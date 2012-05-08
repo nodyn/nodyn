@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>6</version>
+  </parent>
+
+  <groupId>org.projectodd.node</groupId>
+  <artifactId>node</artifactId>
+  <version>0.1.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>Java Node</name>
+  <url>http://www.jboss.org/</url>
+
+  <description>
+    Node.js, in Java!
+  </description>
+
+  <scm>
+    <connection>scm:git:git://github.com/projectodd/node.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/projectodd/node.git</developerConnection>
+    <url>http://github.com/projectodd/node</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>node-team</id>
+      <name>The Node Team</name>
+      <email>node-dev@projectodd.org</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <version.maven.jdocbook.plugin>2.3.3</version.maven.jdocbook.plugin>
+    <version.junit>4.7</version.junit>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${version.junit}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>${version.jboss-logging}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>1.0-beta-7</version>
+      </extension>
+    </extensions>
+
+    <finalName>${project.artifactId}</finalName>
+    
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jboss.maven.plugins</groupId>
+          <artifactId>maven-jdocbook-plugin</artifactId>
+          <version>${version.maven.jdocbook.plugin}</version>
+          <extensions>true</extensions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
