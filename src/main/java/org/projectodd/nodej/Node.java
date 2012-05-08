@@ -1,4 +1,4 @@
-package org.projectodd.node;
+package org.projectodd.nodej;
 
 public class Node {
 	
@@ -9,7 +9,8 @@ public class Node {
 	}
 	
 	public void start() {
-		
+		Process process = new Process();
 	}
+
 
 }

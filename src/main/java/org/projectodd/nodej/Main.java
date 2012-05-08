@@ -1,4 +1,4 @@
-package org.projectodd.node;
+package org.projectodd.nodej;
 
 public class Main {
 	
