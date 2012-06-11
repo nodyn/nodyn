@@ -36,8 +36,23 @@
   <properties>
     <version.maven.jdocbook.plugin>2.3.3</version.maven.jdocbook.plugin>
     <version.junit>4.7</version.junit>
-    <version.dynjs>1.0-SNAPSHOT</version.dynjs>
+    <version.dynjs>1.x.incremental.5</version.dynjs>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>projectodd-upstream</id>
+      <name>project:odd Upstream Builds</name>
+      <url>https://repository-projectodd.forge.cloudbees.com/upstream</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <dependencyManagement>
     <dependencies>
