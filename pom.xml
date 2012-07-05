@@ -36,7 +36,8 @@
   <properties>
     <version.maven.jdocbook.plugin>2.3.3</version.maven.jdocbook.plugin>
     <version.junit>4.7</version.junit>
-    <version.dynjs>1.x.incremental.5</version.dynjs>
+    <!--<version.dynjs>1.x.incremental.16</version.dynjs>-->
+    <version.dynjs>1.0-SNAPSHOT</version.dynjs>
   </properties>
 
   <repositories>
@@ -113,6 +114,16 @@
     <finalName>${project.artifactId}</finalName>
     
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
