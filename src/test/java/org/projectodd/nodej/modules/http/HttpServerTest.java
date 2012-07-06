@@ -31,7 +31,8 @@ public class HttpServerTest {
 	
 	@Test
 	public void testInstantiation() {
-		dynJS.eval( this.context,  "var http = require( 'http' ); var result = http.createServer( function(){ return 'yes!' } );" );
+		dynJS.eval( this.context,  "var http = require( 'http' ); var f = function(){}; var result = http.createServer( f );" );
+		//dynJS.eval( this.context,  "var http = require( 'http' ); var result = http.createServer( function(){} );" );
         Object result = context.getScope().resolve("result");
         System.err.println( result );
 	}
