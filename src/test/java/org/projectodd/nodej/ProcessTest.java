@@ -63,4 +63,9 @@ public class ProcessTest {
         this.runtime.evaluate("process.title = 'something else'");
         assertThat(this.runtime.evaluate("process.title")).isEqualTo("something else");
     }
+    
+    @Test
+    public void testGlobalness() {
+        assertThat(this.runtime.evaluate("var x = function() { return process.title }; x()")).isEqualTo("nodej");
+    }
 }
