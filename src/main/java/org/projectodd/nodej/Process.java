@@ -22,8 +22,13 @@ public class Process extends DynObject {
         setProperty(globalObject, "arch", "java" );
         setProperty(globalObject, "platform", "java" );
         setProperty(globalObject, "version", Node.VERSION );
-	    
-		setProperty(globalObject, "title", null );
+
+        // These seem to be undocumented in node, but are required?
+        setProperty(globalObject, "noDeprecation", false);        
+        setProperty(globalObject, "traceDeprecation", false);
+        
+		setWritableProperty(globalObject, "title", "nodej" );
+		
 		setProperty(globalObject, "moduleLoadList", new ArrayList<String>() );
 		setProperty(globalObject, "versions", new Versions(globalObject) );
 		
@@ -65,6 +70,17 @@ public class Process extends DynObject {
             {
                 set("Value", value );
                 set("Writable", false);
+                set("Enumerable", false);
+                set("Configurable", false);
+            }
+        }, false);
+    }
+
+    protected void setWritableProperty(final GlobalObject globalObject, String name, final Object value) {
+        this.defineOwnProperty(null, name, new PropertyDescriptor() {
+            {
+                set("Value", value );
+                set("Writable", true);
                 set("Enumerable", false);
                 set("Configurable", false);
             }

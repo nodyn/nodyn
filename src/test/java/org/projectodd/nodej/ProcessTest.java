@@ -46,4 +46,21 @@ public class ProcessTest {
     public void testVersion() {
         assertThat(this.runtime.evaluate("process.version")).isEqualTo(Node.VERSION);
     }
+
+    @Test
+    public void testNoDeprecation() {
+        assertThat(this.runtime.evaluate("process.noDeprecation")).isEqualTo(false);
+    }
+
+    @Test
+    public void testTraceDeprecation() {
+        assertThat(this.runtime.evaluate("process.traceDeprecation")).isEqualTo(false);
+    }
+    
+    @Test
+    public void testTitle() {
+        assertThat(this.runtime.evaluate("process.title")).isEqualTo("nodej");
+        this.runtime.evaluate("process.title = 'something else'");
+        assertThat(this.runtime.evaluate("process.title")).isEqualTo("something else");
+    }
 }
