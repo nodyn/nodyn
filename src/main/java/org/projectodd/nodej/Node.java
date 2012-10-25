@@ -14,7 +14,7 @@ public class Node {
 	
 	public void start(ExecutionContext executionContext) {
 	    GlobalObject globalObject = executionContext.getGlobalObject();
-		new Process(globalObject, this.args);
+	    globalObject.defineGlobalProperty("process", new Process(globalObject, this.args));
 	}
 	
 
