@@ -2,7 +2,6 @@ package org.projectodd.nodej;
 
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
 import org.junit.Before;
 
 public class NodejTestSupport {
@@ -16,8 +15,8 @@ public class NodejTestSupport {
         System.setProperty("dynjs.require.path", System.getProperty("user.dir") + "/src/main/javascript/node/lib");
         runtime = new DynJS();
         context = runtime.getExecutionContext();
-        GlobalObject globalObject = context.getGlobalObject();
-        globalObject.defineGlobalProperty("process", new Process(globalObject, defaultArgs));
+        Node node = new Node(defaultArgs);
+        node.start(context);
     }
 
 }
