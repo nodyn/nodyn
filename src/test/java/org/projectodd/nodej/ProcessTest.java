@@ -13,12 +13,12 @@ public class ProcessTest extends NodejTestSupport {
 
     @Test
     public void testStdOut() {
-        assertThat(runtime.evaluate("process.stdout")).isEqualTo(runtime.getConfig().getOutputStream());
+        assertThat(runtime.evaluate("process.stdout")).isNotNull();
     }
 
     @Test
     public void testStdErr() {
-        assertThat(runtime.evaluate("process.stderr")).isEqualTo(runtime.getConfig().getErrorStream());
+        assertThat(runtime.evaluate("process.stderr")).isNotNull();
     }
 
     @Test

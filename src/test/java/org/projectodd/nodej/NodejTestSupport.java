@@ -13,10 +13,10 @@ public class NodejTestSupport {
     @Before
     public void setUp() {
         System.setProperty("dynjs.require.path", System.getProperty("user.dir") + "/src/main/javascript/node/lib");
-        runtime = new DynJS();
-        context = runtime.getExecutionContext();
         Node node = new Node(defaultArgs);
-        node.start(context);
+        runtime = node.getRuntime();
+        context = runtime.getExecutionContext();
+        node.start();
     }
     
     protected Object eval(String... lines) {
