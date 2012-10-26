@@ -1,7 +1,9 @@
 package org.projectodd.nodej;
 
+import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.GlobalObjectFactory;
 
 public class Node {
 	
@@ -13,8 +15,14 @@ public class Node {
 	}
 	
 	public void start(ExecutionContext executionContext) {
-	    GlobalObject globalObject = executionContext.getGlobalObject();
-	    globalObject.defineGlobalProperty("process", new Process(globalObject, this.args));
+        executionContext.getConfig().setGlobalObjectFactory(new GlobalObjectFactory() {
+            @Override
+            public GlobalObject newGlobalObject(DynJS runtime) {
+                final GlobalObject globalObject = new GlobalObject(runtime);
+	            globalObject.defineGlobalProperty("process", new Process(globalObject, Node.this.args));
+                return globalObject;
+            }
+        });
 	}
 	
 
