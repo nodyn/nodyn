@@ -18,5 +18,12 @@ public class NodejTestSupport {
         Node node = new Node(defaultArgs);
         node.start(context);
     }
+    
+    protected Object eval(String... lines) {
+        return getRuntime().evaluate(lines);
+    }
 
+    public DynJS getRuntime() {
+        return this.runtime;
+    }
 }

@@ -9,9 +9,8 @@ public class AssertTest extends NodejTestSupport {
     
     @Test
     @Ignore
-    public void test() {
-        assertThat(this.runtime.evaluate("var x = require('assert')")).isNotEqualTo(null);
-        assertThat(this.runtime.evaluate("x.assert(1,1)")).isEqualTo(true);
+    public void testAssert() {
+        assertThat(eval("var a = require('assert'); a.equal(1,1)")).isEqualTo(true);
     }
 
 }

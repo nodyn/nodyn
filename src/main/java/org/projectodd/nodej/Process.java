@@ -1,8 +1,11 @@
 package org.projectodd.nodej;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 
+import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 
@@ -17,8 +20,8 @@ public class Process extends DynObject {
 	public Process(GlobalObject globalObject, String[] args) {
 	    super(globalObject);
         setProperty("argv", args );
-	    setProperty("stdout", globalObject.getConfig().getOutputStream());
-        setProperty("stderr", globalObject.getConfig().getErrorStream());
+	    setProperty("stdout", wrappedPrintStream( globalObject, globalObject.getConfig().getOutputStream() ) );
+        setProperty("stderr", wrappedPrintStream( globalObject, globalObject.getConfig().getErrorStream() ) );
         setProperty("arch", "java" );
         setProperty("platform", "java" );
         setProperty("version", Node.VERSION );
@@ -62,10 +65,6 @@ public class Process extends DynObject {
 		setProperty("memoryUsage", null );
 		//setProperty("uvCounters", null );
 		setProperty("binding", null );
-		
-		// Tell the world we exist!
-	    //globalObject.defineGlobalProperty("process", this);
-	    //globalObject.put(null, "process", this, false);
 	}
 	
     protected void setProperty(String name, final Object value) {
@@ -88,5 +87,28 @@ public class Process extends DynObject {
                 set("Configurable", false);
             }
         }, false);
+    }
+    
+    protected DynObject wrappedPrintStream(final GlobalObject globalObject, final PrintStream printStream) {
+        DynObject object = new DynObject(globalObject);
+        object.defineOwnProperty(null, "write", new PropertyDescriptor() {
+            {
+                set("Value", new AbstractNativeFunction(globalObject) {
+
+                    @Override
+                    public Object call(ExecutionContext context, Object self, Object... args) {
+                        for (Object arg : args) {
+                            printStream.print(arg.toString());
+                        }
+                        return null;
+                    }
+                    
+                });
+                set("Writable", false);
+                set("Enumerable", false);
+                set("Configurable", false);
+            }
+        }, false);
+        return object;
     }
 }
