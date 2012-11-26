@@ -8,6 +8,7 @@ import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
+import org.projectodd.nodej.bindings.Binding;
 
 /**
  * A <code>Process</code> is a node.js application.
@@ -64,7 +65,7 @@ public class Process extends DynObject {
 		setProperty("uptime", null );
 		setProperty("memoryUsage", null );
 		//setProperty("uvCounters", null );
-		setProperty("binding", null );
+		setProperty("binding", new Binding(globalObject) );
 	}
 	
     protected void setProperty(String name, final Object value) {

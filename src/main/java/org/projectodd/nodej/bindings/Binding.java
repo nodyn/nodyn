@@ -1,0 +1,40 @@
+package org.projectodd.nodej.bindings;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.dynjs.runtime.AbstractNativeFunction;
+import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.PropertyDescriptor;
+
+public class Binding extends AbstractNativeFunction {
+
+    private Map<String, DynObject> bindings = new HashMap<String, DynObject>();
+    
+    public Binding(GlobalObject globalObject) {
+        super(globalObject);
+        bindings.put("os", new Os(globalObject));
+    }
+
+    static void setProperty(DynObject __this, String name, final Object value) {
+        __this.defineOwnProperty(null, name, new PropertyDescriptor() {
+            {
+                set("Value", value );
+                set("Writable", false);
+                set("Enumerable", false);
+                set("Configurable", false);
+            }
+        }, false);
+    }
+
+    @Override
+    public Object call(ExecutionContext context, Object self, Object... args) {
+        if (args[0] instanceof String) {
+            return bindings.get(args[0]);
+        }
+        return null;
+    }
+    
+}

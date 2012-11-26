@@ -57,4 +57,9 @@ public class ProcessTest extends NodejTestSupport {
     public void testGlobalness() {
         assertThat(runtime.evaluate("var x = function() { return process.title }; x()")).isEqualTo("nodej");
     }
+    
+    @Test
+    public void testOsBinding() {
+        assertThat(eval("process.binding('os').getHostname")).isEqualTo("localhost");
+    }
 }
