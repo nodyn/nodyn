@@ -9,7 +9,7 @@
   </parent>
 
   <groupId>org.projectodd.node</groupId>
-  <artifactId>node</artifactId>
+  <artifactId>nodej</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Java Node</name>
@@ -139,6 +139,7 @@
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <mainClass>org.projectodd.nodej.Main</mainClass>
             </manifest>
           </archive>
         </configuration>

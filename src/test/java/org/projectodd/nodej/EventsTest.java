@@ -2,11 +2,7 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.JSFunction;
-import org.dynjs.runtime.JSObject;
-import org.dynjs.runtime.Types;
-import org.junit.Before;
 import org.junit.Test;
 
 public class EventsTest extends NodejTestSupport {
