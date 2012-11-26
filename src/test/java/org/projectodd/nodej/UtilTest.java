@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.Types;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class UtilTest extends NodejTestSupport {
@@ -17,7 +16,6 @@ public class UtilTest extends NodejTestSupport {
     }
     
     @Test
-    @Ignore // Pending implementation of String.prototype.replace in dynjs 
     public void testFormat() {
         assertThat(eval("require('util').format('1 2 3')")).isEqualTo("1 2 3");
     }
@@ -47,10 +45,7 @@ public class UtilTest extends NodejTestSupport {
     }
     
     @Test
-    @Ignore
     public void testLog() {
-        // This currently fails when creating the timestamp and calling toString()
-        // objects returned from Date#getHours() (or minutes or seconds).
         assertThat(eval("require('util').log('message to log')")).isEqualTo(Types.UNDEFINED);
     }
     

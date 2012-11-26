@@ -2,15 +2,34 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import org.junit.Ignore;
+import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.JSObject;
+import org.dynjs.runtime.Types;
 import org.junit.Test;
 
 public class AssertTest extends NodejTestSupport {
+
+    @Test
+    public void testAssertOk() {
+        // if != we get an error
+        assertThat(eval("require('assert').ok(true)")).isEqualTo(Types.UNDEFINED);
+    }
     
     @Test
-    @Ignore
-    public void testAssert() {
-        assertThat(eval("var a = require('assert'); a.equal(1,1)")).isEqualTo(true);
+    public void testAssertFail() {
+        try {
+            eval("require('assert').fail('actual', 'expected', 'message', null)");
+            throw new AssertionError("assert.fail() should have thrown an AssertionError");
+        } catch (ThrowException e) {
+            JSObject err = (JSObject) e.getValue();
+            assertThat(err.get(null, "name")).isEqualTo("AssertionError");
+        }
+    }
+
+    @Test
+    public void testConsoleLog() {
+        // if != we get an error
+        assertThat(eval("var console = require('console');")).isNotEqualTo(Types.UNDEFINED);
     }
 
 }
