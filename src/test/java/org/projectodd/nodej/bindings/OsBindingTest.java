@@ -7,7 +7,6 @@ import java.net.UnknownHostException;
 import org.dynjs.runtime.DynArray;
 import org.dynjs.runtime.JSFunction;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.projectodd.nodej.NodejTestSupport;
 
 public class OsBindingTest extends NodejTestSupport {
@@ -46,9 +45,8 @@ public class OsBindingTest extends NodejTestSupport {
     }
     
     @Test
-    @Ignore
     public void testOSType() {
         assertThat(eval("process.binding('os').getOSType")).isInstanceOf(JSFunction.class);
-        assertThat(eval("process.binding('os').getOSType()")).isEqualTo("foo");
+        assertThat(eval("process.binding('os').getOSType()")).isNotNull();
     }
 }
