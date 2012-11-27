@@ -8,7 +8,7 @@
     <version>6</version>
   </parent>
 
-  <groupId>org.projectodd.node</groupId>
+  <groupId>org.projectodd.nodej</groupId>
   <artifactId>nodej</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -156,6 +156,13 @@
         <configuration>
           <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+              <argLine>-Djava.library.path=${basedir}/lib</argLine>
+          </configuration>
       </plugin>
     </plugins>
 
