@@ -4,6 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.net.UnknownHostException;
 
+import org.dynjs.runtime.DynArray;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {
@@ -58,11 +59,5 @@ public class ProcessTest extends NodejTestSupport {
     @Test
     public void testGlobalness() {
         assertThat(runtime.evaluate("var x = function() { return process.title }; x()")).isEqualTo("nodej");
-    }
-    
-    @Test
-    public void testOsBinding() throws UnknownHostException {
-        assertThat(eval("process.binding('os').getHostname")).isInstanceOf(org.dynjs.runtime.JSFunction.class);
-        assertThat(eval("process.binding('os').getHostname()")).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
     }
 }
