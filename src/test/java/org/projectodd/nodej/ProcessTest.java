@@ -2,6 +2,8 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.net.UnknownHostException;
+
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {
@@ -59,7 +61,8 @@ public class ProcessTest extends NodejTestSupport {
     }
     
     @Test
-    public void testOsBinding() {
-        assertThat(eval("process.binding('os').getHostname")).isEqualTo("localhost");
+    public void testOsBinding() throws UnknownHostException {
+        assertThat(eval("process.binding('os').getHostname")).isInstanceOf(org.dynjs.runtime.JSFunction.class);
+        assertThat(eval("process.binding('os').getHostname()")).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
     }
 }
