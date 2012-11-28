@@ -5,7 +5,9 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.net.UnknownHostException;
 
 import org.dynjs.runtime.DynArray;
+import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
+import org.dynjs.runtime.Types;
 import org.junit.Test;
 import org.projectodd.nodej.NodejTestSupport;
 
@@ -47,12 +49,27 @@ public class OsBindingTest extends NodejTestSupport {
     @Test
     public void testOSType() {
         assertThat(eval("process.binding('os').getOSType")).isInstanceOf(JSFunction.class);
-        assertThat(eval("process.binding('os').getOSType()")).isNotNull();
+        assertThat(eval("process.binding('os').getOSType()")).isNotEqualTo(Types.UNDEFINED);
     }
     
     @Test
     public void testOSRelease() {
         assertThat(eval("process.binding('os').getOSRelease")).isInstanceOf(JSFunction.class);
-        assertThat(eval("process.binding('os').getOSRelease()")).isNotNull();
+        assertThat(eval("process.binding('os').getOSRelease()")).isNotEqualTo(Types.UNDEFINED);
+    }
+    
+    @Test
+    public void testCpus() {
+        assertThat(eval("process.binding('os').getCPUs")).isInstanceOf(JSFunction.class);
+        assertThat(eval("var cpus = process.binding('os').getCPUs(); cpus")).isInstanceOf(DynArray.class);
+        assertThat(eval("cpus.length > 0")).isEqualTo(true);
+        assertThat(eval("cpus[0].model")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].speed")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].times")).isInstanceOf(DynObject.class);
+        assertThat(eval("cpus[0].times.user")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].times.nice")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].times.sys")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].times.idle")).isNotEqualTo(Types.UNDEFINED);
+        assertThat(eval("cpus[0].times.irq")).isNotEqualTo(Types.UNDEFINED);
     }
 }
