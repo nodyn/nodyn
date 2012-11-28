@@ -12,8 +12,8 @@ import org.hyperic.sigar.SysInfo;
 
 public abstract class OsFunctionBinding extends AbstractNativeFunction {
 
-    protected static Map<String, String> osNames = new HashMap<String, String>();
-    protected GlobalObject globalObject;
+    private static Map<String, String> osNames = new HashMap<String, String>();
+    private GlobalObject globalObject;
     private Sigar sigar = new Sigar();
     private SysInfo sysInfo;
 
@@ -88,5 +88,12 @@ public abstract class OsFunctionBinding extends AbstractNativeFunction {
             e.printStackTrace();
             return -1;
         }
+    }
+
+
+    protected Object getOSRelease() {
+        // TODO: This actually returns OSX version number
+        // vs. the Darwin version on OSX
+        return sysInfo.getVendorVersion();
     }
 }

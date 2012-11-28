@@ -49,4 +49,10 @@ public class OsBindingTest extends NodejTestSupport {
         assertThat(eval("process.binding('os').getOSType")).isInstanceOf(JSFunction.class);
         assertThat(eval("process.binding('os').getOSType()")).isNotNull();
     }
+    
+    @Test
+    public void testOSRelease() {
+        assertThat(eval("process.binding('os').getOSRelease")).isInstanceOf(JSFunction.class);
+        assertThat(eval("process.binding('os').getOSRelease()")).isNotNull();
+    }
 }
