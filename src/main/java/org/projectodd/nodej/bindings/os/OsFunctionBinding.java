@@ -117,12 +117,12 @@ public abstract class OsFunctionBinding extends AbstractNativeFunction {
                 times.put(null, "irq", timings[index].getIrq(), false);
                 cpu.put(null, "times", times, false);
                 
-                System.err.println("model: " + info.getModel());
-                System.err.println("user: " + timings[index].getUser());
-                System.err.println("nice: " + timings[index].getNice());
-                System.err.println("sys: " + timings[index].getSys());
-                System.err.println("idle: " + timings[index].getIdle());
-                System.err.println("irq: " + timings[index].getIrq());
+//                System.err.println("model: " + info.getModel());
+//                System.err.println("user: " + timings[index].getUser());
+//                System.err.println("nice: " + timings[index].getNice());
+//                System.err.println("sys: " + timings[index].getSys());
+//                System.err.println("idle: " + timings[index].getIdle());
+//                System.err.println("irq: " + timings[index].getIrq());
                 rval.put(null, ""+index, cpu, false);
                 index++;
             }
