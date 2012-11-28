@@ -37,7 +37,7 @@ public class Process extends DynObject {
 		setProperty("versions", new Versions(globalObject) );
 		
 		setProperty("execArgv", null );
-		setProperty("env", null );
+		setProperty("env", getProcessEnv(globalObject));
 		setProperty("pid", null );
 		setProperty("features", null );
 		setProperty("_eval", null );
@@ -68,6 +68,18 @@ public class Process extends DynObject {
 		setProperty("binding", new Binding(globalObject) );
 	}
 	
+    private DynObject getProcessEnv(GlobalObject globalObject) {
+        DynObject env = new DynObject(globalObject);
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        if (tmpDir == null) {
+            tmpDir = "/tmp";
+        }
+        env.put(null, "TMPDIR", tmpDir, false);
+        env.put(null, "TMP", tmpDir, false);
+        env.put(null, "TEMP", tmpDir, false);
+        return env;
+    }
+
     protected void setProperty(String name, final Object value) {
         this.defineOwnProperty(null, name, new PropertyDescriptor() {
             {
