@@ -72,4 +72,10 @@ public class OsBindingTest extends NodejTestSupport {
         assertThat(eval("cpus[0].times.idle")).isNotEqualTo(Types.UNDEFINED);
         assertThat(eval("cpus[0].times.irq")).isNotEqualTo(Types.UNDEFINED);
     }
+    
+    @Test
+    public void testInterfaceAddresses() {
+        assertThat(eval("process.binding('os').getInterfaceAddresses")).isInstanceOf(JSFunction.class);
+        assertThat(eval("var ifaces = process.binding('os').getInterfaceAddresses(); ifaces")).isNotEqualTo(Types.UNDEFINED);
+    }
 }

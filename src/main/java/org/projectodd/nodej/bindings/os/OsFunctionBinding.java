@@ -1,7 +1,6 @@
 package org.projectodd.nodej.bindings.os;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.dynjs.runtime.AbstractNativeFunction;
@@ -10,6 +9,7 @@ import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.GlobalObject;
 import org.hyperic.sigar.Cpu;
 import org.hyperic.sigar.CpuInfo;
+import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SysInfo;
@@ -92,6 +92,36 @@ public abstract class OsFunctionBinding extends AbstractNativeFunction {
         // TODO: This actually returns OSX version number
         // vs. the Darwin version on OSX
         return sysInfo.getVendorVersion();
+    }
+    
+    protected Object getInterfaceAddresses() {
+        DynObject rval = new DynObject(globalObject);
+        try {
+            String[] interfaceList = sigar.getNetInterfaceList();
+            for (String iface : interfaceList) {
+                DynArray interfaceInfo = new DynArray(globalObject);
+                
+                DynObject nextInterface   = new DynObject(globalObject);
+                NetInterfaceConfig config = sigar.getNetInterfaceConfig(iface);
+                nextInterface.put(null, "address", config.getDestination(), false);
+                nextInterface.put(null, "family", "IPv4", false); // Sigar doesn't provide IPv6 info until version 1.7
+                nextInterface.put(null, "internal", config.getType().contains("Local"), false);
+                
+                interfaceInfo.put(null, "0", nextInterface, false);
+                
+//                System.err.println(iface + ":");
+//                System.err.println("\tdescription: " + config.getDescription());
+//                System.err.println("\tdestination: " + config.getDestination());
+//                System.err.println("\tflags: " + config.getFlags());
+//                System.err.println("\thwaddr: " + config.getHwaddr());
+//                System.err.println("\tname: " + config.getName());
+//                System.err.println("\ttype: " + config.getType());
+                rval.put(null, iface, interfaceInfo, false);
+            }
+        } catch (SigarException e) {
+            e.printStackTrace();
+        }
+        return rval;
     }
 
     protected Object getCPUs() {
