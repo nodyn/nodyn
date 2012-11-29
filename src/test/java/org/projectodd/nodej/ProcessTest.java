@@ -2,9 +2,6 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.net.UnknownHostException;
-
-import org.dynjs.runtime.DynArray;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {

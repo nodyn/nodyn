@@ -2,10 +2,7 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.io.IOException;
-
 import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.Types;
 import org.junit.Before;
 import org.junit.Test;
 
