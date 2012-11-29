@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ ! -f target/nodej.jar ]; then
-	mvn clean package
+	mvn clean package -Pshade
 fi
-java -jar target/nodej.jar --console $*
+java -jar target/nodej-all.jar --console $*
 
