@@ -16,6 +16,7 @@ public class Binding extends AbstractNativeFunction {
     public Binding(GlobalObject globalObject) {
         super(globalObject);
         bindings.put("os", new Os(globalObject));
+        bindings.put("buffer", new Buffer(globalObject));
     }
 
     static void setProperty(DynObject __this, String name, final Object value) {
@@ -23,7 +24,7 @@ public class Binding extends AbstractNativeFunction {
             {
                 set("Value", value );
                 set("Writable", false);
-                set("Enumerable", false);
+                set("Enumerable", true);
                 set("Configurable", false);
             }
         }, false);
