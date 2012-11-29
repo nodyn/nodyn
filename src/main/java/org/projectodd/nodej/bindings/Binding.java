@@ -17,6 +17,7 @@ public class Binding extends AbstractNativeFunction {
         super(globalObject);
         bindings.put("os", new Os(globalObject));
         bindings.put("buffer", new Buffer(globalObject));
+        bindings.put("fs", new Fs(globalObject));
     }
 
     static void setProperty(DynObject __this, String name, final Object value) {
