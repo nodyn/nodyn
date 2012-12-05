@@ -3,6 +3,7 @@ package org.projectodd.nodej;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.dynjs.runtime.JSFunction;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EventsTest extends NodejTestSupport {
@@ -13,6 +14,7 @@ public class EventsTest extends NodejTestSupport {
     }
     
     @Test
+    @Ignore
     public void testOnEvent() {
         eval("var x = 0");
         eval("var func = function() { x = x+1 }");

@@ -6,7 +6,7 @@ import org.junit.Test;
 public class BufferTest extends NodejTestSupport {
 
     @Test
-    @Ignore 
+    @Ignore
     public void testRequireBuffer() {
         eval("var buffer = require('buffer')");
     }
