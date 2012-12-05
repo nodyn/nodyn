@@ -1,4 +1,4 @@
-package org.projectodd.nodej.bindings.buffer;
+package org.projectodd.nodej.bindings.buffer.prototype;
 
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
