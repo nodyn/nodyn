@@ -33,55 +33,13 @@ public class BufferFunctionsTest extends NodejTestSupport {
     }
     
     @Test
+    public void testMakeFastBuffer() {
+        assertThat(eval("JavaBuffer(4).makeFastBuffer")).isInstanceOf(JSFunction.class);
+    }
+    
+    @Test
     public void testBufferToString() {
         assertThat(eval("JavaBuffer(4).toString")).isInstanceOf(JSFunction.class);
-    }
-    
-    @Test
-    public void testBufferCopy() {
-        eval("var source = new JavaBuffer(4)");
-        eval("var dest   = new JavaBuffer(4)");
-        eval("source.fill(72, 0, 3)");
-        assertThat(eval("source.copy(dest, 0, 0, 2)")).isEqualTo(2L);
-        assertThat(eval("dest.toString()")).isEqualTo("HH");
-    }
-    
-    @Test
-    public void testBufferCopyZeroBytes() {
-        eval("var source = new JavaBuffer(4)");
-        eval("var dest   = new JavaBuffer(4)");
-        eval("source.fill(72, 0, 3)");
-        assertThat(eval("source.copy(dest, 0, 4, 4)")).isEqualTo(0L);
-        assertThat(eval("dest.toString()")).isEqualTo("");
-    }
-    
-    @Test(expected = ThrowException.class)
-    public void testBufferCopyWithBadTargetStart() {
-        eval("var source = new JavaBuffer(4)");
-        eval("var dest   = new JavaBuffer(4)");
-        eval("source.fill(72, 0, 3)");
-        eval("source.copy(dest, 4, 0, 2)");
-    }
-    
-    @Test(expected = ThrowException.class)
-    public void testBufferCopyWithBadSourceStartLength() {
-        eval("var source = new JavaBuffer(4)");
-        eval("var dest   = new JavaBuffer(4)");
-        eval("source.fill(72, 0, 3)");
-        eval("source.copy(dest, 0, 6, 8)");
-    }
-    
-    @Test(expected = ThrowException.class)
-    public void testBufferCopyWithBadSourceStartEnd() {
-        eval("var source = new JavaBuffer(4)");
-        eval("var dest   = new JavaBuffer(4)");
-        eval("source.fill(72, 0, 3)");
-        eval("source.copy(dest, 0, 6, 2)");
-    }
-    
-    @Test(expected = ThrowException.class)
-    public void testBufferCopyTypeError() {
-        eval("var source = new JavaBuffer(4); source.copy(1,2,3,4)");
     }
     
     @Test

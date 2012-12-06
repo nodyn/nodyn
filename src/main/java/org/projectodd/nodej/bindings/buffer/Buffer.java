@@ -1,25 +1,44 @@
 package org.projectodd.nodej.bindings.buffer;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
 import org.projectodd.nodej.bindings.buffer.prototype.ToString;
+import org.projectodd.nodej.bindings.buffer.prototype.Utf8Write;
 
 public class Buffer extends DynObject {
     private byte[] buffer;
     
-    public Buffer(GlobalObject globalObject, long length) {
+    public enum Encoding {
+        UTF8, UCS2, ASCII, BASE64, BINARY
+    }
+    
+    public Buffer(final GlobalObject globalObject, long length) {
         super(globalObject);
         buffer = new byte[(int) length];
         setClassName("SlowBuffer");
         put(null, "length", length, false);
         defineReadOnlyProperty(globalObject, "copy", new Copy(globalObject));
         defineReadOnlyProperty(globalObject, "fill", new Fill(globalObject));
+        defineReadOnlyProperty(globalObject, "utf8Write", new Utf8Write(globalObject));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
+        // This is an internal function of SlowBuffer - atm, a noop is OK
+        // https://github.com/joyent/node/blob/master/src/node_buffer.cc#L695
+        defineReadOnlyProperty(globalObject, "makeFastBuffer", new AbstractNativeFunction(globalObject) {
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                return Types.UNDEFINED;
+            }
+            
+        });
     }
     
     public String toString() {
@@ -69,5 +88,14 @@ public class Buffer extends DynObject {
     
     public byte[] getBuffer() {
         return this.buffer;
+    }
+
+    public long write(String string, Encoding encoding, int offset) {
+        int length = string.length();
+        if (length == 0) { return 0; }
+        if (length > 0 && offset > buffer.length) {
+            throw new ThrowException(null, "Offset is out of bounds");
+        }
+        return this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, string.length());
     }
 }
