@@ -12,6 +12,6 @@ public class ToString extends AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        return self.toString();
+        return self.toString().trim();
     }
 }
