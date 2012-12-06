@@ -5,7 +5,7 @@ import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodej.bindings.buffer.SlowBuffer;
+import org.projectodd.nodej.bindings.buffer.Buffer;
 
 public class Copy extends AbstractNativeFunction {
     
@@ -15,11 +15,11 @@ public class Copy extends AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        if (!(args[0] instanceof SlowBuffer)) {
+        if (!(args[0] instanceof Buffer)) {
             throw new ThrowException(context, context.createTypeError("First arg should be a Buffer."));
         }
-        SlowBuffer source = (SlowBuffer) self;
-        SlowBuffer target = (SlowBuffer) args[0];
+        Buffer source = (Buffer) self;
+        Buffer target = (Buffer) args[0];
         int targetStart  = Types.toUint32(context, args[1]).intValue();
         int sourceStart  = Types.toUint32(context, args[2]).intValue();
         int sourceEnd    = Types.toUint32(context, args[3]).intValue();

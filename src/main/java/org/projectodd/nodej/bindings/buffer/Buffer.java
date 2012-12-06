@@ -9,10 +9,10 @@ import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
 import org.projectodd.nodej.bindings.buffer.prototype.ToString;
 
-public class SlowBuffer extends DynObject {
+public class Buffer extends DynObject {
     private byte[] buffer;
     
-    public SlowBuffer(GlobalObject globalObject, long length) {
+    public Buffer(GlobalObject globalObject, long length) {
         super(globalObject);
         buffer = new byte[(int) length];
         setClassName("SlowBuffer");

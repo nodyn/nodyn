@@ -4,7 +4,7 @@ import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodej.bindings.buffer.SlowBuffer;
+import org.projectodd.nodej.bindings.buffer.Buffer;
 
 public class Fill extends AbstractNativeFunction {
     
@@ -14,8 +14,8 @@ public class Fill extends AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        if (self instanceof SlowBuffer) {
-            SlowBuffer buffer = (SlowBuffer) self;
+        if (self instanceof Buffer) {
+            Buffer buffer = (Buffer) self;
             Number start = Types.toNumber(context, args[1]);
             Number end   = Types.toNumber(context, args[2]);
             Number value = Types.toNumber(context, args[0]);

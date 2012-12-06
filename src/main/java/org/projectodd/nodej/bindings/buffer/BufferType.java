@@ -7,8 +7,8 @@ import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.projectodd.nodej.bindings.buffer.prototype.ByteLength;
 
-public class SlowBufferType extends  AbstractNativeFunction { 
-    public SlowBufferType(GlobalObject globalObject) {
+public class BufferType extends  AbstractNativeFunction { 
+    public BufferType(GlobalObject globalObject) {
         super(globalObject);
         this.setClassName("SlowBuffer");
         final DynObject prototype = initializePrototype(globalObject);
@@ -25,7 +25,7 @@ public class SlowBufferType extends  AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        SlowBuffer buffer = new SlowBuffer(context.getGlobalObject(), (long) args[0]);
+        Buffer buffer = new Buffer(context.getGlobalObject(), (long) args[0]);
         buffer.setPrototype(this.getPrototype());
         return buffer;
     }

@@ -5,12 +5,11 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
-import org.dynjs.runtime.Types;
 import org.junit.Before;
 import org.junit.Test;
 import org.projectodd.nodej.NodejTestSupport;
 
-public class SlowBufferTest extends NodejTestSupport {
+public class BufferFunctionsTest extends NodejTestSupport {
     @Before
     public void setUp() {
         super.setUp();
@@ -18,14 +17,14 @@ public class SlowBufferTest extends NodejTestSupport {
     }
     @Test
     public void testSlowBufferPrototype() {
-        assertThat(eval("JavaBuffer")).isInstanceOf(SlowBufferType.class);
+        assertThat(eval("JavaBuffer")).isInstanceOf(BufferType.class);
         assertThat(eval("JavaBuffer.prototype")).isInstanceOf(DynObject.class);
         assertThat(eval("JavaBuffer.length")).isEqualTo(0L);
     }
     
     @Test
     public void testSlowBufferConstructor() {
-        assertThat(eval("new JavaBuffer(12)")).isInstanceOf(SlowBuffer.class);
+        assertThat(eval("new JavaBuffer(12)")).isInstanceOf(Buffer.class);
     }
     
     @Test
