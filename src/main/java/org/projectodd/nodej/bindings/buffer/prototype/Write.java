@@ -7,10 +7,12 @@ import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.Buffer;
 
-public class Utf8Write extends AbstractNativeFunction {
+public class Write extends AbstractNativeFunction {
+    private final Buffer.Encoding encoding;
     
-    public Utf8Write(GlobalObject globalObject) {
+    public Write(GlobalObject globalObject, Buffer.Encoding encoding) {
         super(globalObject, "string", "offset", "[maxLength]");
+        this.encoding = encoding;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class Utf8Write extends AbstractNativeFunction {
         if (args[2] != Types.UNDEFINED) {
             maxLength = Types.toUint32(context, args[2]).intValue();
         }
-        return buffer.write(string, Buffer.Encoding.UTF8, offset.intValue(), maxLength);
+        return buffer.write(string, this.encoding, offset.intValue(), maxLength);
     }
 
 }

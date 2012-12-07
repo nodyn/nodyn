@@ -12,7 +12,7 @@ import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
 import org.projectodd.nodej.bindings.buffer.prototype.ToString;
-import org.projectodd.nodej.bindings.buffer.prototype.Utf8Write;
+import org.projectodd.nodej.bindings.buffer.prototype.Write;
 
 public class Buffer extends DynObject {
     private final byte[] buffer;
@@ -28,7 +28,7 @@ public class Buffer extends DynObject {
         put(null, "length", length, false);
         defineReadOnlyProperty(globalObject, "copy", new Copy(globalObject));
         defineReadOnlyProperty(globalObject, "fill", new Fill(globalObject));
-        defineReadOnlyProperty(globalObject, "utf8Write", new Utf8Write(globalObject));
+        defineReadOnlyProperty(globalObject, "utf8Write", new Write(globalObject, Buffer.Encoding.UTF8));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
         defineReadOnlyProperty(globalObject, "byteAt", new AbstractNativeFunction(globalObject) {
             
@@ -110,6 +110,11 @@ public class Buffer extends DynObject {
         if (length > 0 && offset > buffer.length) {
             throw new ThrowException(null, "Offset is out of bounds");
         }
-        return this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, maxLength);
+        long bytesWritten = 0;
+        switch(encoding) {
+        case UTF8: 
+            bytesWritten = this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, maxLength); 
+        }
+        return bytesWritten;
     }
 }
