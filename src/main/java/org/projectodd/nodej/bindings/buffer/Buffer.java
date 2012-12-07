@@ -29,6 +29,7 @@ public class Buffer extends DynObject {
         defineReadOnlyProperty(globalObject, "copy", new Copy(globalObject));
         defineReadOnlyProperty(globalObject, "fill", new Fill(globalObject));
         defineReadOnlyProperty(globalObject, "utf8Write", new Write(globalObject, Buffer.Encoding.UTF8));
+        defineReadOnlyProperty(globalObject, "asciiWrite", new Write(globalObject, Buffer.Encoding.ASCII));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
         defineReadOnlyProperty(globalObject, "byteAt", new AbstractNativeFunction(globalObject) {
             
@@ -43,15 +44,6 @@ public class Buffer extends DynObject {
                 }
                 return buffer[index];
             }
-        });
-        // This is an internal function of SlowBuffer - atm, a noop is OK
-        // https://github.com/joyent/node/blob/master/src/node_buffer.cc#L695
-        defineReadOnlyProperty(globalObject, "makeFastBuffer", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                return Types.UNDEFINED;
-            }
-            
         });
     }
     
@@ -114,6 +106,10 @@ public class Buffer extends DynObject {
         switch(encoding) {
         case UTF8: 
             bytesWritten = this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, maxLength); 
+            break;
+        case ASCII:
+            bytesWritten = this.copy(string.getBytes(Charset.forName("US-ASCII")), offset, 0, maxLength); 
+            break;
         }
         return bytesWritten;
     }

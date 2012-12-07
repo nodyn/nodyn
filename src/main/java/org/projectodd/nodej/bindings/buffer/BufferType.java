@@ -5,6 +5,7 @@ import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
+import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.prototype.ByteLength;
 
 public class BufferType extends  AbstractNativeFunction { 
@@ -41,6 +42,15 @@ public class BufferType extends  AbstractNativeFunction {
                 set("Enumerable", true);
             }
         }, false);
+        // This is an internal function of SlowBuffer - atm, a noop is OK
+        // https://github.com/joyent/node/blob/master/src/node_buffer.cc#L695
+        prototype.defineReadOnlyProperty(globalObject, "makeFastBuffer", new AbstractNativeFunction(globalObject) {
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                return Types.UNDEFINED;
+            }
+            
+        });
         return prototype;
     }
     
