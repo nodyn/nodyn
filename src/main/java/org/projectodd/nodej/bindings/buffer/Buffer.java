@@ -15,7 +15,7 @@ import org.projectodd.nodej.bindings.buffer.prototype.ToString;
 import org.projectodd.nodej.bindings.buffer.prototype.Utf8Write;
 
 public class Buffer extends DynObject {
-    private byte[] buffer;
+    private final byte[] buffer;
     
     public enum Encoding {
         UTF8, UCS2, ASCII, BASE64, BINARY
@@ -30,6 +30,20 @@ public class Buffer extends DynObject {
         defineReadOnlyProperty(globalObject, "fill", new Fill(globalObject));
         defineReadOnlyProperty(globalObject, "utf8Write", new Utf8Write(globalObject));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
+        defineReadOnlyProperty(globalObject, "byteAt", new AbstractNativeFunction(globalObject) {
+            
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                if (!(args[0] instanceof Long)) {
+                    throw new ThrowException(context, "Arg must be an integer.");
+                }
+                int index = Types.toNumber(context, args[0]).intValue();
+                if (index < 0 || buffer.length <= index) {
+                    return Types.UNDEFINED;
+                }
+                return buffer[index];
+            }
+        });
         // This is an internal function of SlowBuffer - atm, a noop is OK
         // https://github.com/joyent/node/blob/master/src/node_buffer.cc#L695
         defineReadOnlyProperty(globalObject, "makeFastBuffer", new AbstractNativeFunction(globalObject) {
@@ -90,12 +104,12 @@ public class Buffer extends DynObject {
         return this.buffer;
     }
 
-    public long write(String string, Encoding encoding, int offset) {
+    public long write(String string, Encoding encoding, int offset, int maxLength) {
         int length = string.length();
         if (length == 0) { return 0; }
         if (length > 0 && offset > buffer.length) {
             throw new ThrowException(null, "Offset is out of bounds");
         }
-        return this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, string.length());
+        return this.copy(string.getBytes(Charset.forName("UTF-8")), offset, 0, maxLength);
     }
 }

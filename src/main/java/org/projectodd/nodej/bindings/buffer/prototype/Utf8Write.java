@@ -18,10 +18,14 @@ public class Utf8Write extends AbstractNativeFunction {
         if (!(args[0] instanceof String)) {
             throw new ThrowException(context, context.createTypeError("Argument should be a String."));
         }
-        String string = (String)args[0];
-        Buffer buffer = (Buffer)self;
-        Long offset   = Types.toUint32(context, args[1]);
-        return buffer.write(string, Buffer.Encoding.UTF8, offset.intValue());
+        String string  = (String)args[0];
+        Buffer buffer  = (Buffer)self;
+        Long offset    = Types.toUint32(context, args[1]);
+        int maxLength  = string.length();
+        if (args[2] != Types.UNDEFINED) {
+            maxLength = Types.toUint32(context, args[2]).intValue();
+        }
+        return buffer.write(string, Buffer.Encoding.UTF8, offset.intValue(), maxLength);
     }
 
 }
