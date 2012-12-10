@@ -28,6 +28,13 @@ public class BufferFunctionsTest extends NodejTestSupport {
     }
     
     @Test
+    public void testBufferConstructorWithArray() {
+        eval("var buff = new JavaBuffer(['f','o', 'o'])");
+        assertThat(eval("buff.length")).isEqualTo(3L);
+        assertThat(eval("buff.toString()")).isEqualTo("foo");
+    }
+    
+    @Test
     public void testSlowBufferLength() {
         assertThat(eval("JavaBuffer(4).length")).isEqualTo(4L);
     }
