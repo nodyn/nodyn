@@ -2,12 +2,15 @@ package org.projectodd.nodej.bindings.buffer;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
@@ -16,6 +19,7 @@ import org.projectodd.nodej.bindings.buffer.prototype.Write;
 
 public class Buffer extends DynObject {
     private final byte[] buffer;
+    private final Map<Long, PropertyDescriptor> indexedPropertyDescriptors = new HashMap<Long, PropertyDescriptor>();
     
     public enum Encoding {
         UTF8, UCS2, ASCII, BASE64, BINARY
@@ -47,6 +51,61 @@ public class Buffer extends DynObject {
         });
     }
     
+    
+    @Override
+    public Object getOwnProperty(ExecutionContext context, String name) {
+        Long number = Types.toUint32(context, name);
+        final int index   = number.intValue();
+        if (number.toString().equals(name)) {
+            if (index < 0 || index >= buffer.length) {
+                return Types.UNDEFINED;
+            } else {
+                synchronized(this) {
+                    if (!this.indexedPropertyDescriptors.containsKey(number)) {
+                        this.indexedPropertyDescriptors.put(number, new PropertyDescriptor() {
+                            {
+                                set("Value", buffer[index]);
+                                set("Writable", true);
+                                set("Enumerable", false);
+                                set("Configurable", false);
+                            }
+                        });
+                    }
+                }
+                return this.indexedPropertyDescriptors.get(number);
+            }
+        }
+        return super.getOwnProperty(context, name);
+    }
+
+
+    @Override
+    public void put(ExecutionContext context, String name, Object value, boolean shouldThrow) {
+        Long number = Types.toUint32(context, name);
+        final int index   = number.intValue();
+        if (number.toString().equals(name)) {
+            if (index < 0 || index >= buffer.length) {
+                super.put(context, name, value, false);
+            } else {
+                synchronized(this) {
+                    buffer[index] = Types.toNumber(context, value).byteValue();
+                    if (!this.indexedPropertyDescriptors.containsKey(number)) {
+                        this.indexedPropertyDescriptors.put(number, new PropertyDescriptor() {
+                            {
+                                set("Value", buffer[index]);
+                                set("Writable", true);
+                                set("Enumerable", false);
+                                set("Configurable", false);
+                            }
+                        });
+                    }
+                }
+            }
+        } else {
+            super.put(context, name, value, shouldThrow);
+        }
+    }
+
     public String toString() {
         try {
             return new String(buffer, "UTF8");

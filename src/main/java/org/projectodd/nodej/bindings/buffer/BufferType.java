@@ -52,6 +52,7 @@ public class BufferType extends  AbstractNativeFunction {
     private DynObject initializePrototype(GlobalObject globalObject) {
         final DynObject prototype = new DynObject(globalObject);
         prototype.defineReadOnlyProperty(globalObject, "byteLength", new ByteLength(globalObject));
+        prototype.defineReadOnlyProperty(globalObject, "makeFastBuffer", new MakeFastBuffer(globalObject));
         prototype.defineOwnProperty(null, "constructor", new PropertyDescriptor() {
             {
                 set("Value", this);
@@ -60,15 +61,6 @@ public class BufferType extends  AbstractNativeFunction {
                 set("Enumerable", true);
             }
         }, false);
-        // This is an internal function of SlowBuffer - atm, a noop is OK
-        // https://github.com/joyent/node/blob/master/src/node_buffer.cc#L695
-        prototype.defineReadOnlyProperty(globalObject, "makeFastBuffer", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                return Types.UNDEFINED;
-            }
-            
-        });
         return prototype;
     }
     

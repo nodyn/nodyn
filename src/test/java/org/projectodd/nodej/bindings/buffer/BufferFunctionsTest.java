@@ -53,7 +53,14 @@ public class BufferFunctionsTest extends NodejTestSupport {
         for (byte b : stringBytes) {
             assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
         }
-
+    }
+    
+    @Test
+    public void testIndexedBufferAccess() {
+        eval("var buff = new JavaBuffer(1024)");
+        assertThat(eval("buff.length")).isEqualTo(1024L);
+        eval("buff[0] = 10");
+        assertThat(eval("buff.byteAt(0) == buff[0]")).isEqualTo(true);
     }
     
     @Test
