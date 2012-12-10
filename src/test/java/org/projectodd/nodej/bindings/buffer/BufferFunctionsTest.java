@@ -2,6 +2,8 @@ package org.projectodd.nodej.bindings.buffer;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.io.UnsupportedEncodingException;
+
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
@@ -32,6 +34,26 @@ public class BufferFunctionsTest extends NodejTestSupport {
         eval("var buff = new JavaBuffer(['f','o', 'o'])");
         assertThat(eval("buff.length")).isEqualTo(3L);
         assertThat(eval("buff.toString()")).isEqualTo("foo");
+    }
+    
+    @Test
+    public void testBufferConstructorWithString() {
+        eval("var buff = new JavaBuffer('foobar')");
+        assertThat(eval("buff.length")).isEqualTo(6L);
+        assertThat(eval("buff.toString()")).isEqualTo("foobar");
+    }
+    
+    @Test
+    public void testBufferConstructorWithStringAndEncoding() throws UnsupportedEncodingException {
+        eval("var buff = new JavaBuffer('foobar', 'ascii')");
+        assertThat(eval("buff.length")).isEqualTo(6L);
+        assertThat(eval("buff.toString()")).isEqualTo("foobar");
+        byte[] stringBytes = "foobar".getBytes("US-ASCII");
+        int idx = 0;
+        for (byte b : stringBytes) {
+            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+        }
+
     }
     
     @Test

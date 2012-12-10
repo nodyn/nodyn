@@ -1,5 +1,6 @@
 package org.projectodd.nodej.bindings.buffer;
 
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynArray;
 import org.dynjs.runtime.DynObject;
@@ -27,18 +28,22 @@ public class BufferType extends  AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        long length = 0;
         Buffer buffer;
         if (args[0] instanceof DynArray) {
             DynArray items = (DynArray) args[0];
-            length = Types.toUint32(context, items.get(context, "length"));
+            long length = Types.toUint32(context, items.get(context, "length"));
             buffer = new Buffer(context.getGlobalObject(), length);
             for(int i=0; i<length; i++) {
                 buffer.write(Types.toString(context, items.get(context, "" + i)), Buffer.Encoding.UTF8, i, 1);
             }
+        } else if (args[0] instanceof Number){
+            buffer = new Buffer(context.getGlobalObject(), (long) args[0]);
+        } else if (args[0] == Types.UNDEFINED || args[0] == Types.NULL) {
+            throw new ThrowException(context, context.createTypeError("Bad argument"));
         } else {
-            length = (long) args[0];
-            buffer = new Buffer(context.getGlobalObject(), length);
+            String str = Types.toString(context, args[0]);
+            buffer = new Buffer(context.getGlobalObject(), str.length());
+            buffer.copy(str.getBytes(), 0, 0, str.length());
         }
         buffer.setPrototype(this.getPrototype());
         return buffer;
