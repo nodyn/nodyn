@@ -4,6 +4,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.UnsupportedEncodingException;
 
+import org.dynjs.runtime.Types;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class BufferWriteTest extends NodejTestSupport {
         int idx = 0;
         byte[] stringBytes = string.getBytes("UTF-8");
         for (byte b : stringBytes) {
-            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+            assertThat(eval("buff["+ idx++ +"] == " + b)).isEqualTo(true);
         }
     }
     
@@ -39,7 +40,7 @@ public class BufferWriteTest extends NodejTestSupport {
         int idx = 10;
         byte[] stringBytes = string.getBytes("UTF-8");
         for (byte b : stringBytes) {
-            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+            assertThat(eval("buff["+ idx++ +"] == " + b)).isEqualTo(true);
         }
     }
     
@@ -47,10 +48,10 @@ public class BufferWriteTest extends NodejTestSupport {
     public void testBufferUtf8WriteWithMaxLength() throws UnsupportedEncodingException {
         assertThat(eval("buff.utf8Write('"+string+"', 0, 10)")).isEqualTo(10L);
         assertThat(eval("buff.toString()")).isEqualTo(string.subSequence(0, 10));
-        assertThat(eval("buff.byteAt(10)")).isEqualTo((byte)0);
+        assertThat(eval("buff[10]")).isEqualTo(Types.UNDEFINED);
         byte[] stringBytes = string.getBytes("UTF-8");
         for (int i=0; i<10; i++) {
-            assertThat(eval("buff.byteAt("+ i +")")).isEqualTo(stringBytes[i]);
+            assertThat(eval("buff["+ i +"] == " + stringBytes[i])).isEqualTo(true);
         }
     }
 
@@ -61,7 +62,7 @@ public class BufferWriteTest extends NodejTestSupport {
         int idx = 0;
         byte[] stringBytes = string.getBytes("US-ASCII");
         for (byte b : stringBytes) {
-            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+            assertThat(eval("buff["+ idx++ +"] == " + b)).isEqualTo(true);
         }
     }
     
@@ -72,7 +73,7 @@ public class BufferWriteTest extends NodejTestSupport {
         int idx = 10;
         byte[] stringBytes = string.getBytes("US-ASCII");
         for (byte b : stringBytes) {
-            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+            assertThat(eval("buff["+ idx++ +"] == " + b)).isEqualTo(true);
         }
     }
     
@@ -80,10 +81,10 @@ public class BufferWriteTest extends NodejTestSupport {
     public void testBufferAsciiWriteWithMaxLength() throws UnsupportedEncodingException {
         assertThat(eval("buff.asciiWrite('"+string+"', 0, 10)")).isEqualTo(10L);
         assertThat(eval("buff.toString()")).isEqualTo(string.subSequence(0, 10));
-        assertThat(eval("buff.byteAt(10)")).isEqualTo((byte)0);
+        assertThat(eval("buff[10]")).isEqualTo(Types.UNDEFINED);
         byte[] stringBytes = string.getBytes("US-ASCII");
         for (int i=0; i<10; i++) {
-            assertThat(eval("buff.byteAt("+ i +")")).isEqualTo(stringBytes[i]);
+            assertThat(eval("buff["+ i +"] == " + stringBytes[i])).isEqualTo(true);
         }
     }
 

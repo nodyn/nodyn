@@ -1,5 +1,7 @@
 package org.projectodd.nodej.bindings.buffer;
 
+import java.io.UnsupportedEncodingException;
+
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynArray;
@@ -43,7 +45,11 @@ public class BufferType extends  AbstractNativeFunction {
         } else {
             String str = Types.toString(context, args[0]);
             buffer = new Buffer(context.getGlobalObject(), str.length());
-            buffer.copy(str.getBytes(), 0, 0, str.length());
+            try {
+                buffer.copy(Buffer.getByteObjectArray(str, "UTF-8"), 0, 0, str.length());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
         buffer.setPrototype(this.getPrototype());
         return buffer;

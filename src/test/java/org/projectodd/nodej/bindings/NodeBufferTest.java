@@ -1,10 +1,10 @@
 package org.projectodd.nodej.bindings;
 
+import static org.fest.assertions.Assertions.assertThat;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.projectodd.nodej.NodejTestSupport;
-import static org.fest.assertions.Assertions.*;
 
 public class NodeBufferTest extends NodejTestSupport {
     @Before
@@ -15,12 +15,11 @@ public class NodeBufferTest extends NodejTestSupport {
     }
     
     @Test
-    @Ignore
     public void testSafeCtor() {
-        eval("var b = Buffer(1024)");
-        eval("assert.strictEqual(1024, b.length)");
+        eval("var b = new Buffer(10)");
+        eval("assert.strictEqual(10, b.length)");
         eval("b[0] = -1");
-        eval("assert.equal(b[0], -1);");
-        assertThat(eval("b[1];")).isEqualTo(0L);
+        assertThat(eval("b[0]")).isEqualTo(255);
+        eval("assert.strictEqual(b[0], 255);");
     }
 }

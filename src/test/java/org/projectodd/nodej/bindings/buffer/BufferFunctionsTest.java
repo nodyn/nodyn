@@ -51,7 +51,7 @@ public class BufferFunctionsTest extends NodejTestSupport {
         byte[] stringBytes = "foobar".getBytes("US-ASCII");
         int idx = 0;
         for (byte b : stringBytes) {
-            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo(b);
+            assertThat(eval("buff.byteAt("+ idx++ +")")).isEqualTo((int)b);
         }
     }
     
