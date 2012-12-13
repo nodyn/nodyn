@@ -3,7 +3,6 @@ package org.projectodd.nodej.bindings.buffer;
 import java.io.UnsupportedEncodingException;
 
 import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
@@ -28,19 +27,6 @@ public class Buffer extends DynObject {
         defineReadOnlyProperty(globalObject, "utf8Write", new Write(globalObject, Buffer.Encoding.UTF8));
         defineReadOnlyProperty(globalObject, "asciiWrite", new Write(globalObject, Buffer.Encoding.ASCII));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
-        defineReadOnlyProperty(globalObject, "byteAt", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                if (!(args[0] instanceof Long)) {
-                    throw new ThrowException(context, "Arg must be an integer.");
-                }
-                int index = Types.toNumber(context, args[0]).intValue();
-                if (index < 0 || getBuffer().length <= index) {
-                    return Types.UNDEFINED;
-                }
-                return getBuffer()[index];
-            }
-        });
     }
     
     public void fill(byte b, int offset, int end) {
