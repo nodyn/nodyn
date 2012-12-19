@@ -66,6 +66,13 @@ public class Process extends DynObject {
 		setProperty("memoryUsage", null );
 		//setProperty("uvCounters", null );
 		setProperty("binding", new Binding(globalObject));
+        setProperty("on", new AbstractNativeFunction(globalObject) {
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                return null;
+            }
+            
+        }); // TODO:
 	}
 	
     private DynObject getProcessEnv(GlobalObject globalObject) {

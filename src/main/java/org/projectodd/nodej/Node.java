@@ -13,6 +13,7 @@ import org.dynjs.runtime.Runner;
 public class Node {
 
     public static final String VERSION = "0.1.0";
+    private String filename = "<eval>";
     private DynJS runtime;
     private String[] args;
 
@@ -23,6 +24,7 @@ public class Node {
             @Override
             public GlobalObject newGlobalObject(DynJS runtime) {
                 final GlobalObject globalObject = new GlobalObject(runtime);
+                globalObject.defineGlobalProperty("__filename", getFilename());
                 globalObject.defineGlobalProperty("process", new Process(globalObject, Node.this.args));
                 return globalObject;
             }
@@ -39,11 +41,18 @@ public class Node {
     public DynJS getRuntime() {
         return this.runtime;
     }
+    
+    public String getFilename() {
+        return this.filename;
+    }
+    
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 
     public void execute(File file) {
-        GlobalObject global = this.runtime.getExecutionContext().getGlobalObject();
         try {
-            global.defineGlobalProperty("__filename", file.getCanonicalPath());
+            this.setFilename(file.getCanonicalPath());
             this.runtime.newRunner().withSource(file).execute();
         } catch (IOException e) {
             e.printStackTrace();
