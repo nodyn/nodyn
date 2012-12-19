@@ -8,7 +8,7 @@ public class ProcessTest extends NodejTestSupport {
 
     @Test
     public void testArgv() {
-        assertThat(runtime.evaluate(runtime.getExecutionContext(), "process.argv", false, true)).isEqualTo(defaultArgs);
+        assertThat(runtime.evaluate("process.argv")).isEqualTo(defaultArgs);
     }
 
     @Test

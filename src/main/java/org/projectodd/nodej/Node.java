@@ -1,9 +1,14 @@
 package org.projectodd.nodej;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
+import org.dynjs.runtime.Runner;
 
 public class Node {
 
@@ -33,6 +38,16 @@ public class Node {
     // At the moment, it's being used for testing
     public DynJS getRuntime() {
         return this.runtime;
+    }
+
+    public void execute(File file) {
+        GlobalObject global = this.runtime.getExecutionContext().getGlobalObject();
+        try {
+            global.defineGlobalProperty("__filename", file.getCanonicalPath());
+            this.runtime.newRunner().withSource(file).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
