@@ -323,9 +323,6 @@ if (isWindows) {
     }
 
     var x = (isAbsolute ? '/' : '') + path;
-    print("path: " + path);
-    print("isAbsolute: " + isAbsolute);
-    print("x: " + x);
     return x;
   };
 
