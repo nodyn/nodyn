@@ -28,6 +28,7 @@ public class Node {
             }
         });
         this.runtime = new DynJS(config);
+        this.runtime.evaluate("var console = require('console')");
     }
 
     public void start() {

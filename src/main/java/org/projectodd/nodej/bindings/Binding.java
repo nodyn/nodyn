@@ -8,6 +8,7 @@ import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
+import org.projectodd.nodej.bindings.console.Logger;
 
 public class Binding extends AbstractNativeFunction {
 
@@ -19,9 +20,10 @@ public class Binding extends AbstractNativeFunction {
         bindings.put("buffer", new Buffer(globalObject));
         bindings.put("fs", new Fs(globalObject));
         bindings.put("constants", new Constants(globalObject));
+        bindings.put("logger", new Logger(globalObject));
     }
 
-    static void setProperty(DynObject __this, String name, final Object value) {
+    public static void setProperty(DynObject __this, String name, final Object value) {
         __this.defineOwnProperty(null, name, new PropertyDescriptor() {
             {
                 set("Value", value );
