@@ -9,8 +9,27 @@ import org.projectodd.nodej.bindings.console.Logger;
 public class ConsoleTest extends NodejTestSupport {
 
     @Test
-    public void testConsoleLog() {
+    public void testConsoleLoggerClass() {
         assertThat(eval("console.logger")).isInstanceOf(Logger.class);
-        assertThat(eval("console.log('hello yaks')")).isEqualTo(Types.UNDEFINED);
+    }
+    
+    @Test
+    public void testConsoleLog() {
+        assertThat(eval("console.log('hello log')")).isEqualTo(Types.UNDEFINED);
+    }
+    
+    @Test
+    public void testConsoleInfo() {
+        assertThat(eval("console.info('hello info')")).isEqualTo(Types.UNDEFINED);
+    }
+    
+    @Test
+    public void testConsoleWarn() {
+        assertThat(eval("console.warn('hello warn')")).isEqualTo(Types.UNDEFINED);
+    }
+    
+    @Test
+    public void testConsoleError() {
+        assertThat(eval("console.error('hello error')")).isEqualTo(Types.UNDEFINED);
     }
 }

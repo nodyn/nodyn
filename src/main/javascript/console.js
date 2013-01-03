@@ -10,6 +10,9 @@ var Console = function() {
   this.error = function( msg ) {
     this.logger.err( util.format( msg ) );
   }
+
+  this.info  = this.log
+  this.warn  = this.error
 }
 
 module.exports = new Console()
