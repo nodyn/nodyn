@@ -1,14 +1,12 @@
 package org.projectodd.nodej;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
-import org.dynjs.runtime.Runner;
 
 public class Node {
 
