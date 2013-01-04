@@ -29,6 +29,7 @@ public class Node {
         });
         this.runtime = new DynJS(config);
         this.runtime.evaluate("var console = require('console')");
+        this.runtime.evaluate("var Buffer = require('buffer').Buffer");
     }
 
     public void start() {

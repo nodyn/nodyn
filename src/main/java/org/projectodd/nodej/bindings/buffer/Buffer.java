@@ -9,16 +9,23 @@ import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
+import org.projectodd.nodej.bindings.buffer.prototype.Slice;
 import org.projectodd.nodej.bindings.buffer.prototype.ToString;
 import org.projectodd.nodej.bindings.buffer.prototype.Write;
 
 public class Buffer extends DynObject {
     public enum Encoding {
-        UTF8, UCS2, ASCII, BASE64, BINARY
+        // Implemented
+        UTF8, ASCII, 
+        // Not implemented
+        BASE64, BINARY, HEX, UTF16LE, UCS2
     }
+
+    private GlobalObject global;
     
     public Buffer(final GlobalObject globalObject, long length) {
         super(globalObject);
+        this.global = globalObject;
         setBackingArray(new Object[(int) length]);
         setClassName("SlowBuffer");
         put(null, "length", length, false);
@@ -27,6 +34,8 @@ public class Buffer extends DynObject {
         defineReadOnlyProperty(globalObject, "utf8Write", new Write(globalObject, Buffer.Encoding.UTF8));
         defineReadOnlyProperty(globalObject, "asciiWrite", new Write(globalObject, Buffer.Encoding.ASCII));
         defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
+        defineReadOnlyProperty(globalObject, "utf8Slice", new Slice(globalObject, Buffer.Encoding.UTF8));
+        defineReadOnlyProperty(globalObject, "asciiSlice", new Slice(globalObject, Buffer.Encoding.ASCII));
     }
     
     public void fill(byte b, int offset, int end) {
@@ -125,5 +134,14 @@ public class Buffer extends DynObject {
             fancyBytes[i++] = new Byte(b);
         }
         return fancyBytes;
+    }
+
+    // TODO: Or not todo, that is the question... node.js slices reference
+    // *the same* underlying memory, so changes to one buffer are reflected
+    // in its slices. Is this a feature or side effect?
+    public Object slice(int start, int end) {
+        Buffer buffer = new Buffer(this.global, end-start);
+        buffer.copy(this.getBuffer(), 0, start, end);
+        return buffer;
     }
 }
