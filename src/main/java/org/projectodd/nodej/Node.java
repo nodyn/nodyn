@@ -26,10 +26,11 @@ public class Node {
                 final GlobalObject globalObject = new GlobalObject(runtime);
                 globalObject.defineGlobalProperty("__filename",    getFilename());
                 globalObject.defineGlobalProperty("process",       new Process(globalObject, Node.this.args));
-                globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject));
-                globalObject.defineGlobalProperty("clearTimeout",  new ClearTimeout(globalObject));
-                globalObject.defineGlobalProperty("setInterval",   null);
-                globalObject.defineGlobalProperty("clearInterval", null);
+                globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject, false));
+                final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
+                globalObject.defineGlobalProperty("clearTimeout",  clearTimeout);
+                globalObject.defineGlobalProperty("setInterval",   new SetTimeout(globalObject, true));
+                globalObject.defineGlobalProperty("clearInterval", clearTimeout);
                 return globalObject;
             }
         });

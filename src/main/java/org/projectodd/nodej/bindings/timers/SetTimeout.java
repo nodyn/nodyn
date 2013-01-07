@@ -7,9 +7,11 @@ import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.Types;
 
 public class SetTimeout extends AbstractNativeFunction {
+    boolean repeat = false;
     
-    public SetTimeout(GlobalObject globalObject) {
+    public SetTimeout(GlobalObject globalObject, boolean repeat) {
         super(globalObject, "callback", "delay", "[arg]", "[...]");
+        this.repeat = repeat;
     }
 
     @Override
@@ -22,7 +24,7 @@ public class SetTimeout extends AbstractNativeFunction {
                 functionArgs = new Object[args.length-2];
                 for(int i=2; i<args.length; ++i) { functionArgs[i-2] = args[i]; }
             }
-            Timer runner = new Timer(func, context, timeout, functionArgs);
+            Timer runner = new Timer(func, context, timeout, repeat, functionArgs);
             runner.start();
             return runner.getId();
         } else {

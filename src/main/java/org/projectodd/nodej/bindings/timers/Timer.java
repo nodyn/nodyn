@@ -14,21 +14,28 @@ public class Timer extends Thread {
     private JSFunction func;
     private int timeout;
     private Object[] args;
+    private boolean repeating;
 
-    public Timer(JSFunction func, ExecutionContext context, int timeout, Object... args) {
+    public Timer(JSFunction func, ExecutionContext context, int timeout, boolean repeating, Object... args) {
         this.func = func;
         this.args = args;
         this.context = context;
         this.timeout = timeout;
+        this.repeating = repeating;
     }
 
     public void run() {
         TIMERS.put(this.getId(), this);
+        boolean finished = false;
         try {
-            Thread.sleep(timeout);
-            context.call(func, null, args);
-            TIMERS.remove(this.getId());
+            while(!finished) {
+                Thread.sleep(timeout);
+                context.call(func, null, args);
+                finished = !repeating;
+            }
         } catch (InterruptedException e) {
+        } finally {
+            TIMERS.remove(this.getId());
         }
     }
 }

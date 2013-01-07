@@ -2,8 +2,6 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.JSObject;
 import org.dynjs.runtime.Types;
 import org.junit.Test;
 
@@ -44,12 +42,31 @@ public class TimeoutTest extends NodejTestSupport {
     }
     
     @Test
-    public void testCleartimeout() throws InterruptedException {
+    public void testClearTimeout() throws InterruptedException {
         eval("var x = 0");
         eval("var f = function(y) { x = x+y }");
         eval("var id = setTimeout(f, 1000, 5)");
         eval("clearTimeout(id)");
         Thread.sleep(1000);
+        assertThat(eval("x")).isEqualTo(0L);
+    }
+    
+    @Test
+    public void testSetInterval() throws InterruptedException {
+        eval("var x = 0");
+        eval("var f = function() { x = x+1 }");
+        eval("setInterval(f, 10)");
+        Thread.sleep(100);
+        assertThat(eval("x>1")).isEqualTo(true);
+    }
+    
+    @Test
+    public void testClearInterval() throws InterruptedException {
+        eval("var x = 0");
+        eval("var f = function() { x = x+1 }");
+        eval("var id = setInterval(f, 10000)");
+        eval("clearTimeout(id)");
+        Thread.sleep(500);
         assertThat(eval("x")).isEqualTo(0L);
     }
 }
