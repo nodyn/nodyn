@@ -37,6 +37,7 @@
     <version.maven.jdocbook.plugin>2.3.3</version.maven.jdocbook.plugin>
     <version.junit>4.7</version.junit>
     <version.sigar>1.6.4</version.sigar>
+    <version.netty>3.6.1.Final</version.netty>
     <!--<version.dynjs>1.x.incremental.16</version.dynjs>-->
     <version.dynjs>1.0-SNAPSHOT</version.dynjs>
   </properties>
@@ -101,6 +102,11 @@
       <artifactId>fest-assert</artifactId>
       <version>1.4</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>${version.netty}</version>
     </dependency>
     <dependency>
       <groupId>org.dynjs</groupId>

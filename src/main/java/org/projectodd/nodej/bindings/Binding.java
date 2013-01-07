@@ -21,6 +21,7 @@ public class Binding extends AbstractNativeFunction {
         bindings.put("fs", new Fs(globalObject));
         bindings.put("constants", new Constants(globalObject));
         bindings.put("logger", new Logger(globalObject));
+        bindings.put("QueryString", new QueryString(globalObject));
     }
 
     public static void setProperty(DynObject __this, String name, final Object value) {

@@ -26,8 +26,9 @@ public class Node {
                 final GlobalObject globalObject = new GlobalObject(runtime);
                 globalObject.defineGlobalProperty("__filename",    getFilename());
                 globalObject.defineGlobalProperty("process",       new Process(globalObject, Node.this.args));
-                globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject, false));
+
                 final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
+                globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject, false));
                 globalObject.defineGlobalProperty("clearTimeout",  clearTimeout);
                 globalObject.defineGlobalProperty("setInterval",   new SetTimeout(globalObject, true));
                 globalObject.defineGlobalProperty("clearInterval", clearTimeout);
