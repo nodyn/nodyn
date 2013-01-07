@@ -26,13 +26,11 @@ public class Timer extends Thread {
 
     public void run() {
         TIMERS.put(this.getId(), this);
-        boolean finished = false;
         try {
-            while(!finished) {
+            do {
                 Thread.sleep(timeout);
                 context.call(func, null, args);
-                finished = !repeating;
-            }
+            } while (repeating);
         } catch (InterruptedException e) {
         } finally {
             TIMERS.remove(this.getId());

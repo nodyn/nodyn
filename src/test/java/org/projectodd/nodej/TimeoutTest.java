@@ -65,7 +65,7 @@ public class TimeoutTest extends NodejTestSupport {
         eval("var x = 0");
         eval("var f = function() { x = x+1 }");
         eval("var id = setInterval(f, 10000)");
-        eval("clearTimeout(id)");
+        eval("clearInterval(id)");
         Thread.sleep(500);
         assertThat(eval("x")).isEqualTo(0L);
     }
