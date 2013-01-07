@@ -42,4 +42,14 @@ public class TimeoutTest extends NodejTestSupport {
         Thread.sleep(500);
         assertThat(eval("x")).isEqualTo(5L);
     }
+    
+    @Test
+    public void testCleartimeout() throws InterruptedException {
+        eval("var x = 0");
+        eval("var f = function(y) { x = x+y }");
+        eval("var id = setTimeout(f, 1000, 5)");
+        eval("clearTimeout(id)");
+        Thread.sleep(1000);
+        assertThat(eval("x")).isEqualTo(0L);
+    }
 }

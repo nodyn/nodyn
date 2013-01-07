@@ -7,6 +7,7 @@ import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
+import org.projectodd.nodej.bindings.timers.ClearTimeout;
 import org.projectodd.nodej.bindings.timers.SetTimeout;
 
 public class Node {
@@ -26,7 +27,7 @@ public class Node {
                 globalObject.defineGlobalProperty("__filename",    getFilename());
                 globalObject.defineGlobalProperty("process",       new Process(globalObject, Node.this.args));
                 globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject));
-                globalObject.defineGlobalProperty("clearTimeout",  null);
+                globalObject.defineGlobalProperty("clearTimeout",  new ClearTimeout(globalObject));
                 globalObject.defineGlobalProperty("setInterval",   null);
                 globalObject.defineGlobalProperty("clearInterval", null);
                 return globalObject;
