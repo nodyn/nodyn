@@ -1,12 +1,14 @@
 package org.projectodd.nodej.bindings.timers;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.JSFunction;
 
 public class Timer extends Thread {
-    public static final HashMap<Long, Timer> TIMERS = new HashMap<Long, Timer>();
+    public static final Map<Long, Timer> TIMERS = Collections.synchronizedMap(new HashMap<Long, Timer>());
 
     private ExecutionContext context;
     private JSFunction func;

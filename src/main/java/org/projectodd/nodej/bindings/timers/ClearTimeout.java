@@ -3,7 +3,6 @@ package org.projectodd.nodej.bindings.timers;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.LexicalEnvironment;
 import org.dynjs.runtime.Types;
 
 public class ClearTimeout extends AbstractNativeFunction {
