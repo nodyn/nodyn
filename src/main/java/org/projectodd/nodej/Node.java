@@ -25,7 +25,9 @@ public class Node {
             public GlobalObject newGlobalObject(DynJS runtime) {
                 final GlobalObject globalObject = new GlobalObject(runtime);
                 globalObject.defineGlobalProperty("__filename",    getFilename());
+                globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
                 globalObject.defineGlobalProperty("process",       new Process(globalObject, Node.this.args));
+                globalObject.defineGlobalProperty("global", globalObject);
 
                 final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
                 globalObject.defineGlobalProperty("setTimeout",    new SetTimeout(globalObject, false));
