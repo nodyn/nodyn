@@ -7,6 +7,7 @@ import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
+import org.projectodd.nodej.bindings.buffer.BufferType;
 import org.projectodd.nodej.bindings.timers.ClearTimeout;
 import org.projectodd.nodej.bindings.timers.SetTimeout;
 
@@ -34,12 +35,12 @@ public class Node {
                 globalObject.defineGlobalProperty("clearTimeout",  clearTimeout);
                 globalObject.defineGlobalProperty("setInterval",   new SetTimeout(globalObject, true));
                 globalObject.defineGlobalProperty("clearInterval", clearTimeout);
+                globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
                 return globalObject;
             }
         });
         this.runtime = new DynJS(config);
         this.runtime.evaluate("var console = require('console')");
-        this.runtime.evaluate("var Buffer = require('buffer').Buffer");
     }
 
     public void start() {
