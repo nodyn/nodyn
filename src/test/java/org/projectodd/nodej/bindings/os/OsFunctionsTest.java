@@ -2,6 +2,7 @@ package org.projectodd.nodej.bindings.os;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.io.File;
 import java.net.UnknownHostException;
 
 import org.dynjs.runtime.DynArray;
@@ -82,5 +83,25 @@ public class OsFunctionsTest extends NodejTestSupport {
     @Test
     public void testRequireOs() {
         assertThat(eval("require('os')")).isInstanceOf(DynObject.class);
+    }
+    
+    @Test
+    public void testOsModuleFunctions() throws UnknownHostException {
+        eval("var os = require('os')");
+        // These aren't testing the values, just that the API is at least
+        // returning expected types
+        assertThat(new File((String) eval("os.tmpDir()")).isDirectory()).isTrue();
+        assertThat(eval("os.hostname()")).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
+        assertThat(eval("os.type()")).isInstanceOf(String.class);
+        assertThat(eval("os.platform()")).isInstanceOf(String.class);
+        assertThat(eval("os.arch()")).isInstanceOf(String.class);
+        assertThat(eval("os.release()")).isInstanceOf(String.class);
+        assertThat(eval("os.uptime()")).isInstanceOf(Number.class);
+        assertThat(eval("os.loadavg()")).isInstanceOf(DynArray.class);
+        assertThat(eval("os.totalmem()")).isInstanceOf(Number.class);
+        assertThat(eval("os.freemem()")).isInstanceOf(Number.class);
+        assertThat(eval("os.cpus()")).isInstanceOf(DynArray.class);
+        assertThat(eval("os.networkInterfaces()")).isInstanceOf(DynObject.class);
+        assertThat(eval("os.EOL")).isInstanceOf(String.class);
     }
 }
