@@ -78,4 +78,9 @@ public class OsFunctionsTest extends NodejTestSupport {
         assertThat(eval("process.binding('os').getInterfaceAddresses")).isInstanceOf(JSFunction.class);
         assertThat(eval("var ifaces = process.binding('os').getInterfaceAddresses(); ifaces")).isNotEqualTo(Types.UNDEFINED);
     }
+    
+    @Test
+    public void testRequireOs() {
+        assertThat(eval("require('os')")).isInstanceOf(DynObject.class);
+    }
 }
