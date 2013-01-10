@@ -51,6 +51,8 @@ public class Node {
         });
         this.runtime = new DynJS(config);
         this.runtime.evaluate("var console = require('console')");
+        this.runtime.evaluate("var NodeJ = require('nodej')");
+        this.runtime.evaluate("process.nextTick = NodeJ.nextTick");
     }
 
     public void start() {

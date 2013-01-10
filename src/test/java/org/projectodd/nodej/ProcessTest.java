@@ -57,4 +57,13 @@ public class ProcessTest extends NodejTestSupport {
     public void testGlobalness() {
         assertThat(runtime.evaluate("var x = function() { return process.title }; x()")).isEqualTo("nodej");
     }
+    
+    @Test
+    public void testNextTick() throws InterruptedException {
+        eval("var x = 0");
+        eval("var f = function(y) { x = x+y }");
+        eval("process.nextTick(f, 10)");
+        Thread.sleep(100);
+        assertThat(eval("x")).isEqualTo(10L);
+    }
 }

@@ -16,7 +16,12 @@ public class Dispatcher extends DynObject {
             @Override
             public Object call(final ExecutionContext context, Object self, Object... args) {
                 if (args[0] instanceof JSFunction) {
-                    return Node.dispatch((JSFunction)args[0], context);
+                    Object[] functionArgs = null;
+                    if (args.length > 1) {
+                        functionArgs = new Object[args.length-1];
+                        for(int i=1; i<args.length; ++i) { functionArgs[i-1] = args[i]; }
+                    }
+                    return Node.dispatch((JSFunction)args[0], context, functionArgs);
                 } else {
                     System.err.println("Can't dispatch non-callable object");
                 }

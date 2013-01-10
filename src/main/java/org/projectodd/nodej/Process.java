@@ -7,6 +7,7 @@ import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.projectodd.nodej.bindings.Binding;
 
@@ -72,7 +73,7 @@ public class Process extends DynObject {
                 return null;
             }
             
-        }); // TODO:
+        }); // TODO
 	}
 	
     private DynObject getProcessEnv(GlobalObject globalObject) {
