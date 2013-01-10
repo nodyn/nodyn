@@ -5,6 +5,7 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.Types;
+import org.projectodd.nodej.Node;
 
 public class SetTimeout extends AbstractNativeFunction {
     boolean repeat = false;
@@ -24,9 +25,7 @@ public class SetTimeout extends AbstractNativeFunction {
                 functionArgs = new Object[args.length-2];
                 for(int i=2; i<args.length; ++i) { functionArgs[i-2] = args[i]; }
             }
-            Timer runner = new Timer(func, context, timeout, repeat, functionArgs);
-            runner.start();
-            return runner.getId();
+            return Node.dispatchAt(context, timeout, repeat, func, functionArgs);
         } else {
             System.err.println("usage: setTimeout(callback, delay, [arg], [...])");
         }
