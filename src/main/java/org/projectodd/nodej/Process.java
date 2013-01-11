@@ -50,7 +50,6 @@ public class Process extends DynObject {
 		setProperty("reallyExit", null );
 		setProperty("abort", null );
 		setProperty("chdir", null );
-		setProperty("cwd", null );
 		setProperty("umask", null );
 		setProperty("getuid", null );
 		setProperty("setuid", null );
@@ -66,13 +65,12 @@ public class Process extends DynObject {
 		setProperty("memoryUsage", null );
 		//setProperty("uvCounters", null );
 		setProperty("binding", new Binding(globalObject));
-        setProperty("on", new AbstractNativeFunction(globalObject) {
+        setProperty("cwd", new AbstractNativeFunction(globalObject) {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
-                return null;
+                return System.getProperty("user.dir");
             }
-            
-        }); // TODO
+        });
 	}
 	
     private DynObject getProcessEnv(GlobalObject globalObject) {

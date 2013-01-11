@@ -65,6 +65,11 @@ public class ProcessTest extends NodejTestSupport {
             assertThat(runtime.evaluate("process.env."+key.replaceAll("[\\./]", "_"))).isEqualTo(env.get(key));
         }
     }
+    
+    @Test
+    public void testCwd() {
+        assertThat(runtime.evaluate("process.cwd()")).isEqualTo(System.getProperty("user.dir"));
+    }
 
     @Test
     public void testNoDeprecation() {
