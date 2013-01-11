@@ -3,6 +3,7 @@ package org.projectodd.nodej;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
+import java.util.Map;
 
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
@@ -54,6 +55,15 @@ public class ProcessTest extends NodejTestSupport {
         assertThat(runtime.evaluate("process.versions.node")).isEqualTo(org.projectodd.nodej.Node.VERSION);
         assertThat(runtime.evaluate("process.versions.java")).isEqualTo(System.getProperty("java.version"));
         assertThat(runtime.evaluate("process.versions.dynjs")).isEqualTo(org.dynjs.DynJSVersion.FULL);
+    }
+    
+    @Test
+    public void testEnv() {
+        assertThat(runtime.evaluate("process.env")).isInstanceOf(JSObject.class);
+        Map<String,String> env = System.getenv();
+        for (String key : env.keySet()) {
+            assertThat(runtime.evaluate("process.env."+key.replaceAll("[\\./]", "_"))).isEqualTo(env.get(key));
+        }
     }
 
     @Test

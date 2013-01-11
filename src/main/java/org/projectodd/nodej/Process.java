@@ -3,12 +3,12 @@ package org.projectodd.nodej;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.projectodd.nodej.bindings.Binding;
 
@@ -28,15 +28,13 @@ public class Process extends DynObject {
         setProperty("arch", "java" );
         setProperty("platform", "java" );
         setProperty("version", Node.VERSION );
+		setProperty("versions", new Versions(globalObject) );
 
         // These seem to be undocumented in node, but are required?
         setProperty("noDeprecation", false);        
         setProperty("traceDeprecation", false);
         
-		setWritableProperty("title", "nodej" );
-		
 		setProperty("moduleLoadList", new ArrayList<String>() );
-		setProperty("versions", new Versions(globalObject) );
 		
 		setProperty("execArgv", null );
 		setProperty("env", getProcessEnv(globalObject));
@@ -83,9 +81,15 @@ public class Process extends DynObject {
         if (tmpDir == null) {
             tmpDir = "/tmp";
         }
+        Map<String,String> systemEnv = System.getenv();
+        for(String key : systemEnv.keySet()) {
+            String value = systemEnv.get(key);
+            env.put(null, key.replaceAll("[\\./]", "_"), value, false);
+        }
         env.put(null, "TMPDIR", tmpDir, false);
         env.put(null, "TMP", tmpDir, false);
         env.put(null, "TEMP", tmpDir, false);
+        
         return env;
     }
 
