@@ -1,5 +1,6 @@
 package org.projectodd.nodej;
 
+import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
@@ -44,7 +45,7 @@ public class Process extends DynObject {
 		setProperty("_eval", null );
 		setProperty("_print_eval", null );
 		setProperty("_forceRepl", null );
-		setProperty("execPath", null );
+		setProperty("execPath", new File( args[0]).getAbsolutePath() );
 		setProperty("debugPort", null );
 		
 		setProperty("_needTickCallback", null );

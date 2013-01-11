@@ -9,21 +9,8 @@ public class Versions extends DynObject {
     
     public Versions(GlobalObject globalObject) {
         super(globalObject);
+        this.put(null, "node", org.projectodd.nodej.Node.VERSION, false);
+        this.put(null, "java", System.getProperty("java.version"), false);
+        this.put(null, "dynjs", org.dynjs.DynJSVersion.FULL, false);
     }
-
-	public Object get(ExecutionContext context, String key) {
-		return (String) getProperty(context, key);
-	}
-	
-	public void put(ExecutionContext context, String key, final String version) {
-        this.defineOwnProperty(null, key, new PropertyDescriptor() {
-            {
-                set("Value", version );
-                set("Writable", false);
-                set("Enumerable", false);
-                set("Configurable", false);
-            }
-        }, false);
-	}
-
 }

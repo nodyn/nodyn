@@ -1,8 +1,8 @@
 
-var NodeJ = function() {
-  this.nextTick = function(callback, args) {
+var NodeJ = function(process) {
+  process.nextTick = function(callback, args) {
     process.binding('Dispatcher').submit(callback, args)
   }
 }
 
-module.exports = new NodeJ()
+module.exports = NodeJ

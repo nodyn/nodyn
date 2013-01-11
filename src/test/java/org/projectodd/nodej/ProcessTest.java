@@ -2,6 +2,11 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.io.File;
+
+import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.JSFunction;
+import org.dynjs.runtime.JSObject;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {
@@ -13,12 +18,19 @@ public class ProcessTest extends NodejTestSupport {
 
     @Test
     public void testStdOut() {
-        assertThat(runtime.evaluate("process.stdout")).isNotNull();
+        assertThat(runtime.evaluate("process.stdout")).isInstanceOf(DynObject.class);
+        assertThat(runtime.evaluate("process.stdout.write")).isInstanceOf(JSFunction.class);
     }
 
     @Test
     public void testStdErr() {
-        assertThat(runtime.evaluate("process.stderr")).isNotNull();
+        assertThat(runtime.evaluate("process.stderr")).isInstanceOf(DynObject.class);
+        assertThat(runtime.evaluate("process.stderr.write")).isInstanceOf(JSFunction.class);
+    }
+    
+    @Test
+    public void testExecPath() {
+        assertThat(runtime.evaluate("process.execPath")).isEqualTo(new File("node").getAbsolutePath());
     }
 
     @Test
@@ -34,6 +46,14 @@ public class ProcessTest extends NodejTestSupport {
     @Test
     public void testVersion() {
         assertThat(runtime.evaluate("process.version")).isEqualTo(Node.VERSION);
+    }
+    
+    @Test
+    public void testVersions() {
+        assertThat(runtime.evaluate("process.versions")).isInstanceOf(JSObject.class);
+        assertThat(runtime.evaluate("process.versions.node")).isEqualTo(org.projectodd.nodej.Node.VERSION);
+        assertThat(runtime.evaluate("process.versions.java")).isEqualTo(System.getProperty("java.version"));
+        assertThat(runtime.evaluate("process.versions.dynjs")).isEqualTo(org.dynjs.DynJSVersion.FULL);
     }
 
     @Test
