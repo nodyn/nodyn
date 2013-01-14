@@ -3,11 +3,13 @@ package org.projectodd.nodej;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.JSObject;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {
@@ -43,10 +45,26 @@ public class ProcessTest extends NodejTestSupport {
     public void testPlatform() {
         assertThat(runtime.evaluate("process.platform")).isEqualTo("java");
     }
+    
+    @Test
+    @Ignore
+    public void testMemoryUsage() {
+        assertThat(runtime.evaluate("process.memoryUsage()")).isInstanceOf(DynObject.class);
+    }
 
     @Test
     public void testVersion() {
         assertThat(runtime.evaluate("process.version")).isEqualTo(Node.VERSION);
+    }
+    
+    @Test
+    public void testConfig() {
+        assertThat(runtime.evaluate("process.config")).isInstanceOf(DynObject.class);
+    }
+    
+    @Test
+    public void testPid() {
+        assertThat(runtime.evaluate("process.pid")).isEqualTo(ManagementFactory.getRuntimeMXBean().getName());
     }
     
     @Test

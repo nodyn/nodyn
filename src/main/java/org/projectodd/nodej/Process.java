@@ -2,6 +2,7 @@ package org.projectodd.nodej;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class Process extends DynObject {
 		
 		setProperty("execArgv", null );
 		setProperty("env", getProcessEnv(globalObject));
-		setProperty("pid", null );
+		setProperty("pid", ManagementFactory.getRuntimeMXBean().getName() );
 		setProperty("features", null );
 		setProperty("_eval", null );
 		setProperty("_print_eval", null );
@@ -102,17 +103,6 @@ public class Process extends DynObject {
         }, false);
     }
 
-    protected void setWritableProperty(String name, final Object value) {
-        this.defineOwnProperty(null, name, new PropertyDescriptor() {
-            {
-                set("Value", value );
-                set("Writable", true);
-                set("Enumerable", false);
-                set("Configurable", false);
-            }
-        }, false);
-    }
-    
     protected DynObject wrappedPrintStream(final GlobalObject globalObject, final PrintStream printStream) {
         DynObject object = new DynObject(globalObject);
         object.defineOwnProperty(null, "write", new PropertyDescriptor() {

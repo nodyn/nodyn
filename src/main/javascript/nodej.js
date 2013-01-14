@@ -1,3 +1,4 @@
+var os = require('os')
 
 var NodeJ = function(process) {
 
@@ -6,6 +7,12 @@ var NodeJ = function(process) {
   }
 
   process.title = "nodej"
+  process.memoryUsage = function() {
+    var obj = {}
+    obj.heapTotal = os.getTotalMem()
+    obj.heapUsed  = os.getTotalMem() - os.getFreeMem()
+    return obj
+  }
 
   // TODO: process.config
   // Node.js puts the configure options that were used to compile the current
