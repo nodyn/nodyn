@@ -48,8 +48,10 @@ public class ProcessTest extends NodejTestSupport {
     
     @Test
     public void testMemoryUsage() {
-        assertThat(runtime.evaluate("process.memoryUsage")).isInstanceOf(JSFunction.class);
-        //assertThat(runtime.evaluate("process.memoryUsage()")).isInstanceOf(DynObject.class);
+        assertThat(runtime.evaluate("var mem = process.memoryUsage(); mem")).isInstanceOf(DynObject.class);
+        assertThat(runtime.evaluate("mem.heapTotal")).isInstanceOf(Number.class);
+        assertThat(runtime.evaluate("mem.heapUsed")).isInstanceOf(Number.class);
+        assertThat(runtime.evaluate("mem.heapTotal > mem.heapUsed")).isEqualTo(true);
     }
 
     @Test

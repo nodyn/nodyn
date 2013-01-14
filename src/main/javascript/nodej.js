@@ -9,8 +9,8 @@ var NodeJ = function(process) {
   process.title = "nodej"
   process.memoryUsage = function() {
     var obj = {}
-    obj.heapTotal = os.getTotalMem()
-    obj.heapUsed  = os.getTotalMem() - os.getFreeMem()
+    obj.heapTotal = os.totalmem()
+    obj.heapUsed  = os.totalmem() - os.freemem()
     return obj
   }
 
