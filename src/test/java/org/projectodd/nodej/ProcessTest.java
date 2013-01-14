@@ -47,9 +47,9 @@ public class ProcessTest extends NodejTestSupport {
     }
     
     @Test
-    @Ignore
     public void testMemoryUsage() {
-        assertThat(runtime.evaluate("process.memoryUsage()")).isInstanceOf(DynObject.class);
+        assertThat(runtime.evaluate("process.memoryUsage")).isInstanceOf(JSFunction.class);
+        //assertThat(runtime.evaluate("process.memoryUsage()")).isInstanceOf(DynObject.class);
     }
 
     @Test

@@ -63,7 +63,7 @@ public class Process extends DynObject {
 		setProperty("hrtime", null );
 		setProperty("dlopen", null );
 		setProperty("uptime", null );
-		setProperty("memoryUsage", null );
+		//setProperty("memoryUsage", null );
 		//setProperty("uvCounters", null );
 		setProperty("binding", new Binding(globalObject));
         setProperty("cwd", new AbstractNativeFunction(globalObject) {
