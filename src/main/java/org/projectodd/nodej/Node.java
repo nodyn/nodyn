@@ -56,7 +56,7 @@ public class Node {
         // Start event processing
         this.runtime.evaluate("var NodeJ = require('nodej')");
         this.runtime.evaluate("var nodej = new NodeJ(process)");
-        this.runtime.evaluate("var console = require('console')");
+        this.runtime.evaluate("var console = nodej.console");
     }
 
     public static Future<Object> dispatch(final JSFunction func, final ExecutionContext context, final Object...args) {

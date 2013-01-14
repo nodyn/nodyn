@@ -1,4 +1,5 @@
 var os = require('os')
+var console = require('console')
 var EventEmitter = require('events').EventEmitter
 
 var NodeJ = function(process) {
@@ -25,7 +26,7 @@ var NodeJ = function(process) {
     return obj
   }
 
-  
+  this.console = console
 
   // TODO: process.config
   // Node.js puts the configure options that were used to compile the current
