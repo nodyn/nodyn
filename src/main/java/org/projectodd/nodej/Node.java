@@ -50,13 +50,13 @@ public class Node {
             }
         });
         this.runtime = new DynJS(config);
-        this.runtime.evaluate("var NodeJ = require('nodej')");
-        this.runtime.evaluate("var nodej = new NodeJ(process)");
-        this.runtime.evaluate("var console = require('console')");
     }
 
     public void start() {
         // Start event processing
+        this.runtime.evaluate("var NodeJ = require('nodej')");
+        this.runtime.evaluate("var nodej = new NodeJ(process)");
+        this.runtime.evaluate("var console = require('console')");
     }
 
     public static Future<Object> dispatch(final JSFunction func, final ExecutionContext context, final Object...args) {

@@ -53,6 +53,18 @@ public class ProcessTest extends NodejTestSupport {
         assertThat(runtime.evaluate("mem.heapUsed")).isInstanceOf(Number.class);
         assertThat(runtime.evaluate("mem.heapTotal > mem.heapUsed")).isEqualTo(true);
     }
+    
+    @Test
+    public void testProcessEvents() {
+        assertThat(runtime.evaluate("process.addListener")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.on")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.once")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.removeListener")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.removeAllListeners")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.setMaxListeners")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.listeners")).isInstanceOf(JSFunction.class);
+        assertThat(runtime.evaluate("process.emit")).isInstanceOf(JSFunction.class);
+    }
 
     @Test
     public void testVersion() {
