@@ -36,12 +36,15 @@ public class NetTest extends NodejTestSupport {
     }
     
     @Test
-    public void serverListenTest() throws InterruptedException {
-        eval("server = net.createServer()");
+    public void serverListenCallbackTest() throws InterruptedException {
+        eval("connected = false");
+        eval("connectCallback = function(obj) { connected = true }");
+        eval("server = net.createServer(connectCallback)");
         eval("listening = false");
         eval("listenCallback = function() { listening = true; }");
-        eval("server.listen(80, listenCallback)");
-        Thread.sleep(100);
+        eval("server.listen(8808, listenCallback)");
+        Thread.sleep(900);
         assertThat(eval("listening")).isEqualTo(true);
     }
+    
 }
