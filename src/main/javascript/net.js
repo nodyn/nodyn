@@ -27,9 +27,12 @@ var Server = function(listener) {
 
   this.createAndBind = function(address) {
     this.log('Creating server')
-    factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
+    // TODO: This is the only ctor I can get to work
+    factory = new ChannelFactory() 
     bootstrap = new ServerBootstrap(factory)
     bootstrap.setPipelineFactory(Pipeline(this.connectionListener))
+    bootstrap.setOption("child.keepAlive", true)
+    bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.bind(address)
   }
 
@@ -39,7 +42,7 @@ var Server = function(listener) {
     }
 
     Dispatcher.submit(function(server, port) {
-      address = new SocketAddress(new java.lang.Integer(port.toString()))
+      address = new SocketAddress(port)
       server.createAndBind(address)
       server.log("Listening on: " + address)
       server.emit('listening')
@@ -50,7 +53,8 @@ var Server = function(listener) {
 var Pipeline = function(callback) {
   return new PipelineFactory( { 
     getPipeline: function() {
-      return Channels.pipeline(ServerHandler(callback))
+      handler = ServerHandler(callback)
+      return Channels.pipeline(handler)
     }
   } )
 }
@@ -58,7 +62,9 @@ var Pipeline = function(callback) {
 var ServerHandler = function(callback) {
   return new ChannelHandler( {
     messageReceived: function(context, evnt) {
-      callback.apply(context, evnt)
+      channel = evnt.getChannel()
+      channel.write( evnt.getMessage() )
+      callback.apply( callback, evnt.getMessage() )
     }
   } )
 }
