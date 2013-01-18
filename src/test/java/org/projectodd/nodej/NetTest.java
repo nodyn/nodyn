@@ -42,7 +42,7 @@ public class NetTest extends NodejTestSupport {
         eval("listenCallback = function() { listening = true; }");
         eval("server.listen(8800, listenCallback)");
         try {
-            Thread.sleep(600);
+            Thread.sleep(900);
         } catch (InterruptedException e) {
         } finally {
             assertThat(eval("listening")).isEqualTo(true);
@@ -53,12 +53,12 @@ public class NetTest extends NodejTestSupport {
     @Test
     public void testServerAddress() {
         eval("server = net.createServer()");
-        eval("server.listen(8801)");
+        eval("server.listen(8800)");
         try {
             Thread.sleep(600);
         } catch(InterruptedException e) {
         } finally {
-            assertThat(eval("server.address.port")).isEqualTo(8801);
+            assertThat(eval("server.address.port")).isEqualTo(8800);
             assertThat(eval("server.address.address")).isEqualTo("0.0.0.0");
             assertThat(eval("server.address.family")).isEqualTo("IPv4");
             eval("server.close()");
@@ -70,7 +70,7 @@ public class NetTest extends NodejTestSupport {
         eval("server = net.createServer()");
         eval("closed = false");
         eval("server.on('close', function(e) { closed = true })");
-        eval("server.listen(8802)");
+        eval("server.listen(8800)");
         try {
             Thread.sleep(600);
         } catch(InterruptedException e) {
@@ -83,7 +83,7 @@ public class NetTest extends NodejTestSupport {
     @Test
     public void testServerCloseWithCallback() {
         eval("server = net.createServer()");
-        eval("server.listen(8802)");
+        eval("server.listen(8800)");
         eval("closed = false");
         eval("func = function() { closed = true }");
         try {

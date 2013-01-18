@@ -6,6 +6,7 @@ var Dispatcher    = process.binding('Dispatcher')
 
 // netty bits
 var ChannelFactory  = org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+var ChannelGroup    = org.jboss.netty.channel.group.DefaultChannelGroup
 var ChannelHandler  = org.jboss.netty.channel.SimpleChannelHandler
 var PipelineFactory = org.jboss.netty.channel.ChannelPipelineFactory
 var ServerBootstrap = org.jboss.netty.bootstrap.ServerBootstrap
@@ -13,12 +14,15 @@ var Channels        = org.jboss.netty.channel.Channels
 
 // java bits
 var SocketAddress   = java.net.InetSocketAddress
+var Executor        = java.util.concurrent.Executor
 var Executors       = java.util.concurrent.Executors
 
 module.exports.Socket = function() {
 }
 
 var Server = function(listener) {
+  this.factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+  this.channels = new ChannelGroup("nodej")
   this.connectionListener = listener
   this.address = {}
 
@@ -28,12 +32,11 @@ var Server = function(listener) {
 
   this.createAndBind = function(address) {
     this.log('Creating server')
-    factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-    bootstrap = new ServerBootstrap(factory)
-    bootstrap.setPipelineFactory(Pipeline(this.connectionListener))
+    bootstrap = new ServerBootstrap(this.factory)
+    bootstrap.setPipelineFactory(Pipeline(this))
     bootstrap.setOption("child.keepAlive", true)
     bootstrap.setOption("child.tcpNoDelay", true)
-    bootstrap.bind(address)
+    this.channels.add( bootstrap.bind(address) )
   }
 
   this.listen = function(port, callback) {
@@ -56,26 +59,34 @@ var Server = function(listener) {
     if (callback) {
       callback()
     }
+    this.channels.close()
     this.emit('close')
   }
 }
 
-var Pipeline = function(callback) {
+var Pipeline = function(server) {
   return new PipelineFactory( { 
     getPipeline: function() {
-      handler = ServerHandler(callback)
+      handler = ServerHandler(server)
       return Channels.pipeline(handler)
     }
   } )
 }
 
-var ServerHandler = function(callback) {
+var ServerHandler = function(server) {
 
   return new ChannelHandler( {
     messageReceived: function(context, evnt) {
       channel = evnt.getChannel()
       channel.write( evnt.getMessage() )
-      callback.apply( callback, evnt.getMessage() )
+      callback = server.connectionListener
+      if (callback) {
+        callback.apply( callback, evnt.getMessage() )
+      }
+    },
+
+    channelOpen: function(context, evnt) {
+      server.channels.add( evnt.getChannel() )
     },
 
     exceptionCaught: function(context, evnt) {
