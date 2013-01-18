@@ -87,6 +87,7 @@ var ServerHandler = function(server) {
 
     channelOpen: function(context, evnt) {
       server.channels.add( evnt.getChannel() )
+      server.emit('connection')
     },
 
     exceptionCaught: function(context, evnt) {
