@@ -20,6 +20,7 @@ module.exports.Socket = function() {
 
 var Server = function(listener) {
   this.connectionListener = listener
+  this.address = {}
 
   this.log = function(msg) {
     java.lang.System.err.println(msg)
@@ -27,8 +28,7 @@ var Server = function(listener) {
 
   this.createAndBind = function(address) {
     this.log('Creating server')
-    // TODO: This is the only ctor I can get to work
-    factory = new ChannelFactory() 
+    factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
     bootstrap = new ServerBootstrap(factory)
     bootstrap.setPipelineFactory(Pipeline(this.connectionListener))
     bootstrap.setOption("child.keepAlive", true)
@@ -43,11 +43,16 @@ var Server = function(listener) {
 
     Dispatcher.submit(function(server, port) {
       address = new SocketAddress(port)
+      server.address.port = address.port
+      server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
+      server.address.address = address.address.canonicalHostName
       server.createAndBind(address)
       server.log("Listening on: " + address)
       server.emit('listening')
     }, this, port)
   }
+
+  this.close = function() {}
 }
 
 var Pipeline = function(callback) {
@@ -60,11 +65,17 @@ var Pipeline = function(callback) {
 }
 
 var ServerHandler = function(callback) {
+
   return new ChannelHandler( {
     messageReceived: function(context, evnt) {
       channel = evnt.getChannel()
       channel.write( evnt.getMessage() )
       callback.apply( callback, evnt.getMessage() )
+    },
+
+    exceptionCaught: function(context, evnt) {
+      evnt.cause.printStackTrace()
+      evnt.channel.close()
     }
   } )
 }
