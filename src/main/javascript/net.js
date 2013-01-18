@@ -52,7 +52,12 @@ var Server = function(listener) {
     }, this, port)
   }
 
-  this.close = function() {}
+  this.close = function(callback) {
+    if (callback) {
+      callback()
+    }
+    this.emit('close')
+  }
 }
 
 var Pipeline = function(callback) {

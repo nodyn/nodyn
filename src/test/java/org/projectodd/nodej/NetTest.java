@@ -36,25 +36,63 @@ public class NetTest extends NodejTestSupport {
     }
     
     @Test
-    public void serverListenCallbackTest() throws InterruptedException {
+    public void serverListenCallbackTest() {
         eval("server = net.createServer()");
         eval("listening = false");
         eval("listenCallback = function() { listening = true; }");
         eval("server.listen(8800, listenCallback)");
-        Thread.sleep(1000);
-        assertThat(eval("listening")).isEqualTo(true);
-        eval("server.close()");
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+        } finally {
+            assertThat(eval("listening")).isEqualTo(true);
+            eval("server.close()");
+        }
     }
     
     @Test
-    public void testServerAddress() throws InterruptedException {
+    public void testServerAddress() {
         eval("server = net.createServer()");
-        eval("listening = false");
-        eval("server.listen(8808)");
-        assertThat(eval("server.address.port")).isEqualTo(8808);
-        assertThat(eval("server.address.address")).isEqualTo("0.0.0.0");
-        assertThat(eval("server.address.family")).isEqualTo("IPv4");
-        eval("server.close()");
+        eval("server.listen(8801)");
+        try {
+            Thread.sleep(600);
+        } catch(InterruptedException e) {
+        } finally {
+            assertThat(eval("server.address.port")).isEqualTo(8801);
+            assertThat(eval("server.address.address")).isEqualTo("0.0.0.0");
+            assertThat(eval("server.address.family")).isEqualTo("IPv4");
+            eval("server.close()");
+        }
+    }
+    
+    @Test
+    public void testServerCloseEvent() {
+        eval("server = net.createServer()");
+        eval("closed = false");
+        eval("server.on('close', function(e) { closed = true })");
+        eval("server.listen(8802)");
+        try {
+            Thread.sleep(600);
+        } catch(InterruptedException e) {
+        } finally {
+            eval("server.close()");
+            assertThat(eval("closed")).isEqualTo(true);
+        }
+    }
+    
+    @Test
+    public void testServerCloseWithCallback() {
+        eval("server = net.createServer()");
+        eval("server.listen(8802)");
+        eval("closed = false");
+        eval("func = function() { closed = true }");
+        try {
+            Thread.sleep(600);
+        } catch(InterruptedException e) {
+        } finally {
+            eval("server.close(func)");
+            assertThat(eval("closed")).isEqualTo(true);
+        }
     }
     
 }
