@@ -55,23 +55,44 @@ var Server = function(listener) {
   }
 
   this.close = function(callback) {
-    if (callback) {
-      callback()
+    Dispatcher.submit( function(server) {
+      future = server.channels.close()
+      future.awaitUninterruptibly()
+      server.factory.releaseExternalResources()
+      server.emit('close')
+      if (callback) {
+        callback()
+      }
     }
-    future = this.channels.close()
-    future.awaitUninterruptibly()
-    this.factory.releaseExternalResources()
-    this.emit('close')
   }
 }
 
-var Socket = function() {
+var Socket = function(context, evnt) {
+  this.context  = context
+  this.evnt     = evnt
+  this.encoding = 'utf8'
+
   this.connect = function() {
     this.type = 'tcp4'
   }
-  this.setEncoding = function() { }
-  this.write = function() { }
-  this.destroy = function() { }
+
+  this.setEncoding = function(encoding) { 
+    this.encoding = encoding
+  }
+
+  this.write = function(string, encoding) { 
+    Dispatcher.submit(function(channel) {
+      channel.write(string)
+    }, this.evnt.getChannel() )
+  }
+
+  this.destroy = function() { 
+    Dispatcher.submit(function(socket) {
+      socket.evnt.getChannel().close()
+      socket.emit('close')
+    }, this)
+  }
+
   this.pause = function() { }
   this.resume = function() { }
   this.setTimeout = function() { }
@@ -81,6 +102,8 @@ var Socket = function() {
   this.bytesRead = 0
   this.bytesWritten = 0
 }
+// Inheriting from Stream automatically makes
+// us an EventEmitter too. Yay.
 util.inherits(Socket, Stream)
 
 
@@ -103,7 +126,7 @@ var ServerHandler = function(server) {
       if (callback) {
         // Create a new socket object and give it
         // to the connection listener
-        callback.apply( callback, evnt.getMessage() )
+        callback.apply( callback, new Socket(context, evnt) )
       }
     },
 
@@ -115,6 +138,8 @@ var ServerHandler = function(server) {
     exceptionCaught: function(context, evnt) {
       evnt.cause.printStackTrace()
       evnt.channel.close()
+      server.emit('error')
+      server.close()
     }
   } )
 }
