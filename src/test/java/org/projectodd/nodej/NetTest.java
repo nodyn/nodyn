@@ -2,6 +2,9 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
 import org.junit.Before;
@@ -35,28 +38,30 @@ public class NetTest extends NodejTestSupport {
         assertThat(eval("net.createServer")).isInstanceOf(JSFunction.class);
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void serverListenCallbackTest() {
         eval("server = net.createServer()");
         eval("listening = false");
         eval("listenCallback = function() { listening = true; }");
-        eval("server.listen(8800, listenCallback)");
+        Future f = (Future) eval("server.listen(8800, listenCallback)");
         try {
-            Thread.sleep(900);
-        } catch (InterruptedException e) {
+            f.get();
+        } catch (InterruptedException | ExecutionException e) {
         } finally {
             assertThat(eval("listening")).isEqualTo(true);
             eval("server.close()");
         }
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void testServerAddress() {
         eval("server = net.createServer()");
-        eval("server.listen(8800)");
+        Future f = (Future) eval("server.listen(8800)");
         try {
-            Thread.sleep(600);
-        } catch(InterruptedException e) {
+            f.get();
+        } catch(InterruptedException | ExecutionException e) {
         } finally {
             assertThat(eval("server.address.port")).isEqualTo(8800);
             assertThat(eval("server.address.address")).isEqualTo("0.0.0.0");
@@ -65,33 +70,35 @@ public class NetTest extends NodejTestSupport {
         }
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void testServerCloseEvent() {
         eval("server = net.createServer()");
         eval("closed = false");
         eval("server.on('close', function(e) { closed = true })");
-        eval("server.listen(8800)");
+        Future f = (Future) eval("server.listen(8800)");
         try {
-            Thread.sleep(600);
-            eval("server.close()");
-            Thread.sleep(600);
-        } catch(InterruptedException e) {
+            f.get();
+            f = (Future) eval("server.close()");
+            f.get();
+        } catch(InterruptedException | ExecutionException e) {
         } finally {
             assertThat(eval("closed")).isEqualTo(true);
         }
     }
     
+    @SuppressWarnings("rawtypes")
     @Test
     public void testServerCloseWithCallback() {
         eval("server = net.createServer()");
-        eval("server.listen(8800)");
+        Future f = (Future) eval("server.listen(8800)");
         eval("closed = false");
         eval("func = function() { closed = true }");
         try {
-            Thread.sleep(600);
-            eval("server.close(func)");
-            Thread.sleep(600);
-        } catch(InterruptedException e) {
+            f.get();
+            f = (Future) eval("server.close(func)");
+            f.get();
+        } catch(InterruptedException | ExecutionException e) {
         } finally {
             assertThat(eval("closed")).isEqualTo(true);
         }

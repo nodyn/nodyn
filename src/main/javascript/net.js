@@ -26,7 +26,9 @@ var Server = function(listener) {
   this.address = {}
 
   this.log = function(msg) {
-    java.lang.System.err.println(msg)
+    return Dispatcher.submit( function() {
+      java.lang.System.err.println(msg)
+    } )
   }
 
   this.createAndBind = function(address) {
@@ -43,7 +45,7 @@ var Server = function(listener) {
       this.addListener('listening', callback); 
     }
 
-    Dispatcher.submit(function(server, port) {
+    return Dispatcher.submit(function(server, port) {
       address = new SocketAddress(port)
       server.address.port = address.port
       server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
@@ -55,7 +57,7 @@ var Server = function(listener) {
   }
 
   this.close = function(callback) {
-    Dispatcher.submit( function(server) {
+    return Dispatcher.submit( function(server) {
       future = server.channels.close()
       future.awaitUninterruptibly()
       server.factory.releaseExternalResources()
@@ -74,6 +76,7 @@ var Socket = function(context, evnt) {
 
   this.connect = function() {
     this.type = 'tcp4'
+    this.emit('connect')
   }
 
   this.setEncoding = function(encoding) { 
@@ -81,15 +84,27 @@ var Socket = function(context, evnt) {
   }
 
   this.write = function(string, encoding) { 
-    Dispatcher.submit(function(channel) {
+    return Dispatcher.submit(function(channel) {
       channel.write(string)
     }, this.evnt.getChannel() )
   }
 
   this.destroy = function() { 
-    Dispatcher.submit(function(socket) {
+    return Dispatcher.submit(function(socket) {
       socket.evnt.getChannel().close()
       socket.emit('close')
+    }, this)
+  }
+
+  this.end = function(data) {
+    return Dispatcher.submit(function(socket) {
+      if (data) {
+        future = socket.write(data)
+        future.awaitUninterruptibly()
+      }
+      future = socket.evnt.getChannel().close()
+      future.awaitUninterruptibly()
+      socket.emit('end')
     }, this)
   }
 
@@ -138,7 +153,7 @@ var ServerHandler = function(server) {
     exceptionCaught: function(context, evnt) {
       evnt.cause.printStackTrace()
       evnt.channel.close()
-      server.emit('error')
+      server.emit('error', true)
       server.close()
     }
   } )
