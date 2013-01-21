@@ -9,7 +9,6 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.projectodd.nodej.bindings.console.Logger;
-import org.projectodd.nodej.bindings.net.ServerFactory;
 
 public class Binding extends AbstractNativeFunction {
 
@@ -24,7 +23,6 @@ public class Binding extends AbstractNativeFunction {
         bindings.put("logger", new Logger(globalObject));
         bindings.put("QueryString", new QueryString(globalObject));
         bindings.put("Dispatcher", new Dispatcher(globalObject));
-        bindings.put("ServerFactory", new ServerFactory(globalObject));
     }
 
     public static void setProperty(DynObject __this, String name, final Object value) {

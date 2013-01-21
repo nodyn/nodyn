@@ -122,21 +122,10 @@ var Socket = function(context, evnt) {
 util.inherits(Socket, Stream)
 
 
-var Pipeline = function(server) {
-  return new PipelineFactory( { 
-    getPipeline: function() {
-      handler = ServerHandler(server)
-      return Channels.pipeline(handler)
-    }
-  } )
-}
-
 var ServerHandler = function(server) {
 
   return new ChannelHandler( {
     messageReceived: function(context, evnt) {
-      channel = evnt.getChannel()
-      channel.write( evnt.getMessage() )
       callback = server.connectionListener
       if (callback) {
         // Create a new socket object and give it
@@ -155,6 +144,15 @@ var ServerHandler = function(server) {
       evnt.channel.close()
       server.emit('error', true)
       server.close()
+    }
+  } )
+}
+
+var Pipeline = function(server) {
+  return new PipelineFactory( { 
+    getPipeline: function() {
+      handler = ServerHandler(server)
+      return Channels.pipeline(handler)
     }
   } )
 }
