@@ -9,7 +9,6 @@ import java.util.Map;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.JSFunction;
 import org.dynjs.runtime.JSObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {

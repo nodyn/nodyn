@@ -1,6 +1,7 @@
 
 // nodej bits
 var util          = require('util')
+var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
 var Dispatcher    = process.binding('Dispatcher')
 
@@ -17,8 +18,6 @@ var SocketAddress   = java.net.InetSocketAddress
 var Executor        = java.util.concurrent.Executor
 var Executors       = java.util.concurrent.Executors
 
-module.exports.Socket = function() {
-}
 
 var Server = function(listener) {
   this.factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
@@ -59,13 +58,17 @@ var Server = function(listener) {
     if (callback) {
       callback()
     }
-    this.channels.close()
+    future = this.channels.close()
+    future.awaitUninterruptibly()
+    this.factory.releaseExternalResources()
     this.emit('close')
   }
 }
 
 var Socket = function() {
-  this.connect = function() { }
+  this.connect = function() {
+    this.type = 'tcp4'
+  }
   this.setEncoding = function() { }
   this.write = function() { }
   this.destroy = function() { }
@@ -78,6 +81,8 @@ var Socket = function() {
   this.bytesRead = 0
   this.bytesWritten = 0
 }
+util.inherits(Socket, Stream)
+
 
 var Pipeline = function(server) {
   return new PipelineFactory( { 

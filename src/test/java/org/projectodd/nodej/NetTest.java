@@ -113,4 +113,11 @@ public class NetTest extends NodejTestSupport {
         assertThat(eval("socket.bytesWritten")).isEqualTo(0L);
     }
     
+    @Test
+    public void testSocketConnect() {
+        eval("socket = new net.Socket()");
+        eval("socket.connect(8800)");
+        assertThat(eval("socket.type")).isEqualTo("tcp4");
+    }
+    
 }
