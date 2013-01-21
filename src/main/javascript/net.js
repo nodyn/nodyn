@@ -64,6 +64,21 @@ var Server = function(listener) {
   }
 }
 
+var Socket = function() {
+  this.connect = function() { }
+  this.setEncoding = function() { }
+  this.write = function() { }
+  this.destroy = function() { }
+  this.pause = function() { }
+  this.resume = function() { }
+  this.setTimeout = function() { }
+  this.setNoDelay = function() { }
+  this.setKeepAlive = function() { }
+  this.address = function() { }
+  this.bytesRead = 0
+  this.bytesWritten = 0
+}
+
 var Pipeline = function(server) {
   return new PipelineFactory( { 
     getPipeline: function() {
@@ -81,6 +96,8 @@ var ServerHandler = function(server) {
       channel.write( evnt.getMessage() )
       callback = server.connectionListener
       if (callback) {
+        // Create a new socket object and give it
+        // to the connection listener
         callback.apply( callback, evnt.getMessage() )
       }
     },
@@ -99,6 +116,7 @@ var ServerHandler = function(server) {
 
 util.inherits(Server, EventEmitter)
 
+module.exports.Socket = Socket
 module.exports.Server = Server
 module.exports.createServer = function(listener) {
   return new Server(listener)

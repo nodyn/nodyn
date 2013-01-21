@@ -95,4 +95,22 @@ public class NetTest extends NodejTestSupport {
         }
     }
     
+    @Test
+    public void testSocketObject() {
+        assertThat(eval("net.Socket")).isInstanceOf(JSFunction.class);
+        eval("socket = new net.Socket()");
+        assertThat(eval("socket.connect")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.setEncoding")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.write")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.destroy")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.pause")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.resume")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.setTimeout")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.setNoDelay")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.setKeepAlive")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.address")).isInstanceOf(JSFunction.class);
+        assertThat(eval("socket.bytesRead")).isEqualTo(0L);
+        assertThat(eval("socket.bytesWritten")).isEqualTo(0L);
+    }
+    
 }
