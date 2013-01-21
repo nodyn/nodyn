@@ -63,7 +63,7 @@ var Server = function(listener) {
       if (callback) {
         callback()
       }
-    }
+    }, this)
   }
 }
 

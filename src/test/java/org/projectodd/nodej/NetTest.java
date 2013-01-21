@@ -73,9 +73,10 @@ public class NetTest extends NodejTestSupport {
         eval("server.listen(8800)");
         try {
             Thread.sleep(600);
+            eval("server.close()");
+            Thread.sleep(600);
         } catch(InterruptedException e) {
         } finally {
-            eval("server.close()");
             assertThat(eval("closed")).isEqualTo(true);
         }
     }
@@ -88,9 +89,10 @@ public class NetTest extends NodejTestSupport {
         eval("func = function() { closed = true }");
         try {
             Thread.sleep(600);
+            eval("server.close(func)");
+            Thread.sleep(600);
         } catch(InterruptedException e) {
         } finally {
-            eval("server.close(func)");
             assertThat(eval("closed")).isEqualTo(true);
         }
     }
