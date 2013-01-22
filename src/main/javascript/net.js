@@ -11,6 +11,7 @@ var ChannelGroup    = org.jboss.netty.channel.group.DefaultChannelGroup
 var ChannelHandler  = org.jboss.netty.channel.SimpleChannelHandler
 var PipelineFactory = org.jboss.netty.channel.ChannelPipelineFactory
 var ServerBootstrap = org.jboss.netty.bootstrap.ServerBootstrap
+var ClientBootstrap = org.jboss.netty.bootstrap.ClientBootstrap
 var Channels        = org.jboss.netty.channel.Channels
 
 // java bits
@@ -34,7 +35,7 @@ var Server = function(listener) {
   this.createAndBind = function(address) {
     this.log('Creating server')
     bootstrap = new ServerBootstrap(this.factory)
-    bootstrap.setPipelineFactory(Pipeline(this))
+    bootstrap.setPipelineFactory(ServerPipeline(this))
     bootstrap.setOption("child.keepAlive", true)
     bootstrap.setOption("child.tcpNoDelay", true)
     this.channels.add( bootstrap.bind(address) )
@@ -70,12 +71,25 @@ var Server = function(listener) {
 }
 
 var Socket = function(context, evnt) {
+  this.factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
   this.context  = context
   this.evnt     = evnt
   this.encoding = 'utf8'
+  this.writable = true
 
-  this.connect = function() {
+  this.connect = function(port, host, connectListener) {
     this.type = 'tcp4'
+    if (!host) {
+      host = 'localhost'
+    }
+    bootstrap = new ClientBootstrap(this.factory)
+    bootstrap.setPipelineFactory(ClientPipeline(this))
+    bootstrap.setOption("keepAlive", false)
+    bootstrap.setOption("tcpNoDelay", true)
+    address = new SocketAddress(host, port)
+    if (connectionListener) {
+      this.on('connect', connectionListener)
+    }
     this.emit('connect')
   }
 
@@ -92,6 +106,7 @@ var Socket = function(context, evnt) {
   this.destroy = function() { 
     return Dispatcher.submit(function(socket) {
       socket.evnt.getChannel().close()
+      socket.writable = false
       socket.emit('close')
     }, this)
   }
@@ -104,9 +119,11 @@ var Socket = function(context, evnt) {
       }
       future = socket.evnt.getChannel().close()
       future.awaitUninterruptibly()
+      socket.writable = false
       socket.emit('end')
     }, this)
   }
+  this.destroySoon = this.end
 
   this.pause = function() { }
   this.resume = function() { }
@@ -121,6 +138,8 @@ var Socket = function(context, evnt) {
 // us an EventEmitter too. Yay.
 util.inherits(Socket, Stream)
 
+var ClientHandler = function(client) {
+}
 
 var ServerHandler = function(server) {
 
@@ -148,7 +167,16 @@ var ServerHandler = function(server) {
   } )
 }
 
-var Pipeline = function(server) {
+var ClientPipeline = function(client) {
+  return new PipelineFactory( { 
+    getPipeline: function() {
+      handler = ClientHandler(client)
+      return Channels.pipeline(handler)
+    }
+  } )
+}
+
+var ServerPipeline = function(server) {
   return new PipelineFactory( { 
     getPipeline: function() {
       handler = ServerHandler(server)
