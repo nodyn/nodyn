@@ -17,12 +17,14 @@ import org.dynjs.runtime.JSFunction;
 import org.projectodd.nodej.bindings.buffer.BufferType;
 import org.projectodd.nodej.bindings.timers.ClearTimeout;
 import org.projectodd.nodej.bindings.timers.SetTimeout;
+import org.vertx.java.core.Vertx;
 
 public class Node {
 
     public static final String VERSION = "0.1.0";
     public static final int MAX_THREADS = 100;
     private static final ScheduledExecutorService DISPATCH = Executors.newScheduledThreadPool(MAX_THREADS);
+    private static final Vertx VERTX = Vertx.newVertx();
 
     private String filename = "<eval>";
     private DynJS runtime;
@@ -46,6 +48,7 @@ public class Node {
                 globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
                 globalObject.defineGlobalProperty("clearInterval", clearTimeout);
                 globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
+                globalObject.defineReadOnlyGlobalProperty("vertx", VERTX);
                 return globalObject;
             }
         });

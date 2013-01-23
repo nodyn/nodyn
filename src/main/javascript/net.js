@@ -87,8 +87,8 @@ var Socket = function(context, evnt) {
     bootstrap.setOption("keepAlive", false)
     bootstrap.setOption("tcpNoDelay", true)
     address = new SocketAddress(host, port)
-    if (connectionListener) {
-      this.on('connect', connectionListener)
+    if (connectListener) {
+      this.on('connect', connectListener)
     }
     this.emit('connect')
   }
@@ -97,10 +97,15 @@ var Socket = function(context, evnt) {
     this.encoding = encoding
   }
 
-  this.write = function(string, encoding) { 
-    return Dispatcher.submit(function(channel) {
-      channel.write(string)
-    }, this.evnt.getChannel() )
+  this.write = function(string, encoding, callback) { 
+    return Dispatcher.submit(function(socket) {
+      channel = socket.evnt.getChannel()
+      future = channel.write(string)
+      if (callback) {
+        future.awaitUninterruptibly()
+        callback.apply(callback)
+      }
+    }, this )
   }
 
   this.destroy = function() { 
@@ -180,6 +185,7 @@ var ServerPipeline = function(server) {
   return new PipelineFactory( { 
     getPipeline: function() {
       handler = ServerHandler(server)
+    server.log("SERVER: " + server.toString())
       return Channels.pipeline(handler)
     }
   } )

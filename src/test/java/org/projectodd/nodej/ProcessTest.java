@@ -117,6 +117,7 @@ public class ProcessTest extends NodejTestSupport {
         assertThat(runtime.evaluate("process.title")).isEqualTo("nodej");
         runtime.evaluate("process.title = 'something else'");
         assertThat(runtime.evaluate("process.title")).isEqualTo("something else");
+        runtime.evaluate("process.title = 'nodej'");
     }
     
     @Test
