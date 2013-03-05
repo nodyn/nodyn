@@ -8,55 +8,44 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.runtime.JSFunction;
 import org.projectodd.nodej.bindings.buffer.BufferType;
 import org.projectodd.nodej.bindings.timers.ClearTimeout;
 import org.projectodd.nodej.bindings.timers.SetTimeout;
-import org.vertx.java.core.Vertx;
 
 public class Node {
 
     public static final String VERSION = "0.1.0";
     public static final int MAX_THREADS = 100;
     private static final ScheduledExecutorService DISPATCH = Executors.newScheduledThreadPool(MAX_THREADS);
-    private static final Vertx VERTX = Vertx.newVertx();
 
     private String filename = "<eval>";
     private DynJS runtime;
     private String[] args;
 
-    public Node(String... args) {
+    public Node(DynJS runtime, String... args) {
         this.args = args;
-        Config config = new Config();
-        config.setGlobalObjectFactory(new GlobalObjectFactory() {
-            @Override
-            public GlobalObject newGlobalObject(DynJS runtime) {
-                final GlobalObject globalObject = new GlobalObject(runtime);
-                globalObject.defineGlobalProperty("__filename", getFilename());
-                globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-                globalObject.defineGlobalProperty("process", new Process(globalObject, Node.this.args));
-                globalObject.defineGlobalProperty("global", globalObject);
-
-                final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
-                globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
-                globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
-                globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
-                globalObject.defineGlobalProperty("clearInterval", clearTimeout);
-                globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
-                globalObject.defineReadOnlyGlobalProperty("vertx", VERTX);
-                return globalObject;
-            }
-        });
-        this.runtime = new DynJS(config);
+        this.runtime = runtime;
+        System.setProperty("java.library.path", System.getProperty("user.dir") + "/lib");
     }
 
     public void start() {
         // Start event processing
+        GlobalObject globalObject = this.runtime.getExecutionContext().getGlobalObject();
+        globalObject.defineGlobalProperty("__filename", getFilename());
+        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+        globalObject.defineGlobalProperty("process", new Process(globalObject, Node.this.args));
+        globalObject.defineGlobalProperty("global", globalObject);
+
+        final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
+        globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
+        globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
+        globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
+        globalObject.defineGlobalProperty("clearInterval", clearTimeout);
+        globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
         this.runtime.evaluate("var NodeJ = require('nodej')");
         this.runtime.evaluate("var nodej = new NodeJ(process)");
         this.runtime.evaluate("var console = nodej.console");

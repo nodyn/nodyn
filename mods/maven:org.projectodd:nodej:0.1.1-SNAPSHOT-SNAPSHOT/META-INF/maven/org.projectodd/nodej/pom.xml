@@ -81,22 +81,22 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>${version.netty}</version>
+      <version>3.6.1.Final</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-      <version>${version.vertx}</version>
+      <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-platform</artifactId>
-      <version>${version.vertx}</version>
+      <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.dynjs</groupId>
       <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
+      <version>1.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>antlr</groupId>
@@ -115,13 +115,13 @@
     <dependency>
       <groupId>org.fusesource</groupId>
       <artifactId>sigar</artifactId>
-      <version>${version.sigar}</version>
+      <version>1.6.4</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${version.junit}</version>
+      <version>4.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>testtools</artifactId>
-      <version>${version.vertx.tests}</version>
+      <version>1.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -171,7 +171,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/mods/maven:${groupId}:${artifactId}:${version}-SNAPSHOT</outputDirectory>
+              <outputDirectory>/Users/lanceball/src/AssJazz/nodej/mods/maven:org.projectodd:nodej:0.1.1-SNAPSHOT-SNAPSHOT</outputDirectory>
               <resources>
                 <resource>
                   <directory>target/classes</directory>
@@ -205,7 +205,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>${basedir}/mods</directory>
+              <directory>/Users/lanceball/src/AssJazz/nodej/mods</directory>
             </fileset>
           </filesets>
         </configuration>
@@ -214,7 +214,7 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
-              <argLine>-Djava.library.path=${basedir}/lib</argLine>
+              <argLine>-Djava.library.path=/Users/lanceball/src/AssJazz/nodej/lib</argLine>
           </configuration>
       </plugin>
     </plugins>
