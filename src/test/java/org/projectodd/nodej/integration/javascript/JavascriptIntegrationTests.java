@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
  * 
  * The scripts go in src/test/resources.
  */
-@TestVerticleInfo(filenameFilter = ".+\\.js", funcRegex = "function[\\s]+(test[^\\s]+\\(.+)")
+@TestVerticleInfo(filenameFilter = ".+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
 @RunWith(ScriptClassRunner.class)
 public class JavascriptIntegrationTests {
     @Test
