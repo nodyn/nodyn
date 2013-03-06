@@ -1,4 +1,5 @@
 package org.projectodd.nodej.integration.javascript;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -23,14 +24,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * This is dummy JUnit test class which is used to run any JavaScript test scripts as JUnit tests.
- *
+ * This is dummy JUnit test class which is used to run any JavaScript test
+ * scripts as JUnit tests.
+ * 
  * The scripts go in src/test/resources.
  */
-@TestVerticleInfo(filenameFilter=".+\\.js", funcRegex="function[\\s]+(test[^\\s(]+)")
+@TestVerticleInfo(filenameFilter = ".+\\.js", funcRegex = "function[\\s]+(test[^\\s]+\\(.+)")
 @RunWith(ScriptClassRunner.class)
 public class JavascriptIntegrationTests {
-  @Test
-  public void __vertxDummy() {
-  }
+    @Test
+    public void __vertxDummy() {
+    }
 }

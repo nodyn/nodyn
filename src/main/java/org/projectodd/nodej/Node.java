@@ -34,6 +34,7 @@ public class Node {
 
     public void start() {
         // Start event processing
+        System.err.println("Starting NodeJ");
         GlobalObject globalObject = this.runtime.getExecutionContext().getGlobalObject();
         globalObject.defineGlobalProperty("__filename", getFilename());
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
@@ -46,7 +47,9 @@ public class Node {
         globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
         globalObject.defineGlobalProperty("clearInterval", clearTimeout);
         globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
+        System.err.println("Loading nodej.js");
         this.runtime.evaluate("var NodeJ = require('nodej')");
+        System.err.println("Loaded nodej.js");
         this.runtime.evaluate("var nodej = new NodeJ(process)");
         this.runtime.evaluate("var console = nodej.console");
     }

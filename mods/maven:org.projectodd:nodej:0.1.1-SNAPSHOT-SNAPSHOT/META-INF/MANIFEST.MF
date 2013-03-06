@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Built-By: lanceball
-Build-Jdk: 1.6.0_41
-Created-By: Maven Integration for Eclipse
-

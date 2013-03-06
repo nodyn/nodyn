@@ -171,7 +171,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/mods/maven:${groupId}:${artifactId}:${version}-SNAPSHOT</outputDirectory>
+              <outputDirectory>${basedir}/mods/maven:${groupId}:${artifactId}:${version}</outputDirectory>
               <resources>
                 <resource>
                   <directory>target/classes</directory>
