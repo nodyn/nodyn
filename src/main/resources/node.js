@@ -1,12 +1,8 @@
-java.lang.System.err.println("LOADING NODEJ");
 __node = new org.projectodd.nodej.Node(dynjs.runtime);
-
 // Node creates a global process object
-process = __node.getProcess();
-dynjs.global.process = process;
 process.title = "NodeJ";
 
-EventEmitter                 = require('events').EventEmitter
+EventEmitter               = require('events').EventEmitter
 process.on                 = EventEmitter.prototype.on
 process.addListener        = EventEmitter.prototype.addListener
 process.once               = EventEmitter.prototype.once

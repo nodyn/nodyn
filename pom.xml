@@ -35,6 +35,7 @@
     <version.vertx>2.0.0-SNAPSHOT</version.vertx>
     <version.vertx.tests>1.0.0-SNAPSHOT</version.vertx.tests>
     <version.dynjs>1.0-SNAPSHOT</version.dynjs>
+    <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
   </properties>
 
   <repositories>
@@ -111,6 +112,11 @@
           <artifactId>args4j</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.dynjs</groupId>
+      <artifactId>lang-dynjs</artifactId>
+      <version>${version.dynjs.verticle}</version>
     </dependency>
     <dependency>
       <groupId>org.fusesource</groupId>

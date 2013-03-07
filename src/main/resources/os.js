@@ -19,11 +19,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-java.lang.System.err.println("DYNJS: " + dynjs);
-java.lang.System.err.println("DYNJS GLOBAL: " + dynjs.global);
-java.lang.System.err.println("DYNJS RUNTIME: " + dynjs.runtime);
-java.lang.System.err.println("GLOBAL PROCESS: " + process);
-
 var binding = process.binding('os');
 var util = require('util');
 

@@ -1,3 +1,5 @@
 {
-  "main": "dynjs:node.js"
+  "includes": "org.dynjs#lang-dynjs#1.0.0-SNAPSHOT",
+  "system":   true,
+  "resident": true
 }
