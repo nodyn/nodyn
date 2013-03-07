@@ -2,7 +2,8 @@ __node = new org.projectodd.nodej.Node(dynjs.runtime);
 
 // Node creates a global process object
 process = __node.getProcess();
-process.title = "NodeJ"
+dynjs.global.process = process;
+process.title = "NodeJ";
 
 EventEmitter                 = require('events').EventEmitter
 process.on                 = EventEmitter.prototype.on
