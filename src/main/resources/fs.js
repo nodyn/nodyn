@@ -1,22 +1,13 @@
-var AsyncResult = org.vertx.java.core.AsyncResult
-var AsyncResultHandler = org.vertx.java.core.AsyncResultHandler
-var FileSystem = vertx.fileSystem()
+var vertx = require('vertx')
 
 var Fs = function() {
 
   this.rename = function(oldPath, newPath, callback) {
-    FileSystem.move(oldPath, newPath, new AsyncResultHandler({
-      handle: function(ar) {
-        if (callback) {
-          ex = ar.exception ? new Error("rename failed for " + ar.exception.getMessage()) : null
-          callback(ex)
-        }
-      }
-    }))
+    vertx.fileSystem.move(oldPath, newPath, callback);
   }
 
   this.renameSync = function(oldPath, newPath) {
-    FileSystem.moveSync(oldPath, newPath)
+    vertx.fileSystem.moveSync(oldPath, newPath)
   }
 
 }
