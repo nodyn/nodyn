@@ -45,8 +45,7 @@ public class NodejTestSupport {
             }
         });
         runtime = new DynJS(config);
-        node = new Node(runtime, defaultArgs);
-        node.start();
+        node = new Node(runtime);
     }
 
     @Before

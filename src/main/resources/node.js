@@ -1,3 +1,4 @@
+java.lang.System.err.println("LOADING NODEJ");
 __node = new org.projectodd.nodej.Node(dynjs.runtime);
 
 // Node creates a global process object
