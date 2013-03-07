@@ -1,9 +1,6 @@
 load("vertx.js");
 load("vertx_tests.js");
 var fs = require('fs');
-var done = false;
-var thrown = false;
-var check = function(e) { done = true; thrown = e ? true : false; }
 var tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
 var basedir = tmpFile.getParent();
 var newFile = new java.io.File(basedir + "/granola.txt");
