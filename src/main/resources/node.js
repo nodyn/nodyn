@@ -23,10 +23,6 @@ process.memoryUsage = function() {
   return obj;
 }
 
-// Make the console available globally
-__console = require('console');
-dynjs.global.console = __console;
-
 process.nextTick = function(callback, args) {
   process.binding('Dispatcher').submit(callback, args)
 }

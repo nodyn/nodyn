@@ -27,7 +27,6 @@ public class Node {
     private String filename = "<eval>";
 
     public Node(DynJS runtime) {
-        System.err.println("Starting NodeJ");
         this.runtime = runtime;
         ExecutionContext context = runtime.getExecutionContext();
         ExecutionContext parent = context.getParent();

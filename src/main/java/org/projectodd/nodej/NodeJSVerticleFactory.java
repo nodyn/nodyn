@@ -32,6 +32,8 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         public GlobalObject newGlobalObject(final DynJS runtime) {
             GlobalObject global = super.newGlobalObject(runtime);
             global.defineReadOnlyGlobalProperty("process", process);
+            global.defineReadOnlyGlobalProperty("stdout", System.out);
+            global.defineReadOnlyGlobalProperty("stderr", System.err);
             return global;
         }
     }
