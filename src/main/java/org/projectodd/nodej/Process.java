@@ -23,6 +23,7 @@ public class Process extends DynObject {
 
 	public Process(GlobalObject globalObject, String[] args) {
 	    super(globalObject);
+
         setProperty("argv", args );
 	    setProperty("stdout", wrappedPrintStream( globalObject, globalObject.getConfig().getOutputStream() ) );
         setProperty("stderr", wrappedPrintStream( globalObject, globalObject.getConfig().getErrorStream() ) );
@@ -44,8 +45,9 @@ public class Process extends DynObject {
 		setProperty("_eval", null );
 		setProperty("_print_eval", null );
 		setProperty("_forceRepl", null );
-		setProperty("execPath", new File( args[0]).getAbsolutePath() );
-		setProperty("debugPort", null );
+//		setProperty("execPath", new File( args[0]).getAbsolutePath() );
+		setProperty("execPath", null );
+        setProperty("debugPort", null );
 		
 		setProperty("_needTickCallback", null );
 		setProperty("reallyExit", null );

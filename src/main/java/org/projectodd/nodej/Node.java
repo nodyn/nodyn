@@ -22,36 +22,28 @@ public class Node {
     public static final int MAX_THREADS = 100;
     private static final ScheduledExecutorService DISPATCH = Executors.newScheduledThreadPool(MAX_THREADS);
 
-    private String filename = "<eval>";
     private DynJS runtime;
-    private String[] args;
+    private Process process;
+    private String filename = "<eval>";
 
-    public Node(DynJS runtime, String... args) {
-        this.args = args;
-        this.runtime = runtime;
-        System.setProperty("java.library.path", System.getProperty("user.dir") + "/lib");
-    }
-
-    public void start() {
-        // Start event processing
+    public Node(DynJS runtime) {
         System.err.println("Starting NodeJ");
-        GlobalObject globalObject = this.runtime.getExecutionContext().getGlobalObject();
-        globalObject.defineGlobalProperty("__filename", getFilename());
-        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-        globalObject.defineGlobalProperty("process", new Process(globalObject, Node.this.args));
-        globalObject.defineGlobalProperty("global", globalObject);
-
+        this.runtime = runtime;
+        ExecutionContext context = runtime.getExecutionContext();
+        ExecutionContext parent = context.getParent();
+        while (parent != null) {
+            context = parent;
+            parent = context.getParent();
+        }
+        GlobalObject globalObject = context.getGlobalObject();
+        process = new Process(globalObject, null);
+        globalObject.defineGlobalProperty("process", new Process(globalObject, null));
         final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
         globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
         globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
         globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
         globalObject.defineGlobalProperty("clearInterval", clearTimeout);
         globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
-        System.err.println("Loading nodej.js");
-        this.runtime.evaluate("var NodeJ = require('nodej')");
-        System.err.println("Loaded nodej.js");
-        this.runtime.evaluate("var nodej = new NodeJ(process)");
-        this.runtime.evaluate("var console = nodej.console");
     }
 
     public static Future<Object> dispatch(final JSFunction func, final ExecutionContext context, final Object...args) {
@@ -92,6 +84,15 @@ public class Node {
     // At the moment, it's being used for testing
     public DynJS getRuntime() {
         return this.runtime;
+    }
+    
+    // May return null if Node hasn't started
+    public Process getProcess() {
+        return this.process;
+    }
+    
+    public String getDirname() {
+        return System.getProperty("user.dir");
     }
 
     public String getFilename() {
