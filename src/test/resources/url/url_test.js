@@ -6,7 +6,6 @@ var url = require('url');
 
 function testParse() {
   var obj = url.parse('http://user:pass@www.foo.com:8080/some/path?with=querystring&another=value#hash')
-  vassert.testComplete();
   vassert.assertEquals(obj.protocol, "http:");
   vassert.assertEquals(obj.href, "http://user:pass@www.foo.com:8080/some/path?with=querystring&another=value#hash");
   vassert.assertEquals(obj.host, "www.foo.com:8080");
@@ -17,6 +16,7 @@ function testParse() {
   vassert.assertEquals(obj.search, "?with=querystring&another=value");
   vassert.assertEquals(obj.path, "/some/path?with=querystring&another=value");
   vassert.assertEquals(obj.hash, "#hash");
+  vassert.testComplete();
 }
 
 initTests(this);
