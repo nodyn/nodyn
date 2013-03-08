@@ -35,6 +35,10 @@ public class Node {
             parent = context.getParent();
         }
         GlobalObject globalObject = context.getGlobalObject();
+        
+        // This makes no sense to me, since we're setting a process object
+        // up in the NodeJSVerticleFactory. But without this process isn't
+        // visible to the scripts.
         globalObject.defineGlobalProperty("process", new DynObject(globalObject));
         final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
         globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));

@@ -177,7 +177,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/mods/${groupId}#${artifactId}#${version}</outputDirectory>
+              <outputDirectory>${basedir}/mods/${groupId}~${artifactId}~${version}</outputDirectory>
               <resources>
                 <resource>
                   <directory>target/classes</directory>
