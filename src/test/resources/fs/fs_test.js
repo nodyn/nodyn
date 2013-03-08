@@ -1,5 +1,6 @@
 load("vertx.js");
 load("vertx_tests.js");
+
 var fs = require('fs');
 var tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
 var basedir = tmpFile.getParent();
