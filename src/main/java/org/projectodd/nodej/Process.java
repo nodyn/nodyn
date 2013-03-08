@@ -1,6 +1,5 @@
 package org.projectodd.nodej;
 
-import java.io.File;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;

@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.JSFunction;
@@ -23,7 +24,6 @@ public class Node {
     private static final ScheduledExecutorService DISPATCH = Executors.newScheduledThreadPool(MAX_THREADS);
 
     private DynJS runtime;
-    private Process process;
     private String filename = "<eval>";
 
     public Node(DynJS runtime) {
@@ -35,8 +35,7 @@ public class Node {
             parent = context.getParent();
         }
         GlobalObject globalObject = context.getGlobalObject();
-        process = new Process(globalObject, null);
-        globalObject.defineGlobalProperty("process", new Process(globalObject, null));
+        globalObject.defineGlobalProperty("process", new DynObject(globalObject));
         final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
         globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
         globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
@@ -83,11 +82,6 @@ public class Node {
     // At the moment, it's being used for testing
     public DynJS getRuntime() {
         return this.runtime;
-    }
-    
-    // May return null if Node hasn't started
-    public Process getProcess() {
-        return this.process;
     }
     
     public String getDirname() {

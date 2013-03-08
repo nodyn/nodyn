@@ -1,9 +1,7 @@
 package org.projectodd.nodej;
 
 import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.PropertyDescriptor;
 
 public class Versions extends DynObject {
     

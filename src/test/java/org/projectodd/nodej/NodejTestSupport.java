@@ -1,9 +1,6 @@
 package org.projectodd.nodej;
 
-import java.io.FileNotFoundException;
-
 import org.dynjs.Config;
-import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynObject;
