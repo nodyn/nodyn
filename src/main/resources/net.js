@@ -4,6 +4,7 @@ var util          = require('util')
 var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
 var Dispatcher    = process.binding('Dispatcher')
+var vertx         = require('vertx')
 
 // netty bits
 var ChannelFactory  = org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
@@ -20,9 +21,17 @@ var Executor        = java.util.concurrent.Executor
 var Executors       = java.util.concurrent.Executors
 
 
-var Server = function(listener) {
-  this.factory = new ChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-  this.channels = new ChannelGroup("nodej")
+var Server = function( listener ) {
+
+  that = this;
+  this.server = vertx.createNetServer().connectHandler( function(sock) {
+    if (listener) {
+      // TODO: Create a node.js compatible socket
+      // to pass to the node-like listener
+      listener(sock);
+    }
+  });
+
   this.connectionListener = listener
   this.address = {}
 
@@ -32,41 +41,34 @@ var Server = function(listener) {
     } )
   }
 
-  this.createAndBind = function(address) {
-    this.log('Creating server')
-    bootstrap = new ServerBootstrap(this.factory)
-    bootstrap.setPipelineFactory(ServerPipeline(this))
-    bootstrap.setOption("child.keepAlive", true)
-    bootstrap.setOption("child.tcpNoDelay", true)
-    this.channels.add( bootstrap.bind(address) )
-  }
-
-  this.listen = function(port, callback) {
-    if (callback) { 
-      this.addListener('listening', callback); 
+  this.listen = function(port, host, callback) {
+    if (typeof(host) == 'function') {
+      callback = host;
+      host = 'localhost';
+    } else if (host == null || host == undefined) {
+      host = "localhost";
     }
+    this.server.listen(port, host);
+    that.address.port = port;
+    that.address.host = host;
+    // TODO: Vert.x does not provide bind address information?
+    // server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
+    // server.address.address = address.address.canonicalHostName
 
-    return Dispatcher.submit(function(server, port) {
-      address = new SocketAddress(port)
-      server.address.port = address.port
-      server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
-      server.address.address = address.address.canonicalHostName
-      server.createAndBind(address)
-      server.log("Listening on: " + address)
-      server.emit('listening')
-    }, this, port)
+    // TODO: Vert.x does not provide notification
+    // for a 'listening' event whent the server
+    // has been bound.
+    if (callback) { 
+      that.addListener('listening', callback); 
+      that.emit('listening');
+    }
   }
 
   this.close = function(callback) {
-    return Dispatcher.submit( function(server) {
-      future = server.channels.close()
-      future.awaitUninterruptibly()
-      server.factory.releaseExternalResources()
-      server.emit('close')
-      if (callback) {
-        callback()
-      }
-    }, this)
+    this.server.close(function() { 
+      if (callback) { that.addListener('close', callback); }
+      that.emit('close'); 
+    });
   }
 }
 
