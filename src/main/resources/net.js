@@ -1,15 +1,8 @@
-
-// nodej bits
 var util          = require('util')
 var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
 var Dispatcher    = process.binding('Dispatcher')
 var vertx         = require('vertx')
-
-// java bits
-var SocketAddress   = java.net.InetSocketAddress
-var Executor        = java.util.concurrent.Executor
-var Executors       = java.util.concurrent.Executors
 
 
 var Server = function( connectionListener ) {
@@ -54,10 +47,8 @@ var Server = function( connectionListener ) {
     that.address.port = port;
     that.address.host = host;
 
-    // TODO: Vert.x does not provide notification
-    // for a 'listening' event whent the server
-    // has been bound, so we'll just emit the event
-    // now, once we've set everything up.
+    // TODO: Vert.x does not provide notification for a 'listening' event whent the server
+    // has been bound, so we'll just emit the event now, once we've set everything up.
     that.emit('listening');
   }
 
@@ -69,10 +60,12 @@ var Server = function( connectionListener ) {
   }
 }
 
-var Socket = function() {
+var Socket = function(options) {
   var that = this;
   that.encoding = 'utf8';
   that.writable = true;
+  // TODO: Handle ctor options
+  // { fd: null, type: null, allowHalfOpen: false }
 
   that.setProxy = function(proxy) {
     that.proxy = proxy;
@@ -102,21 +95,26 @@ var Socket = function() {
     });
   }
 
-  that.end = function(data) {
+  that.end = function(data, encoding) {
+    // TODO: HANDLE ENCODING
     that.write(data, function() {
       that.destroy();
       that.emit('end');
     });
   }
-
   that.destroySoon = that.end;
 
   that.setEncoding = function(encoding) { 
     that.encoding = encoding;
   }
 
-  that.pause = function() { }
-  that.resume = function() { }
+  that.pause = function() { 
+    that.proxy.pause();
+  }
+  that.resume = function() { 
+    that.proxy.resume();
+  }
+
   that.setTimeout = function() { }
   that.setNoDelay = function() { }
   that.setKeepAlive = function() { }
@@ -125,14 +123,49 @@ var Socket = function() {
   that.bytesWritten = 0;
 }
 
-// Inheriting from Stream automatically makes
-// us an EventEmitter too. Yay.
+// Inheriting from Stream makes Socket an EventEmitter.
 util.inherits(Socket, Stream);
 util.inherits(Server, EventEmitter);
 
 module.exports.Socket = Socket;
 module.exports.Server = Server;
+
 module.exports.createServer = function(connectionListener) {
   return new Server(connectionListener);
 }
+
+module.exports.createConnection = function() {
+  options           = {}
+  options.host      = 'localhost';
+  options.port      = null;
+  options.localAddr = null;
+  callback          = null;
+
+  if (typeof(arguments[0]) == 'object') {
+    options.port = arguments[0].port;
+
+    if (arguments[0].host) { 
+      options.host = arguments[0].host; 
+    }
+    if (arguments[0].localAddress) { 
+      options.localAddr = arguments[0].localAddress; 
+    }
+    if (typeof(arguments[1]) == 'function') { 
+      callback = arguments[1]; 
+    }
+  } 
+  else if (typeof(arguments[0]) == 'number') {
+    options.port = arguments[0];
+    if (typeof(arguments[1]) == 'string') { 
+      options.host = arguments[1]; 
+    }
+    else if (typeof(arguments[1] == 'function')) { 
+      callback = arguments[1]; 
+    }
+  }
+
+  sock = new Socket();
+  sock.connect(options.port, options.host, callback);
+}
+module.exports.connect = module.exports.createConnection;
 
