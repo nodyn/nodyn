@@ -1,7 +1,6 @@
 var util          = require('util')
 var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
-var Dispatcher    = process.binding('Dispatcher')
 var vertx         = require('vertx')
 
 
@@ -15,13 +14,18 @@ var Server = function( connectionListener ) {
       that.on('connection', connectionListener);
   }
 
-  that.listen = function(port, host, callback) {
-    // TODO: This is ugly
-    if (!host) {
-      host = 'localhost';
-    } else if (typeof(host) == 'function') {
-      callback = host;
-      host = 'localhost';
+  // Usage server.listen(port, [host], [backlog], [callback])
+  that.listen = function() {
+    callback = null;
+    host = '0.0.0.0';
+    port = arguments[0];
+    lastArg = arguments[arguments.length - 1];
+
+    if (typeof lastArg  == 'function') {
+      callback = lastArg;
+    }
+    if (typeof arguments[1]  == 'string') {
+      host = arguments[1];
     }
 
     // activate the 'listening' callback
@@ -31,10 +35,6 @@ var Server = function( connectionListener ) {
     that.server.connectHandler( function(sock) {
       nodeSocket = new Socket();
       nodeSocket.setProxy(sock);
-      sock.dataHandler( function(buffer) {
-        // TODO: Make this a node.js compatible buffer
-        nodeSocket.emit('data', buffer);
-      });
       that.emit('connection', nodeSocket);
     });
 
@@ -69,30 +69,54 @@ var Socket = function(options) {
 
   that.setProxy = function(proxy) {
     that.proxy = proxy;
-  }
-
-  that.connect = function(port, host, connectListener) {
-    if (!host) { host = 'localhost'; }
-    if (connectListener) { that.on('connect', connectListener); }
-
-    client = vertx.createNetClient();
-    client.connect( port, host, function(sock) {
-      that.setProxy(sock);
-      that.emit('connect');
+    that.proxy.dataHandler( function(buffer) {
+      // TODO: Make this a node.js compatible buffer
+      that.emit('data', buffer.toString());
     });
   }
 
-  that.write = function(string, encoding, callback) {
-    proxy.write(data, encoding, function() {
+  // Usage net.connect(port, [host], [callback])
+  that.connect = function() {
+    callback = null;
+    host = 'localhost';
+    port = arguments[0];
+    lastArg = arguments[arguments.length - 1];
+
+    if (typeof lastArg  == 'function') {
+      that.on('connect', lastArg);
+    }
+    if (typeof arguments[1]  == 'string') {
+      host = arguments[1];
+    }
+
+    client = vertx.createNetClient();
+    client.connect( port, host, function(sock) {
+      that.setProxy( sock );
+      that.emit('connect');
+    });
+    return that;
+  }
+
+  // Usage net.connect(string, [encoding], [callback])
+  that.write = function() {
+    encoding = 'UTF-8';
+    string   = arguments[0];
+    lastArg  = arguments[arguments.length - 1];
+
+    if (typeof lastArg  == 'function') {
+      callback = lastArg;
+    }
+    if (typeof arguments[1] == 'string') {
+      encoding = arguments[1];
+    }
+
+    that.proxy.write(string, encoding, function() {
       if (callback) { callback.apply(callback); }
     });
   }
 
   that.destroy = function() { 
-    proxy.close(function() {
-      that.writable = false;
-      that.emit('close');
-    });
+    that.emit('close');
   }
 
   that.end = function(data, encoding) {
@@ -166,6 +190,7 @@ module.exports.createConnection = function() {
 
   sock = new Socket();
   sock.connect(options.port, options.host, callback);
+  return sock;
 }
 module.exports.connect = module.exports.createConnection;
 

@@ -3,9 +3,12 @@ load('vertx_tests.js');
 
 var net = require('net');
 
-function testServerIsFunction() {
+function testNetFunctionsExist() {
   vassert.assertEquals('function', typeof(net.Server));
+  vassert.assertEquals('function', typeof(net.Socket));
   vassert.assertEquals('function', typeof(net.createServer));
+  vassert.assertEquals('function', typeof(net.connect));
+  vassert.assertEquals('function', typeof(net.createConnection));
   vassert.testComplete();
 }
 
@@ -76,6 +79,62 @@ function testServerCloseWithCallback() {
   });
 }
 
+function testConnect() {
+  connected = false;
+  server = net.createServer();
+  server.listen(8800, function() { connected = true; });
+  net.connect(8800);
+  tries = 0;
+  vertx.setPeriodic(1000, function(id) {
+    if (connected || tries++ > 3) {
+      vertx.cancelTimer(id);
+      vassert.assertTrue(connected);
+      server.close();
+      vassert.testComplete();
+    }
+  });
+}
+
+function testConnectWithCallback() {
+  connected = false;
+  server = net.createServer();
+  server.listen(8800);
+  net.connect(8800, function() { connected = true; });
+  tries = 0;
+  vertx.setPeriodic(1000, function(id) {
+    if (connected || tries++ > 3) {
+      vertx.cancelTimer(id);
+      vassert.assertTrue(connected);
+      server.close();
+      vassert.testComplete();
+    }
+  });
+}
+
+function testSocketReadWrite() {
+  data = undefined;
+  server = net.createServer();
+  server.listen(8800);
+  server.on('connection', function(socket) { 
+    socket.on('data', function(buffer) {
+      data = buffer; 
+    });
+  });
+  socket = net.connect(8800, function() {
+    socket.write("crunchy bacon", function() { 
+      socket.destroy();
+    });
+  });
+  tries = 0;
+  vertx.setPeriodic(1000, function(id) {
+    if (data || tries++ > 3) {
+      vertx.cancelTimer(id);
+      vassert.assertEquals("crunchy bacon", data);
+      server.close();
+      vassert.testComplete();
+    }
+  });
+}
 
 function testServerAddress() {
   listening = false;
@@ -99,5 +158,6 @@ function testServerAddress() {
   server.close();
   vassert.testComplete();
 }
+
 
 initTests(this);
