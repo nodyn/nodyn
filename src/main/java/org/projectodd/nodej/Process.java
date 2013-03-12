@@ -44,7 +44,7 @@ public class Process extends DynObject {
 		setProperty("_eval", null );
 		setProperty("_print_eval", null );
 		setProperty("_forceRepl", null );
-//		setProperty("execPath", new File( args[0]).getAbsolutePath() );
+		setProperty("execPath",  System.getProperty("user.dir")); // TODO: This doesn't make much sense
 		setProperty("execPath", null );
         setProperty("debugPort", null );
 		

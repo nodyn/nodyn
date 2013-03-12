@@ -15,27 +15,38 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     public void init(Vertx vertx, Container container, ClassLoader classloader) {
         super.init(vertx, container, classloader);
         DynJS runtime = this.getRuntime();
-        ExecutionContext context = runtime.getExecutionContext();
-        runtime.getConfig().setGlobalObjectFactory(new NodeJSGlobalObjectFactory(context));
+        runtime.getConfig().setGlobalObjectFactory(new NodeJSGlobalObjectFactory(runtime));
         try {
-            loadScript(context, "node.js");
+            loadScript(getRootContext(runtime), "node.js");
         } catch (FileNotFoundException e) {
             System.err.println("Cannot initialize NodeJ");
             e.printStackTrace();
         }
     }
 
+    private ExecutionContext getRootContext(final DynJS runtime) {
+        ExecutionContext context = runtime.getExecutionContext();
+        ExecutionContext parent = context.getParent();
+        while (parent != null) {
+            context = parent;
+            parent = context.getParent();
+        }
+        return context;
+    }
+
     private class NodeJSGlobalObjectFactory extends DynJSGlobalObjectFactory {
         private Process process;
 
-        NodeJSGlobalObjectFactory(ExecutionContext context) {
-            process = new Process(context.getGlobalObject(), null);
+        NodeJSGlobalObjectFactory(DynJS runtime) {
+            ExecutionContext context = getRootContext(runtime);
+            this.process = new Process(context.getGlobalObject(), null);
         }
         
         @Override
         public GlobalObject newGlobalObject(final DynJS runtime) {
             GlobalObject global = super.newGlobalObject(runtime);
-            global.defineGlobalProperty("process", process);
+            global.defineGlobalProperty("process", this.process);
+            global.defineGlobalProperty("Buffer", "foo");
             return global;
         }
     }
