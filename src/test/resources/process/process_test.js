@@ -73,6 +73,43 @@ function testTitle() {
   vassert.testComplete();
 }
 
+function testGlobalness() {
+  vassert.assertEquals(process, function() { return process; }());
+  vassert.testComplete();
+}
+
+function testProcessConfig() {
+  // somewhat pointless 
+  // In node.js process.config returns the compile-time options of node.js
+  vassert.assertNotNull(process.config);
+  vassert.testComplete();
+}
+
+function testProcessEventListeners() {
+  // make sure process.on and process.addListener are aliased
+  vassert.assertEquals(process.on, process.addListener);
+  var functionCalled = false;
+
+  // set an event listener on 'foo'
+  process.on('foo', function() { functionCalled = true }); 
+  vassert.assertEquals(1, process.listeners('foo').length);
+  process.emit('foo');
+  vassert.assertTrue(functionCalled);
+
+  // reset our listeners
+  process.removeAllListeners('foo');
+  vassert.assertEquals(0, process.listeners('foo').length);
+
+  process.once('foo', function(str) { functionCalled = str; });
+  process.emit('foo', 'bar');
+  vassert.assertEquals('bar', functionCalled);
+
+  // This event should not be fired
+  process.emit('foo', 'foobar');
+  vassert.assertEquals('bar', functionCalled);
+  vassert.testComplete();
+}
+
 function testUndocumentedProperties() {
   vassert.assertFalse(process.noDeprecation);
   vassert.assertFalse(process.traceDeprecation);

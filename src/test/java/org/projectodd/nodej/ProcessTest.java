@@ -39,16 +39,6 @@ public class ProcessTest extends NodejTestSupport {
     }
 
     @Test
-    public void testConfig() {
-        assertThat(runtime.evaluate("process.config")).isInstanceOf(DynObject.class);
-    }
-    
-    @Test
-    public void testGlobalness() {
-        assertThat(runtime.evaluate("var x = function() { return process.title }; x()")).isEqualTo("nodej");
-    }
-    
-    @Test
     public void testNextTick() throws InterruptedException {
         eval("var x = 0");
         eval("var f = function(y) { x = x+y }");
