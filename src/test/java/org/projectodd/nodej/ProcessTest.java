@@ -2,13 +2,7 @@ package org.projectodd.nodej;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.util.Map;
-
 import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.JSFunction;
-import org.dynjs.runtime.JSObject;
 import org.junit.Test;
 
 public class ProcessTest extends NodejTestSupport {
@@ -24,18 +18,6 @@ public class ProcessTest extends NodejTestSupport {
         assertThat(runtime.evaluate("mem.heapTotal")).isInstanceOf(Number.class);
         assertThat(runtime.evaluate("mem.heapUsed")).isInstanceOf(Number.class);
         assertThat(runtime.evaluate("mem.heapTotal > mem.heapUsed")).isEqualTo(true);
-    }
-    
-    @Test
-    public void testProcessEvents() {
-        assertThat(runtime.evaluate("process.addListener")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.on")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.once")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.removeListener")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.removeAllListeners")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.setMaxListeners")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.listeners")).isInstanceOf(JSFunction.class);
-        assertThat(runtime.evaluate("process.emit")).isInstanceOf(JSFunction.class);
     }
 
     @Test

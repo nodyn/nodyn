@@ -1,14 +1,11 @@
 package org.projectodd.nodej;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.JSFunction;
@@ -22,19 +19,10 @@ public class Node {
     public static final int MAX_THREADS = 100;
     private static final ScheduledExecutorService DISPATCH = Executors.newScheduledThreadPool(MAX_THREADS);
 
-    private DynJS runtime;
     private String filename = "<eval>";
-    private Process process = null;
 
     public Node(final ExecutionContext context) {
         GlobalObject globalObject = context.getGlobalObject();
-        this.runtime = context.getGlobalObject().getRuntime();
-        this.process = new Process(globalObject, null);
-        
-        // This makes no sense to me, since we're setting a process object
-        // up in the NodeJSVerticleFactory. But without this process isn't
-        // visible to the scripts.
-        globalObject.defineGlobalProperty("process", this.process);
         final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
         globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
         globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
@@ -43,10 +31,6 @@ public class Node {
         globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
     }
     
-    public Process getProcess() {
-        return this.process;
-    }
-
     public static Future<Object> dispatch(final JSFunction func, final ExecutionContext context, final Object...args) {
         Callable<Object> callable = new Callable<Object>() {
             @Override
@@ -77,16 +61,7 @@ public class Node {
             return DISPATCH.schedule(callable, delay, TimeUnit.MILLISECONDS);
         }
     }
-    
-    
 
-
-    // I'm not sure if we really want to expose this or not.
-    // At the moment, it's being used for testing
-    public DynJS getRuntime() {
-        return this.runtime;
-    }
-    
     public String getDirname() {
         return System.getProperty("user.dir");
     }
@@ -97,15 +72,6 @@ public class Node {
 
     public void setFilename(String filename) {
         this.filename = filename;
-    }
-
-    public void execute(File file) {
-        try {
-            this.setFilename(file.getCanonicalPath());
-            this.runtime.newRunner().withSource(file).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }

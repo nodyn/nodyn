@@ -46,9 +46,9 @@ public class NodejTestSupport {
 
     @Before
     public void setUp() {
-        runtime = node.getRuntime();
-        context = runtime.getExecutionContext();
-        node = new Node(context);
+//        runtime = node.getRuntime();
+//        context = runtime.getExecutionContext();
+//        node = new Node(context);
     }
     
     @AfterClass
