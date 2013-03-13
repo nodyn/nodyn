@@ -110,6 +110,23 @@ function testProcessEventListeners() {
   vassert.testComplete();
 }
 
+function testNextTick() {
+  var x = 0;
+  var f = function(y) { x += y; }
+  process.nextTick(f, 10);
+  vertx.setTimer(100, function() {
+    vassert.assertEquals(10, x);
+    vassert.testComplete();
+  });
+}
+
+function testMemoryUsage() {
+  vassert.assertEquals('function', typeof process.memoryUsage);
+  memory = process.memoryUsage();
+  vassert.assertTrue(memory.heapTotal > memory.heapUsed);
+  vassert.testComplete();
+}
+
 function testUndocumentedProperties() {
   vassert.assertFalse(process.noDeprecation);
   vassert.assertFalse(process.traceDeprecation);
