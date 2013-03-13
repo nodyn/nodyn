@@ -1,6 +1,21 @@
-__node = new org.projectodd.nodej.Node(dynjs.runtime);
-// Node creates a global process object
 process.title = "NodeJ";
+
+process.stdout = {
+  write: function(message) {
+    java.lang.System.out.print(message);
+  }
+}
+
+process.stderr = {
+  write: function(message) {
+    java.lang.System.err.print(message);
+  }
+}
+
+process.arch = "java";
+process.platform = "java";
+process.noDeprecation = false;
+process.traceDeprecation = false;
 
 EventEmitter               = require('events').EventEmitter
 process.on                 = EventEmitter.prototype.on
@@ -12,8 +27,8 @@ process.setMaxListeners    = EventEmitter.prototype.setMaxListeners
 process.listeners          = EventEmitter.prototype.listeners
 process.emit               = EventEmitter.prototype.emit
 
-dynjs.global.__filename = __node.getFilename();
-dynjs.global.__dirname  = __node.getDirname();
+// dynjs.global.__filename = __node.getFilename();
+// dynjs.global.__dirname  = __node.getDirname();
 
 os = require('os');
 process.memoryUsage = function() {

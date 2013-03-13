@@ -23,28 +23,20 @@ public class Process extends DynObject {
 	public Process(GlobalObject globalObject, String[] args) {
 	    super(globalObject);
 
-        setProperty("argv", args );
-	    setProperty("stdout", wrappedPrintStream( globalObject, globalObject.getConfig().getOutputStream() ) );
-        setProperty("stderr", wrappedPrintStream( globalObject, globalObject.getConfig().getErrorStream() ) );
-        setProperty("arch", "java" );
-        setProperty("platform", "java" );
+        setProperty("argv", args);
         setProperty("version", Node.VERSION );
 		setProperty("versions", new Versions(globalObject) );
-
-        // These seem to be undocumented in node, but are required?
-        setProperty("noDeprecation", false);        
-        setProperty("traceDeprecation", false);
-        
-		setProperty("moduleLoadList", new ArrayList<String>() );
-		
-		setProperty("execArgv", null );
 		setProperty("env", getProcessEnv(globalObject));
 		setProperty("pid", ManagementFactory.getRuntimeMXBean().getName() );
+		setProperty("execPath",  System.getProperty("user.dir")); // TODO: This doesn't make much sense
+
+		setProperty("moduleLoadList", new ArrayList<String>() );
+		setProperty("execArgv", null );
+        
 		setProperty("features", null );
 		setProperty("_eval", null );
 		setProperty("_print_eval", null );
 		setProperty("_forceRepl", null );
-		setProperty("execPath",  System.getProperty("user.dir")); // TODO: This doesn't make much sense
 		setProperty("execPath", null );
         setProperty("debugPort", null );
 		
@@ -101,28 +93,5 @@ public class Process extends DynObject {
                 set("Configurable", false);
             }
         }, false);
-    }
-
-    protected DynObject wrappedPrintStream(final GlobalObject globalObject, final PrintStream printStream) {
-        DynObject object = new DynObject(globalObject);
-        object.defineOwnProperty(null, "write", new PropertyDescriptor() {
-            {
-                set("Value", new AbstractNativeFunction(globalObject) {
-
-                    @Override
-                    public Object call(ExecutionContext context, Object self, Object... args) {
-                        for (Object arg : args) {
-                            printStream.print(arg.toString());
-                        }
-                        return null;
-                    }
-                    
-                });
-                set("Writable", false);
-                set("Enumerable", false);
-                set("Configurable", false);
-            }
-        }, false);
-        return object;
     }
 }

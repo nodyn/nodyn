@@ -42,13 +42,13 @@ public class NodejTestSupport {
             }
         });
         runtime = new DynJS(config);
-        node = new Node(runtime);
     }
 
     @Before
     public void setUp() {
         runtime = node.getRuntime();
         context = runtime.getExecutionContext();
+        node = new Node(context);
     }
     
     @AfterClass

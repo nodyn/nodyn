@@ -19,33 +19,6 @@ public class ProcessTest extends NodejTestSupport {
     }
 
     @Test
-    public void testStdOut() {
-        assertThat(runtime.evaluate("process.stdout")).isInstanceOf(DynObject.class);
-        assertThat(runtime.evaluate("process.stdout.write")).isInstanceOf(JSFunction.class);
-    }
-
-    @Test
-    public void testStdErr() {
-        assertThat(runtime.evaluate("process.stderr")).isInstanceOf(DynObject.class);
-        assertThat(runtime.evaluate("process.stderr.write")).isInstanceOf(JSFunction.class);
-    }
-    
-    @Test
-    public void testExecPath() {
-        assertThat(runtime.evaluate("process.execPath")).isEqualTo(new File("node").getAbsolutePath());
-    }
-
-    @Test
-    public void testArch() {
-        assertThat(runtime.evaluate("process.arch")).isEqualTo("java");
-    }
-
-    @Test
-    public void testPlatform() {
-        assertThat(runtime.evaluate("process.platform")).isEqualTo("java");
-    }
-    
-    @Test
     public void testMemoryUsage() {
         assertThat(runtime.evaluate("var mem = process.memoryUsage(); mem")).isInstanceOf(DynObject.class);
         assertThat(runtime.evaluate("mem.heapTotal")).isInstanceOf(Number.class);
@@ -66,58 +39,8 @@ public class ProcessTest extends NodejTestSupport {
     }
 
     @Test
-    public void testVersion() {
-        assertThat(runtime.evaluate("process.version")).isEqualTo(Node.VERSION);
-    }
-    
-    @Test
     public void testConfig() {
         assertThat(runtime.evaluate("process.config")).isInstanceOf(DynObject.class);
-    }
-    
-    @Test
-    public void testPid() {
-        assertThat(runtime.evaluate("process.pid")).isEqualTo(ManagementFactory.getRuntimeMXBean().getName());
-    }
-    
-    @Test
-    public void testVersions() {
-        assertThat(runtime.evaluate("process.versions")).isInstanceOf(JSObject.class);
-        assertThat(runtime.evaluate("process.versions.node")).isEqualTo(org.projectodd.nodej.Node.VERSION);
-        assertThat(runtime.evaluate("process.versions.java")).isEqualTo(System.getProperty("java.version"));
-        assertThat(runtime.evaluate("process.versions.dynjs")).isEqualTo(org.dynjs.DynJSVersion.FULL);
-    }
-    
-    @Test
-    public void testEnv() {
-        assertThat(runtime.evaluate("process.env")).isInstanceOf(JSObject.class);
-        Map<String,String> env = System.getenv();
-        for (String key : env.keySet()) {
-            assertThat(runtime.evaluate("process.env."+key.replaceAll("[\\./]", "_"))).isEqualTo(env.get(key));
-        }
-    }
-    
-    @Test
-    public void testCwd() {
-        assertThat(runtime.evaluate("process.cwd()")).isEqualTo(System.getProperty("user.dir"));
-    }
-
-    @Test
-    public void testNoDeprecation() {
-        assertThat(runtime.evaluate("process.noDeprecation")).isEqualTo(false);
-    }
-
-    @Test
-    public void testTraceDeprecation() {
-        assertThat(runtime.evaluate("process.traceDeprecation")).isEqualTo(false);
-    }
-    
-    @Test
-    public void testTitle() {
-        assertThat(runtime.evaluate("process.title")).isEqualTo("nodej");
-        runtime.evaluate("process.title = 'something else'");
-        assertThat(runtime.evaluate("process.title")).isEqualTo("something else");
-        runtime.evaluate("process.title = 'nodej'");
     }
     
     @Test

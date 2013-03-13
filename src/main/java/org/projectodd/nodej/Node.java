@@ -9,7 +9,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.JSFunction;
@@ -25,27 +24,27 @@ public class Node {
 
     private DynJS runtime;
     private String filename = "<eval>";
+    private Process process = null;
 
-    public Node(DynJS runtime) {
-        this.runtime = runtime;
-        ExecutionContext context = runtime.getExecutionContext();
-        ExecutionContext parent = context.getParent();
-        while (parent != null) {
-            context = parent;
-            parent = context.getParent();
-        }
+    public Node(final ExecutionContext context) {
         GlobalObject globalObject = context.getGlobalObject();
+        this.runtime = context.getGlobalObject().getRuntime();
+        this.process = new Process(globalObject, null);
         
         // This makes no sense to me, since we're setting a process object
         // up in the NodeJSVerticleFactory. But without this process isn't
         // visible to the scripts.
-        globalObject.defineGlobalProperty("process", new DynObject(globalObject));
+        globalObject.defineGlobalProperty("process", this.process);
         final ClearTimeout clearTimeout = new ClearTimeout(globalObject);
         globalObject.defineGlobalProperty("setTimeout", new SetTimeout(globalObject, false));
         globalObject.defineGlobalProperty("clearTimeout", clearTimeout);
         globalObject.defineGlobalProperty("setInterval", new SetTimeout(globalObject, true));
         globalObject.defineGlobalProperty("clearInterval", clearTimeout);
         globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
+    }
+    
+    public Process getProcess() {
+        return this.process;
     }
 
     public static Future<Object> dispatch(final JSFunction func, final ExecutionContext context, final Object...args) {
