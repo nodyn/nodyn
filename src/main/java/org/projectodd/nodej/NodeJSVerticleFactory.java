@@ -10,7 +10,7 @@ import org.vertx.java.platform.Verticle;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     private GlobalObjectFactory globalObjectFactory;
-    
+
     @Override
     public Verticle createVerticle(String main) throws Exception {
         initializeRootContext();
@@ -23,11 +23,13 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         }
         return new DynJSVerticle(main);
     }
-    
+
     @Override
     public GlobalObjectFactory getGlobalObjectFactory() {
-        if (this.globalObjectFactory == null) {
-            this.globalObjectFactory = new NodeJSGlobalObjectFactory();
+        synchronized (this) {
+            if (this.globalObjectFactory == null) {
+                this.globalObjectFactory = new NodeJSGlobalObjectFactory();
+            }
         }
         return this.globalObjectFactory;
     }
@@ -41,5 +43,5 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             return global;
         }
     }
-    
+
 }
