@@ -221,6 +221,12 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
               <argLine>-Djava.library.path=${basedir}/lib</argLine>
+              <disableXmlReport>true</disableXmlReport>
+              <argLine>-Xss2048k</argLine>
+              <verbose>true</verbose>
+              <includes>
+                <include>**/*Tests.java</include>
+              </includes>
           </configuration>
       </plugin>
     </plugins>

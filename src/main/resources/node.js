@@ -41,7 +41,9 @@ process.memoryUsage = function() {
 }
 
 process.nextTick = function(callback, args) {
-  process.binding('Dispatcher').submit(callback, args)
+  vertx.runOnLoop(function() {
+    callback(args);
+  });
 }
 
 // TODO: process.config
