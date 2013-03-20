@@ -1,14 +1,12 @@
 var util          = require('util')
 var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
-var vertx         = require('vertx')
-
 
 var Server = function( connectionListener ) {
 
   var that = this;
   that.address = {}
-  that.server = vertx.createNetServer();
+  that.server = vertx.__vertx.createNetServer();
 
   if (connectionListener) {
       that.on('connection', connectionListener);
@@ -89,7 +87,7 @@ var Socket = function(options) {
       host = arguments[1];
     }
 
-    client = vertx.createNetClient();
+    client = vertx.__vertx.createNetClient();
     client.connect( port, host, function(sock) {
       that.setProxy( sock );
       that.emit('connect');

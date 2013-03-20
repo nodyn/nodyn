@@ -1,3 +1,5 @@
+console = require('console');
+
 process.title = "NodeJ";
 
 process.stdout = {

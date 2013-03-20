@@ -45,3 +45,4 @@ var Console = function() {
 }
 
 module.exports = new Console()
+

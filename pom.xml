@@ -14,8 +14,8 @@
   </description>
 
   <scm>
-    <connection>scm:git:git://github.com/projectodd/node.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/projectodd/node.git</developerConnection>
+    <connection>scm:git:git://github.com/projectodd/nodej.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/projectodd/nodej.git</developerConnection>
     <url>http://github.com/projectodd/node</url>
   </scm>
 

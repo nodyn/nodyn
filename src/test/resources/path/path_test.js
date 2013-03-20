@@ -1,4 +1,3 @@
-load('vertx.js');
 load('vertx_tests.js');
 
 var path = require('path');

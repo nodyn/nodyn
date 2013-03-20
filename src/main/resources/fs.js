@@ -1,4 +1,3 @@
-var vertx = require('vertx')
 
 var Fs = function() {
 

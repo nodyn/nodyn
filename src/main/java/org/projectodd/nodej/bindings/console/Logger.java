@@ -7,8 +7,7 @@ import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-
-import org.projectodd.nodej.bindings.Binding;
+import org.dynjs.runtime.PropertyDescriptor;
 
 public class Logger extends DynObject {
 
@@ -20,31 +19,52 @@ public class Logger extends DynObject {
         this.output = globalObject.getConfig().getOutputStream();
         this.error  = globalObject.getConfig().getErrorStream();
         
-        Binding.setProperty(this, "out", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                // TODO: Make this async
-                output.println(args[0].toString());
-                return null;
+        this.defineOwnProperty(null, "out", new PropertyDescriptor() {
+            {
+                set("Value", new AbstractNativeFunction(globalObject) {
+                            @Override
+                            public Object call(ExecutionContext context, Object self, Object... args) {
+                                // TODO: Make this async
+                                output.println(args[0].toString());
+                                return null;
+                            }
+                        } );
+                set("Writable", false);
+                set("Enumerable", true);
+                set("Configurable", false);
             }
-        });
-        Binding.setProperty(this, "err", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                // TODO: Make this async
-                error.println(args[0].toString());
-                return null;
+        }, false);
+        this.defineOwnProperty(null, "err", new PropertyDescriptor() {
+            {
+                set("Value", new AbstractNativeFunction(globalObject) {
+                            @Override
+                            public Object call(ExecutionContext context, Object self, Object... args) {
+                                // TODO: Make this async
+                                error.println(args[0].toString());
+                                return null;
+                            }
+                        } );
+                set("Writable", false);
+                set("Enumerable", true);
+                set("Configurable", false);
             }
-        });
-        Binding.setProperty(this, "trace", new AbstractNativeFunction(globalObject) {
-            @Override
-            public Object call(ExecutionContext context, Object self, Object... args) {
-                // TODO: Make this async
-                ThrowException e = new ThrowException(context, args[0]);
-                e.printStackTrace();
-                return null;
+        }, false);
+        this.defineOwnProperty(null, "trace", new PropertyDescriptor() {
+            {
+                set("Value", new AbstractNativeFunction(globalObject) {
+                            @Override
+                            public Object call(ExecutionContext context, Object self, Object... args) {
+                                // TODO: Make this async
+                                ThrowException e = new ThrowException(context, args[0]);
+                                e.printStackTrace();
+                                return null;
+                            }
+                        } );
+                set("Writable", false);
+                set("Enumerable", true);
+                set("Configurable", false);
             }
-        });
+        }, false);
     }
 
 }

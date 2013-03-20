@@ -15,13 +15,13 @@ package org.projectodd.nodej.integration.javascript;
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author <a href="http://lanceball.com">Lance Ball</a>
  */
 
-import org.vertx.testtools.ScriptClassRunner;
-import org.vertx.testtools.TestVerticleInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.vertx.testtools.ScriptClassRunner;
+import org.vertx.testtools.TestVerticleInfo;
 
 /**
  * This is dummy JUnit test class which is used to run any JavaScript test

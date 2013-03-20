@@ -3,34 +3,33 @@ package org.projectodd.nodej;
 import java.io.FileNotFoundException;
 
 import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
+import org.dynjs.runtime.InitializationListener;
 import org.dynjs.vertx.DynJSVerticleFactory;
-import org.vertx.java.platform.Verticle;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
-    private GlobalObjectFactory globalObjectFactory;
+    private GlobalObjectFactory globalObjectFactory = new NodeJSGlobalObjectFactory();
 
-    @Override
-    public Verticle createVerticle(String main) throws Exception {
-        initializeRootContext();
-        try {
-            loadScript(getExecutionContext(), "node.js");
-            new Node(getExecutionContext());
-        } catch (FileNotFoundException e) {
-            System.err.println("Cannot initialize NodeJ");
-            e.printStackTrace();
-        }
-        return new DynJSVerticle(main);
+    protected ExecutionContext initializeRootContext() {
+        return ExecutionContext.createGlobalExecutionContext(getRuntime(), new InitializationListener()
+        {
+            @Override
+            public void initialize(ExecutionContext context) {
+                try {
+                    loadScript(context, "vertx.js");
+                    loadScript(context, "node.js");
+                } catch (FileNotFoundException e) {
+                    System.err.println("Missing file. Cannot initialize NodeJ.");
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
-    public GlobalObjectFactory getGlobalObjectFactory() {
-        synchronized (this) {
-            if (this.globalObjectFactory == null) {
-                this.globalObjectFactory = new NodeJSGlobalObjectFactory();
-            }
-        }
+    protected GlobalObjectFactory getGlobalObjectFactory() {
         return this.globalObjectFactory;
     }
 

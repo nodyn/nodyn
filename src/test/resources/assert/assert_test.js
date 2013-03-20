@@ -1,4 +1,3 @@
-load("vertx.js");
 load("vertx_tests.js");
 node_assert = require('assert');
 

@@ -1,4 +1,3 @@
-load('vertx.js');
 load('vertx_tests.js');
 
 function testConsoleLog() {
@@ -8,8 +7,8 @@ function testConsoleLog() {
 }
 
 function testConsoleInfo() {
-//  vassert.assertEquals('function', typeof console.info);
-//  console.info('an info message');
+  vassert.assertEquals('function', typeof console.info);
+  console.info('an info message');
   vassert.testComplete();
 }
 

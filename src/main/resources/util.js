@@ -81,26 +81,26 @@ exports.deprecate = function(fn, msg) {
 
 exports.print = function() {
   for (var i = 0, len = arguments.length; i < len; ++i) {
-    process.stdout.write(String(arguments[i]));
+    stdout.print(String(arguments[i]));
   }
 };
 
 
 exports.puts = function() {
   for (var i = 0, len = arguments.length; i < len; ++i) {
-    process.stdout.write(arguments[i] + '\n');
+    stdout.print(arguments[i] + '\n');
   }
 };
 
 
 exports.debug = function(x) {
-  process.stderr.write('DEBUG: ' + x + '\n');
+  stderr.print('DEBUG: ' + x + '\n');
 };
 
 
 var error = exports.error = function(x) {
   for (var i = 0, len = arguments.length; i < len; ++i) {
-    process.stderr.write(arguments[i] + '\n');
+    stderr.print(arguments[i] + '\n');
   }
 };
 
