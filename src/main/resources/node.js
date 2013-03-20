@@ -1,5 +1,4 @@
 console = require('console');
-
 process.title = "NodeJ";
 
 process.stdout = {
@@ -32,8 +31,8 @@ process.emit               = EventEmitter.prototype.emit
 // dynjs.global.__filename = __node.getFilename();
 // dynjs.global.__dirname  = __node.getDirname();
 
-os = require('os');
 process.memoryUsage = function() {
+  os = require('os');
   var obj = {};
   obj.heapTotal = os.totalmem();
   obj.heapUsed  = os.totalmem() - os.freemem();

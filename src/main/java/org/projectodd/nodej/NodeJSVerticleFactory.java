@@ -9,6 +9,7 @@ import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.runtime.InitializationListener;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
+import org.projectodd.nodej.bindings.buffer.BufferType;
 import org.vertx.java.platform.Verticle;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
@@ -29,7 +30,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         public GlobalObject newGlobalObject(final DynJS runtime) {
             GlobalObject global = super.newGlobalObject(runtime);
             global.defineGlobalProperty("process", new Process(global, null));
-            global.defineGlobalProperty("Buffer", "foo");
+            global.defineGlobalProperty("Buffer", new BufferType(global));
             return global;
         }
     }
