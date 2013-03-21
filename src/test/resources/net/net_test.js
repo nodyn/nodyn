@@ -150,10 +150,11 @@ function testServerAddress() {
       vertx.cancelTimer(id);
     }
   });
-  vassert.assertEquals(8800, server.address.port);
+  address = server.address();
+  vassert.assertEquals(8800, address.port);
   // TODO: Vert.x does not provide bind address info?
-  // vassert.assertEquals("0.0.0.0", server.address.address);
-  // vassert.assertEquals("IPv4", server.address.family);
+  // vassert.assertEquals("0.0.0.0", address.address);
+  // vassert.assertEquals("IPv4", address.family);
   server.close();
   vassert.testComplete();
 }

@@ -50,6 +50,10 @@ var Server = function( connectionListener ) {
     that.emit('listening');
   }
 
+  that.address = function() {
+    return that.address;
+  }
+
   that.close = function(callback) {
     that.server.close(function() { 
       if (callback) { that.on('close', callback); }

@@ -32,6 +32,14 @@ function testRenameNonExistentFile() {
   vassert.testComplete();
 }
 
+function testTruncate() {
+  vassert.testComplete();
+}
+
+function testFtruncate() {
+  vassert.testComplete();
+}
+
 initTests(this);
 
 
