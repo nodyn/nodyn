@@ -22,29 +22,60 @@
 var binding = process.binding('os');
 var util = require('util');
 
-exports.hostname = binding.getHostname;
-exports.loadavg = binding.getLoadAvg;
-exports.uptime = binding.getUptime;
-exports.freemem = binding.getFreeMem;
-exports.totalmem = binding.getTotalMem;
-exports.cpus = binding.getCPUs;
-exports.type = binding.getOSType;
-exports.release = binding.getOSRelease;
-exports.networkInterfaces = binding.getInterfaceAddresses;
+exports.cpus = function() {
+  // TODO
+  return "NOT IMPLEMENTED";
+}
+
+exports.networkInterfaces = function() {
+  // TODO
+  return "NOT IMPLEMENTED";
+}
+
+exports.tmpdir = function() {
+  return java.lang.System.getProperty("java.io.tmpdir");
+}
+
+exports.endianness = function() {
+  return "BE";
+}
+
+exports.hostname = function() {
+  return java.net.InetAddress.getLocalHost().getHostName();
+}
+
+exports.uptime = function() {
+  return java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime();
+}
+
+exports.loadavg = function() {
+  avg = java.lang.management.ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+  // nodej likes 1/5/15 minute averages -  we'll just do one 3x
+  return [avg, avg, avg];
+}
+
+exports.totalmem = function() {
+  return java.lang.Runtime.getRuntime().totalMemory();
+}
+
+exports.freemem = function() {
+  return java.lang.Runtime.getRuntime().freeMemory();
+}
+
+exports.type = function() {
+  return java.lang.management.ManagementFactory.getOperatingSystemMXBean().getName();
+}
+
+exports.release = function() {
+  return java.lang.management.ManagementFactory.getOperatingSystemMXBean().getVersion();
+}
 
 exports.arch = function() {
   return process.arch;
 };
 
 exports.platform = function() {
-  return process.platform;
-};
-
-exports.tmpDir = function() {
-  return process.env.TMPDIR ||
-         process.env.TMP ||
-         process.env.TEMP ||
-         (process.platform === 'win32' ? 'c:\\windows\\temp' : '/tmp');
+  return "java";
 };
 
 exports.getNetworkInterfaces = util.deprecate(function() {
