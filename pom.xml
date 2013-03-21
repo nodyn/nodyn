@@ -34,7 +34,7 @@
     <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.0.0-SNAPSHOT</version.vertx>
     <version.vertx.tests>1.0.0-SNAPSHOT</version.vertx.tests>
-    <version.dynjs>1.0-SNAPSHOT</version.dynjs>
+    <version.dynjs>0.1.0-SNAPSHOT</version.dynjs>
     <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
   </properties>
 
