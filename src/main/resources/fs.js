@@ -1,13 +1,11 @@
 
 var Fs = function() {
 
-  this.rename = function(oldPath, newPath, callback) {
-    vertx.fileSystem.move(oldPath, newPath, callback);
-  }
+  this.rename = vertx.fileSystem.move.bind( vertx.fileSystem );
+  this.renameSync = vertx.fileSystem.moveSync.bind( vertx.fileSystem );
 
-  this.renameSync = function(oldPath, newPath) {
-    vertx.fileSystem.moveSync(oldPath, newPath)
-  }
+  this.truncate = vertx.fileSystem.truncate.bind( vertx.fileSystem );
+  this.truncateSync = vertx.fileSystem.truncateSync.bind( vertx.fileSystem );
 
 }
 
