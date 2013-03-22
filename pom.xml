@@ -171,8 +171,8 @@
         </configuration>
         <executions>
           <execution>
-            <id>copy-resources</id>
-            <phase>process-classes</phase>
+            <id>prep-for-test</id>
+            <phase>process-test-classes</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
@@ -180,8 +180,18 @@
               <outputDirectory>${basedir}/mods/${groupId}~${artifactId}~${version}</outputDirectory>
               <resources>
                 <resource>
-                  <directory>target/classes</directory>
+                  <directory>${basedir}/src/main/resources</directory>
                   <filtering>true</filtering>
+                  <includes>
+                    <include>**/*</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${basedir}/target/classes</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>**/*.class</include>
+                  </includes>
                 </resource>
               </resources>
             </configuration>
@@ -230,5 +240,46 @@
           </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.maven.ide.eclipse</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <versionRange>[2.4,)</versionRange>
+                    <phase>process-resources</phase>
+                    <goals>
+                      <goal>resources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <versionRange>[2.4,)</versionRange>
+                    <phase>process-test-classes</phase>
+                    <goals>
+                      <goal>copy-resources</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore/>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>
