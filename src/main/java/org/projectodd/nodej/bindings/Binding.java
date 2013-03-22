@@ -8,7 +8,6 @@ import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
-import org.projectodd.nodej.bindings.console.Logger;
 
 public class Binding extends AbstractNativeFunction {
 
@@ -18,7 +17,6 @@ public class Binding extends AbstractNativeFunction {
         super(globalObject);
         bindings.put("buffer", new Buffer(globalObject));
         bindings.put("constants", new Constants(globalObject));
-        bindings.put("logger", new Logger(globalObject));
         bindings.put("QueryString", new QueryString(globalObject));
     }
 
