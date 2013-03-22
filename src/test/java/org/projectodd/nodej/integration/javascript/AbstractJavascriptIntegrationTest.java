@@ -15,12 +15,22 @@ package org.projectodd.nodej.integration.javascript;
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author <a href="http://lanceball.com">Lance Ball</a>
  */
 
-public class FsIntegrationTests extends AbstractJavascriptIntegrationTest {
-    public FsIntegrationTests() {
-        super( "fs/fs_test.js" );
+import org.junit.runner.RunWith;
+import org.projectodd.nodej.test.ScriptClassRunner;
+
+@RunWith(ScriptClassRunner.class)
+public abstract class AbstractJavascriptIntegrationTest {
+    
+    private String filename;
+
+    public AbstractJavascriptIntegrationTest(String filename) {
+        this.filename = filename;
     }
     
+    public String getFilename() {
+        return this.filename;
+    }
 }
