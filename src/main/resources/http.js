@@ -1,8 +1,10 @@
+var url  = require('url');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter
 
-var WebServer = function(requestListener) {
-  var that  = this;
+var WebServer = module.exports.WebServer = function(requestListener) {
+  var that   = this;
+  that.proxy = vertx.createHttpServer();
 
   // default socket timeout value (2 minutes)
   // TODO: Actually implement timeouts
@@ -15,9 +17,6 @@ var WebServer = function(requestListener) {
   if (requestListener) {
     that.on('request', requestListener);
   }
-  that.proxy = vertx.createHttpServer().requestHandler(function(request) {
-    that.emit('request', new IncomingMessage(request), new ServerResponse(request.response));
-  });
 
   that.close = function(callback) {
     if (callback) { that.on('close', callback); }
@@ -44,10 +43,8 @@ var WebServer = function(requestListener) {
     if (callback) { that.on('listening', callback); }
 
     // setup a connection handler in vert.x
-    that.proxy.requestHandler( function(sock) {
-      nodeSocket = new Socket();
-      nodeSocket.setProxy(sock);
-      that.emit('connection', nodeSocket);
+    that.proxy.requestHandler( function(request) {
+      that.emit('request', new IncomingMessage(request), new ServerResponse(request.response));
     });
 
     // listen for incoming connections
@@ -56,12 +53,23 @@ var WebServer = function(requestListener) {
   }
 }
 
-var IncomingMessage = function(vertxRequest) {
+var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var proxy = vertxRequest;
 }
 
-var ServerResponse = function(vertxResponse) {
+var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var proxy = vertxResponse;
+}
+
+var ClientRequest = module.exports.ClientRequest = function() {
+}
+
+var DefaultRequestOptions = {
+  host:     'localhost',
+  hostname: 'localhost',
+  method:   'GET',
+  path:     '/',
+  port:     80
 }
 
 // Make the web server emit events
@@ -71,9 +79,40 @@ module.exports.createServer = function(requestListener) {
   return new WebServer(requestListener);
 }
 
+module.exports.request = function(options, callback) {
+  switch(typeof options) {
+    case 'undefined':
+      options = {};
+      break;
+    case 'string':
+      options = url.parse(options);
+      break;
+    case 'function':
+      callback = options;
+      options  = {};
+  }
+
+  options.host     = options.host     || DefaultRequestOptions.host;
+  options.hostname = options.hostname || DefaultRequestOptions.hostname;
+  options.port     = options.port     || DefaultRequestOptions.port;
+  options.method   = options.method   || DefaultRequestOptions.method;
+  options.path     = options.path     || DefaultRequestOptions.path;
+
+  var client = vertx.createHttpClient()
+                    .setPort(options.port)
+                    .setHost(options.hostname);
+
+  var request = client.request(options.method, options.path, function(resp) { 
+    callback(new ServerResponse());
+  });
+  request.end();
+  return new ClientRequest();
+}
+
 // TODO: Implement this
 // args are [port], [host]
 module.exports.createClient = function() {
+  // This is deprecated. Use http.request instead
 }
 
 var STATUS_CODES = exports.STATUS_CODES = {
