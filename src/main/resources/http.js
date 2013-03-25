@@ -7,7 +7,7 @@ var WebServer = function(requestListener) {
   if (requestListener) {
     that.on('request', requestListener);
   }
-  var proxy = vertx.createHttpServer().requestHandler(function(request) {
+  that.proxy = vertx.createHttpServer().requestHandler(function(request) {
     that.emit('request', new IncomingMessage(request), new ServerResponse(request.response));
   });
 
@@ -36,7 +36,7 @@ var WebServer = function(requestListener) {
     if (callback) { that.on('listening', callback); }
 
     // setup a connection handler in vert.x
-    that.proxy.connectHandler( function(sock) {
+    that.proxy.requestHandler( function(sock) {
       nodeSocket = new Socket();
       nodeSocket.setProxy(sock);
       that.emit('connection', nodeSocket);
@@ -53,7 +53,7 @@ var IncomingMessage = function(vertxRequest) {
 }
 
 var ServerResponse = function(vertxResponse) {
-  var proxy - vertxResponse;
+  var proxy = vertxResponse;
 }
 
 // Make the web server emit events
