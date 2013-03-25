@@ -30,4 +30,17 @@ function testServerListeningEvent() {
   });
 }
 
+function testServerClose() {
+  var closed = false;
+  var server = http.createServer();
+  server.close(function() {
+    closed = true;
+  });
+  // give the server half a second to close
+  vertx.setTimer(500, function() {
+    vassert.assertTrue(closed);
+    vassert.testComplete();
+  });
+}
+
 initTests(this);

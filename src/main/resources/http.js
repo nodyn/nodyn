@@ -12,8 +12,8 @@ var WebServer = function(requestListener) {
   });
 
   that.close = function(callback) {
+    if (callback) { that.on('close', callback); }
     that.proxy.close(function() { 
-      if (callback) { that.on('close', callback); }
       that.emit('close'); 
     });
   }
