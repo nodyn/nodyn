@@ -49,4 +49,10 @@ function testServerTimeoutDefault() {
   vassert.testComplete();
 }
 
+function testServerMaxHeadersCountDefaultValue() {
+  var server = http.createServer();
+  vassert.assertEquals(1000, server.maxHeadersCount);
+  vassert.testComplete();
+}
+
 initTests(this);

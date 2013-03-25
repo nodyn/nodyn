@@ -4,6 +4,14 @@ var EventEmitter = require('events').EventEmitter
 var WebServer = function(requestListener) {
   var that  = this;
 
+  // default socket timeout value (2 minutes)
+  // TODO: Actually implement timeouts
+  that.timeout = 120000;
+
+  // default limit for incoming headers
+  // TODO: Actually implement limits
+  that.maxHeadersCount = 1000;
+
   if (requestListener) {
     that.on('request', requestListener);
   }
