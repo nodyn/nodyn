@@ -43,4 +43,10 @@ function testServerClose() {
   });
 }
 
+function testServerTimeoutDefault() {
+  var server = http.createServer();
+  vassert.assertEquals(120000, server.timeout);
+  vassert.testComplete();
+}
+
 initTests(this);
