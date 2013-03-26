@@ -54,13 +54,27 @@ var WebServer = module.exports.WebServer = function(requestListener) {
   }
 }
 
+// Node.js uses IncomingMessage for both the server and the client
+// That makes this class a little bulky as we check the type
+// and set properties accordingly
 var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var that  = this;
   var proxy = vertxRequest;
+
+  that.headers = proxy.headers();
+
   // I hate this, but dynjs barfs when you check for the 
   // existence of properties that don't exist on java objects
   var ServerRequest = org.vertx.java.core.http.impl.DefaultHttpServerRequest;
-  if (proxy.getClass().getName() != ServerRequest.getName()) {
+  if (proxy.getClass().getName() == ServerRequest.getName()) {
+    var version = proxy.getNettyRequest().getProtocolVersion();
+    that.httpMajorVersion = version.majorVersion().toString();
+    that.httpMinorVersion = version.minorVersion().toString();
+    that.httpVersion = that.httpMajorVersion + "." + that.httpMinorVersion;
+    that.url = proxy.uri;
+    that.method = proxy.method;
+    that.headersSent = that.headers.size() > 0;
+  } else {
     that.statusCode = proxy.statusCode;
   }
 }
@@ -69,6 +83,35 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var that  = this;
   var proxy = vertxResponse;
   that.end = proxy.end.bind(proxy);
+  
+  that.writeHead = function() {
+    reasonPhrase = null;
+    statusCode   = arguments[0];
+    headers      = {};
+
+    if (typeof arguments[1]  == 'string') {
+      reasonPhrase = arguments[1];
+      if (arguments[2]) {
+        headers = arguments[2];
+      }
+    } else if (typeof arguments[1]  == 'object') {
+      headers = arguments[1];
+    }
+    for( header in headers ) {
+      that.setHeader(header, headers[header]);
+    }
+    if (statusCode) {
+      proxy.statusCode = statusCode;
+    }
+    if (reasonPhrase) {
+      proxy.statusMessage = reasonPhrase;
+    }
+  }
+
+  that.setHeader = function(name, value) {
+    java.lang.System.err.println("HEADER: " + name + ": " + value);
+    proxy.putHeader(name, value);
+  }
 }
 
 var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
@@ -118,6 +161,11 @@ module.exports.request = function(options, callback) {
   var request = proxy.request(options.method, options.path, function(resp) { 
     callback(new IncomingMessage(resp));
   });
+  if (options.headers) {
+    for (header in options.headers) {
+      request.putHeader(header, options.headers[header]);
+    }
+  }
   return new ClientRequest(request);
 }
 

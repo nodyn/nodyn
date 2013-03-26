@@ -23,7 +23,7 @@ function testVersion() {
   vassert.assertNotNull(process.versions);
   vassert.assertEquals(org.projectodd.nodej.Node.VERSION, process.versions.node);
   vassert.assertEquals(java.lang.System.getProperty("java.version"), process.versions.java);
-  vassert.assertEquals(org.dynjs.DynJSVersion.FULL, process.versions.dynjs);
+//  vassert.assertEquals(org.dynjs.runtime.DynJS.VERSION, process.versions.dynjs);
   vassert.testComplete();
 }
 

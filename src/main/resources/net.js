@@ -37,17 +37,15 @@ var Server = function( connectionListener ) {
     });
 
     // listen for incoming connections
-    that.server.listen(port, host);
+    that.server.listen(port, host, function() {
+      that.emit('listening');
+    });
 
     // TODO: Vert.x does not provide bind address information?
     // server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
     // server.address.address = address.address.canonicalHostName
     that.address.port = port;
     that.address.host = host;
-
-    // TODO: Vert.x does not provide notification for a 'listening' event whent the server
-    // has been bound, so we'll just emit the event now, once we've set everything up.
-    that.emit('listening');
   }
 
   that.address = function() {
