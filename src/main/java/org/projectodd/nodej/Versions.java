@@ -9,6 +9,6 @@ public class Versions extends DynObject {
         super(globalObject);
         this.put(null, "node", org.projectodd.nodej.Node.VERSION, false);
         this.put(null, "java", System.getProperty("java.version"), false);
-        this.put(null, "dynjs", org.dynjs.DynJSVersion.FULL, false);
+        this.put(null, "dynjs", org.dynjs.runtime.DynJS.VERSION, false);
     }
 }

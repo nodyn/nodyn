@@ -48,20 +48,33 @@ var WebServer = module.exports.WebServer = function(requestListener) {
     });
 
     // listen for incoming connections
-    that.proxy.listen(port, host);
-    that.emit('listening');
+    that.proxy.listen(port, host, function() {
+      that.emit('listening');
+    });
   }
 }
 
 var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
+  var that  = this;
   var proxy = vertxRequest;
+  // I hate this, but dynjs barfs when you check for the 
+  // existence of properties that don't exist on java objects
+  var ServerRequest = org.vertx.java.core.http.impl.DefaultHttpServerRequest;
+  if (proxy.getClass().getName() != ServerRequest.getName()) {
+    that.statusCode = proxy.statusCode;
+  }
 }
 
 var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
+  var that  = this;
   var proxy = vertxResponse;
+  that.end = proxy.end.bind(proxy);
 }
 
-var ClientRequest = module.exports.ClientRequest = function() {
+var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
+  var that  = this;
+  var proxy = vertxRequest;
+  that.end  = proxy.end.bind(proxy);
 }
 
 var DefaultRequestOptions = {
@@ -98,15 +111,14 @@ module.exports.request = function(options, callback) {
   options.method   = options.method   || DefaultRequestOptions.method;
   options.path     = options.path     || DefaultRequestOptions.path;
 
-  var client = vertx.createHttpClient()
+  var proxy = vertx.createHttpClient()
                     .setPort(options.port)
                     .setHost(options.hostname);
 
-  var request = client.request(options.method, options.path, function(resp) { 
-    callback(new ServerResponse());
+  var request = proxy.request(options.method, options.path, function(resp) { 
+    callback(new IncomingMessage(resp));
   });
-  request.end();
-  return new ClientRequest();
+  return new ClientRequest(request);
 }
 
 // TODO: Implement this

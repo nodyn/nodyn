@@ -32,20 +32,23 @@ function testCreateServerWithRequestListener() {
 function testServerRequestEvent() {
   var called = false;
   var server = http.createServer(function(request, response) {
+    // node.js request listener
+    // called when a 'request' event is emitted
     called = true;
     vassert.assertTrue(request instanceof http.IncomingMessage);
     vassert.assertTrue(response instanceof http.ServerResponse);
+    response.statusCode = 200;
+    response.end();
   });
-  server.listen(test_port);
-
-  // Give the server a second to start listen()'ing
-  // TODO: Figure out why this is failing
-  vertx.setTimer(500, function() {
-    var request = http.request({port: test_port});//, function(response) {
-//    vassert.assertNotNull(response);
-//    vassert.assertEquals(true, called);
-    vassert.testComplete();
-    server.close();
+  server.listen(test_port, function() {
+    var request = http.request({port: test_port}, function(response) {
+      vassert.assertNotNull(response);
+      vassert.assertEquals(true, called);
+      vassert.assertEquals("200", response.statusCode.toString());
+      server.close();
+      vassert.testComplete();
+    });
+    request.end();
   });
 }
 
