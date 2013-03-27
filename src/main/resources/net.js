@@ -62,20 +62,26 @@ var Server = function( connectionListener ) {
 
 var Socket = function(options) {
   var that = this;
-  that.encoding = 'utf8';
-  that.writable = true;
+  that.encoding  = 'utf8';
+  that.writable  = true;
+  that.timeoutId = null;
+  that.remoteAddress = null;
+  that.remotePort = null;
   // TODO: Handle ctor options
   // { fd: null, type: null, allowHalfOpen: false }
 
   that.setProxy = function(proxy) {
     that.proxy = proxy;
+    var inetAddress = proxy.getRemoteAddress();
+    that.remoteAddress = inetAddress.getAddress().toString().replace(/.+\//, '');
+    that.remotePort = inetAddress.getPort();
     that.proxy.dataHandler( function(buffer) {
       // TODO: Make this a node.js compatible buffer
       that.emit('data', buffer.toString());
     });
   }
 
-  // Usage net.connect(port, [host], [callback])
+  // Usage socket.connect(port, [host], [callback])
   that.connect = function() {
     callback = null;
     host = 'localhost';
@@ -92,12 +98,12 @@ var Socket = function(options) {
     client = vertx.__vertx.createNetClient();
     client.connect( port, host, function(sock) {
       that.setProxy( sock );
-      that.emit('connect');
+      that.emit('connect', that);
     });
     return that;
   }
 
-  // Usage net.connect(string, [encoding], [callback])
+  // Usage socket.write(string, [encoding], [callback])
   that.write = function() {
     encoding = 'UTF-8';
     string   = arguments[0];
@@ -120,8 +126,7 @@ var Socket = function(options) {
   }
 
   that.end = function(data, encoding) {
-    // TODO: HANDLE ENCODING
-    that.write(data, function() {
+    that.write(data, encoding, function() {
       that.destroy();
       that.emit('end');
     });
@@ -139,7 +144,20 @@ var Socket = function(options) {
     that.proxy.resume();
   }
 
-  that.setTimeout = function() { }
+  that.setTimeout = function(msec, timeout) { 
+    if (that.timeoutId) {
+      vertx.cancelTimer(that.timeoutId);
+    }
+    if (msec > 0) {
+      if (timeout) {
+        that.on('timeout', timeout);
+      }
+      that.timeoutId = vertx.setTimer(msec, function() { that.emit('timeout'); });
+    }
+  }
+
+  that.ref = function() {}
+  that.unref = function() {}
   that.setNoDelay = function() { }
   that.setKeepAlive = function() { }
   that.address = function() { }
