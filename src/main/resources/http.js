@@ -44,8 +44,8 @@ var WebServer = module.exports.WebServer = function(requestListener) {
 
     // setup a connection handler in vert.x
     that.proxy.requestHandler( function(request) {
-      that.emit('request', new IncomingMessage(request), new ServerResponse(request.response));
-    });
+      that.emit('request', new IncomingMessage(request), 
+        new ServerResponse(request.response)); });
 
     // listen for incoming connections
     that.proxy.listen(port, host, function() {
@@ -108,11 +108,23 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
     if (reasonPhrase) {
       proxy.statusMessage = reasonPhrase;
     }
+    // default HTTP date header
+    if (!proxy.headers()['Date']) {
+      that.setHeader('Date', new Date().toUTCString());
+    }
+  }
+
+  that.getHeader = function(name) {
+    return proxy.headers()[name];
   }
 
   that.setHeader = function(name, value) {
     java.lang.System.err.println("HEADER: " + name + ": " + value);
     proxy.putHeader(name, value);
+  }
+
+  that.removeHeader = function(name) {
+    proxy.headers().remove(name);
   }
 }
 

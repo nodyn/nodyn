@@ -47,6 +47,10 @@ function testMessageHeaders() {
     // response.writeHead(201, { 'Content-Length': body.length });
     response.writeHead(201, { 'x-something-else': body.length });
     response.setHeader('Content-Type', 'text/plain');
+    vassert.assertEquals('text/plain', response.getHeader('Content-Type'));
+    vassert.assertEquals(body.length, response.getHeader('x-something-else'));
+    response.removeHeader('x-something-else');
+    vassert.assertEquals(undefined, response.getHeader('x-something-else'));
     // TODO Figure out how to deal with headers having multiple values
     response.setHeader("Set-Cookie", ["type=ninja", "language=javascript"]);
     response.end();
@@ -56,9 +60,10 @@ function testMessageHeaders() {
       server.close();
     // TODO: Make this work
 //      vassert.assertEquals("201", response.statusCode.toString());
-      vassert.assertEquals('crunchy bacon'.length.toString(), 
-        response.headers['x-something-else']);
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
+      java.lang.System.err.println("DATE HEADER: " + response.headers['Date']);
+      vassert.assertNotNull(response.headers['Date']);
+      vassert.assertTrue(response.headers['Date'] != undefined);
       vassert.testComplete();
     });
     request.end();
