@@ -23,7 +23,10 @@ function testVersion() {
   vassert.assertNotNull(process.versions);
   vassert.assertEquals(org.projectodd.nodej.Node.VERSION, process.versions.node);
   vassert.assertEquals(java.lang.System.getProperty("java.version"), process.versions.java);
-//  vassert.assertEquals(org.dynjs.runtime.DynJS.VERSION, process.versions.dynjs);
+  // Now that DynJS reports build numbers and such from version.properties,
+  // this test doesn't work. E.g.
+  // expected:<[0.1.0]> but was:<[v0.1.1-8-g42b66a6-dirty]>
+  // vassert.assertEquals(org.dynjs.runtime.DynJS.VERSION, process.versions.dynjs);
   vassert.testComplete();
 }
 

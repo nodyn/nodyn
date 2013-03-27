@@ -43,20 +43,21 @@ function testMessageHeaders() {
     vassert.assertEquals(test_headers['x-custom-header'], request.headers['x-custom-header']);
     var body = 'crunchy bacon';
 
+    // TODO: For some reason, vert.x hangs when sending Content-Length?
+    // response.writeHead(201, { 'Content-Length': body.length });
+    response.writeHead(201, { 'x-something-else': body.length });
     response.setHeader('Content-Type', 'text/plain');
     // TODO Figure out how to deal with headers having multiple values
     response.setHeader("Set-Cookie", ["type=ninja", "language=javascript"]);
-
-    // send a non-standard response code
-    // TODO: Make this work
-    // response.writeHead(201, { 'Content-Length': body.length });
     response.end();
   });
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {
       server.close();
+    // TODO: Make this work
 //      vassert.assertEquals("201", response.statusCode.toString());
-//      vassert.assertEquals('crunchy bacon'.length, response.headers['Content-Length']);
+      vassert.assertEquals('crunchy bacon'.length.toString(), 
+        response.headers['x-something-else']);
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.testComplete();
     });

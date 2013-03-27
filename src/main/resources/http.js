@@ -101,7 +101,9 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
       that.setHeader(header, headers[header]);
     }
     if (statusCode) {
-      proxy.statusCode = statusCode;
+      // TODO: Awaiting a fix from rephract
+      //https://github.com/dynjs/dynjs/blob/master/src/test/java/org/dynjs/runtime/java/JavaIntegrationTest.java#L354 
+      // proxy.statusCode = statusCode;
     }
     if (reasonPhrase) {
       proxy.statusMessage = reasonPhrase;
