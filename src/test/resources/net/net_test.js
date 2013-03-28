@@ -175,6 +175,37 @@ function testSocketTimeoutCanceled() {
   });
 }
 
+function testSocketPauseAndResume() {
+  var paused = false;
+  var server_socket = null;
+  server = net.createServer();
+  server.on('connection', function(socket) { 
+    server_socket = socket;
+    server_socket.pause();
+    paused = true;
+    server_socket.on('data', function(buffer) {
+      paused = false;
+      server.close();
+      socket.destroy();
+      vassert.testComplete();
+    });
+  });
+  server.listen(8800);
+  socket = net.connect(8800, function() {
+    // I don't like having to set these timers
+    // But I couldn't figure out a better way
+    // to give the server time to do its thing
+    // on the 'connection' and 'data' events
+    vertx.setTimer(200, function() {
+      socket.write('juicy burgers');
+      vertx.setTimer(200, function() {
+        vassert.assertTrue(paused);
+        server_socket.resume();
+      });
+    });
+  });
+}
+
 function testSocketRemoteAddress() {
   server = net.createServer();
   server.listen(8800);
