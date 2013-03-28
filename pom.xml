@@ -6,7 +6,7 @@
   <artifactId>nodej</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Java Node</name>
+  <name>NodeJ</name>
   <url>http://www.github.com/projectodd/nodej</url>
 
   <description>
