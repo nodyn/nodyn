@@ -67,6 +67,9 @@ var Socket = function(options) {
   that.timeoutId = null;
   that.remoteAddress = null;
   that.remotePort = null;
+  that.noDelay = true;
+  that.keepAlive = false;
+  that.initialDelay = 0;
   // TODO: Handle ctor options
   // { fd: null, type: null, allowHalfOpen: false }
 
@@ -96,6 +99,8 @@ var Socket = function(options) {
     }
 
     client = vertx.__vertx.createNetClient();
+    client.setTCPNoDelay( that.noDelay );
+    client.setTCPKeepAlive( that.keepAlive );
     client.connect( port, host, function(sock) {
       that.setProxy( sock );
       that.emit('connect', that);
@@ -156,10 +161,16 @@ var Socket = function(options) {
     }
   }
 
+  that.setNoDelay = function(bool) { 
+    that.noDelay = (bool == undefined ? true : bool);
+  }
+
+  that.setKeepAlive = function(bool) { 
+    that.keepAlive = (bool == undefined ? true : bool);
+  }
+
   that.ref = function() {}
   that.unref = function() {}
-  that.setNoDelay = function() { }
-  that.setKeepAlive = function() { }
   that.address = function() { }
   that.bytesRead = 0;
   that.bytesWritten = 0;
