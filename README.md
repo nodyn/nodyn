@@ -1,3 +1,7 @@
+[![Build Status](https://secure.travis-ci.org/projectodd/nodej.png)](http://travis-ci.org/projectodd/nodej)
+
+[![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodej/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodej/)
+
 ## Hey, What's NodeJ?
 
 NodeJ is a [node.js](http://nodejs.org) compatible framework, running on the
