@@ -1,4 +1,6 @@
 *.swp
+*.iml
+.idea/
 mods/
 target/
 .classpath
