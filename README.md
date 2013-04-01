@@ -16,28 +16,36 @@ JVM. Neat, right? We thought so, and thus we decided to try and make it happen.
 
 ## How Do I Run It?
 
-You don't. At least not yet, and not unless you want to get your hands pretty
-dirty. It's still a work in progress and it's evolving daily. But for now, if
-you want to run it, you need to be willing to build it from source. And to do
-that, you'll need to build a few other packages from source. Once we've got
-some releases of this and its dependencies, you won't need to do all of this by
-hand. But for now, because you asked....
+Be prepared to get your hands dirty. NodeJ is still a work in progress and it's
+evolving daily. But for now, if you want to run it, you need to be willing to
+build it from source. And to do that, you'll need to build vert.x from source.
+But for now, because you asked....
 
-    git clone https://github.com/dynjs/dynjs
-    cd dynjs
-    mvn install
-    cd ..
-    git clone https://github.com/dynjs/dynjs-vertx-module
-    cd dynjs-vertx-module
-    mvn install
-    cd ..
-    git clone https://github.com/projectodd/nodej
-    cd nodej
-    mvn install
+    $ git clone https://github.com/vert-x/vert.x.git
+    $ cd vert.x
+    $ ./gradlew collectDeps
+    $ ./gradelew distTar
 
-NodeJ runs as a vert.x language module for javascript files, so you'll need
-vert.x 2.0 as well. And that's not released yet either. See? It's a lot of very
-immature stuff here. 
+This will put the complete vert.x installation in
+`build/vert.x-2.0.0-SNAPSHOT`. Just update your `$PATH` to include
+`/path/to/repo/vert.x/build/vert.x-2.0.0-SNAPSHOT/bin`. 
+
+Then, you'll need to build nodej.
+
+    $ git clone https://github.com/projectodd/nodej.git
+    $ cd nodej
+    $ mvn install
+
+By default, vert.x runs Javascript with Rhino. Change this to use lang-dynjs
+and nodej by creating a `langs.properties` file at the root of your project
+that looks like this.
+
+    nodejs=org.projectodd~nodej~0.1.1-SNAPSHOT:org.projectodd.nodej.NodeJSVerticleFactory
+    .js=nodejs
+
+Now you should be able to run nodej through vert.x like so.
+
+    $ vertx run someFile.js
 
 ## API Completion Status
 
