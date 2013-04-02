@@ -205,6 +205,29 @@ function testServerCloseEvent() {
   });
 }
 
+function testCheckContinueEvent() {
+  var eventFired = false;
+  var server = http.createServer();
+  server.on('checkContinue', function(request, response) {
+    eventFired = true;
+    response.writeContinue();
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    var headers = {
+      'Expect': '100-Continue'
+    }
+    test_options.headers = headers;
+    var request = http.request(test_options, function(response) {
+      server.close();
+      vassert.assertEquals(true, eventFired);
+      test_options.headers = null;
+      vassert.testComplete();
+    });
+    request.end();
+  });
+}
+
 function testServerMaxHeadersCountDefaultValue() {
   var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);

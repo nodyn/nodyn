@@ -44,8 +44,22 @@ var WebServer = module.exports.WebServer = function(requestListener) {
 
     // setup a connection handler in vert.x
     that.proxy.requestHandler( function(request) {
-      that.emit('request', new IncomingMessage(request), 
-        new ServerResponse(request.response)); });
+      if (request.headers()['Expect'] == '100-Continue') {
+        if (that.listeners('checkContinue')) {
+          // if a client has subscribed to checkContinue events
+          // we let the client handle the message
+          that.emit('checkContinue', new IncomingMessage(request),
+            new ServerResponse(request.response));
+        } else {
+          // otherwise, the server sends a continue message
+          // TODO: vert.x automatically does this - but will
+          // be changing to accept a checkContinue handler.
+        }
+      } else {
+        that.emit('request', new IncomingMessage(request), 
+          new ServerResponse(request.response)); 
+      }
+    });
 
     // listen for incoming connections
     that.proxy.listen(port, host, function() {
@@ -173,12 +187,17 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
     proxy.headers().remove(name);
   }
 
+  that.writeContinue = function() {
+    that.setHeader('Status', '100 (Continue)');
+    that.writeHead();
+  }
 }
 
 var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   var that  = this;
   var proxy = vertxRequest;
   that.end  = proxy.end.bind(proxy);
+
 }
 
 var DefaultRequestOptions = {
