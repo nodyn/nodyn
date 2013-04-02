@@ -180,6 +180,19 @@ function testServerTimeoutDefault() {
   vassert.testComplete();
 }
 
+function testServerSetTimeout() {
+  var server = http.createServer();
+  var timedOut = false;
+  server.setTimeout(10, function(sock) {
+    timedOut = true;
+    sock.close();
+  });
+  vertx.setTimer(100, function() {
+    vassert.assertEquals(true, timedOut);
+    vassert.testComplete();
+  });
+}
+
 function testServerMaxHeadersCountDefaultValue() {
   var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);

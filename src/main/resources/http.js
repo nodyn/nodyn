@@ -7,8 +7,8 @@ var WebServer = module.exports.WebServer = function(requestListener) {
   that.proxy = vertx.createHttpServer();
 
   // default socket timeout value (2 minutes)
-  // TODO: Actually implement timeouts
   that.timeout = 120000;
+  that.timeoutId = null;
 
   // default limit for incoming headers
   // TODO: Actually implement limits
@@ -52,6 +52,23 @@ var WebServer = module.exports.WebServer = function(requestListener) {
       that.emit('listening');
     });
   }
+
+  that.setTimeout = function(msec, callback) {
+    if (that.timeoutId) { 
+      vertx.cancelTimer(that.timeoutId);
+      that.removeAllListeners('timeout');
+    }
+    that.on('timeout', function() {
+      callback(that);
+    });
+    that.timeoutId = vertx.setTimer(msec, function() {
+      that.emit('timeout');
+    });
+  }
+
+  that.setTimeout(that.timeout, function() {
+    that.close();
+  });
 }
 
 // Node.js uses IncomingMessage for both the server and the client
