@@ -228,6 +228,30 @@ function testCheckContinueEvent() {
   });
 }
 
+function testConnectEventFired() {
+  var eventFired = false;
+  var server = http.createServer();
+  server.on('connect', function(request, socket, head) {
+    vassert.testComplete();
+    server.close();
+  });
+  server.listen(test_options.port, function() {
+    test_options.method = 'CONNECT';
+    http.request(test_options).end();
+  });
+}
+
+function testConnectMethodClosesConnectionWhenNotListenedFor() {
+  var eventFired = false;
+  var server = http.createServer();
+  server.listen(test_options.port, function() {
+    test_options.method = 'CONNECT';
+    var request = http.request(test_options, function(response) {
+    });
+    request.end();
+  });
+}
+
 function testServerMaxHeadersCountDefaultValue() {
   var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);

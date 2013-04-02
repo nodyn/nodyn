@@ -44,6 +44,15 @@ var WebServer = module.exports.WebServer = function(requestListener) {
 
     // setup a connection handler in vert.x
     that.proxy.requestHandler( function(request) {
+      if (request.method == 'CONNECT') {
+        if (that.listeners('connect')) {
+          // TODO: Node.js expects socket+head as addtl params on this
+          that.emit('connect', new IncomingMessage(request)); 
+        } else {
+          // close the connection per the node.js api
+          request.response.close();
+        }
+      }
       if (request.headers()['Expect'] == '100-Continue') {
         if (that.listeners('checkContinue')) {
           // if a client has subscribed to checkContinue events
