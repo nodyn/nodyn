@@ -193,6 +193,18 @@ function testServerSetTimeout() {
   });
 }
 
+function testServerCloseEvent() {
+  var server = http.createServer();
+  var closed = false;
+  server.on('close', function() {
+    closed = true;
+  });
+  server.close(function() {
+    vassert.assertEquals(true, closed);
+    vassert.testComplete();
+  });
+}
+
 function testServerMaxHeadersCountDefaultValue() {
   var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);
