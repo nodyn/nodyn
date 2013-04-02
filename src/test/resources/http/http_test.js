@@ -36,6 +36,25 @@ function testCreateServerWithRequestListener() {
   vassert.testComplete();
 }
 
+function testServerResponseWrite() {
+  var server = http.createServer(function(request, response) {
+    vassert.assertEquals(false, response.headersSent);
+    response.write('crunchy bacon');
+    vassert.assertEquals(true, response.headersSent);
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options, function(response) {
+      response.on('data', function(message) {
+        vassert.assertEquals('crunchy bacon', message);
+        server.close();
+        vassert.testComplete();
+      });
+    });
+    request.end();
+  });
+}
+
 // both request and response
 function testMessageHeaders() {
   var server = http.createServer(function(request, response) {
@@ -61,7 +80,6 @@ function testMessageHeaders() {
     // TODO: Make this work
 //      vassert.assertEquals("201", response.statusCode.toString());
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
-      java.lang.System.err.println("DATE HEADER: " + response.headers['Date']);
       vassert.assertNotNull(response.headers['Date']);
       vassert.assertTrue(response.headers['Date'] != undefined);
       vassert.testComplete();
@@ -165,7 +183,26 @@ function testServerTimeoutDefault() {
 function testServerMaxHeadersCountDefaultValue() {
   var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);
+  server.maxHeadersCount = 500;
+  vassert.assertEquals(500, server.maxHeadersCount);
   vassert.testComplete();
+}
+
+function testServerResponseHeadersSent() {
+  var server = http.createServer(function(request, response) {
+    vassert.assertTrue(request.headersSent);
+    vassert.assertEquals(false, response.headersSent);
+    response.writeHead(201);
+    vassert.assertEquals(true, response.headersSent);
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options, function(response) {
+      server.close();
+      vassert.testComplete();
+    });
+    request.end();
+  });
 }
 
 function testRequestReturnsClientRequest() {

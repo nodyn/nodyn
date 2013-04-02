@@ -76,42 +76,72 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.headersSent = that.headers.size() > 0;
   } else {
     that.statusCode = proxy.statusCode;
+    proxy.dataHandler(function(buffer) {
+      // TODO: Deal with buffers the right way
+      that.emit('data', buffer.toString());
+    });
   }
 }
 
 var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
-  var that  = this;
-  var proxy = vertxResponse;
-  that.end = proxy.end.bind(proxy);
+  var that         = this;
+  var proxy        = vertxResponse;
+  that.sendDate    = true;
+  that.headersSent = false;
+  that.end         = proxy.end.bind(proxy);
+
+  // node.js defaults to HTTP chunked encoding, whereas vert.x defaults
+  // to non-chunked. Inform vert.x we want chunked for now.
+  proxy.setChunked(true);
   
   that.writeHead = function() {
-    reasonPhrase = null;
-    statusCode   = arguments[0];
-    headers      = {};
+    if (!that.headersSent) {
+      reasonPhrase = null;
+      statusCode   = arguments[0];
+      headers      = {};
 
-    if (typeof arguments[1]  == 'string') {
-      reasonPhrase = arguments[1];
-      if (arguments[2]) {
-        headers = arguments[2];
+      if (typeof arguments[1]  == 'string') {
+        reasonPhrase = arguments[1];
+        if (arguments[2]) {
+          headers = arguments[2];
+        }
+      } else if (typeof arguments[1]  == 'object') {
+        headers = arguments[1];
       }
-    } else if (typeof arguments[1]  == 'object') {
-      headers = arguments[1];
+      for( header in headers ) {
+        that.setHeader(header, headers[header]);
+      }
+      if (statusCode) {
+        // TODO: Awaiting a fix from rephract
+        //https://github.com/dynjs/dynjs/blob/master/src/test/java/org/dynjs/runtime/java/JavaIntegrationTest.java#L354 
+        // proxy.statusCode = statusCode;
+      }
+      if (reasonPhrase) {
+        proxy.statusMessage = reasonPhrase;
+      }
+      // default HTTP date header
+      if (!proxy.headers()['Date']) {
+        that.setHeader('Date', new Date().toUTCString());
+      }
+      if (that.getHeader('Content-Length')) {
+        proxy.setChunked(false);
+      }
+      that.headersSent = true;
     }
-    for( header in headers ) {
-      that.setHeader(header, headers[header]);
+  }
+
+  // response.write(chunk, [encoding])
+  that.write = function() {
+    var length = 0;
+    var chunk  = arguments[0];
+    var encode = "UTF-8";
+    if (!that.headersSent) {
+      that.writeHead();
     }
-    if (statusCode) {
-      // TODO: Awaiting a fix from rephract
-      //https://github.com/dynjs/dynjs/blob/master/src/test/java/org/dynjs/runtime/java/JavaIntegrationTest.java#L354 
-      // proxy.statusCode = statusCode;
+    if (typeof arguments[1] == 'string') {
+      encode = arguments[1];
     }
-    if (reasonPhrase) {
-      proxy.statusMessage = reasonPhrase;
-    }
-    // default HTTP date header
-    if (!proxy.headers()['Date']) {
-      that.setHeader('Date', new Date().toUTCString());
-    }
+    proxy.write(chunk, encode);
   }
 
   that.getHeader = function(name) {
@@ -119,13 +149,13 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   }
 
   that.setHeader = function(name, value) {
-    java.lang.System.err.println("HEADER: " + name + ": " + value);
     proxy.putHeader(name, value);
   }
 
   that.removeHeader = function(name) {
     proxy.headers().remove(name);
   }
+
 }
 
 var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
@@ -142,8 +172,10 @@ var DefaultRequestOptions = {
   port:     80
 }
 
-// Make the web server emit events
+// Make the web server and its ilk emit events
 util.inherits(WebServer, EventEmitter);
+util.inherits(ServerResponse, EventEmitter);
+util.inherits(IncomingMessage, EventEmitter);
 
 module.exports.createServer = function(requestListener) {
   return new WebServer(requestListener);
