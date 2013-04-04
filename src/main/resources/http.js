@@ -44,29 +44,33 @@ var WebServer = module.exports.WebServer = function(requestListener) {
 
     // setup a connection handler in vert.x
     that.proxy.requestHandler( function(request) {
+      var incomingMessage = new IncomingMessage(request);
+      var serverResponse  = new ServerResponse(request.response);
+
       if (request.method == 'CONNECT') {
-        if (that.listeners('connect')) {
+        if (that.listeners('connect').length > 0) {
           // TODO: Node.js expects socket+head as addtl params on this
-          that.emit('connect', new IncomingMessage(request)); 
+          that.emit('connect', incomingMessage); 
         } else {
           // close the connection per the node.js api
+          serverResponse.emit('close');
+          serverResponse.end();
           request.response.close();
+          return;
         }
       }
       if (request.headers()['Expect'] == '100-Continue') {
-        if (that.listeners('checkContinue')) {
+        if (that.listeners('checkContinue').length > 0) {
           // if a client has subscribed to checkContinue events
-          // we let the client handle the message
-          that.emit('checkContinue', new IncomingMessage(request),
-            new ServerResponse(request.response));
+          // we let it handle the message
+          that.emit('checkContinue', incomingMessage, serverResponse);
         } else {
           // otherwise, the server sends a continue message
           // TODO: vert.x automatically does this - but will
           // be changing to accept a checkContinue handler.
         }
       } else {
-        that.emit('request', new IncomingMessage(request), 
-          new ServerResponse(request.response)); 
+        that.emit('request', incomingMessage, serverResponse);
       }
     });
 
@@ -103,10 +107,8 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
 
   that.headers = proxy.headers();
 
-  // I hate this, but dynjs barfs when you check for the 
-  // existence of properties that don't exist on java objects
-  var ServerRequest = org.vertx.java.core.http.impl.DefaultHttpServerRequest;
-  if (proxy.getClass().getName() == ServerRequest.getName()) {
+  if (proxy.getNettyRequest) {
+    // It's a client request message
     var version = proxy.getNettyRequest().getProtocolVersion();
     that.httpMajorVersion = version.majorVersion().toString();
     that.httpMinorVersion = version.minorVersion().toString();
@@ -115,6 +117,7 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.method = proxy.method;
     that.headersSent = that.headers.size() > 0;
   } else {
+    // it's a server response message
     that.statusCode = proxy.statusCode;
     proxy.dataHandler(function(buffer) {
       // TODO: Deal with buffers the right way
@@ -206,7 +209,6 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   var that  = this;
   var proxy = vertxRequest;
   that.end  = proxy.end.bind(proxy);
-
 }
 
 var DefaultRequestOptions = {
@@ -221,6 +223,7 @@ var DefaultRequestOptions = {
 util.inherits(WebServer, EventEmitter);
 util.inherits(ServerResponse, EventEmitter);
 util.inherits(IncomingMessage, EventEmitter);
+util.inherits(ClientRequest, EventEmitter);
 
 module.exports.createServer = function(requestListener) {
   return new WebServer(requestListener);

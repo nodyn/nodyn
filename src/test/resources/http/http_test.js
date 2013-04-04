@@ -77,7 +77,7 @@ function testMessageHeaders() {
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {
       server.close();
-    // TODO: Make this work
+      // TODO: Make this work
 //      vassert.assertEquals("201", response.statusCode.toString());
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.assertNotNull(response.headers['Date']);
@@ -238,17 +238,6 @@ function testConnectEventFired() {
   server.listen(test_options.port, function() {
     test_options.method = 'CONNECT';
     http.request(test_options).end();
-  });
-}
-
-function testConnectMethodClosesConnectionWhenNotListenedFor() {
-  var eventFired = false;
-  var server = http.createServer();
-  server.listen(test_options.port, function() {
-    test_options.method = 'CONNECT';
-    var request = http.request(test_options, function(response) {
-    });
-    request.end();
   });
 }
 
