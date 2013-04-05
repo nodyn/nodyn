@@ -134,15 +134,30 @@ function testHttpVersion() {
 
 function testRequestMethod() {
   var server = http.createServer(function(request, response) {
-    vassert.assertEquals('GET', request.method);
+    vassert.assertEquals('HEAD', request.method);
     response.end();
   });
   server.listen(test_options.port, function() {
+    test_options.method = 'HEAD';
     var request = http.request(test_options, function(response) {
       server.close();
       vassert.testComplete();
     });
     request.end();
+  });
+}
+
+function testGetMethod() {
+  var server = http.createServer(function(request, response) {
+    vassert.assertEquals('GET', request.method);
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    test_options.method = null;
+    http.get(test_options, function(response) {
+      server.close();
+      vassert.testComplete();
+    });
   });
 }
 

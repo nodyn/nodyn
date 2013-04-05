@@ -229,7 +229,14 @@ module.exports.createServer = function(requestListener) {
   return new WebServer(requestListener);
 }
 
-module.exports.request = function(options, callback) {
+module.exports.get = function(options, callback) {
+  options.method = 'GET';
+  var clientRequest = httpRequest(options, callback);
+  clientRequest.end();
+  return clientRequest;
+}
+
+var httpRequest = module.exports.request = function(options, callback) {
   switch(typeof options) {
     case 'undefined':
       options = {};
