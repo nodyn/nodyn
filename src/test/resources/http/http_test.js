@@ -132,6 +132,23 @@ function testHttpVersion() {
   });
 }
 
+function testRequestWrite() {
+  var server = http.createServer(function(request, response) {
+    request.on('data', function(data) {
+      vassert.assertEquals("cheese muffins", data.toString());
+      server.close();
+      vassert.testComplete();
+    });
+
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options, function() {});
+    request.write("cheese muffins");
+    request.end();
+  });
+}
+
 function testRequestMethod() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals('HEAD', request.method);
@@ -158,6 +175,20 @@ function testGetMethod() {
       server.close();
       vassert.testComplete();
     });
+  });
+}
+
+function testRequestSetTimeout() {
+  var server = http.createServer(function(request, response) {
+    // do nothing - we want the connection to timeout
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options);
+    request.setTimeout(10, function() {
+      server.close();
+      vassert.testComplete();
+    });
+    request.end();
   });
 }
 

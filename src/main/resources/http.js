@@ -72,6 +72,11 @@ var WebServer = module.exports.WebServer = function(requestListener) {
       } else {
         that.emit('request', incomingMessage, serverResponse);
       }
+
+      // handle incoming data
+      request.dataHandler(function(buffer) {
+        incomingMessage.emit('data', buffer);
+      });
     });
 
     // listen for incoming connections
@@ -206,9 +211,32 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
 }
 
 var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
-  var that  = this;
-  var proxy = vertxRequest;
-  that.end  = proxy.end.bind(proxy);
+  var that      = this;
+  var proxy     = vertxRequest;
+  var timeoutId = null;
+
+  that.end   = proxy.end.bind(proxy);
+  that.write = proxy.write.bind(proxy);
+  that.abort = that.end; // not really a true abort
+
+  proxy.setChunked(true); // TODO: This should be configurable?
+
+  that.setTimeout = function(msec, timeout) { 
+    if (timeoutId) {
+      vertx.cancelTimer(timeoutId);
+    }
+    if (msec > 0) {
+      if (timeout) {
+        that.on('timeout', timeout);
+      }
+      timeoutId = vertx.setTimer(msec, function() { that.emit('timeout'); });
+    }
+  }
+
+  // TODO: These methods are not available on a 
+  // vert.x HttpClientRequest...
+  that.setNoDelay = function() {}
+  that.setSocketKeepAlive = function() {}
 }
 
 var DefaultRequestOptions = {
