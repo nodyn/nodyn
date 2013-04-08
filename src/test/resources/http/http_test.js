@@ -101,8 +101,7 @@ function testTrailers() {
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.assertEquals('X-Custom-Trailer', response.headers['Trailers']);
       response.on('end', function() {
-        // TODO: Figure out why trailers aren't being sent
-        // vassert.assertEquals('a trailer', response.trailers['X-Custom-Trailer']);
+        vassert.assertEquals('a trailer', response.trailers['X-Custom-Trailer']);
         server.close();
         vassert.testComplete();
       });

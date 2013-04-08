@@ -128,8 +128,9 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   } else {
     // it's a client response message
     that.statusCode = proxy.statusCode;
-    that.trailers = proxy.trailers();
     proxy.endHandler(function() {
+      // make sure we have all the trailers from the response object
+      that.trailers = proxy.trailers();
       that.emit('end');
     });
     proxy.dataHandler(function(buffer) {
