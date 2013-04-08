@@ -2,7 +2,7 @@ var url  = require('url');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter
 
-var WebServer = module.exports.WebServer = function(requestListener) {
+var WebServer = module.exports.Server = function(requestListener) {
   var that   = this;
   that.proxy = vertx.createHttpServer();
 
@@ -77,6 +77,10 @@ var WebServer = module.exports.WebServer = function(requestListener) {
       request.dataHandler(function(buffer) {
         incomingMessage.emit('data', buffer);
       });
+
+      request.endHandler(function() {
+        incomingMessage.emit('end');
+      });
     });
 
     // listen for incoming connections
@@ -113,7 +117,7 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   that.headers = proxy.headers();
 
   if (proxy.getNettyRequest) {
-    // It's a client request message
+    // It's a server request message
     var version = proxy.getNettyRequest().getProtocolVersion();
     that.httpMajorVersion = version.majorVersion().toString();
     that.httpMinorVersion = version.minorVersion().toString();
@@ -122,8 +126,12 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.method = proxy.method;
     that.headersSent = that.headers.size() > 0;
   } else {
-    // it's a server response message
+    // it's a client response message
     that.statusCode = proxy.statusCode;
+    that.trailers = proxy.trailers();
+    proxy.endHandler(function() {
+      that.emit('end');
+    });
     proxy.dataHandler(function(buffer) {
       // TODO: Deal with buffers the right way
       that.emit('data', buffer.toString());
@@ -160,9 +168,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
         that.setHeader(header, headers[header]);
       }
       if (statusCode) {
-        // TODO: Awaiting a fix from rephract
-        //https://github.com/dynjs/dynjs/blob/master/src/test/java/org/dynjs/runtime/java/JavaIntegrationTest.java#L354 
-        // proxy.statusCode = statusCode;
+        proxy.statusCode = statusCode;
       }
       if (reasonPhrase) {
         proxy.statusMessage = reasonPhrase;
@@ -202,6 +208,12 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
 
   that.removeHeader = function(name) {
     proxy.headers().remove(name);
+  }
+
+  that.addTrailers = function(trailers) {
+    for( header in trailers ) {
+      proxy.putTrailer(header, trailers[header]);
+    }
   }
 
   that.writeContinue = function() {

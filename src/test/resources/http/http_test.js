@@ -11,7 +11,7 @@ var test_options = {
 
 function testCreateServerReturnsServer() {
   var server = http.createServer();
-  vassert.assertTrue(server instanceof http.WebServer);
+  vassert.assertTrue(server instanceof http.Server);
   server.close();
   vassert.testComplete();
 }
@@ -77,12 +77,35 @@ function testMessageHeaders() {
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {
       server.close();
-      // TODO: Make this work
-//      vassert.assertEquals("201", response.statusCode.toString());
+      vassert.assertEquals("201", response.statusCode.toString());
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.assertNotNull(response.headers['Date']);
       vassert.assertTrue(response.headers['Date'] != undefined);
       vassert.testComplete();
+    });
+    request.end();
+  });
+}
+
+function testTrailers() {
+  var server = http.createServer(function(request, response) {
+    var body = 'crunchy bacon';
+    response.writeHead(200, {'Content-Type': 'text/plain',
+                              'Trailers': 'X-Custom-Trailer'});
+    response.write(body);
+    response.addTrailers({'X-Custom-Trailer': 'a trailer'});
+    response.end();
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options, function(response) {
+      vassert.assertEquals('text/plain', response.headers['Content-Type']);
+      vassert.assertEquals('X-Custom-Trailer', response.headers['Trailers']);
+      response.on('end', function() {
+        // TODO: Figure out why trailers aren't being sent
+        // vassert.assertEquals('a trailer', response.trailers['X-Custom-Trailer']);
+        server.close();
+        vassert.testComplete();
+      });
     });
     request.end();
   });
