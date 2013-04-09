@@ -114,10 +114,30 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var that  = this;
   var proxy = vertxRequest;
 
+  that.encoding = 'UTF-8';
   that.headers = proxy.headers();
-
   that.pause  = proxy.pause.bind(proxy);
   that.resume = proxy.resume.bind(proxy);
+
+  that.setEncoding = function(enc) {
+    try {
+      that.encoding = java.nio.charset.Charset.forName(enc).toString();
+    } catch(err) {
+      console.error("Cannot find message encoding for: " + enc);
+      console.error(err);
+    }
+  }
+
+  proxy.dataHandler(function(buffer) {
+    that.emit('data', buffer.toString(that.encoding));
+  });
+  proxy.endHandler(function() {
+    if (proxy.trailers) {
+      // make sure we have all the trailers from the response object
+      that.trailers = proxy.trailers();
+    }
+    that.emit('end');
+  });
 
   if (proxy.getNettyRequest) {
     // It's a server request message
@@ -129,21 +149,10 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.url = proxy.uri;
     that.method = proxy.method;
     that.headersSent = that.headers.size() > 0;
-    proxy.endHandler(function() {
-      that.emit('end');
-    });
-    proxy.dataHandler(function(buffer) {
-      that.emit('data', buffer.toString());
-    });
   } else {
     // it's a client response message
     // vert.x HttpClientResponse
     that.statusCode = proxy.statusCode;
-    proxy.endHandler(function() {
-      // make sure we have all the trailers from the response object
-      that.trailers = proxy.trailers();
-      that.emit('end');
-    });
   }
 }
 
@@ -309,10 +318,6 @@ var httpRequest = module.exports.request = function(options, callback) {
 
   var request = proxy.request(options.method, options.path, function(resp) { 
     incomingMessage = new IncomingMessage(resp);
-    resp.dataHandler(function(buffer) {
-      // TODO: Deal with buffers the right way
-      incomingMessage.emit('data', buffer.toString());
-    });
     callback(incomingMessage);
   });
   if (options.headers) {

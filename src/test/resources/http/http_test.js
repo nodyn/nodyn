@@ -110,6 +110,32 @@ function testTrailers() {
   });
 }
 
+function testMessageEncoding() {
+  var expected = 'This is a unicode text: سلام';
+  var result = '';
+
+  var server = http.createServer(function(req, res) {
+    req.setEncoding('utf8');
+    req.on('data', function(chunk) {
+      result += chunk;
+    });
+    res.writeHead(200);
+    res.end('hello world\n');
+  });
+
+  server.listen(test_options.port, function() {
+    test_options.method = 'POST';
+    var request = http.request(test_options, function(res) {
+      res.resume();
+      res.on('end', function() {
+        server.close();
+        vassert.assertEquals(expected, result);
+        vassert.testComplete();
+      });
+    }).end(expected);
+  });
+}
+
 function deferredTestPauseAndResume() {
   var expectedServer = 'Request Body from Client';
   var resultServer = '';
