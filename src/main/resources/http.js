@@ -116,8 +116,12 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
 
   that.headers = proxy.headers();
 
+  that.pause  = proxy.pause.bind(proxy);
+  that.resume = proxy.resume.bind(proxy);
+
   if (proxy.getNettyRequest) {
     // It's a server request message
+    // vert.x HttpServerRequest
     var version = proxy.getNettyRequest().getProtocolVersion();
     that.httpMajorVersion = version.majorVersion().toString();
     that.httpMinorVersion = version.minorVersion().toString();
@@ -125,17 +129,20 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.url = proxy.uri;
     that.method = proxy.method;
     that.headersSent = that.headers.size() > 0;
+    proxy.endHandler(function() {
+      that.emit('end');
+    });
+    proxy.dataHandler(function(buffer) {
+      that.emit('data', buffer.toString());
+    });
   } else {
     // it's a client response message
+    // vert.x HttpClientResponse
     that.statusCode = proxy.statusCode;
     proxy.endHandler(function() {
       // make sure we have all the trailers from the response object
       that.trailers = proxy.trailers();
       that.emit('end');
-    });
-    proxy.dataHandler(function(buffer) {
-      // TODO: Deal with buffers the right way
-      that.emit('data', buffer.toString());
     });
   }
 }
@@ -301,7 +308,12 @@ var httpRequest = module.exports.request = function(options, callback) {
                     .setHost(options.hostname);
 
   var request = proxy.request(options.method, options.path, function(resp) { 
-    callback(new IncomingMessage(resp));
+    incomingMessage = new IncomingMessage(resp);
+    resp.dataHandler(function(buffer) {
+      // TODO: Deal with buffers the right way
+      incomingMessage.emit('data', buffer.toString());
+    });
+    callback(incomingMessage);
   });
   if (options.headers) {
     for (header in options.headers) {

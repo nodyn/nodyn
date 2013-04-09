@@ -110,6 +110,53 @@ function testTrailers() {
   });
 }
 
+function deferredTestPauseAndResume() {
+  var expectedServer = 'Request Body from Client';
+  var resultServer = '';
+  var expectedClient = 'Response Body from Server';
+  var resultClient = '';
+
+  var server = http.createServer(function(req, res) {
+    req.pause();
+    setTimeout(function() {
+      req.resume();
+      //req.setEncoding('utf8');
+      req.on('data', function(chunk) {
+        print("SERVER DATA EMITTED: " + chunk);
+        resultServer += chunk;
+      });
+      req.on('end', function() {
+        print("SERVER WRITING RESPONSE");
+        res.writeHead(200);
+        res.end(expectedClient);
+        print("SERVER RESPONSE ENDED");
+      });
+    }, 100);
+  });
+
+  server.listen(test_options.port, function() {
+    test_options.method = 'POST';
+    var req = http.request(test_options, function(res) {
+      res.pause();
+      setTimeout(function() {
+        res.resume();
+        res.on('data', function(chunk) {
+          print("CLIENT DATA EMITTED: " + chunk);
+          resultClient += chunk;
+        });
+        res.on('end', function() {
+          print("RESPONSE ENDED");
+          server.close();
+          vassert.assertEqual(expectedServer, resultServer);
+          vassert.assertEqual(expectedClient, resultClient);
+          vassert.testComplete();
+        });
+      }, 100);
+    });
+    req.end(expectedServer);
+  });
+}
+
 function testStatusCode() {
   var server = http.createServer(function(request, response) {
     response.end();
