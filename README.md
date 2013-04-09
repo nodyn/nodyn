@@ -79,9 +79,9 @@ provide our own (e.g. Clustering).
 * <strike>Events</strike> - complete[1]
 * File System
 * <strike>Globals</strike> - complete
-* HTTP
+* <strike>HTTP</strike> - Complete except for http.Agent
 * HTTPS
-* Modules - incomplete but functional
+* <strike>Modules</strike> - complete
 * <strike>Net</strike> - complete
 * <strike>OS</strike> - complete[3]
 * <strike>Path</strike> - complete[1]
