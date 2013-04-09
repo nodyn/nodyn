@@ -32,11 +32,35 @@ function testRenameNonExistentFile() {
   vassert.testComplete();
 }
 
+function testWriteFile() {
+  fs.writeFile(tmpFile.getAbsolutePath(),
+    'Now is the winter of our discontent made glorious summer by this son of York',
+    function (err) {
+      if (err) throw err;
+      fs.exists(tmpFile.getAbsolutePath(), function(exists) {
+        vassert.assertEquals(true, exists);
+        // TODO: Check the size and then remove the file
+        // But wait! no way to check the size in vert.x
+        vassert.testComplete();
+      });
+    });
+}
+
+function testExists() {
+  fs.exists(tmpFile.getAbsolutePath(), function(result) {
+    vassert.assertEquals(true, result);
+    fs.exists('/random/something', function(result) {
+      vassert.assertEquals(false, result);
+      vassert.testComplete();
+    });
+  });
+}
+
 function testTruncate() {
   vassert.testComplete();
 }
 
-function testFtruncate() {
+function testTruncateSync() {
   vassert.testComplete();
 }
 
