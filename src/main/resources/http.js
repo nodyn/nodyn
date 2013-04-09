@@ -328,10 +328,9 @@ var httpRequest = module.exports.request = function(options, callback) {
   return new ClientRequest(request);
 }
 
-// TODO: Implement this
-// args are [port], [host]
 module.exports.createClient = function() {
   // This is deprecated. Use http.request instead
+  console.log("http.createClient is deprecated. Please use http.request instead");
 }
 
 var STATUS_CODES = exports.STATUS_CODES = {
