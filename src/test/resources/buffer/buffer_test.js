@@ -21,6 +21,74 @@ function testDefaultConstructor() {
   vassert.testComplete();
 }
 
+function testDefaultConstructorWithEncoding() {
+  var b = new Buffer('cheezy bits', 'ascii');
+  vassert.assertEquals('cheezy bits', b.toString());
+  vassert.testComplete();
+  // TODO: Figure out a better way to test this
+}
+
+function testArrayConstructor() {
+  var b = new Buffer(['b', 'a', 'c', 'o', 'n']);
+  vassert.assertEquals(5, b.length);
+  vassert.assertEquals("bacon", b.toString());
+  vassert.testComplete();
+}
+
+function testSlowBufferIndexedAccess() {
+  var b = new SlowBuffer(1024);
+  vassert.assertEquals(1024, b.length);
+  b[4] = 10;
+  vassert.assertEquals("10", "" + b[4]);
+  vassert.assertEquals(1024, b.length);
+  vassert.testComplete();
+}
+
+function testMakeFastBuffer() {
+  // TODO: really test this
+  vassert.assertEquals('function', typeof SlowBuffer.makeFastBuffer);
+  vassert.testComplete();
+}
+
+function testSlowBufferFill() {
+  var b = new Buffer(4);
+  b.fill(72, 0, 4);
+  vassert.assertEquals(4, b.length);
+  vassert.assertEquals("HHHH", b.toString());
+  vassert.testComplete();
+}
+
+function testSlowBufferOverfull() {
+  var b = new Buffer(4);
+  try {
+    b.fill(1, 0, 5);
+    vassert.assertFail("Buffer.fill should throw");
+  } catch(e) {
+  }
+  vassert.testComplete();
+}
+
+function testSlowBufferSimpleByteLength() {
+  vassert.assertEquals("" + SlowBuffer.byteLength('monkeys'), "7");
+  vassert.testComplete();
+}
+
+function testSlowBufferUnicodeByteLength() {
+  var str = '\u00bd + \u00bc = \u00be';
+  vassert.assertEquals("" + SlowBuffer.byteLength(str, 'utf8'), "12");
+  vassert.testComplete();
+}
+
+function testSlowBufferByteLengthTypeException() {
+  try {
+    SlowBuffer.byteLength(8);
+    vassert.assertFail("SlowBuffer.byteLength should fail");
+  } catch (e) {
+    vassert.assertTrue(e instanceof TypeError);
+  }
+  vassert.testComplete();
+}
+
 function testSlowBufferCopy() {
   var source = new SlowBuffer(4);
   var dest   = new SlowBuffer(4);
