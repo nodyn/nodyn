@@ -32,7 +32,7 @@ exports.networkInterfaces = function() {
   return "NOT IMPLEMENTED";
 }
 
-exports.tmpdir = function() {
+exports.tmpdir = exports.tmpDir = function() {
   return java.lang.System.getProperty("java.io.tmpdir");
 }
 

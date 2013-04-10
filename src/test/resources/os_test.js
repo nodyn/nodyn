@@ -25,6 +25,7 @@ function testEndianness() {
 
 function testTmpDir() {
   vassert.assertEquals(java.lang.System.getProperty("java.io.tmpdir"), os.tmpdir());
+  vassert.assertEquals(java.lang.System.getProperty("java.io.tmpdir"), os.tmpDir());
   vassert.testComplete();
 }
 
