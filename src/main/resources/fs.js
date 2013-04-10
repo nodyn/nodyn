@@ -3,6 +3,8 @@ var Fs = function() {
   var fs = vertx.fileSystem;
 
   this.exists       = fs.exists.bind( vertx.fileSystem );
+  this.readdir      = fs.readDir.bind(vertx.fileSystem);
+  this.readdirSync  = fs.readDirSync.bind(vertx.fileSystem);
   this.rename       = fs.move.bind( vertx.fileSystem );
   this.renameSync   = fs.moveSync.bind( vertx.fileSystem );
   this.truncate     = fs.truncate.bind( vertx.fileSystem );
@@ -35,6 +37,16 @@ var Fs = function() {
     }
 
     fs.writeFile(filename, data, callback);
+  }
+
+  this.mkdir = function(path, mode, callback) {
+    //for now we ignore the mode as vertx api expect a unix perms string
+    //CreateParent boolean will always be false as NodeJS do not support this option
+    vertx.fileSystem.mkdir(path, false, convertModeToString(mode), callback);
+  }
+
+  this.mkdirSync = function(path, mode) {
+    vertx.fileSystem.mkdirSync(path, false, convertModeToString(mode));
   }
 
   var invertAndConvert = function(x){

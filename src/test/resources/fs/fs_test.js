@@ -4,6 +4,7 @@ var fs = require('fs');
 var tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
 var basedir = tmpFile.getParent();
 var newFile = new java.io.File(basedir + "/granola.txt");
+var newDirectory = new java.io.File(basedir + "/waffle-recipes");
 
 function testRename() {
   newFile.delete(); 
@@ -62,6 +63,28 @@ function testTruncate() {
 
 function testTruncateSync() {
   vassert.testComplete();
+}
+
+function testMkdir() {
+  newDirectory.delete();
+  fs.mkdir(basedir + "/waffle-recipes", 0755, function(e) {
+    vassert.assertTrue(newDirectory.exists());
+    vassert.testComplete();
+  })
+}
+
+function testMkdirSync() {
+  newDirectory.delete();
+  fs.mkdirSync(basedir + "/waffle-recipes", 0755);
+  vassert.assertTrue(newDirectory.exists());
+  vassert.testComplete();
+}
+
+function testReaddir() {
+  fs.readdir(basedir, function(e,r) {
+    vassert.assertTrue(r.length>0);
+    vassert.testComplete();
+  })
 }
 
 initTests(this);
