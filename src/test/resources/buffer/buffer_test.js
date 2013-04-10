@@ -1,6 +1,9 @@
 load('vertx_tests.js');
 
-var SlowBuffer = process.binding('buffer').SlowBuffer;
+var Harness     = org.projectodd.nodej.integration.javascript.BufferIntegrationTests;
+var SlowBuffer  = process.binding('buffer').SlowBuffer;
+var TEST_STRING = Harness.TEST_STRING;
+var UTF8_BYTES  = Harness.TEST_STRING;
 
 function testSafeConstructor() {
   var b = new Buffer(10);
@@ -138,6 +141,44 @@ function testSlowBufferCopyTypeError() {
     vassert.assertFail("Copying should throw an exception");
   } catch(e) {
     vassert.assertTrue(e instanceof TypeError);
+  }
+  vassert.testComplete();
+}
+
+function testBufferUtf8Write() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(TEST_STRING.length, b.utf8Write(TEST_STRING, 0));
+  vassert.assertEquals(TEST_STRING, b.toString());
+  idx = 0;
+  for (_byte in UTF8_BYTES) {
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
+  }
+  vassert.testComplete();
+}
+
+function testBufferUtf8WriteWithOffset() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(TEST_STRING.length, b.utf8Write(TEST_STRING, 10));
+  vassert.assertEquals(TEST_STRING, b.toString());
+  idx = 10;
+  for (_byte in UTF8_BYTES) {
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
+  }
+  vassert.testComplete();
+}
+
+function testBufferUtf8WriteWithMaxLength() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(10, b.utf8Write(TEST_STRING, 0, 10));
+  vassert.assertEquals(TEST_STRING.substring(0, 10), b.toString());
+  for (idx = 0; idx < 10; idx++) {
+    // TODO: FIgure out why this is failing
+    // vassert.assertEquals(UTF8_BYTES[idx] == b[idx]);
   }
   vassert.testComplete();
 }

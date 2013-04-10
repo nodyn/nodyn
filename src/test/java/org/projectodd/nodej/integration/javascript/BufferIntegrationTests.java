@@ -1,5 +1,7 @@
 package org.projectodd.nodej.integration.javascript;
 
+import java.io.UnsupportedEncodingException;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -19,8 +21,12 @@ package org.projectodd.nodej.integration.javascript;
  */
 
 public class BufferIntegrationTests extends AbstractJavascriptIntegrationTest {
-    public BufferIntegrationTests() {
+    public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
+    public static byte[] UTF8_BYTE_STRING;
+    
+    public BufferIntegrationTests() throws UnsupportedEncodingException {
         super( "buffer/buffer_test.js" );
+        UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
     }
     
 }
