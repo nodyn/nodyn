@@ -1,5 +1,7 @@
 load('vertx_tests.js');
 
+var SlowBuffer = process.binding('buffer').SlowBuffer;
+
 function testSafeConstructor() {
   var b = new Buffer(10);
   vassert.assertEquals(10, b.length);
@@ -16,6 +18,59 @@ function testSafeConstructor() {
 function testDefaultConstructor() {
   var b = new Buffer('cheezy bits');
   vassert.assertEquals('cheezy bits', b.toString());
+  vassert.testComplete();
+}
+
+function testSlowBufferCopy() {
+  var source = new SlowBuffer(4);
+  var dest   = new SlowBuffer(4);
+  source.fill(72, 0, 3);
+  vassert.assertEquals(2, source.copy(dest, 0, 0, 2));
+  vassert.assertEquals("HH", dest.toString());
+  vassert.testComplete();
+}
+
+function testSlowBufferCopyZeroBytes() {
+  var source = new SlowBuffer(4);
+  var dest   = new SlowBuffer(4);
+  source.fill(72, 0, 3);
+  vassert.assertEquals(0, source.copy(dest, 0, 4, 4));
+  vassert.assertEquals("", dest.toString());
+  vassert.testComplete();
+}
+
+function testSlowBufferCopyWithBadTargetStart() {
+  var source = new SlowBuffer(4);
+  var dest   = new SlowBuffer(4);
+  source.fill(72, 0, 3);
+  try {
+    vassert.assertEquals(0, source.copy(dest, 4, 0, 2));
+    vassert.assertFail("Copying should throw an exception");
+  } catch(e) {
+  }
+  vassert.testComplete();
+}
+
+function testSlowBufferCopyWithBadSourceStartLength() {
+  var source = new SlowBuffer(4);
+  var dest   = new SlowBuffer(4);
+  source.fill(72, 0, 3);
+  try {
+    vassert.assertEquals(0, source.copy(dest, 0, 6, 8));
+    vassert.assertFail("Copying should throw an exception");
+  } catch(e) {
+  }
+  vassert.testComplete();
+}
+
+function testSlowBufferCopyTypeError() {
+  try {
+    var source = new SlowBuffer(4);
+    source.copy(1,2,3,4);
+    vassert.assertFail("Copying should throw an exception");
+  } catch(e) {
+    vassert.assertTrue(e instanceof TypeError);
+  }
   vassert.testComplete();
 }
 
