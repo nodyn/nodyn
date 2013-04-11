@@ -3,7 +3,8 @@ load('vertx_tests.js');
 var Harness     = org.projectodd.nodej.integration.javascript.BufferIntegrationTests;
 var SlowBuffer  = process.binding('buffer').SlowBuffer;
 var TEST_STRING = Harness.TEST_STRING;
-var UTF8_BYTES  = Harness.TEST_STRING;
+var UTF8_BYTES  = Harness.UTF8_BYTE_STRING;
+var ASCII_BYTES = Harness.ASCII_BYTE_STRING;
 
 function testSafeConstructor() {
   var b = new Buffer(10);
@@ -176,11 +177,55 @@ function testBufferUtf8WriteWithMaxLength() {
   b.fill(0);
   vassert.assertEquals(10, b.utf8Write(TEST_STRING, 0, 10));
   vassert.assertEquals(TEST_STRING.substring(0, 10), b.toString());
-  for (idx = 0; idx < 10; idx++) {
-    // TODO: FIgure out why this is failing
-    // vassert.assertEquals(UTF8_BYTES[idx] == b[idx]);
+  idx = 0;
+  for (_byte in UTF8_BYTES) {
+    if (idx == 10) { break; }
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
   }
   vassert.testComplete();
 }
+
+function testBufferAsciiWrite() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(TEST_STRING.length, b.asciiWrite(TEST_STRING, 0));
+  vassert.assertEquals(TEST_STRING, b.toString());
+  idx = 0;
+  for (_byte in ASCII_BYTES) {
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
+  }
+  vassert.testComplete();
+}
+
+function testBufferAsciiWriteWithOffset() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(TEST_STRING.length, b.asciiWrite(TEST_STRING, 10));
+  vassert.assertEquals(TEST_STRING, b.toString());
+  idx = 10;
+  for (_byte in ASCII_BYTES) {
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
+  }
+  vassert.testComplete();
+}
+
+function testBufferAsciiWriteWithMaxLength() {
+  var b = new SlowBuffer(70);
+  b.fill(0);
+  vassert.assertEquals(10, b.asciiWrite(TEST_STRING, 0, 10));
+  vassert.assertEquals(TEST_STRING.substring(0, 10), b.toString());
+  idx = 0;
+  for (_byte in ASCII_BYTES) {
+    if (idx == 10) { break; }
+    vassert.assertEquals(_byte, b[idx]);
+    idx = idx+1;
+  }
+  vassert.testComplete();
+}
+
+// TODO: Test Buffer.binaryWrite
 
 initTests(this);

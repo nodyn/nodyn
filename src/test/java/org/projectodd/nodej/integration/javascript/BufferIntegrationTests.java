@@ -23,10 +23,12 @@ import java.io.UnsupportedEncodingException;
 public class BufferIntegrationTests extends AbstractJavascriptIntegrationTest {
     public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
     public static byte[] UTF8_BYTE_STRING;
+    public static byte[] ASCII_BYTE_STRING;
     
     public BufferIntegrationTests() throws UnsupportedEncodingException {
         super( "buffer/buffer_test.js" );
         UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
+        UTF8_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
     }
     
 }
