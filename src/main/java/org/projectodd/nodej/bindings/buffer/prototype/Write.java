@@ -11,7 +11,7 @@ public class Write extends AbstractNativeFunction {
     private final Buffer.Encoding encoding;
     
     public Write(GlobalObject globalObject, Buffer.Encoding encoding) {
-        super(globalObject, "string", "offset", "[maxLength]");
+        super(globalObject, "string", "offset", "[maxLength]", "[encoding]");
         this.encoding = encoding;
     }
 

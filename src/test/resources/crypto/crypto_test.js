@@ -17,4 +17,12 @@ function testHashUpdate() {
   vassert.testComplete();
 }
 
+function testHashDigest() {
+  var hash = crypto.createHash('sha1');
+  hash.update('Now is the winter of our discontent ');
+  hash.update('made glorious summer');
+  vassert.assertEquals('2365c163a22c69f11c2394ee6064fcfec1d19284', hash.digest('hex'));
+  vassert.testComplete();
+}
+
 initTests(this);

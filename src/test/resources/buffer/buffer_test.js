@@ -39,6 +39,12 @@ function testArrayConstructor() {
   vassert.testComplete();
 }
 
+function deferredtestBufferWrite() {
+  b = new Buffer(256);
+  len = b.write('\u00bd + \u00bc = \u00be', 0);
+  print(len + " bytes: " + b.toString('utf8', 0, len));
+}
+
 function testSlowBufferIndexedAccess() {
   var b = new SlowBuffer(1024);
   vassert.assertEquals(1024, b.length);
