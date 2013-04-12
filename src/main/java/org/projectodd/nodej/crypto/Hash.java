@@ -50,11 +50,15 @@ public class Hash {
     private static String formatter(String algorithm) {
         return algorithm.toLowerCase().replaceFirst("sha", "$0-");
     }
-    
+
     private static Encoder encoderFor(String nodeName) {
-        switch(nodeName) {
-        case "binary": return Encoder.RAW;
-        case "hex": return Encoder.HEX;
+        switch (nodeName) {
+            case "binary":
+                return Encoder.RAW;
+            case "hex":
+                return Encoder.HEX;
+            case "base64":
+                return Encoder.BASE64;
         }
         return Encoder.RAW;
     }

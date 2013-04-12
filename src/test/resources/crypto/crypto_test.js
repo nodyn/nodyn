@@ -10,19 +10,19 @@ function testCreateHash() {
   vassert.testComplete();
 }
 
+function testMD5HashDigest() {
+    var hash = crypto.createHash('md5');
+    hash.update('Now is the winter of our discontent ');
+    hash.update('made glorious summer');
+    vassert.assertEquals('74402c8710d5107209ee554e2e11bcf7', hash.digest('hex'));
+    vassert.testComplete();
+}
+
 function testSHA1HashDigest() {
   var hash = crypto.createHash('sha1');
   hash.update('Now is the winter of our discontent ');
   hash.update('made glorious summer');
   vassert.assertEquals('2365c163a22c69f11c2394ee6064fcfec1d19284', hash.digest('hex'));
-  vassert.testComplete();
-}
-
-function testMD5HashDigest() {
-  var hash = crypto.createHash('md5');
-  hash.update('Now is the winter of our discontent ');
-  hash.update('made glorious summer');
-  vassert.assertEquals('74402c8710d5107209ee554e2e11bcf7', hash.digest('hex'));
   vassert.testComplete();
 }
 
@@ -40,6 +40,38 @@ function testSHA512HashDigest() {
   hash.update('made glorious summer');
   vassert.assertEquals('e62168d80ddc7d992053122b166de7d8db0112422baf4b1255b7421789fd595a3be341c2740153579456fdecf8264a7fc2a0c7aa6851ae531b36ebe94ad16b61', hash.digest('hex'));
   vassert.testComplete();
+}
+
+function testBase64MD5HashDigest() {
+    var hash = crypto.createHash('md5');
+    hash.update('Now is the winter of our discontent ');
+    hash.update('made glorious summer');
+    vassert.assertEquals('dEAshxDVEHIJ7lVOLhG89w==', hash.digest('base64'));
+    vassert.testComplete();
+}
+
+function testSHA1HashDigest() {
+    var hash = crypto.createHash('sha1');
+    hash.update('Now is the winter of our discontent ');
+    hash.update('made glorious summer');
+    vassert.assertEquals('I2XBY6IsafEcI5TuYGT8/sHRkoQ=', hash.digest('base64'));
+    vassert.testComplete();
+}
+
+function testBase64SHA256HashDigest() {
+    var hash = crypto.createHash('sha256');
+    hash.update('Now is the winter of our discontent ');
+    hash.update('made glorious summer');
+    vassert.assertEquals('RToH6LcSTgyxNrfvg45t14suSUTw5VRrgC3mt3S+wug=', hash.digest('base64'));
+    vassert.testComplete();
+}
+
+function testBase64SHA512HashDigest() {
+    var hash = crypto.createHash('sha512');
+    hash.update('Now is the winter of our discontent ');
+    hash.update('made glorious summer');
+    vassert.assertEquals('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==', hash.digest('base64'));
+    vassert.testComplete();
 }
 
 initTests(this);
