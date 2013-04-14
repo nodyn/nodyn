@@ -4,7 +4,7 @@ import java.nio.charset.Charset;
 
 public interface Encoder {
 
-    public static final Charset CHARSET = Charset.forName("US-ASCII");
+    public static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
 
     public static final Hex HEX = new Hex();
     public static final Raw RAW = new Raw();
