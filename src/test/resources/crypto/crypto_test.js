@@ -74,4 +74,13 @@ function testBase64SHA512HashDigest() {
     vassert.testComplete();
 }
 
+function testCreateHmac() {
+    vassert.assertTrue(typeof crypto.createHmac == 'function');
+    var key = 'gollum';
+    var hmac = crypto.createHmac('sha1', key);
+    vassert.assertTrue(hmac instanceof crypto.Hmac);
+    vassert.assertEquals('sha1', hmac.algorithm);
+    vassert.testComplete();
+}
+
 initTests(this);
