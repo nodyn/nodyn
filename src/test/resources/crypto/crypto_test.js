@@ -76,10 +76,82 @@ function testBase64SHA512HashDigest() {
 
 function testCreateHmac() {
     vassert.assertTrue(typeof crypto.createHmac == 'function');
-    var key = 'gollum';
+    var key = 'Sweet home Alabama';
     var hmac = crypto.createHmac('sha1', key);
     vassert.assertTrue(hmac instanceof crypto.Hmac);
     vassert.assertEquals('sha1', hmac.algorithm);
+    vassert.testComplete();
+}
+
+function testMD5HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('md5', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('f41e6884025c2ba61268df653ce16cb3', hmac.digest('hex'));
+    vassert.testComplete();
+}
+
+function testSHA1HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha1', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('6f0dffb1b3cf8b612764873223eeb04ad81fb507', hmac.digest('hex'));
+    vassert.testComplete();
+}
+
+function testSHA256HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha256', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('a2b7a34b1cee5c1db743ba53d5a9efb846e237d511404d0dfa63aca5fd1a286f', hmac.digest('hex'));
+    vassert.testComplete();
+}
+
+function testSHA512HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha512', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('35c01c110092e5dcf9dcf4ca73dfd2ebc1e7b6a69de8036336b3afec8027e74858ebda7ff5061d8b8985189c6061d65c0c9a05c06c6b972d6113743e578faa17', hmac.digest('hex'));
+    vassert.testComplete();
+}
+
+function testBase64MD5HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('md5', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('9B5ohAJcK6YSaN9lPOFssw==', hmac.digest('base64'));
+    vassert.testComplete();
+}
+
+function testBase64SHA1HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha1', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('bw3/sbPPi2EnZIcyI+6wStgftQc=', hmac.digest('base64'));
+    vassert.testComplete();
+}
+
+function testBase64SHA1HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha256', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('orejSxzuXB23Q7pT1anvuEbiN9URQE0N+mOspf0aKG8=', hmac.digest('base64'));
+    vassert.testComplete();
+}
+
+function testBase64SHA1HmacDigest() {
+    var key = 'Sweet home Alabama';
+    var hmac = crypto.createHmac('sha512', key);
+    hmac.update('Where the skies are so blue ');
+    hmac.update('Now we all did what we could do');
+    vassert.assertEquals('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==', hmac.digest('base64'));
     vassert.testComplete();
 }
 

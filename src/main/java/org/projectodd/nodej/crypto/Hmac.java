@@ -1,25 +1,33 @@
 package org.projectodd.nodej.crypto;
 
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import org.projectodd.nodej.crypto.encoders.Encoder;
 
-public class Hash {
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
-    private MessageDigest digest;
+public class Hmac {
 
-    public Hash(String algorithm) {
+    private final Mac hmac;
+    private final SecretKeySpec secretKey;
+
+    public Hmac(String algorithm, String key) {
         try {
-            this.digest = MessageDigest.getInstance(formatter(algorithm));
+            algorithm = formatter(algorithm);
+            this.hmac = Mac.getInstance(algorithm);
+            this.secretKey = new SecretKeySpec(key.getBytes(), algorithm);
+            this.hmac.init(this.secretKey);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hash algorithm not found: " + algorithm);
+            throw new RuntimeException("Hmac algorithm not found: " + algorithm);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid key: " + algorithm);
         }
     }
 
     public void update(String message, String encoding) {
-        this.digest.update(message.getBytes(Charset.forName(encoding)));
+        this.hmac.update(message.getBytes(Charset.forName(encoding)));
     }
 
     public void update(String message) {
@@ -28,7 +36,7 @@ public class Hash {
         // see how far that gets us. Soon, I'm sure, we'll need to rip out
         // the Buffer classes from this project and move entirely to using
         // vert.x Buffers.  It is truly amazing that all six lines of this
-        // comment have the same number of characters, isn't it?  Amazing! 
+        // comment have the same number of characters, isn't it?  Amazing!
         this.update(message, "UTF-8");
     }
 
@@ -39,16 +47,16 @@ public class Hash {
     }
 
     public String digest(String encoding) throws NoSuchAlgorithmException {
-        return this.digest(Hash.encoderFor(encoding));
+        return this.digest(Hmac.encoderFor(encoding));
     }
 
     public String digest(Encoder encoder) throws NoSuchAlgorithmException {
-        return encoder.encode(digest.digest());
+        return encoder.encode(hmac.doFinal());
     }
 
-    // Translate SHA algorithm names between Node.js and Java
+    // Translate Hmac algorithm names between Node.js and Java
     private static String formatter(String algorithm) {
-        return algorithm.toLowerCase().replaceFirst("sha", "$0-");
+        return String.format("Hmac%s", algorithm.toLowerCase());
     }
 
     private static Encoder encoderFor(String nodeName) {

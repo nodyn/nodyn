@@ -23,17 +23,10 @@ var Hmac = module.exports.Hmac = function(algorithm, key) {
     var that = this;
     that.algorithm = algorithm;
     that.buffer    = ""; // TODO: Use a real buffer
+    that.proxy     = new org.projectodd.nodej.crypto.Hmac(algorithm, key);
 
-    that.update = function(input, encoding) {
-        // TODO: Deal with encoding (again)
-        // and a real buffer
-        that.buffer = that.buffer + input;
-    }
-
-    that.digest = function(encoding) {
-        // TODO: Duh
-        return that.buffer;
-    }
+    that.update = that.proxy.update.bind(that.proxy);
+    that.digest = that.proxy.digest.bind(that.proxy);
 }
 
 // TODO: 
