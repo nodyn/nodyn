@@ -29,7 +29,7 @@ public class Hash {
         // the Buffer classes from this project and move entirely to using
         // vert.x Buffers.  It is truly amazing that all six lines of this
         // comment have the same number of characters, isn't it?  Amazing! 
-        this.update(message, "UTF-8");
+        this.update(message, Encoder.DEFAULT_ENCODING.toString());
     }
 
     public String digest() throws NoSuchAlgorithmException {
