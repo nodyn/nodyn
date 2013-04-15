@@ -1,27 +1,37 @@
 package org.projectodd.nodej.crypto;
 
+import org.projectodd.nodej.crypto.encoders.Encoder;
+import static org.projectodd.nodej.crypto.Util.Type;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static org.projectodd.nodej.crypto.Util.Type;
-import org.projectodd.nodej.crypto.encoders.Encoder;
+public class Hmac {
 
-public class Hash {
+    private final Mac hmac;
 
-    private MessageDigest digest;
-
-    public Hash(String algorithm) {
+    public Hmac(String algorithm, String key) {
         try {
-            algorithm = Util.formatter(algorithm, Type.HASH);
-            this.digest = MessageDigest.getInstance(algorithm);
+            algorithm = Util.formatter(algorithm, Type.HMAC);
+            this.hmac = Mac.getInstance(algorithm);
+            computeKey(algorithm, key);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hash algorithm not found: " + algorithm);
+            throw new RuntimeException("Hmac algorithm not found: " + algorithm);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid key: " + algorithm);
         }
     }
 
+    private void computeKey(String algorithm, String key) throws InvalidKeyException {
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), algorithm);
+        this.hmac.init(secretKey);
+    }
+
     public void update(String message, String encoding) {
-        this.digest.update(message.getBytes(Charset.forName(encoding)));
+        this.hmac.update(message.getBytes(Charset.forName(encoding)));
     }
 
     public void update(String message) {
@@ -30,8 +40,8 @@ public class Hash {
         // see how far that gets us. Soon, I'm sure, we'll need to rip out
         // the Buffer classes from this project and move entirely to using
         // vert.x Buffers.  It is truly amazing that all six lines of this
-        // comment have the same number of characters, isn't it?  Amazing! 
-        this.update(message, Encoder.DEFAULT_ENCODING.toString());
+        // comment have the same number of characters, isn't it?  Amazing!
+        this.update(message, "UTF-8");
     }
 
     public String digest() throws NoSuchAlgorithmException {
@@ -45,6 +55,6 @@ public class Hash {
     }
 
     public String digest(Encoder encoder) throws NoSuchAlgorithmException {
-        return encoder.encode(digest.digest());
+        return encoder.encode(hmac.doFinal());
     }
 }
