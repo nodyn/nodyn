@@ -13,6 +13,8 @@ process.stderr = {
   }
 }
 
+Buffer = require('Buffer').Buffer;
+
 setTimeout = function() {
   var args = Array.prototype.slice.call(arguments);
 

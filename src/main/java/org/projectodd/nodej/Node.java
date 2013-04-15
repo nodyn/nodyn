@@ -10,8 +10,8 @@ public class Node {
     private String filename = "<eval>";
 
     public Node(final ExecutionContext context) {
-        GlobalObject globalObject = context.getGlobalObject();
-        globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
+        //GlobalObject globalObject = context.getGlobalObject();
+        //globalObject.defineGlobalProperty("Buffer", new BufferType(globalObject));
     }
     
     public String getDirname() {

@@ -3,6 +3,7 @@ package org.projectodd.nodej;
 import java.io.FileNotFoundException;
 
 import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
@@ -29,8 +30,14 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         @Override
         public GlobalObject newGlobalObject(final DynJS runtime) {
             GlobalObject global = super.newGlobalObject(runtime);
-            global.defineGlobalProperty("process", new Process(global, null));
-            global.defineGlobalProperty("Buffer", new BufferType(global));
+            Process process = new Process(global, null);
+            BufferType bufferType = new BufferType(global);
+            DynObject nodeJ = new DynObject(global);
+            nodeJ.put("process", process);
+            nodeJ.put("buffer", bufferType);
+            global.defineGlobalProperty("nodej", nodeJ);
+            global.defineGlobalProperty("process", process); // backwards compat
+            global.defineGlobalProperty("Buffer", bufferType); //
             return global;
         }
     }
