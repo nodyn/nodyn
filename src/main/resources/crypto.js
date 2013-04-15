@@ -15,6 +15,20 @@ var Hash = module.exports.Hash = function(algorithm) {
   that.digest = that.proxy.digest.bind(that.proxy);
 }
 
+module.exports.createHmac = function(algorithm, key) {
+    return new Hmac(algorithm, key);
+}
+
+var Hmac = module.exports.Hmac = function(algorithm, key) {
+    var that = this;
+    that.algorithm = algorithm;
+    that.buffer    = ""; // TODO: Use a real buffer
+    that.proxy     = new org.projectodd.nodej.crypto.Hmac(algorithm, key);
+
+    that.update = that.proxy.update.bind(that.proxy);
+    that.digest = that.proxy.digest.bind(that.proxy);
+}
+
 // TODO: 
 // The node.js API has changed, and a Hash is now a Stream
 // As part of this change, node.js introduced a bunch of new
