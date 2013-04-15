@@ -160,6 +160,6 @@ public class Hex implements Encoder {
      */
     @Override
     public String toString() {
-        return super.toString() + "[charsetName=" + CHARSET + "]";
+        return super.toString() + "[charsetName=" + DEFAULT_ENCODING + "]";
     }
 }
