@@ -1,6 +1,7 @@
 package org.projectodd.nodej.crypto;
 
 import org.projectodd.nodej.crypto.encoders.Encoder;
+import static org.projectodd.nodej.crypto.Util.Type;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,19 +12,22 @@ import java.security.NoSuchAlgorithmException;
 public class Hmac {
 
     private final Mac hmac;
-    private final SecretKeySpec secretKey;
 
     public Hmac(String algorithm, String key) {
         try {
-            algorithm = formatter(algorithm);
+            algorithm = Util.formatter(algorithm, Type.HMAC);
             this.hmac = Mac.getInstance(algorithm);
-            this.secretKey = new SecretKeySpec(key.getBytes(), algorithm);
-            this.hmac.init(this.secretKey);
+            computeKey(algorithm, key);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Hmac algorithm not found: " + algorithm);
         } catch (InvalidKeyException e) {
             throw new RuntimeException("Invalid key: " + algorithm);
         }
+    }
+
+    private void computeKey(String algorithm, String key) throws InvalidKeyException {
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), algorithm);
+        this.hmac.init(secretKey);
     }
 
     public void update(String message, String encoding) {
@@ -47,27 +51,10 @@ public class Hmac {
     }
 
     public String digest(String encoding) throws NoSuchAlgorithmException {
-        return this.digest(Hmac.encoderFor(encoding));
+        return this.digest(Util.encoderFor(encoding));
     }
 
     public String digest(Encoder encoder) throws NoSuchAlgorithmException {
         return encoder.encode(hmac.doFinal());
-    }
-
-    // Translate Hmac algorithm names between Node.js and Java
-    private static String formatter(String algorithm) {
-        return String.format("Hmac%s", algorithm.toLowerCase());
-    }
-
-    private static Encoder encoderFor(String nodeName) {
-        switch (nodeName) {
-            case "binary":
-                return Encoder.RAW;
-            case "hex":
-                return Encoder.HEX;
-            case "base64":
-                return Encoder.BASE64;
-        }
-        return Encoder.RAW;
     }
 }

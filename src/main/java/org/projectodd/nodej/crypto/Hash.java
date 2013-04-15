@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static org.projectodd.nodej.crypto.Util.Type;
 import org.projectodd.nodej.crypto.encoders.Encoder;
 
 public class Hash {
@@ -12,7 +13,8 @@ public class Hash {
 
     public Hash(String algorithm) {
         try {
-            this.digest = MessageDigest.getInstance(formatter(algorithm));
+            algorithm = Util.formatter(algorithm, Type.HASH);
+            this.digest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Hash algorithm not found: " + algorithm);
         }
@@ -39,27 +41,10 @@ public class Hash {
     }
 
     public String digest(String encoding) throws NoSuchAlgorithmException {
-        return this.digest(Hash.encoderFor(encoding));
+        return this.digest(Util.encoderFor(encoding));
     }
 
     public String digest(Encoder encoder) throws NoSuchAlgorithmException {
         return encoder.encode(digest.digest());
-    }
-
-    // Translate SHA algorithm names between Node.js and Java
-    private static String formatter(String algorithm) {
-        return algorithm.toLowerCase().replaceFirst("sha", "$0-");
-    }
-
-    private static Encoder encoderFor(String nodeName) {
-        switch (nodeName) {
-            case "binary":
-                return Encoder.RAW;
-            case "hex":
-                return Encoder.HEX;
-            case "base64":
-                return Encoder.BASE64;
-        }
-        return Encoder.RAW;
     }
 }
