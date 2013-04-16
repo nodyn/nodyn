@@ -26,7 +26,7 @@ public class Copy extends AbstractNativeFunction {
         if (args[3] == Types.UNDEFINED) {
             sourceEnd = ((Long) source.get(context, "length")).intValue();
         }
-        return target.copy(source.getBackingArray(), targetStart, sourceStart, sourceEnd);
+        return target.copy(source, targetStart, sourceStart, sourceEnd);
     }
 
 }

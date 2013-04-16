@@ -9,7 +9,6 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodej.bindings.buffer.Buffer.Encoding;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
 import org.projectodd.nodej.bindings.buffer.prototype.Slice;
@@ -82,25 +81,27 @@ public class Buffer extends DynObject {
         }
     }
     
-    public long copy(Object[] objects, int targetStart, int sourceStart, int sourceEnd) {
+    public long copy(Buffer source, int targetStart, int sourceStart, int sourceEnd) {
         if (sourceEnd == sourceStart) {
             return 0L;
         }
         if (sourceStart > sourceEnd) {
             throw new ThrowException(null, "sourceEnd < sourceStart");
         }
-        if (sourceStart >= objects.length) {
+        if (sourceStart >= source.length) {
             throw new ThrowException(null, "sourceStart out of bounds");
         }
-        if (sourceEnd > objects.length) {
+        if (sourceEnd > source.length) {
             throw new ThrowException(null, "sourceEnd out of bounds");
         }
-        int counter = 0;
-        for (int i = sourceStart; i < sourceEnd; i++) {
-            putValueAtIndex(null, objects[i], targetStart+counter);
-            counter++;
+        
+        int l = sourceEnd - sourceStart;
+        if (targetStart > this.length - l) {
+            this.length = this.length + l;
+            put("length", this.length);
         }
-        return counter;
+        delegate.setBuffer(targetStart, source.delegate.getBuffer(sourceStart, sourceEnd));
+        return sourceEnd - sourceStart;
     }
     
     @Override
@@ -114,7 +115,7 @@ public class Buffer extends DynObject {
         if (isIndex(name)) {
             Long numberValue = Types.toUint32(context, value);
             int val = (numberValue.byteValue() & 0xff);
-            this.delegate.setInt(possibleIndex.intValue(), val);
+            delegate.setInt(possibleIndex.intValue(), val);
         }
         super.put(context, name, value, shouldThrow);
     }
@@ -134,18 +135,17 @@ public class Buffer extends DynObject {
         return super.getOwnProperty(context, name);
     }
     
-    public void write(String str) {
-        this.delegate.appendString(str, Buffer.getCharset(encoding));
-    }
-
     public long write(String string, Encoding encoding, int offset, int maxLength) {
-        int length = string.length();
+        int length = Math.min(maxLength, string.length());
         if (length == 0) { return 0; }
-        length = Math.min(length, maxLength);
-        this.delegate.setString(offset, string.substring(0, length), Buffer.getCharset(encoding));
-        // TODO: Return the number of bytes written
-        // https://github.com/vert-x/vert.x/issues/559
-        return length;
+        try {
+            byte[] bytes = string.substring(0, length).getBytes(Buffer.getCharset(encoding));
+            delegate.setBytes(offset, bytes);
+            put("_charsWritten", length);
+            return bytes.length;
+        } catch (UnsupportedEncodingException e) {
+        }
+        return 0;
     }
 
 
