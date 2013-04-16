@@ -6,7 +6,7 @@ import org.dynjs.runtime.GlobalObject;
 
 public class ToString extends AbstractNativeFunction {
     
-   public ToString(GlobalObject globalObject) {
+    public ToString(GlobalObject globalObject) {
         super(globalObject);
     }
 

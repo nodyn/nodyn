@@ -15,7 +15,6 @@ public class Binding extends AbstractNativeFunction {
     
     public Binding(GlobalObject globalObject) {
         super(globalObject);
-//        bindings.put("buffer", new Buffer(globalObject));
         bindings.put("constants", new Constants(globalObject));
         bindings.put("QueryString", new QueryString(globalObject));
     }

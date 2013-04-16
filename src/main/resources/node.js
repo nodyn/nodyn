@@ -14,6 +14,7 @@ process.stderr = {
 }
 
 Buffer = require('Buffer').Buffer;
+SlowBuffer = Buffer.SlowBuffer;
 
 setTimeout = function() {
   var args = Array.prototype.slice.call(arguments);

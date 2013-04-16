@@ -3,10 +3,13 @@ package org.projectodd.nodej.bindings.buffer;
 import java.io.UnsupportedEncodingException;
 
 import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.DynArray;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
+import org.projectodd.nodej.bindings.buffer.Buffer.Encoding;
 import org.projectodd.nodej.bindings.buffer.prototype.Copy;
 import org.projectodd.nodej.bindings.buffer.prototype.Fill;
 import org.projectodd.nodej.bindings.buffer.prototype.Slice;
@@ -16,37 +19,66 @@ import org.projectodd.nodej.bindings.buffer.prototype.Write;
 public class Buffer extends DynObject {
     public enum Encoding {
         // Implemented
-        UTF8, ASCII, 
+        UTF8, ASCII, UTF16LE, UCS2,
         // Not implemented
-        BASE64, BINARY, HEX, UTF16LE, UCS2
+        BASE64, BINARY, HEX
     }
 
+    public long _charsWritten = 0;
+    private long length = 0;
+    
     private GlobalObject global;
+    private Encoding encoding = Encoding.UTF8;
+    private org.vertx.java.core.buffer.Buffer delegate;
     
     public Buffer(final GlobalObject globalObject, long length) {
+        this(globalObject, "", length, Encoding.UTF8);
+    }
+
+    public Buffer(GlobalObject globalObject, DynArray items) {
+        this(globalObject, "", Types.toUint32(null, items.get(null, "length")), Encoding.UTF8);
+        for(int i=0; i<length; i++) {
+            String c = Types.toString(null, items.get(null, "" + i));
+            delegate.appendString(c);
+        }
+    }
+
+    public Buffer(final GlobalObject globalObject, String str, long length, Encoding encoding) {
         super(globalObject);
-        this.global = globalObject;
-        setBackingArray(new Object[(int) length]);
-        setClassName("SlowBuffer");
-        put(null, "length", length, false);
-        defineReadOnlyProperty(globalObject, "copy", new Copy(globalObject));
-        defineReadOnlyProperty(globalObject, "fill", new Fill(globalObject));
-        defineReadOnlyProperty(globalObject, "utf8Write", new Write(globalObject, Buffer.Encoding.UTF8));
-        defineReadOnlyProperty(globalObject, "asciiWrite", new Write(globalObject, Buffer.Encoding.ASCII));
-        defineReadOnlyProperty(globalObject, "toString", new ToString(globalObject));
-        defineReadOnlyProperty(globalObject, "utf8Slice", new Slice(globalObject, Buffer.Encoding.UTF8));
-        defineReadOnlyProperty(globalObject, "asciiSlice", new Slice(globalObject, Buffer.Encoding.ASCII));
+        this.global   = globalObject;
+        this.encoding = encoding;
+        this.length   = length;
+        this.delegate = new org.vertx.java.core.buffer.Buffer(str, Buffer.getCharset(encoding));
+        initializeProperties();
     }
     
+    public static Encoding getEncoding(String encoding) {
+        switch(encoding.toLowerCase()) {
+        case "utf8":  case "utf-8":      return Encoding.UTF8;
+        case "ascii": case "us-ascii":   return Encoding.ASCII;
+        case "ucf2":  case "ucf-2":
+        case "utf16le": case "utf-16le": return Encoding.UTF16LE;
+        }
+        return Encoding.UTF8;
+    }
+    
+    public static String getCharset(Encoding encoding) {
+        String charset = "UTF-8";
+        switch(encoding) {
+        case UTF8: 
+            break;
+        case ASCII:
+            charset = "US-ASCII";
+            break;
+        case UTF16LE:
+            charset = "UTF-16LE";
+        }
+        return charset;
+    }
+
     public void fill(byte b, int offset, int end) {
-        if (offset >= getBuffer().length ) {
-            return;
-        }
-        if (end > getBuffer().length) {
-            throw new ThrowException(null, "end cannot be longer than length");
-        }
         for (int i=offset; i < end; i++) {
-            putValueAtIndex(null, b, i);
+            this.delegate.setByte(i, b);
         }
     }
     
@@ -56,9 +88,6 @@ public class Buffer extends DynObject {
         }
         if (sourceStart > sourceEnd) {
             throw new ThrowException(null, "sourceEnd < sourceStart");
-        }
-        if (targetStart >= getBuffer().length) {
-            throw new ThrowException(null, "targetStart out of bounds");
         }
         if (sourceStart >= objects.length) {
             throw new ThrowException(null, "sourceStart out of bounds");
@@ -75,73 +104,81 @@ public class Buffer extends DynObject {
     }
     
     @Override
-    protected void putValueAtIndex(ExecutionContext context, Object value, int index) {
-        Long numberValue = Types.toUint32(context, value);
-        this.getBackingArray()[index] = numberValue.byteValue() & 0xff;
+    public String toString() {
+        return delegate.toString(Buffer.getCharset(encoding));
+    }
+
+    @Override
+    public void put(ExecutionContext context, final String name, final Object value, final boolean shouldThrow) {
+        Number possibleIndex = Types.toNumber(context, name);
+        if (isIndex(name)) {
+            Long numberValue = Types.toUint32(context, value);
+            int val = (numberValue.byteValue() & 0xff);
+            this.delegate.setInt(possibleIndex.intValue(), val);
+        }
+        super.put(context, name, value, shouldThrow);
     }
     
     @Override
-    public String toString() {
-        // There has to be a better way
-        Object[] objects = getBackingArray();
-        byte[] bytes = new byte[objects.length];
-        int i = 0;
-        for(Object b: objects) {
-            if (b != null) {
-                bytes[i++] = ((Integer)b).byteValue();
-            }
+    public Object getOwnProperty(ExecutionContext context, String name) {
+        if (isIndex(name)) {
+            Integer value = this.delegate.getInt(Types.toInteger(context, name).intValue());
+            PropertyDescriptor desc = new PropertyDescriptor();
+            desc.set(name, value);
+            desc.setConfigurable(true);
+            desc.setEnumerable(true);
+            desc.setWritable(true);
+            desc.setValue(value);
+            return desc;
         }
-        try {
-            return new String(bytes, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return super.toString();
+        return super.getOwnProperty(context, name);
     }
     
-    public Object[] getBuffer() {
-        return super.getBackingArray();
+    public void write(String str) {
+        this.delegate.appendString(str, Buffer.getCharset(encoding));
     }
 
     public long write(String string, Encoding encoding, int offset, int maxLength) {
         int length = string.length();
         if (length == 0) { return 0; }
-        if (length > 0 && offset > getBuffer().length) {
-            throw new ThrowException(null, "Offset is out of bounds");
-        }
-        String charset = "UTF-8";
-        switch(encoding) {
-        case UTF8: 
-            break;
-        case ASCII:
-            charset = "US-ASCII";
-            break;
-        }
-        try {
-            return this.copy(getByteObjectArray(string, charset), offset, 0, maxLength); 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        length = Math.min(length, maxLength);
+        this.delegate.setString(offset, string.substring(0, length), Buffer.getCharset(encoding));
+        // TODO: Return the number of bytes written
+        // https://github.com/vert-x/vert.x/issues/559
+        return length;
     }
 
-
-    public static Byte[] getByteObjectArray(String string, String charset) throws UnsupportedEncodingException {
-        byte[] stringBytes = string.getBytes(charset);
-        Byte[] fancyBytes = new Byte[stringBytes.length];
-        int i = 0;
-        for(byte b: stringBytes) {
-            fancyBytes[i++] = new Byte(b);
-        }
-        return fancyBytes;
-    }
 
     // TODO: Or not todo, that is the question... node.js slices reference
     // *the same* underlying memory, so changes to one buffer are reflected
     // in its slices. Is this a feature or side effect?
     public Object slice(int start, int end) {
         Buffer buffer = new Buffer(this.global, end-start);
-        buffer.copy(this.getBuffer(), 0, start, end);
+//        buffer.copy(this.getBuffer(), 0, start, end);
         return buffer;
     }
+    
+    public long getLength() {
+        return this.length;
+    }
+
+    private void initializeProperties() {
+        setClassName("Buffer");
+        put(null, "length", length, false);
+        defineReadOnlyProperty(global, "delegate", delegate);
+        defineReadOnlyProperty(global, "copy", new Copy(global));
+        defineReadOnlyProperty(global, "fill", new Fill(global));
+        defineReadOnlyProperty(global, "write", new Write(global, this.encoding));
+        defineReadOnlyProperty(global, "utf8Write", new Write(global, Buffer.Encoding.UTF8));
+        defineReadOnlyProperty(global, "asciiWrite", new Write(global, Buffer.Encoding.ASCII));
+        defineReadOnlyProperty(global, "toString", new ToString(global));
+        defineReadOnlyProperty(global, "utf8Slice", new Slice(global, Buffer.Encoding.UTF8));
+        defineReadOnlyProperty(global, "asciiSlice", new Slice(global, Buffer.Encoding.ASCII));
+    }
+    
+    private boolean isIndex(String name) {
+        Double possibleIndex = Types.toNumber(null, name).doubleValue();
+        return (!possibleIndex.isInfinite() && !possibleIndex.isNaN());
+    }
+    
 }

@@ -21,7 +21,7 @@ public class Slice extends AbstractNativeFunction {
     public Object call(ExecutionContext context, Object self, Object... args) {
         Buffer buffer  = (Buffer) self;
         int start = Types.toUint32(context, args[0]).intValue();
-        int end   = buffer.getBuffer().length;
+        int end   = (int) buffer.getLength();
         if (args[1] != Types.UNDEFINED) {
             end = Types.toUint32(context, args[1]).intValue();
         }
