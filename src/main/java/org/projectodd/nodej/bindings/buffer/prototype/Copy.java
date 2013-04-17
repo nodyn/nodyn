@@ -4,7 +4,6 @@ import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.Types;
 import org.projectodd.nodej.bindings.buffer.Buffer;
 
 public class Copy extends AbstractNativeFunction {
@@ -20,11 +19,17 @@ public class Copy extends AbstractNativeFunction {
         }
         Buffer source = (Buffer) self;
         Buffer target = (Buffer) args[0];
-        int targetStart  = Types.toUint32(context, args[1]).intValue();
-        int sourceStart  = Types.toUint32(context, args[2]).intValue();
-        int sourceEnd    = Types.toUint32(context, args[3]).intValue();
-        if (args[3] == Types.UNDEFINED) {
-            sourceEnd = ((Long) source.get(context, "length")).intValue();
+        int targetStart  = 0; 
+        int sourceStart  = 0; 
+        int sourceEnd    = (int) source.toString().getBytes().length; // totally stupid
+        if (args[1] instanceof Number) {
+            targetStart = ((Number)args[1]).intValue();
+        }
+        if (args[2] instanceof Number) {
+            sourceStart = ((Number)args[2]).intValue();
+        }
+        if (args[3] instanceof Number) {
+            sourceEnd = ((Number)args[3]).intValue();
         }
         return target.copy(source, targetStart, sourceStart, sourceEnd);
     }

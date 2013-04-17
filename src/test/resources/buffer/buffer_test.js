@@ -52,6 +52,22 @@ function testBufferFill() {
   vassert.testComplete();
 }
 
+function testBufferFillDefaultOffsetAndLength() {
+  var b = new Buffer(4);
+  b.fill(72);
+  vassert.assertEquals(4, b.length);
+  vassert.assertEquals("HHHH", b.toString());
+  vassert.testComplete();
+}
+
+function testBufferFillWithStringAndDefaultOffsetAndLength() {
+  var b = new Buffer(4);
+  b.fill('h');
+  vassert.assertEquals(4, b.length);
+  vassert.assertEquals("hhhh", b.toString());
+  vassert.testComplete();
+}
+
 function testBufferOverfull() {
   var b = new Buffer(4);
   try {
@@ -238,6 +254,32 @@ function testBufferIsEncoding() {
 function testBufferIsBuffer() {
   vassert.assertTrue(Buffer.isBuffer(new Buffer()));
   vassert.assertFalse(Buffer.isBuffer(new Array()));
+  vassert.testComplete();
+}
+
+function testBufferConcat() {
+  var x = new Buffer(5);
+  var y = new Buffer(5);
+  x.fill("a");
+  y.fill("b");
+  var z = Buffer.concat([x,y]);
+  vassert.assertEquals(10, z.length);
+  vassert.assertEquals('aaaaabbbbb', z.toString());
+  vassert.testComplete();
+}
+
+function testBufferConcatOneItem() {
+  var x = new Buffer(5);
+  x.fill("a");
+  var z = Buffer.concat([x]);
+  vassert.assertEquals(x, z);
+  vassert.testComplete();
+}
+
+function testBufferConcatNullUndefEmptyList() {
+  vassert.assertEquals(0, Buffer.concat(null).length);
+  vassert.assertEquals(0, Buffer.concat(undefined).length);
+  vassert.assertEquals(0, Buffer.concat([]).length);
   vassert.testComplete();
 }
 

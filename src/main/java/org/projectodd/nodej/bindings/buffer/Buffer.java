@@ -92,8 +92,9 @@ public class Buffer extends DynObject {
             Long numberValue = Types.toUint32(context, value);
             int val = (numberValue.byteValue() & 0xff);
             delegate.setInt(possibleIndex.intValue(), val);
+        } else {
+            super.put(context, name, value, shouldThrow);
         }
-        super.put(context, name, value, shouldThrow);
     }
     
     @Override

@@ -1,5 +1,7 @@
 package org.projectodd.nodej.bindings.buffer.prototype;
 
+import java.io.UnsupportedEncodingException;
+
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
@@ -18,7 +20,22 @@ public class Fill extends AbstractNativeFunction {
             Buffer buffer = (Buffer) self;
             Number start = Types.toNumber(context, args[1]);
             Number end   = Types.toNumber(context, args[2]);
-            Number value = Types.toNumber(context, args[0]);
+            Number value = 0;
+            if (args[0] instanceof String) {
+                try {
+                    value = ((String)args[0]).getBytes("UTF-8")[0];
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                value = Types.toNumber(context, args[0]);
+            }
+            if (Double.isNaN(start.doubleValue())) {
+                start = 0;
+            }
+            if (Double.isNaN(end.doubleValue())) {
+                end = buffer.getLength();
+            }
             buffer.fill(value.byteValue(), start.intValue(), end.intValue());
         }
         String string = Types.toString(context, args[0]);
