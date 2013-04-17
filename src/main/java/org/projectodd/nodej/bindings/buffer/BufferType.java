@@ -8,7 +8,6 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodej.bindings.buffer.Buffer.Encoding;
 import org.projectodd.nodej.bindings.buffer.prototype.ByteLength;
 
 public class BufferType extends  AbstractNativeFunction { 
@@ -30,6 +29,9 @@ public class BufferType extends  AbstractNativeFunction {
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
         Buffer buffer;
+        if (args.length < 1) {
+            return new Buffer(context.getGlobalObject(), "", 0, Buffer.Encoding.UTF8);
+        }
         if (args[0] instanceof DynArray) {
             buffer = new Buffer(context.getGlobalObject(), (DynArray)args[0]);
         } else if (args[0] instanceof Number){
@@ -54,6 +56,12 @@ public class BufferType extends  AbstractNativeFunction {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
                 return BufferType.isEncoding(Types.toString(context, args[0]));
+            }
+        });
+        prototype.defineReadOnlyProperty(globalObject, "isBuffer", new AbstractNativeFunction(globalObject) {
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                return args.length > 0 && (args[0] instanceof Buffer);
             }
         });
         prototype.defineReadOnlyProperty(globalObject, "byteLength", new ByteLength(globalObject));

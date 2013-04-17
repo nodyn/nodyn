@@ -235,5 +235,10 @@ function testBufferIsEncoding() {
   vassert.testComplete();
 }
 
+function testBufferIsBuffer() {
+  vassert.assertTrue(Buffer.isBuffer(new Buffer()));
+  vassert.assertFalse(Buffer.isBuffer(new Array()));
+  vassert.testComplete();
+}
 
 initTests(this);
