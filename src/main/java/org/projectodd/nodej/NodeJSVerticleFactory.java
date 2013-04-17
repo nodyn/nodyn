@@ -57,8 +57,8 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                     try {
                         loadScript(context, "vertx.js");
                         loadScript(context, "node.js");
-                    } catch (FileNotFoundException e) {
-                        System.err.println("Missing file. Cannot initialize NodeJ.");
+                    } catch (Exception e) {
+                        System.err.println("[ERROR] Cannot initialize NodeJ. " + e.getMessage());
                         e.printStackTrace();
                     }
                 }

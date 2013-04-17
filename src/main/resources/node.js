@@ -13,7 +13,7 @@ process.stderr = {
   }
 }
 
-Buffer = require('Buffer').Buffer;
+Buffer = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 
 setTimeout = function() {
