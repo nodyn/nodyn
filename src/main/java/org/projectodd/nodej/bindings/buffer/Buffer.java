@@ -47,34 +47,10 @@ public class Buffer extends DynObject {
         this.global   = globalObject;
         this.encoding = encoding;
         this.length   = length;
-        this.delegate = new org.vertx.java.core.buffer.Buffer(str, Buffer.getCharset(encoding));
+        this.delegate = new org.vertx.java.core.buffer.Buffer(str, BufferType.getCharset(encoding));
         initializeProperties();
     }
     
-    public static Encoding getEncoding(String encoding) {
-        switch(encoding.toLowerCase()) {
-        case "utf8":  case "utf-8":      return Encoding.UTF8;
-        case "ascii": case "us-ascii":   return Encoding.ASCII;
-        case "ucf2":  case "ucf-2":
-        case "utf16le": case "utf-16le": return Encoding.UTF16LE;
-        }
-        return Encoding.UTF8;
-    }
-    
-    public static String getCharset(Encoding encoding) {
-        String charset = "UTF-8";
-        switch(encoding) {
-        case UTF8: 
-            break;
-        case ASCII:
-            charset = "US-ASCII";
-            break;
-        case UTF16LE:
-            charset = "UTF-16LE";
-        }
-        return charset;
-    }
-
     public void fill(byte b, int offset, int end) {
         for (int i=offset; i < end; i++) {
             this.delegate.setByte(i, b);
@@ -106,7 +82,7 @@ public class Buffer extends DynObject {
     
     @Override
     public String toString() {
-        return delegate.toString(Buffer.getCharset(encoding));
+        return delegate.toString(BufferType.getCharset(encoding));
     }
 
     @Override
@@ -139,7 +115,7 @@ public class Buffer extends DynObject {
         int length = Math.min(maxLength, string.length());
         if (length == 0) { return 0; }
         try {
-            byte[] bytes = string.substring(0, length).getBytes(Buffer.getCharset(encoding));
+            byte[] bytes = string.substring(0, length).getBytes(BufferType.getCharset(encoding));
             delegate.setBytes(offset, bytes);
             put("_charsWritten", length);
             return bytes.length;

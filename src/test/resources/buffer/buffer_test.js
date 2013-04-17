@@ -222,5 +222,18 @@ function testBufferAsciiWriteWithMaxLength() {
   vassert.testComplete();
 }
 
+function testBufferIsEncoding() {
+  ['utf8', 'utf-8', 
+   'ascii', 'us-ascii', 
+   'ucf2', 'ucf-2', 'utf16le', 'utf-16le'].forEach( function(enc) {
+    vassert.assertTrue(Buffer.isEncoding(enc));
+  });
+  var unsupported = ['foo', 'bar', 'taco'];
+  ['foo', 'bar', 'taco'].forEach( function(enc) {
+    vassert.assertFalse(Buffer.isEncoding(enc));
+  });
+  vassert.testComplete();
+}
+
 
 initTests(this);
