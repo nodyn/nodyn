@@ -22,3 +22,7 @@ Buffer.prototype.concat = function() {
   return buffer;
 }
 
+Buffer.prototype.readUInt8 = function(offset) {
+  return this[offset];
+}
+

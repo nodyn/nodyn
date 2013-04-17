@@ -90,6 +90,9 @@ public class Buffer extends DynObject {
         Number possibleIndex = Types.toNumber(context, name);
         if (isIndex(name)) {
             Long numberValue = Types.toUint32(context, value);
+//            System.err.println("BUFFER PUT INDEX: " + possibleIndex);
+//            System.err.println("BUFFER REQUESTED PUT: " + value);
+//            System.err.println("BUFFER PUT: " + (numberValue.byteValue() & 0xff));
             int val = (numberValue.byteValue() & 0xff);
             delegate.setInt(possibleIndex.intValue(), val);
         } else {
@@ -100,13 +103,15 @@ public class Buffer extends DynObject {
     @Override
     public Object getOwnProperty(ExecutionContext context, String name) {
         if (isIndex(name)) {
-            Integer value = this.delegate.getInt(Types.toInteger(context, name).intValue());
+            int value = this.delegate.getInt(Types.toInteger(context, name).intValue());
             PropertyDescriptor desc = new PropertyDescriptor();
             desc.set(name, value);
             desc.setConfigurable(true);
             desc.setEnumerable(true);
             desc.setWritable(true);
             desc.setValue(value);
+//            System.err.println("BUFFER RETREIVE: " + value);
+//            System.err.println("BUFFER RETREIVE INDEX: " + name);
             return desc;
         }
         return super.getOwnProperty(context, name);

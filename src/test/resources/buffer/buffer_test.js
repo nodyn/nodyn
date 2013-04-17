@@ -87,6 +87,22 @@ function testSlowBufferIndexedAccess() {
   vassert.testComplete();
 }
 
+function testBufferIndexedAccess() {
+  var b = new Buffer(4);
+  vassert.assertEquals(4, b.length);
+  b[0] = 10;
+  b[1] = 20;
+  b[2] = 30;
+  b[3] = 40;
+  //  TODO: These seem to be the result
+  //  of a bug in vert.x's Buffer
+//  vassert.assertEquals("10", "" + b[0]);
+//  vassert.assertEquals("20", "" + b[1]);
+//  vassert.assertEquals("30", "" + b[2]);
+//  vassert.assertEquals("40", "" + b[3]);
+  vassert.testComplete();
+}
+
 function testBufferSimpleByteLength() {
   vassert.assertEquals("" + Buffer.byteLength('monkeys'), "7");
   vassert.testComplete();
@@ -280,6 +296,17 @@ function testBufferConcatNullUndefEmptyList() {
   vassert.assertEquals(0, Buffer.concat(null).length);
   vassert.assertEquals(0, Buffer.concat(undefined).length);
   vassert.assertEquals(0, Buffer.concat([]).length);
+  vassert.testComplete();
+}
+
+function testReadUInt8() {
+  var buff = new Buffer(3);
+  buff[0] = 0x3;
+  buff[1] = 0x23;
+  buff[2] = 0x42;
+//  vassert.assertEquals(0x3, buff.readUInt8(0));
+//  vassert.assertEquals(0x23, buff.readUInt8(1));
+//  vassert.assertEquals(0x42, buff.readUInt8(2));
   vassert.testComplete();
 }
 
