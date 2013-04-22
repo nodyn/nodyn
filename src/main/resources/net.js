@@ -75,13 +75,17 @@ var Socket = function(options) {
 
   that.setProxy = function(proxy) {
     that.proxy = proxy;
-    var inetAddress = proxy.getRemoteAddress();
-    that.remoteAddress = inetAddress.getAddress().toString().replace(/.+\//, '');
-    that.remotePort = inetAddress.getPort();
-    that.proxy.dataHandler( function(buffer) {
-      // TODO: Make this a node.js compatible buffer
-      that.emit('data', buffer.toString());
-    });
+    if (proxy.remoteAddress) {
+      var inetAddress = proxy.remoteAddress();
+      that.remoteAddress = inetAddress.getAddress().toString().replace(/.+\//, '');
+      that.remotePort = inetAddress.getPort();
+    }
+    if (proxy.dataHandler) {
+      proxy.dataHandler( function(buffer) {
+        // TODO: Make this a node.js compatible buffer
+        that.emit('data', buffer.toString());
+      });
+    }
   }
 
   // Usage socket.connect(port, [host], [callback])
@@ -98,10 +102,8 @@ var Socket = function(options) {
       host = arguments[1];
     }
 
-    client = vertx.__vertx.createNetClient();
-    client.setTCPNoDelay( that.noDelay );
-    client.setTCPKeepAlive( that.keepAlive );
-    client.connect( port, host, function(sock) {
+    client = vertx.createNetClient();
+    client.connect( port, host, function(err, sock) {
       that.setProxy( sock );
       that.emit('connect', that);
     });

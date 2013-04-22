@@ -42,13 +42,13 @@ import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
+import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.PlatformLocator;
 import org.vertx.java.platform.PlatformManager;
-import org.vertx.testtools.TestVerticleInfo;
 
 public class ScriptClassRunner extends Runner implements Filterable {
 
@@ -139,7 +139,7 @@ public class ScriptClassRunner extends Runner implements Filterable {
                 Handler<Message<JsonObject>> handler = new Handler<Message<JsonObject>>() {
                     @Override
                     public void handle(Message<JsonObject> msg) {
-                        JsonObject jmsg = msg.body;
+                        JsonObject jmsg = msg.body();
                         String type = jmsg.getString( "type" );
                         switch (type) {
                         case "done":
@@ -163,13 +163,14 @@ public class ScriptClassRunner extends Runner implements Filterable {
                         testLatch.countDown();
                     }
                 };
-                EventBus eb = mgr.getVertx().eventBus();
+                EventBus eb = mgr.vertx().eventBus();
                 eb.registerHandler( TESTRUNNER_HANDLER_ADDRESS, handler );
                 final CountDownLatch deployLatch = new CountDownLatch( 1 );
                 final AtomicReference<String> deploymentIDRef = new AtomicReference<>();
-                mgr.deployVerticle( this.filename, conf, new URL[0], 1, null, new Handler<String>() {
-                    public void handle(String deploymentID) {
-                        deploymentIDRef.set( deploymentID );
+                mgr.deployVerticle( this.filename, conf, new URL[0], 1, null, new Handler<AsyncResult<String>>() {
+                    @Override
+                    public void handle(AsyncResult<String> deploymentId) {
+                        deploymentIDRef.set( deploymentId.result() );
                         deployLatch.countDown();
                     }
                 } );
@@ -177,8 +178,9 @@ public class ScriptClassRunner extends Runner implements Filterable {
                 waitForLatch( testLatch );
                 eb.unregisterHandler( TESTRUNNER_HANDLER_ADDRESS, handler );
                 final CountDownLatch undeployLatch = new CountDownLatch( 1 );
-                mgr.undeploy( deploymentIDRef.get(), new Handler<Void>() {
-                    public void handle(Void v) {
+                mgr.undeploy( deploymentIDRef.get(), new Handler<AsyncResult<Void>>() {
+                    @Override
+                    public void handle(AsyncResult<Void> v) {
                         undeployLatch.countDown();
                     }
                 } );
