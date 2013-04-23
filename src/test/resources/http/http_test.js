@@ -9,15 +9,15 @@ var test_options = {
   headers: test_headers
 }
 
+var server = http.createServer();
+
 function testCreateServerReturnsServer() {
-  var server = http.createServer();
   vassert.assertTrue(server instanceof http.Server);
   server.close();
   vassert.testComplete();
 }
 
 function testServerListeningEvent() {
-  var server = http.createServer();
   server.listen(test_options.port, function() {
     server.close();
     vassert.testComplete();
@@ -125,6 +125,7 @@ function testMessageEncoding() {
 
   server.listen(test_options.port, function() {
     test_options.method = 'POST';
+    test_options.path = '/unicode/test';
     var request = http.request(test_options, function(res) {
       res.resume();
       res.on('end', function() {
@@ -251,6 +252,8 @@ function testRequestMethod() {
   });
   server.listen(test_options.port, function() {
     test_options.method = 'HEAD';
+    // TODO: This should not produce a stack
+    // https://github.com/vert-x/vert.x/issues/569
     var request = http.request(test_options, function(response) {
       server.close();
       vassert.testComplete();
@@ -316,13 +319,11 @@ function testServerClose() {
 }
 
 function testServerTimeoutDefault() {
-  var server = http.createServer();
   vassert.assertEquals(120000, server.timeout);
   vassert.testComplete();
 }
 
 function testServerSetTimeout() {
-  var server = http.createServer();
   var timedOut = false;
   server.setTimeout(10, function(sock) {
     timedOut = true;
@@ -335,7 +336,6 @@ function testServerSetTimeout() {
 }
 
 function testServerCloseEvent() {
-  var server = http.createServer();
   var closed = false;
   server.on('close', function() {
     closed = true;
@@ -348,7 +348,6 @@ function testServerCloseEvent() {
 
 function testCheckContinueEvent() {
   var eventFired = false;
-  var server = http.createServer();
   server.on('checkContinue', function(request, response) {
     eventFired = true;
     response.writeContinue();
@@ -369,9 +368,9 @@ function testCheckContinueEvent() {
   });
 }
 
-function testConnectEventFired() {
+// TODO: Fix me
+function DEFERREDtestConnectEventFired() {
   var eventFired = false;
-  var server = http.createServer();
   server.on('connect', function(request, socket, head) {
     vassert.testComplete();
     server.close();
@@ -383,7 +382,6 @@ function testConnectEventFired() {
 }
 
 function testServerMaxHeadersCountDefaultValue() {
-  var server = http.createServer();
   vassert.assertEquals(1000, server.maxHeadersCount);
   server.maxHeadersCount = 500;
   vassert.assertEquals(500, server.maxHeadersCount);
@@ -408,7 +406,6 @@ function testServerResponseHeadersSent() {
 }
 
 function testRequestReturnsClientRequest() {
-  var server  = http.createServer();
   server.listen(test_options.port, function() {
     vassert.assertTrue(http.request(test_options) instanceof http.ClientRequest);
     vassert.testComplete();

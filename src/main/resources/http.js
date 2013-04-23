@@ -116,8 +116,12 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
 
   that.encoding = 'UTF-8';
   that.headers = proxy.headers();
-  that.pause  = proxy.pause.bind(proxy);
-  that.resume = proxy.resume.bind(proxy);
+  that.pause  = function() {
+    proxy.pause();
+  }
+  that.resume = function() {
+    proxy.resume();
+  }
 
   that.setEncoding = function(enc) {
     try {
@@ -139,20 +143,19 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.emit('end');
   });
 
-  if (proxy.getNettyRequest) {
-    // It's a server request message
-    // vert.x HttpServerRequest
-    var version = proxy.getNettyRequest().getProtocolVersion();
-    that.httpMajorVersion = version.majorVersion().toString();
-    that.httpMinorVersion = version.minorVersion().toString();
-    that.httpVersion = that.httpMajorVersion + "." + that.httpMinorVersion;
-    that.url = proxy.uri;
-    that.method = proxy.method;
-    that.headersSent = that.headers.size() > 0;
-  } else {
+  if (proxy.statusCode) {
     // it's a client response message
     // vert.x HttpClientResponse
-    that.statusCode = proxy.statusCode;
+    that.statusCode = proxy.statusCode();
+  } else {
+    // It's a server request message
+    // vert.x HttpServerRequest
+    that.url = proxy.uri();
+    that.method = proxy.method();
+    that.headersSent = that.headers.size() > 0;
+    that.httpMajorVersion = proxy.httpMajorVersion;
+    that.httpMinorVersion = proxy.httpMinorVersion;
+    that.httpVersion = proxy.httpVersion;
   }
 }
 
@@ -161,7 +164,9 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var proxy        = vertxResponse;
   that.sendDate    = true;
   that.headersSent = false;
-  that.end         = proxy.end.bind(proxy);
+  that.end         = function() {
+    proxy.end();
+  }
 
   // node.js defaults to HTTP chunked encoding, whereas vert.x defaults
   // to non-chunked. Inform vert.x we want chunked for now.
@@ -185,10 +190,10 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
         that.setHeader(header, headers[header]);
       }
       if (statusCode) {
-        proxy.statusCode = statusCode;
+        proxy.statusCode(statusCode);
       }
       if (reasonPhrase) {
-        proxy.statusMessage = reasonPhrase;
+        proxy.statusMessage(reasonPhrase);
       }
       // default HTTP date header
       if (!proxy.headers()['Date']) {
@@ -244,11 +249,13 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   var proxy     = vertxRequest;
   var timeoutId = null;
 
-  that.end   = proxy.end.bind(proxy);
-  that.write = proxy.write.bind(proxy);
+  that.end = function() {
+    proxy.end.apply(proxy, arguments);
+  }
+  that.write = function() {
+    proxy.write.apply(proxy, arguments);
+  }
   that.abort = that.end; // not really a true abort
-
-  proxy.chunked(true); // TODO: This should be configurable?
 
   that.setTimeout = function(msec, timeout) { 
     if (timeoutId) {
@@ -320,6 +327,12 @@ var httpRequest = module.exports.request = function(options, callback) {
     incomingMessage = new IncomingMessage(resp);
     callback(incomingMessage);
   });
+
+  if (options.method == 'HEAD' || options.method == 'CONNECT') {
+    request.chunked(false);
+  } else {
+    request.chunked(true);
+  }
   if (options.headers) {
     for (header in options.headers) {
       request.putHeader(header, options.headers[header]);

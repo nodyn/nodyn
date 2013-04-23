@@ -89,7 +89,7 @@ process.memoryUsage = function() {
 }
 
 process.nextTick = function(callback, args) {
-  vertx.runOnLoop(function() {
+  vertx.runOnContext(function() {
     callback(args);
   });
 }
