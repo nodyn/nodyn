@@ -4,6 +4,8 @@
 
 ## Hey, What's NodeJ?
 
+**NOTE: The name is changing to nodyn soon.**
+
 NodeJ is a [node.js](http://nodejs.org) compatible framework, running on the
 JVM and powered by the [DynJS](https://github.com/dynjs/dynjs) Javascript
 runtime. "Why do that?", you may ask. Well, imagine running your node app on
@@ -49,5 +51,5 @@ Now you should be able to run nodej through vert.x like so.
 
 ## API Completion Status
 
-See http://nodej.org/compatibility
+See http://nodyn.io/compatibility
 
