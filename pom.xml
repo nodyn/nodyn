@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.projectodd</groupId>
-    <artifactId>nodej</artifactId>
+    <artifactId>nodyn</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>NodeJ</name>
-    <url>http://www.github.com/projectodd/nodej</url>
+    <name>Nodyn</name>
+    <url>http://www.github.com/projectodd/nodyn</url>
 
     <description>
         Node.js, in Java! With Vert.x!
@@ -21,8 +21,8 @@
     </parent>
 
     <scm>
-        <connection>scm:git:git://github.com/projectodd/nodej.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/projectodd/nodej.git</developerConnection>
+        <connection>scm:git:git://github.com/projectodd/nodyn.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/projectodd/nodyn.git</developerConnection>
         <url>http://github.com/projectodd/node</url>
     </scm>
 

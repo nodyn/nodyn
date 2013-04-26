@@ -2,7 +2,7 @@ timer     = require('vertx/timer');
 container = require('vertx/container');
 console   = require('node_console');
 
-process.title = "NodeJ";
+process.title = "Nodyn";
 
 process.stdout = {
   write: function(message) {

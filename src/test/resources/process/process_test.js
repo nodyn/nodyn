@@ -21,9 +21,9 @@ function testStdErr() {
 }
 
 function testVersion() {
-  vassert.assertEquals(org.projectodd.nodej.Node.VERSION, process.version);
+  vassert.assertEquals(org.projectodd.nodyn.Node.VERSION, process.version);
   vassert.assertNotNull(process.versions);
-  vassert.assertEquals(org.projectodd.nodej.Node.VERSION, process.versions.node);
+  vassert.assertEquals(org.projectodd.nodyn.Node.VERSION, process.versions.node);
   vassert.assertEquals(java.lang.System.getProperty("java.version"), process.versions.java);
   // Now that DynJS reports build numbers and such from version.properties,
   // this test doesn't work. E.g.
@@ -73,7 +73,7 @@ function testPID() {
 }
 
 function testTitle() {
-  vassert.assertEquals('NodeJ', process.title);
+  vassert.assertEquals('Nodyn', process.title);
   vassert.testComplete();
 }
 

@@ -9,7 +9,7 @@ var Hash = module.exports.Hash = function(algorithm) {
   var that = this;
   that.algorithm = algorithm;
   that.buffer    = ""; // TODO: Use a real buffer
-  that.proxy     = new org.projectodd.nodej.crypto.Hash(algorithm);
+  that.proxy     = new org.projectodd.nodyn.crypto.Hash(algorithm);
 
   that.update = that.proxy.update.bind(that.proxy);
   that.digest = that.proxy.digest.bind(that.proxy);
@@ -23,7 +23,7 @@ var Hmac = module.exports.Hmac = function(algorithm, key) {
     var that = this;
     that.algorithm = algorithm;
     that.buffer    = ""; // TODO: Use a real buffer
-    that.proxy     = new org.projectodd.nodej.crypto.Hmac(algorithm, key);
+    that.proxy     = new org.projectodd.nodyn.crypto.Hmac(algorithm, key);
 
     that.update = that.proxy.update.bind(that.proxy);
     that.digest = that.proxy.digest.bind(that.proxy);

@@ -1,5 +1,5 @@
 
-var Buffer = module.exports.Buffer = nodej.buffer;
+var Buffer = module.exports.Buffer = nodyn.buffer;
 
 // For now, let's not distinguish between SlowBuffer and
 // Buffer. We'll see if we need to do otherwise later.

@@ -1,7 +1,7 @@
 var vertxTest = require('vertx_tests');
 var vassert   = vertxTest.vassert;
 
-var Harness     = org.projectodd.nodej.integration.javascript.BufferIntegrationTests;
+var Harness     = org.projectodd.nodyn.integration.javascript.BufferIntegrationTests;
 var TEST_STRING = Harness.TEST_STRING;
 var UTF8_BYTES  = Harness.UTF8_BYTE_STRING;
 var ASCII_BYTES = Harness.ASCII_BYTE_STRING;

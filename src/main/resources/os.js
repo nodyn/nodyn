@@ -50,7 +50,7 @@ exports.uptime = function() {
 
 exports.loadavg = function() {
   avg = java.lang.management.ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
-  // nodej likes 1/5/15 minute averages -  we'll just do one 3x
+  // node.js likes 1/5/15 minute averages -  we'll just do one 3x
   return [avg, avg, avg];
 }
 
