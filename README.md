@@ -1,6 +1,6 @@
-[![Build Status](https://secure.travis-ci.org/projectodd/nodej.png)](http://travis-ci.org/projectodd/nodej)
+[![Build Status](https://secure.travis-ci.org/projectodd/nodyn.png)](http://travis-ci.org/projectodd/nodyn)
 
-[![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodej/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodej/)
+[![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/)
 
 ## Hey, What's Nodyn?
 ### The Project Formerly Known as NodeJ
