@@ -266,6 +266,7 @@
                     <disableXmlReport>true</disableXmlReport>
                     <argLine>-Xss2048k</argLine>
                     <verbose>true</verbose>
+                    <forkCount>0</forkCount>
                     <includes>
                         <include>**/*Tests.java</include>
                     </includes>

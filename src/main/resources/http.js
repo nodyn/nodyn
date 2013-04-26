@@ -1,10 +1,13 @@
-var url  = require('url');
-var util = require('util');
+var url   = require('url');
+var util  = require('util');
+var http  = require('vertx/http');
+var timer = require('vertx/timer');
+
 var EventEmitter = require('events').EventEmitter
 
 var WebServer = module.exports.Server = function(requestListener) {
   var that   = this;
-  that.proxy = vertx.createHttpServer();
+  that.proxy = http.createHttpServer();
 
   // default socket timeout value (2 minutes)
   that.timeout = 120000;
@@ -91,13 +94,13 @@ var WebServer = module.exports.Server = function(requestListener) {
 
   that.setTimeout = function(msec, callback) {
     if (that.timeoutId) { 
-      vertx.cancelTimer(that.timeoutId);
+      timer.cancelTimer(that.timeoutId);
       that.removeAllListeners('timeout');
     }
     that.on('timeout', function() {
       callback(that);
     });
-    that.timeoutId = vertx.setTimer(msec, function() {
+    that.timeoutId = timer.setTimer(msec, function() {
       that.emit('timeout');
     });
   }
@@ -259,13 +262,13 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
 
   that.setTimeout = function(msec, timeout) { 
     if (timeoutId) {
-      vertx.cancelTimer(timeoutId);
+      timer.cancelTimer(timeoutId);
     }
     if (msec > 0) {
       if (timeout) {
         that.on('timeout', timeout);
       }
-      timeoutId = vertx.setTimer(msec, function() { that.emit('timeout'); });
+      timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
     }
   }
 
@@ -319,7 +322,7 @@ var httpRequest = module.exports.request = function(options, callback) {
   options.method   = options.method   || DefaultRequestOptions.method;
   options.path     = options.path     || DefaultRequestOptions.path;
 
-  var proxy = vertx.createHttpClient()
+  var proxy = http.createHttpClient()
                     .port(options.port)
                     .host(options.hostname);
 

@@ -1,4 +1,5 @@
-load("vertx_tests.js");
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var fs = require('fs');
 var tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
@@ -87,6 +88,4 @@ function testReaddir() {
   })
 }
 
-initTests(this);
-
-
+vertxTest.startTests(this);

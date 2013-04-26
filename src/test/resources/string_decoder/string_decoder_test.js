@@ -1,4 +1,5 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 function testStringDecoder() {
   var StringDecoder = require('string_decoder').StringDecoder;
@@ -9,4 +10,4 @@ function testStringDecoder() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

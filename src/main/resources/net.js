@@ -1,3 +1,5 @@
+var net           = require('vertx/net');
+var timer         = require('vertx/timer');
 var util          = require('util')
 var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
@@ -6,7 +8,7 @@ var Server = function( connectionListener ) {
 
   var that = this;
   that.address = {}
-  that.server = vertx.__vertx.createNetServer();
+  that.server = net.createNetServer();
 
   if (connectionListener) {
       that.on('connection', connectionListener);
@@ -102,7 +104,7 @@ var Socket = function(options) {
       host = arguments[1];
     }
 
-    client = vertx.createNetClient();
+    client = net.createNetClient();
     client.connect( port, host, function(err, sock) {
       that.setProxy( sock );
       that.emit('connect', that);
@@ -153,13 +155,13 @@ var Socket = function(options) {
 
   that.setTimeout = function(msec, timeout) { 
     if (that.timeoutId) {
-      vertx.cancelTimer(that.timeoutId);
+      timer.cancelTimer(that.timeoutId);
     }
     if (msec > 0) {
       if (timeout) {
         that.on('timeout', timeout);
       }
-      that.timeoutId = vertx.setTimer(msec, function() { that.emit('timeout'); });
+      that.timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
     }
   }
 

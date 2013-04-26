@@ -1,11 +1,13 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
+var timer     = require('vertx/timer');
 
 function testSetTimeout() {
   var x = 0;
   setTimeout(function() {
     x = x+1;
   }, 1);
-  vertx.setTimer(10, function() {
+  timer.setTimer(10, function() {
     vassert.assertEquals(1, x);
     vassert.testComplete();
   });
@@ -17,7 +19,7 @@ function testSetTimeoutWaits() {
     x = x+1;
   }, 100);
   vassert.assertEquals(0, x);
-  vertx.setTimer(200, function() {
+  timer.setTimer(200, function() {
     vassert.assertEquals(1, x);
     vassert.testComplete();
   });
@@ -28,7 +30,7 @@ function testSetTimeoutPassesArgs() {
   setTimeout(function(y, z) { 
     x = z+y;
   }, 1, 5, 45);
-  vertx.setTimer(1, function() {
+  timer.setTimer(1, function() {
     vassert.assertEquals(50, x);
     vassert.testComplete();
   });
@@ -40,7 +42,7 @@ function testClearTimeout() {
     x = x+y;
   }, 200, 5);
   clearTimeout(timerId);
-  vertx.setTimer(200, function() {
+  timer.setTimer(200, function() {
     vassert.assertEquals(0, x);
     vassert.testComplete();
   });
@@ -51,7 +53,7 @@ function testSetInterval() {
   setInterval(function() {
     x = x+1;
   }, 10);
-  vertx.setTimer(100, function() {
+  timer.setTimer(100, function() {
     vassert.assertTrue(x>1);
     vassert.testComplete();
   });
@@ -63,10 +65,10 @@ function testClearInterval() {
     x = x+1;
   }, 500);
   clearInterval(id);
-  vertx.setTimer(100, function() {
+  timer.setTimer(100, function() {
     vassert.assertEquals(0, x);
     vassert.testComplete();
   });
 }
 
-initTests(this);
+vertxTest.startTests(this);

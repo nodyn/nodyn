@@ -1,4 +1,6 @@
-load("vertx_tests.js");
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
+
 EventEmitter = require('events').EventEmitter;
 
 function testEventEmitterIsNotNull() {
@@ -48,4 +50,4 @@ function testRemoveAllListeners() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

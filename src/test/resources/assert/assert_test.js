@@ -1,4 +1,6 @@
-load("vertx_tests.js");
+var vertxTest = require("vertx_tests");
+var vassert   = vertxTest.vassert;
+
 node_assert = require('assert');
 
 function testAssertOK() {
@@ -15,4 +17,4 @@ function testAssertFail() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

@@ -1,4 +1,5 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 // These mostly just test that the functions exist and are callable
 
@@ -71,5 +72,4 @@ function testConsoleAssertFails() {
   vassert.testComplete();
 }
 
-initTests(this);
-
+vertxTest.startTests(this);

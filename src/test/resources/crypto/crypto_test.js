@@ -1,4 +1,5 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var crypto = require('crypto');
 
@@ -155,4 +156,4 @@ function testBase64SHA1HmacDigest() {
     vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

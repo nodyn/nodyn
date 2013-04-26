@@ -1,5 +1,9 @@
-load('vertx_tests.js');
-var http = require('http');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
+
+var http      = require('http');
+var timer     = require('vertx/timer');
+
 var test_headers = {
   'x-custom-header': 'A custom header'
 }
@@ -329,7 +333,7 @@ function testServerSetTimeout() {
     timedOut = true;
     sock.close();
   });
-  vertx.setTimer(100, function() {
+  timer.setTimer(100, function() {
     vassert.assertEquals(true, timedOut);
     vassert.testComplete();
   });
@@ -412,4 +416,4 @@ function testRequestReturnsClientRequest() {
   });
 }
 
-initTests(this);
+vertxTest.startTests(this);

@@ -1,4 +1,5 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var Harness     = org.projectodd.nodej.integration.javascript.BufferIntegrationTests;
 var TEST_STRING = Harness.TEST_STRING;
@@ -310,4 +311,4 @@ function testReadUInt8() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

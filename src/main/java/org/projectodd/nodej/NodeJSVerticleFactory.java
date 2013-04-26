@@ -1,7 +1,5 @@
 package org.projectodd.nodej;
 
-import java.io.FileNotFoundException;
-
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
@@ -38,6 +36,9 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             global.defineGlobalProperty("nodej", nodeJ);
             global.defineGlobalProperty("process", process); // backwards compat
             global.defineGlobalProperty("Buffer", bufferType); //
+            // We have to do this to make the vertx object global
+            // I do not understand why
+//            global.defineGlobalProperty("vertx", new DynObject(global));
             return global;
         }
     }
@@ -55,7 +56,6 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                 @Override
                 public void initialize(ExecutionContext context) {
                     try {
-                        loadScript(context, "vertx.js");
                         loadScript(context, "node.js");
                     } catch (Exception e) {
                         System.err.println("[ERROR] Cannot initialize NodeJ. " + e.getMessage());

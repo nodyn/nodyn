@@ -1,4 +1,7 @@
-console = require('console');
+timer     = require('vertx/timer');
+container = require('vertx/container');
+console   = require('node_console');
+
 process.title = "NodeJ";
 
 process.stdout = {
@@ -31,7 +34,7 @@ setTimeout = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return vertx.setTimer(milliseconds, function() {
+  return timer.setTimer(milliseconds, function() {
     callback.apply(callback, args);
   });
 }
@@ -51,13 +54,13 @@ setInterval = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return vertx.setPeriodic(milliseconds, function() {
+  return timer.setPeriodic(milliseconds, function() {
     callback.apply(callback, args);
   });
 }
 
 clearTimeout = function(id) {
-  vertx.cancelTimer(id);
+  timer.cancelTimer(id);
 }
 
 clearInterval = clearTimeout;
@@ -89,7 +92,7 @@ process.memoryUsage = function() {
 }
 
 process.nextTick = function(callback, args) {
-  vertx.runOnContext(function() {
+  timer.runOnContext(function() {
     callback(args);
   });
 }

@@ -1,7 +1,7 @@
 var util = require('util')
 
 var Console = function() {
-  this.logger = vertx.logger;
+  this.logger = __jcontainer.logger();
   this.labels = {}
 
   this.log = function( msg ) {

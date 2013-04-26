@@ -1,4 +1,6 @@
-load('vertx_tests.js');
+var timer     = require('vertx/timer');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var net = require('net');
 
@@ -19,9 +21,9 @@ function testServerListeningEvent() {
 
   tries = 0;
   // now wait up to 3 seconds for the event to be fired
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (listening || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       server.close();
       vassert.assertTrue(listening);
       vassert.testComplete();
@@ -38,14 +40,14 @@ function testServerClose() {
   server.on('close', function(e) { closed = true; });
 
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (listening || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       server.close();
       tries = 0;
-      vertx.setPeriodic(1000, function(id2) {
+      timer.setPeriodic(1000, function(id2) {
         if (closed || tries++ > 3) {
-          vertx.cancelTimer(id2);
+          timer.cancelTimer(id2);
           vassert.assertTrue(closed);
           vassert.testComplete();
         }
@@ -62,14 +64,14 @@ function testServerCloseWithCallback() {
   server.listen(8800, listenCallback);
 
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (listening || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       server.close(function() { closed = true; });
       tries = 0;
-      vertx.setPeriodic(1000, function(id2) {
+      timer.setPeriodic(1000, function(id2) {
         if (closed || tries++ > 3) {
-          vertx.cancelTimer(id2);
+          timer.cancelTimer(id2);
           vassert.assertTrue(closed);
           vassert.testComplete();
         }
@@ -84,9 +86,9 @@ function testConnect() {
   server.listen(8800, function() { connected = true; });
   net.connect(8800);
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (connected || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       vassert.assertTrue(connected);
       server.close();
       vassert.testComplete();
@@ -100,9 +102,9 @@ function testConnectWithCallback() {
   server.listen(8800);
   net.connect(8800, function() { connected = true; });
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (connected || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       vassert.assertTrue(connected);
       server.close();
       vassert.testComplete();
@@ -125,9 +127,9 @@ function testSocketReadWrite() {
     });
   });
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (data || tries++ > 3) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
       vassert.assertEquals("crunchy bacon", data);
       server.close();
       vassert.testComplete();
@@ -145,7 +147,7 @@ function testSocketTimeout() {
     }); // receive timeout event in 100 msec
   });
   socket = net.connect(8800, function() {
-    vertx.setTimer(300, function() {
+    timer.setTimer(300, function() {
       vassert.assertTrue(timedOut);
       socket.destroy();
       server.close();
@@ -166,7 +168,7 @@ function testSocketTimeoutCanceled() {
     socket.setTimeout(0);
   });
   socket = net.connect(8800, function() {
-    vertx.setTimer(300, function() {
+    timer.setTimer(300, function() {
       vassert.assertFalse(timedOut);
       socket.destroy();
       server.close();
@@ -196,9 +198,9 @@ function testSocketPauseAndResume() {
     // But I couldn't figure out a better way
     // to give the server time to do its thing
     // on the 'connection' and 'data' events
-    vertx.setTimer(200, function() {
+    timer.setTimer(200, function() {
       socket.write('juicy burgers');
-      vertx.setTimer(200, function() {
+      timer.setTimer(200, function() {
         vassert.assertTrue(paused);
         server_socket.resume();
       });
@@ -229,9 +231,9 @@ function testServerAddress() {
 
   // now wait up to 3 seconds for the event to be fired
   tries = 0;
-  vertx.setPeriodic(1000, function(id) {
+  timer.setPeriodic(1000, function(id) {
     if (tries++ > 3 || listening) {
-      vertx.cancelTimer(id);
+      timer.cancelTimer(id);
     }
   });
   address = server.address();
@@ -244,4 +246,4 @@ function testServerAddress() {
 }
 
 
-initTests(this);
+vertxTest.startTests(this);

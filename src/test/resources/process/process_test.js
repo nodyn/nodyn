@@ -1,4 +1,6 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
+var timer     = require('vertx/timer');
 
 function testProcessObject() {
   vassert.assertNotNull(process);
@@ -116,7 +118,7 @@ function testNextTick() {
   var x = 0;
   var f = function(y) { x += y; }
   process.nextTick(f, 10);
-  vertx.setTimer(100, function() {
+  timer.setTimer(100, function() {
     vassert.assertEquals(10, x);
     vassert.testComplete();
   });
@@ -136,4 +138,4 @@ function testUndocumentedProperties() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

@@ -1,4 +1,5 @@
-load("vertx_tests.js");
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var qs = require('querystring');
 
@@ -40,4 +41,4 @@ function testParseWithOptions() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);

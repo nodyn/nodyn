@@ -1,4 +1,5 @@
-load('vertx_tests.js');
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var path = require('path');
 
@@ -44,5 +45,4 @@ function testPathSep() {
   vassert.testComplete();
 }
 
-initTests(this);
-
+vertxTest.startTests(this);

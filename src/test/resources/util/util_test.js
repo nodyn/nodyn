@@ -1,4 +1,5 @@
-load("vertx_tests.js");
+var vertxTest = require('vertx_tests');
+var vassert   = vertxTest.vassert;
 
 var util = require('util');
 
@@ -65,6 +66,6 @@ function testIsError() {
   vassert.testComplete();
 }
 
-initTests(this);
+vertxTest.startTests(this);
 
 
