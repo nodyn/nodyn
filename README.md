@@ -30,18 +30,17 @@ This will put the complete vert.x installation in
 `build/vert.x-2.0.0-SNAPSHOT`. Just update your `$PATH` to include
 `/path/to/repo/vert.x/build/vert.x-2.0.0-SNAPSHOT/bin`. 
 
-Then, you'll need to build Nodyn. Note that the repository name has not yet
-changed from "nodej". It will soon become projectodd/nodyn.
+Then, you'll need to build Nodyn. 
 
-    $ git clone https://github.com/projectodd/nodej.git
-    $ cd nodej
+    $ git clone https://github.com/projectodd/nodyn.git
+    $ cd nodyn
     $ mvn install
 
 By default, vert.x runs Javascript with Rhino. Change this to use lang-dynjs
 and Nodyn by creating a `langs.properties` file at the root of your project
 that looks like this.
 
-    nodejs=org.projectodd~nodej~0.1.1-SNAPSHOT:org.projectodd.nodej.NodeJSVerticleFactory
+    nodejs=org.projectodd~nodyn~0.1.1-SNAPSHOT:org.projectodd.nodyn.NodeJSVerticleFactory
     .js=nodejs
 
 Now you should be able to run Nodyn through vert.x like so.
