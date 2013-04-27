@@ -13,6 +13,7 @@ import org.vertx.java.platform.Verticle;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     private GlobalObjectFactory globalObjectFactory = new NodeJSGlobalObjectFactory();
+    private String filename;
 
     @Override
     protected GlobalObjectFactory getGlobalObjectFactory() {
@@ -21,6 +22,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
 
     @Override
     public Verticle createVerticle(String main) throws Exception {
+        this.filename = main;
         return new NodeJSVerticle(this, main);
     }
 
@@ -34,8 +36,9 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             node.put("process", process);
             node.put("buffer", bufferType);
             global.defineGlobalProperty("nodyn", node);
-            global.defineGlobalProperty("process", process); // backwards compat
-            global.defineGlobalProperty("Buffer", bufferType); //
+            global.defineGlobalProperty("process", process); 
+            global.defineGlobalProperty("Buffer", bufferType); 
+            global.defineGlobalProperty("__filename", filename);
             // We have to do this to make the vertx object global
             // I do not understand why
 //            global.defineGlobalProperty("vertx", new DynObject(global));

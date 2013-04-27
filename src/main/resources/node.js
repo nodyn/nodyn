@@ -3,6 +3,7 @@ container = require('vertx/container');
 console   = require('node_console');
 
 process.title = "Nodyn";
+global.require = require;
 
 process.stdout = {
   write: function(message) {
