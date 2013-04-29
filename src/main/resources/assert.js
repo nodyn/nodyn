@@ -1,5 +1,6 @@
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
-// Copied from node.js assert
+//
+// THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
 //
 // Originally from narwhal.js (http://narwhaljs.org)
 // Copyright (c) 2009 Thomas Robinson <280north.com>
@@ -38,15 +39,12 @@ var assert = module.exports = ok;
 
 assert.AssertionError = function AssertionError(options) {
   this.name = 'AssertionError';
-  this.message = options.message;
   this.actual = options.actual;
   this.expected = options.expected;
   this.operator = options.operator;
+  this.message = options.message || getMessage(this);
   var stackStartFunction = options.stackStartFunction || fail;
-
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, stackStartFunction);
-  }
+//  Error.captureStackTrace(this, stackStartFunction);
 };
 
 // assert.AssertionError instanceof Error
@@ -73,18 +71,11 @@ function truncate(s, n) {
   }
 }
 
-assert.AssertionError.prototype.toString = function() {
-  if (this.message) {
-    return [this.name + ':', this.message].join(' ');
-  } else {
-    return [
-      this.name + ':',
-      truncate(JSON.stringify(this.actual, replacer), 128),
-      this.operator,
-      truncate(JSON.stringify(this.expected, replacer), 128)
-    ].join(' ');
-  }
-};
+function getMessage(self) {
+  return truncate(JSON.stringify(self.actual, replacer), 128) + ' ' +
+         self.operator + ' ' +
+         truncate(JSON.stringify(self.expected, replacer), 128);
+}
 
 // At present only the three keys mentioned above are used and
 // understood by the spec. Implementations or sub modules can pass
@@ -276,7 +267,7 @@ function expectedException(actual, expected) {
     return false;
   }
 
-  if (expected instanceof RegExp) {
+  if (Object.prototype.toString.call(expected) == '[object RegExp]') {
     return expected.test(actual);
   } else if (actual instanceof expected) {
     return true;
