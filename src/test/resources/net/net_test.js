@@ -130,7 +130,8 @@ function testSocketReadWrite() {
   timer.setPeriodic(1000, function(id) {
     if (data || tries++ > 3) {
       timer.cancelTimer(id);
-      vassert.assertEquals("crunchy bacon", data);
+      vassert.assertEquals('object', typeof data);
+      vassert.assertEquals("crunchy bacon", data.toString());
       server.close();
       vassert.testComplete();
     }

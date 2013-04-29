@@ -84,8 +84,7 @@ var Socket = function(options) {
     }
     if (proxy.dataHandler) {
       proxy.dataHandler( function(buffer) {
-        // TODO: Make this a node.js compatible buffer
-        that.emit('data', buffer.toString());
+        that.emit('data', new Buffer(buffer.toString()));
       });
     }
   }
