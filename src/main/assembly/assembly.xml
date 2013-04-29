@@ -1,5 +1,4 @@
 <assembly>
-  <id>${artifactId}-${project.version}</id>
     <formats>
         <format>zip</format>
     </formats>

@@ -123,12 +123,6 @@ public class OldScriptClassRunner extends JavaClassRunner {
     }
 
     @Override
-    protected String getTestName(String methodName) {
-        String[] parts = methodName.split( "\\|" );
-        return parts[0] + FILE_SEP + parts[1] + "#" + parts[2];
-    }
-
-    @Override
     protected URL getClassPath(String methodName) {
         try {
             return new File( methodName.split( "\\|" )[0] ).toURI().toURL();
