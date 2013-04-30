@@ -65,12 +65,10 @@ var WebServer = module.exports.Server = function(requestListener) {
       if (request.headers()['Expect'] == '100-Continue') {
         if (that.listeners('checkContinue').length > 0) {
           // if a client has subscribed to checkContinue events
-          // we let it handle the message
+          // we let it handle the message. However, vert.x 
+          // automatically sends a CONTINUE response, so this
+          // may not work. TODO?
           that.emit('checkContinue', incomingMessage, serverResponse);
-        } else {
-          // otherwise, the server sends a continue message
-          // TODO: vert.x automatically does this - but will
-          // be changing to accept a checkContinue handler.
         }
       } else {
         that.emit('request', incomingMessage, serverResponse);
@@ -84,6 +82,18 @@ var WebServer = module.exports.Server = function(requestListener) {
       request.endHandler(function() {
         incomingMessage.emit('end');
       });
+    });
+
+    // Setup a websocket handler
+    that.proxy.websocketHandler(function(websocket) {
+      if (that.listeners('upgrade').length > 0) {
+        // TODO
+        that.emit('upgrade', null, websocket, new Buffer());
+      } else {
+        // If nobody is listening for an upgrade event, then the 
+        // connection is closed, per the Node.js API
+        websocket.reject();
+      }
     });
 
     // listen for incoming connections
@@ -167,9 +177,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var proxy        = vertxResponse;
   that.sendDate    = true;
   that.headersSent = false;
-  that.end         = function() {
-    proxy.end();
-  }
+  that.end         = proxy.end;
 
   // node.js defaults to HTTP chunked encoding, whereas vert.x defaults
   // to non-chunked. Inform vert.x we want chunked for now.
@@ -252,9 +260,7 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   var proxy     = vertxRequest;
   var timeoutId = null;
 
-  that.end = function() {
-    proxy.end.apply(proxy, arguments);
-  }
+  that.end = proxy.end;
   that.write = function() {
     proxy.write.apply(proxy, arguments);
   }
@@ -328,7 +334,9 @@ var httpRequest = module.exports.request = function(options, callback) {
 
   var request = proxy.request(options.method, options.path, function(resp) { 
     incomingMessage = new IncomingMessage(resp);
-    callback(incomingMessage);
+    if (callback) {
+      callback(incomingMessage);
+    }
   });
 
   if (options.method == 'HEAD' || options.method == 'CONNECT') {

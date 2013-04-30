@@ -40,12 +40,45 @@ function testCreateServerWithRequestListener() {
   vassert.testComplete();
 }
 
+function testRequestNoCallback() {
+  var server = http.createServer(function(request, response) {
+    request.on('data', function(data) {
+      vassert.assertEquals('crispy bacon', data.toString());
+      vassert.testComplete();
+    });
+    response.end();
+  });
+  test_options.method = 'POST';
+  server.listen(test_options.port, function() {
+    request = http.request(test_options);
+    request.end('crispy bacon');
+  });
+}
+
 function testServerResponseWrite() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals(false, response.headersSent);
     response.write('crunchy bacon');
     vassert.assertEquals(true, response.headersSent);
     response.end();
+  });
+  server.listen(test_options.port, function() {
+    var request = http.request(test_options, function(response) {
+      response.on('data', function(message) {
+        vassert.assertEquals('crunchy bacon', message);
+        server.close();
+        vassert.testComplete();
+      });
+    });
+    request.end();
+  });
+}
+
+function testServerResponseWriteEnd() {
+  var server = http.createServer(function(request, response) {
+    vassert.assertEquals(false, response.headersSent);
+    response.end('crunchy bacon');
+    //vassert.assertEquals(true, response.headersSent);
   });
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {

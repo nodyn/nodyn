@@ -1,6 +1,0 @@
-#!/bin/sh
-if [ ! -f target/nodej-all.jar ]; then
-	mvn clean package -Pshade
-fi
-java -jar target/nodej-all.jar --console $*
-

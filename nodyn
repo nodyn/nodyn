@@ -1,0 +1,9 @@
+#!/bin/sh
+
+NODYN_MOD="-Dvertx.langs.nodejs=org.projectodd~nodyn~0.1.1-SNAPSHOT:org.projectodd.nodyn.NodeJSVerticleFactory"
+JS_MAPPING="-Dvertx.langs..js=nodejs"
+
+export JAVA_OPTS="$NODYN_MOD $JS_MAPPING"
+
+vertx run $*
+
