@@ -236,7 +236,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   }
 
   that.setHeader = function(name, value) {
-    proxy.putHeader(name, value);
+    proxy.putHeader(name, value.toString());
   }
 
   that.removeHeader = function(name) {
