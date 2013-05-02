@@ -74,11 +74,11 @@ function testServerResponseWrite() {
   });
 }
 
-function DEFERREDtestServerResponseWriteEnd() {
+function testServerResponseWriteEnd() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals(false, response.headersSent);
     response.end('crunchy bacon');
-    //vassert.assertEquals(true, response.headersSent);
+    vassert.assertEquals(true, response.headersSent);
   });
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {

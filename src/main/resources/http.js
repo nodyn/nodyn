@@ -177,11 +177,17 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var proxy        = vertxResponse;
   that.sendDate    = true;
   that.headersSent = false;
-  that.end         = proxy.end;
 
   // node.js defaults to HTTP chunked encoding, whereas vert.x defaults
   // to non-chunked. Inform vert.x we want chunked for now.
   proxy.chunked(true);
+
+  that.end = function() {
+    if (!that.headersSent) {
+      that.writeHead();
+    }
+    proxy.end.apply(proxy, arguments);
+  }
   
   that.writeHead = function() {
     if (!that.headersSent) {
