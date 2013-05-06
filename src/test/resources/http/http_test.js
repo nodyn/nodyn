@@ -84,8 +84,8 @@ function testServerResponseWriteEnd() {
     var request = http.request(test_options, function(response) {
       response.on('data', function(message) {
         vassert.assertEquals('crunchy bacon', message);
-        server.close();
         vassert.testComplete();
+        server.close();
       });
     });
     request.end();
