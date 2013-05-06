@@ -95,16 +95,16 @@ function testServerResponseWriteEnd() {
 // both request and response
 function testMessageHeaders() {
   var server = http.createServer(function(request, response) {
-    vassert.assertTrue(request.headersSent);
     vassert.assertEquals(test_headers['x-custom-header'], request.headers['x-custom-header']);
     var body = 'crunchy bacon';
 
-    // TODO: For some reason, vert.x hangs when sending Content-Length?
-    // response.writeHead(201, { 'Content-Length': body.length });
-    response.writeHead(201, { 'x-something-else': body.length });
+    response.writeHead(201, { 'Content-Length': body.length });
+    vassert.assertEquals(body.length.toString(), response.getHeader('Content-Length'));
+    vassert.assertTrue(response.headersSent);
+
     response.setHeader('Content-Type', 'text/plain');
     vassert.assertEquals('text/plain', response.getHeader('Content-Type'));
-    vassert.assertEquals(body.length.toString(), response.getHeader('x-something-else'));
+
     response.removeHeader('x-something-else');
     vassert.assertEquals(undefined, response.getHeader('x-something-else'));
     // TODO Figure out how to deal with headers having multiple values
@@ -247,8 +247,8 @@ function testUrl() {
 function testHttpVersion() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals('1.1', request.httpVersion);
-    vassert.assertEquals('1',   request.httpMajorVersion);
-    vassert.assertEquals('1',   request.httpMinorVersion);
+    vassert.assertEquals(1,   request.httpMajorVersion);
+    vassert.assertEquals(1,   request.httpMinorVersion);
     response.end();
   });
   server.listen(test_options.port, function() {
@@ -391,10 +391,10 @@ function testCheckContinueEvent() {
     }
     test_options.headers = headers;
     var request = http.request(test_options, function(response) {
-      server.close();
       vassert.assertEquals(true, eventFired);
       test_options.headers = null;
       vassert.testComplete();
+      server.close();
     });
     request.end();
   });
@@ -422,7 +422,6 @@ function testServerMaxHeadersCountDefaultValue() {
 
 function testServerResponseHeadersSent() {
   var server = http.createServer(function(request, response) {
-    vassert.assertTrue(request.headersSent);
     vassert.assertEquals(false, response.headersSent);
     response.writeHead(201);
     vassert.assertEquals(true, response.headersSent);

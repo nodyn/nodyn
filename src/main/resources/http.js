@@ -62,7 +62,7 @@ var WebServer = module.exports.Server = function(requestListener) {
           return;
         }
       }
-      if (request.headers()['Expect'] == '100-Continue') {
+      if (request.headers().get('Expect') == '100-Continue') {
         if (that.listeners('checkContinue').length > 0) {
           // if a client has subscribed to checkContinue events
           // we let it handle the message. However, vert.x 
@@ -128,7 +128,14 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var proxy = vertxRequest;
 
   that.encoding = 'UTF-8';
-  that.headers = proxy.headers();
+  that.headers = {};
+  proxy.headers().forEach(function (name, value) {
+    if (that.headers[name]) {
+      that.headers[name] = that.headers[name] + "; " + value;
+    } else {
+      that.headers[name] = value;
+    }
+  });
   that.pause  = function() {
     proxy.pause();
   }
@@ -151,7 +158,14 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   proxy.endHandler(function() {
     if (proxy.trailers) {
       // make sure we have all the trailers from the response object
-      that.trailers = proxy.trailers();
+      that.trailers = {};
+      proxy.trailers().forEach(function (name, value) {
+        if (that.trailers[name]) {
+          that.trailers[name] = that.trailers[name] + "; " + value;
+        } else {
+          that.trailers[name] = value;
+        }
+      });
     }
     that.emit('end');
   });
@@ -165,10 +179,15 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     // vert.x HttpServerRequest
     that.url = proxy.uri();
     that.method = proxy.method();
-    that.headersSent = that.headers.size() > 0;
-    that.httpMajorVersion = proxy.httpMajorVersion;
-    that.httpMinorVersion = proxy.httpMinorVersion;
-    that.httpVersion = proxy.httpVersion;
+    if (proxy.version && proxy.version() === "HTTP_1_1") {
+      that.httpMajorVersion = 1;
+      that.httpMinorVersion = 1;
+      that.httpVersion = "1.1";
+    } else {
+      that.httpMajorVersion = 1;
+      that.httpMinorVersion = 0;
+      that.httpVersion = "1.0";
+    }
   }
 }
 
@@ -213,7 +232,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
         proxy.statusMessage(reasonPhrase);
       }
       // default HTTP date header
-      if (!proxy.headers()['Date']) {
+      if (!proxy.headers().get('Date')) {
         that.setHeader('Date', new Date().toUTCString());
       }
       if (that.getHeader('Content-Length')) {
@@ -238,7 +257,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   }
 
   that.getHeader = function(name) {
-    return proxy.headers()[name];
+    return proxy.headers().get(name);
   }
 
   that.setHeader = function(name, value) {
