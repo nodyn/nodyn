@@ -143,7 +143,7 @@ function testSocketTimeout() {
   server = net.createServer();
   server.listen(8800);
   server.on('connection', function(socket) { 
-    socket.setTimeout(100, function() {
+    socket.setTimeout(10, function() {
       timedOut = true;
     }); // receive timeout event in 100 msec
   });
