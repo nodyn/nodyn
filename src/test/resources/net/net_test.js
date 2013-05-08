@@ -232,8 +232,8 @@ function testServerAddress() {
 
   // now wait up to 3 seconds for the event to be fired
   tries = 0;
-  timer.setPeriodic(1000, function(id) {
-    if (tries++ > 3 || listening) {
+  timer.setPeriodic(500, function(id) {
+    if (tries++ > 6 || listening) {
       timer.cancelTimer(id);
     }
   });

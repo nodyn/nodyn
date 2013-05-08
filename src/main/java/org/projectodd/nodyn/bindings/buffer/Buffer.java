@@ -3,6 +3,7 @@ package org.projectodd.nodyn.bindings.buffer;
 import java.io.UnsupportedEncodingException;
 
 import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynArray;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
@@ -88,13 +89,12 @@ public class Buffer extends DynObject {
     @Override
     public void put(ExecutionContext context, final String name, final Object value, final boolean shouldThrow) {
         Number possibleIndex = Types.toNumber(context, name);
-        if (isIndex(name)) {
+        if (isIndex(possibleIndex)) {
             Long numberValue = Types.toUint32(context, value);
+            byte val = (byte) (numberValue.byteValue() & 0xff);
+            delegate.setByte(possibleIndex.intValue(), val);
 //            System.err.println("BUFFER PUT INDEX: " + possibleIndex);
-//            System.err.println("BUFFER REQUESTED PUT: " + value);
-//            System.err.println("BUFFER PUT: " + (numberValue.byteValue() & 0xff));
-            int val = (numberValue.byteValue() & 0xff);
-            delegate.setInt(possibleIndex.intValue(), val);
+//            System.err.println("BUFFER PUT/GET: " + val + "/" + (delegate.getByte(possibleIndex.intValue()) & 0xff));
         } else {
             super.put(context, name, value, shouldThrow);
         }
@@ -102,16 +102,17 @@ public class Buffer extends DynObject {
     
     @Override
     public Object getOwnProperty(ExecutionContext context, String name) {
-        if (isIndex(name)) {
-            int value = this.delegate.getInt(Types.toInteger(context, name).intValue());
+        Number possibleIndex = Types.toNumber(context, name);
+        if (isIndex(possibleIndex)) {
+            int value = this.delegate.getByte(possibleIndex.intValue()) & 0xff;
             PropertyDescriptor desc = new PropertyDescriptor();
             desc.set(name, value);
             desc.setConfigurable(true);
             desc.setEnumerable(true);
             desc.setWritable(true);
             desc.setValue(value);
-//            System.err.println("BUFFER RETREIVE: " + value);
-//            System.err.println("BUFFER RETREIVE INDEX: " + name);
+//            System.err.println("BUFFER GET INDEX: " + name);
+//            System.err.println("BUFFER GET: " + value);
             return desc;
         }
         return super.getOwnProperty(context, name);
@@ -156,10 +157,23 @@ public class Buffer extends DynObject {
         defineReadOnlyProperty(global, "toString", new ToString(global));
         defineReadOnlyProperty(global, "utf8Slice", new Slice(global, Buffer.Encoding.UTF8));
         defineReadOnlyProperty(global, "asciiSlice", new Slice(global, Buffer.Encoding.ASCII));
+        
+        defineReadOnlyProperty(global, "readUInt8", new AbstractNativeFunction(global) {
+            @Override
+            public Object call(ExecutionContext context, Object self, Object... args) {
+                Buffer b = (Buffer) self;
+                final int index = Types.toNumber(context, args[0]).intValue();
+//                System.out.println("Looking for byte at index: " + args[0]);
+//                System.out.println("Buffer size: " + b.delegate.getBytes().length);
+//                System.out.println("Delegate: " + b.delegate.getInt(index));
+//                System.out.println("Delegate: " + b.delegate.toString());
+                return b.delegate.getByte(index) & 0xff;
+            }
+        });
     }
     
-    private boolean isIndex(String name) {
-        Double possibleIndex = Types.toNumber(null, name).doubleValue();
+    private boolean isIndex(Number index) {
+        Double possibleIndex = index.doubleValue();
         return (!possibleIndex.isInfinite() && !possibleIndex.isNaN());
     }
     
