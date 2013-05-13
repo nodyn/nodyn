@@ -5,10 +5,9 @@ var Stream        = require('stream')
 var EventEmitter  = require('events').EventEmitter
 
 var Server = function( connectionListener ) {
-
-  var that = this;
+  var proxy    = net.createNetServer();
+  var that     = this;
   that.address = {}
-  that.server = net.createNetServer();
 
   if (connectionListener) {
       that.on('connection', connectionListener);
@@ -32,22 +31,21 @@ var Server = function( connectionListener ) {
     if (callback) { that.on('listening', callback); }
 
     // setup a connection handler in vert.x
-    that.server.connectHandler( function(sock) {
+    proxy.connectHandler( function(sock) {
       nodeSocket = new Socket();
       nodeSocket.setProxy(sock);
       that.emit('connection', nodeSocket);
     });
 
     // listen for incoming connections
-    that.server.listen(port, host, function() {
+    proxy.listen(port, host, function() {
+      // TODO: Vert.x does not provide bind address information?
+      // server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
+      that.address.port      = port;
+      that.address.host      = host;
+      that.address.address   = host;
       that.emit('listening');
     });
-
-    // TODO: Vert.x does not provide bind address information?
-    // server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
-    // server.address.address = address.address.canonicalHostName
-    that.address.port = port;
-    that.address.host = host;
   }
 
   that.address = function() {
@@ -55,7 +53,7 @@ var Server = function( connectionListener ) {
   }
 
   that.close = function(callback) {
-    that.server.close(function() { 
+    proxy.close(function() { 
       if (callback) { that.on('close', callback); }
       that.emit('close'); 
     });

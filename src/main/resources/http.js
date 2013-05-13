@@ -1,4 +1,5 @@
 var url   = require('url');
+var net   = require('net');
 var util  = require('util');
 var http  = require('vertx/http');
 var timer = require('vertx/timer');
@@ -52,8 +53,10 @@ var WebServer = module.exports.Server = function(requestListener) {
 
       if (request.method == 'CONNECT') {
         if (that.listeners('connect').length > 0) {
-          // TODO: Node.js expects socket+head as addtl params on this
-          that.emit('connect', incomingMessage); 
+          // Create a node.js Socket from our vert.x NetSocket
+          socket = new net.Socket();
+          socket.setProxy(request.netSocket());
+          that.emit('connect', incomingMessage, socket); 
         } else {
           // close the connection per the node.js api
           serverResponse.emit('close');

@@ -113,12 +113,12 @@ function testMessageHeaders() {
   });
   server.listen(test_options.port, function() {
     var request = http.request(test_options, function(response) {
-      server.close();
       vassert.assertEquals("201", response.statusCode.toString());
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.assertNotNull(response.headers['Date']);
       vassert.assertTrue(response.headers['Date'] != undefined);
       vassert.testComplete();
+      server.close();
     });
     request.end();
   });
@@ -277,7 +277,7 @@ function testRequestWrite() {
   });
 }
 
-function testRequestMethod() {
+function DEFERREDtestRequestMethod() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals('HEAD', request.method);
     response.end();
@@ -404,6 +404,8 @@ function testCheckContinueEvent() {
 function DEFERREDtestConnectEventFired() {
   var eventFired = false;
   server.on('connect', function(request, socket, head) {
+    vassert.assertTrue(socket !== null);
+    vassert.assertTrue(socket !== undefined);
     vassert.testComplete();
     server.close();
   });
