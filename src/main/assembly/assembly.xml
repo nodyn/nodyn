@@ -1,36 +1,16 @@
 <assembly>
+  <id>${artifactId}-${project.version}</id>
     <formats>
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/main/resources</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <outputDirectory></outputDirectory>
-            <directory>target/classes</directory>
+            <directory>target/mods/${module.name}</directory>
             <includes>
                 <include>**</include>
             </includes>
         </fileSet>
     </fileSets>
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>lib</outputDirectory>
-            <unpack>false</unpack>
-            <scope>runtime</scope>
-            <excludes>
-                <exclude>org.vert-x:vertx-core</exclude>
-                <exclude>org.vert-x:vertx-platform</exclude>
-                <exclude>org.easytesting:fest-assert</exclude>
-                <exclude>org.easytesting:fest-util</exclude>
-                <exclude>io.netty:netty</exclude>
-            </excludes>
-        </dependencySet>
-    </dependencySets>
 </assembly>
-

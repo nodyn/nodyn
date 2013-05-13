@@ -43,6 +43,9 @@
         <version.vertx.tests>1.0.0-SNAPSHOT</version.vertx.tests>
         <version.dynjs>0.1.2-SNAPSHOT</version.dynjs>
         <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
+        <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
+        <maven.failsafe.plugin.version>2.14</maven.failsafe.plugin.version>
+        <maven.dependency.plugin.version>2.7</maven.dependency.plugin.version>
     </properties>
 
     <repositories>
@@ -196,40 +199,49 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>prep-for-test</id>
-                        <phase>process-test-classes</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/mods/${groupId}~${artifactId}~${version}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/src/main/resources</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                </resource>
-                                <resource>
-                                    <directory>${basedir}/target/classes</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>**/*.class</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-resources-plugin</artifactId>
+              <version>2.4.2</version>
+              <configuration>
+                <encoding>${project.build.sourceEncoding}</encoding>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>copy-resources</id>
+                  <phase>process-classes</phase>
+                  <goals>
+                    <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>${basedir}/target/mods/${module.name}</outputDirectory>
+                    <resources>
+                      <resource>
+                        <directory>target/classes</directory>
+                        <filtering>true</filtering>
+                      </resource>
+                    </resources>
+                  </configuration>
+                </execution>
+              </executions>
             </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <version>${maven.dependency.plugin.version}</version>
+              <executions>
+                <execution>
+                  <id>copy-mod-dependencies-to-target</id>
+                  <phase>process-classes</phase>
+                  <goals>
+                    <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>target/mods/${module.name}/lib</outputDirectory>
+                    <includeScope>runtime</includeScope>
+                  </configuration>
+                </execution>
+            </executions>
+          </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -262,15 +274,45 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <systemProperties>
+                      <property>
+                        <name>vertx.mods</name>
+                        <value>target/mods</value>
+                      </property>
+                    </systemProperties>
                     <argLine>-Djava.library.path=${basedir}/lib</argLine>
                     <disableXmlReport>true</disableXmlReport>
                     <argLine>-Xss2048k</argLine>
                     <verbose>true</verbose>
                     <forkCount>0</forkCount>
                     <includes>
-                        <include>**/*Tests.java</include>
+                      <include>**unit/*Test*.java</include>
                     </includes>
                 </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <version>${maven.failsafe.plugin.version}</version>
+              <configuration>
+                <systemProperties>
+                  <property>
+                    <name>vertx.mods</name>
+                    <value>target/mods</value>
+                  </property>
+                </systemProperties>
+                <includes>
+                  <include>**/integration/**</include>
+                </includes>
+              </configuration>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>integration-test</goal>
+                    <goal>verify</goal>
+                  </goals>
+                </execution>
+              </executions>
             </plugin>
         </plugins>
         <pluginManagement>
