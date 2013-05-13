@@ -79,8 +79,8 @@ var Socket = function(options) {
     that.proxy = proxy;
     if (proxy.remoteAddress) {
       var inetAddress = proxy.remoteAddress();
-      that.remoteAddress = inetAddress.getAddress().toString().replace(/.+\//, '');
-      that.remotePort = inetAddress.getPort();
+      that.remoteAddress = inetAddress.ipaddress;
+      that.remotePort = inetAddress.port;
     }
     if (proxy.dataHandler) {
       proxy.dataHandler( function(buffer) {
