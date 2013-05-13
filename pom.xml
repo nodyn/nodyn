@@ -36,6 +36,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <version.maven.jdocbook.plugin>2.3.3</version.maven.jdocbook.plugin>
         <version.junit>4.7</version.junit>
         <version.netty>3.6.1.Final</version.netty>
