@@ -1,5 +1,5 @@
 <assembly>
-  <id>${artifactId}-${project.version}</id>
+  <id>${project.artifactId}</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -11,6 +11,7 @@
             <includes>
                 <include>**</include>
             </includes>
+            <filtered>false</filtered>
         </fileSet>
     </fileSets>
 </assembly>
