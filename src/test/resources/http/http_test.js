@@ -401,7 +401,7 @@ function testCheckContinueEvent() {
 }
 
 // TODO: Fix me
-function DEFERREDtestConnectEventFired() {
+function DtestConnectEventFired() {
   var eventFired = false;
   server.on('connect', function(request, socket, head) {
     vassert.assertTrue(socket !== null);
@@ -413,6 +413,45 @@ function DEFERREDtestConnectEventFired() {
     test_options.method = 'CONNECT';
     http.request(test_options).end();
   });
+}
+
+function testConnectionUpgrade() {
+  var server = http.createServer(function(req, resp) {
+    resp.writeHead(200, {'Content-Type': 'text/plain'});
+    resp.end('later!');
+  });
+
+  server.on('upgrade', function(req, socket, head) {
+    vassert.assertEquals('Upgrade', req.headers['Connection']);
+    socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
+                 'Upgrade: WebSocket\r\n' +
+                  'Connection: Upgrade\r\n' +
+                  '\r\n');
+
+    socket.write('fajitas');
+  });
+
+  server.listen(test_options.port, function() {
+    test_options.headers = {
+      'Connection': 'Upgrade',
+      'Upgrade': 'websocket' }
+    var request = http.request(test_options);
+    request.end();
+
+    request.on('upgrade', function(resp, socket, head) {
+      vassert.assertEquals('Upgrade', resp.headers['Connection']);
+
+      //  TODO: pending https://github.com/vert-x/vert.x/issues/610
+//      socket.on('data', function(buffer) {
+//        vassert.assertEquals('object', typeof buffer);
+//        vassert.assertEquals("fajitas", buffer.toString());
+//        socket.destroy();
+        server.close();
+        vassert.testComplete();
+//      });
+    });
+  });
+  
 }
 
 function testServerMaxHeadersCountDefaultValue() {

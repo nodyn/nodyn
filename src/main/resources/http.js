@@ -65,6 +65,20 @@ var WebServer = module.exports.Server = function(requestListener) {
           return;
         }
       }
+      if (request.headers().get('Connection') === 'Upgrade') {
+        // Now we have to bypass vert.x's builtin websocket
+        // handler and let the poor node.js developers do all
+        // the hard work on their own.
+        socket = new net.Socket();
+        socket.setProxy(request.netSocket());
+        if (that.listeners('upgrade').length > 0) {
+          that.emit('upgrade', incomingMessage, socket, new Buffer());
+        } else {
+          // If nobody is listening for an upgrade event, then the 
+          // connection is closed, per the Node.js API
+          socket.end();
+        }
+      }
       if (request.headers().get('Expect') == '100-Continue') {
         if (that.listeners('checkContinue').length > 0) {
           // if a client has subscribed to checkContinue events
@@ -85,18 +99,6 @@ var WebServer = module.exports.Server = function(requestListener) {
       request.endHandler(function() {
         incomingMessage.emit('end');
       });
-    });
-
-    // Setup a websocket handler
-    that.proxy.websocketHandler(function(websocket) {
-      if (that.listeners('upgrade').length > 0) {
-        // TODO
-        that.emit('upgrade', null, websocket, new Buffer());
-      } else {
-        // If nobody is listening for an upgrade event, then the 
-        // connection is closed, per the Node.js API
-        websocket.reject();
-      }
     });
 
     // listen for incoming connections
@@ -360,12 +362,30 @@ var httpRequest = module.exports.request = function(options, callback) {
                     .port(options.port)
                     .host(options.hostname);
 
+  var clientRequest = null; // The node.js representation
+
+  // The vert.x request
   var request = proxy.request(options.method, options.path, function(resp) { 
     incomingMessage = new IncomingMessage(resp);
+    // Allow node.js style websockets (i.e. direct socket connection)
+    if (resp.headers().get('Connection') === "Upgrade") {
+      if (clientRequest.listeners('upgrade').length > 0) {
+        // Need socket from vert.x 
+        // https://github.com/vert-x/vert.x/issues/610
+        // TODO: also figure out what needs to get stuffed into the buffer
+        clientRequest.emit('upgrade', incomingMessage, null, new Buffer());
+        clientRequest.emit('socket', null); // pass socket here
+      } else {
+        // close the connection
+        proxy.close();
+      }
+    }
     if (callback) {
       callback(incomingMessage);
     }
+    clientRequest.emit('response', incomingMessage);
   });
+  clientRequest = new ClientRequest(request);
 
   if (options.method == 'HEAD' || options.method == 'CONNECT') {
     request.chunked(false);
@@ -377,7 +397,7 @@ var httpRequest = module.exports.request = function(options, callback) {
       request.putHeader(header, options.headers[header]);
     }
   }
-  return new ClientRequest(request);
+  return clientRequest;
 }
 
 module.exports.createClient = function() {
