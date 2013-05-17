@@ -24,7 +24,7 @@ But for now, because you asked....
     $ git clone https://github.com/vert-x/vert.x.git
     $ cd vert.x
     $ ./gradlew collectDeps
-    $ ./gradelew distTar
+    $ ./gradlew distTar
 
 This will put the complete vert.x installation in
 `build/vert.x-2.0.0-SNAPSHOT`. Just update your `$PATH` to include
