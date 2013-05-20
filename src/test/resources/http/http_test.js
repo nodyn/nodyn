@@ -107,8 +107,7 @@ function testMessageHeaders() {
 
     response.removeHeader('x-something-else');
     vassert.assertEquals(undefined, response.getHeader('x-something-else'));
-    // TODO Figure out how to deal with headers having multiple values
-//    response.setHeader("Set-Cookie", ["type=ninja", "language=javascript"]);
+    response.setHeader("Set-Cookie", ["type=ninja", "language=javascript"]);
     response.end();
   });
   server.listen(test_options.port, function() {
@@ -117,6 +116,7 @@ function testMessageHeaders() {
       vassert.assertEquals('text/plain', response.headers['Content-Type']);
       vassert.assertNotNull(response.headers['Date']);
       vassert.assertTrue(response.headers['Date'] != undefined);
+      vassert.assertEquals('type=ninja,language=javascript', response.headers['Set-Cookie']);
       vassert.testComplete();
       server.close();
     });
@@ -277,7 +277,7 @@ function testRequestWrite() {
   });
 }
 
-function DEFERREDtestRequestMethod() {
+function testRequestMethod() {
   var server = http.createServer(function(request, response) {
     vassert.assertEquals('HEAD', request.method);
     response.end();
@@ -308,7 +308,7 @@ function testGetMethod() {
   });
 }
 
-function testRequestSetTimeout() {
+function XtestRequestSetTimeout() {
   var server = http.createServer(function(request, response) {
     // do nothing - we want the connection to timeout
   });
@@ -379,9 +379,7 @@ function testServerCloseEvent() {
 }
 
 function testCheckContinueEvent() {
-  var eventFired = false;
   server.on('checkContinue', function(request, response) {
-    eventFired = true;
     response.writeContinue();
     response.end();
   });
@@ -390,9 +388,8 @@ function testCheckContinueEvent() {
       'Expect': '100-Continue'
     }
     test_options.headers = headers;
-    var request = http.request(test_options, function(response) {
-      vassert.assertEquals(true, eventFired);
-      test_options.headers = null;
+    var request = http.request(test_options, function(response) {});
+    request.on('continue', function() {
       vassert.testComplete();
       server.close();
     });

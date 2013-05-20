@@ -125,9 +125,6 @@ var WebServer = module.exports.Server = function(requestListener) {
   });
 }
 
-// Node.js uses IncomingMessage for both the server and the client
-// That makes this class a little bulky as we check the type
-// and set properties accordingly
 var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var that  = this;
   var proxy = vertxRequest;
@@ -175,6 +172,9 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
     that.emit('end');
   });
 
+  // Node.js uses IncomingMessage for both the server and the client
+  // That makes this class a little bulky as we check the type
+  // and set properties accordingly
   if (proxy.statusCode) {
     // it's a client response message
     // vert.x HttpClientResponse
@@ -379,6 +379,9 @@ var httpRequest = module.exports.request = function(options, callback) {
         // close the connection
         proxy.close();
       }
+    }
+    if (resp.headers().get('Status') === '100 (Continue)') {
+      clientRequest.emit('continue');
     }
     if (callback) {
       callback(incomingMessage);
