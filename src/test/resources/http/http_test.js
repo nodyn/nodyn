@@ -308,7 +308,7 @@ function testGetMethod() {
   });
 }
 
-function XtestRequestSetTimeout() {
+function testRequestSetTimeout() {
   var server = http.createServer(function(request, response) {
     // do nothing - we want the connection to timeout
   });
@@ -397,9 +397,7 @@ function testCheckContinueEvent() {
   });
 }
 
-// TODO: Fix me
-function DtestConnectEventFired() {
-  var eventFired = false;
+function testConnectEventFired() {
   server.on('connect', function(request, socket, head) {
     vassert.assertTrue(socket !== null);
     vassert.assertTrue(socket !== undefined);

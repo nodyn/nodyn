@@ -51,7 +51,7 @@ var WebServer = module.exports.Server = function(requestListener) {
       var incomingMessage = new IncomingMessage(request);
       var serverResponse  = new ServerResponse(request.response);
 
-      if (request.method == 'CONNECT') {
+      if (request.method() === 'CONNECT') {
         if (that.listeners('connect').length > 0) {
           // Create a node.js Socket from our vert.x NetSocket
           socket = new net.Socket();
