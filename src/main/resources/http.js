@@ -51,42 +51,16 @@ var WebServer = module.exports.Server = function(requestListener) {
       var incomingMessage = new IncomingMessage(request);
       var serverResponse  = new ServerResponse(request.response);
 
-      if (request.method() === 'CONNECT') {
-        if (that.listeners('connect').length > 0) {
-          // Create a node.js Socket from our vert.x NetSocket
-          socket = new net.Socket();
-          socket.setProxy(request.netSocket());
-          that.emit('connect', incomingMessage, socket); 
-        } else {
-          // close the connection per the node.js api
-          serverResponse.emit('close');
-          serverResponse.end();
-          request.response.close();
-          return;
-        }
-      }
       if (request.headers().get('Connection') === 'Upgrade') {
-        // Now we have to bypass vert.x's builtin websocket
-        // handler and let the poor node.js developers do all
-        // the hard work on their own.
-        socket = new net.Socket();
-        socket.setProxy(request.netSocket());
-        if (that.listeners('upgrade').length > 0) {
-          that.emit('upgrade', incomingMessage, socket, new Buffer());
-        } else {
-          // If nobody is listening for an upgrade event, then the 
-          // connection is closed, per the Node.js API
-          socket.end();
-        }
-      }
-      if (request.headers().get('Expect') == '100-Continue') {
+        handleUpgrade(request, incomingMessage);
+      } 
+      else if (request.headers().get('Expect') == '100-Continue') {
         if (that.listeners('checkContinue').length > 0) {
-          // if a client has subscribed to checkContinue events
-          // we let it handle the message. However, vert.x 
-          // automatically sends a CONTINUE response, so this
-          // may not work. TODO?
           that.emit('checkContinue', incomingMessage, serverResponse);
         }
+      } 
+      else if (request.method() === 'CONNECT') {
+        handleConnect(request, incomingMessage, serverResponse);
       } else {
         that.emit('request', incomingMessage, serverResponse);
       }
@@ -123,6 +97,33 @@ var WebServer = module.exports.Server = function(requestListener) {
   that.setTimeout(that.timeout, function() {
     that.close();
   });
+
+  function handleUpgrade(request, incomingMessage) {
+    // Bypass vert.x's builtin websocket handler and let the poor node.js
+    // developers do all the hard work on their own.
+    socket = new net.Socket();
+    socket.setProxy(request.netSocket());
+    if (that.listeners('upgrade').length > 0) {
+      that.emit('upgrade', incomingMessage, socket, new Buffer());
+    } else {
+      // If nobody is listening for an upgrade event, then the 
+      // connection is closed, per the Node.js API
+      socket.end();
+    }
+  }
+
+  function handleConnect(request, incomingMessage, serverResponse) {
+    socket = new net.Socket();
+    socket.setProxy(request.netSocket());
+    if (that.listeners('connect').length > 0) {
+      // Create a node.js Socket from our vert.x NetSocket
+      that.emit('connect', incomingMessage, socket); 
+    } else {
+      // close the connection per the node.js api
+      serverResponse.emit('close');
+      serverResponse.end();
+    }
+  }
 }
 
 var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
@@ -380,6 +381,12 @@ var httpRequest = module.exports.request = function(options, callback) {
         proxy.close();
       }
     }
+    if (options.method === 'CONNECT') {
+      // head = new Buffer();
+      // https://github.com/vert-x/vert.x/issues/610
+      // TODO: also figure out what needs to get stuffed into the buffer
+      clientRequest.emit('connect', incomingMessage, null, null);
+    }
     if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');
     }
@@ -390,7 +397,7 @@ var httpRequest = module.exports.request = function(options, callback) {
   });
   clientRequest = new ClientRequest(request);
 
-  if (options.method == 'HEAD' || options.method == 'CONNECT') {
+  if (options.method === 'HEAD' || options.method === 'CONNECT') { 
     request.chunked(false);
   } else {
     request.chunked(true);

@@ -132,11 +132,17 @@ var Socket = function(options) {
   }
 
   that.end = function(data, encoding) {
-    that.write(data, encoding, function() {
+    if (data) {
+      that.write(data, encoding, function() {
+        that.destroy();
+        that.emit('end');
+      });
+    } else {
       that.destroy();
       that.emit('end');
-    });
+    }
   }
+
   that.destroySoon = that.end;
 
   that.setEncoding = function(encoding) { 

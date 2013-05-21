@@ -398,15 +398,29 @@ function testCheckContinueEvent() {
 }
 
 function testConnectEventFired() {
-  server.on('connect', function(request, socket, head) {
-    vassert.assertTrue(socket !== null);
-    vassert.assertTrue(socket !== undefined);
+  server.on('request', function(request, response) {
+    vassert.fail("CONNECT requests should not issue 'request' events");
     vassert.testComplete();
-    server.close();
+  });
+  server.on('connect', function(request, clientSock, head) {
+    vassert.assertTrue(clientSock !== null);
+    vassert.assertTrue(clientSock !== undefined);
+    clientSock.write('HTTP/1.1 200 Connection Established\r\n' +
+                     'Proxy-agent: Nodyn-Proxy\r\n' +
+                     '\r\n');
+    // TODO: write to the socket
+    clientSock.end();
   });
   server.listen(test_options.port, function() {
     test_options.method = 'CONNECT';
-    http.request(test_options).end();
+    var request = http.request(test_options);
+    // TODO: Test head + socket
+    // Socket pending https://github.com/vert-x/vert.x/issues/610
+    request.on('connect', function(res, socket, head) {
+      vassert.testComplete();
+      server.close();
+    });
+    request.end();
   });
 }
 
