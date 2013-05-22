@@ -88,17 +88,12 @@ var Socket = function(options) {
   }
 
   // Usage socket.connect(port, [host], [callback])
-  that.connect = function() {
-    callback = null;
-    host = 'localhost';
-    port = arguments[0];
-    lastArg = arguments[arguments.length - 1];
-
-    if (typeof lastArg  == 'function') {
-      that.on('connect', lastArg);
+  that.connect = function(port, host, callback) {
+    if (host === null || host === undefined) {
+      host = 'localhost';
     }
-    if (typeof arguments[1]  == 'string') {
-      host = arguments[1];
+    if (typeof callback  == 'function') {
+      that.on('connect', callback);
     }
 
     client = net.createNetClient();
