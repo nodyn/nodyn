@@ -405,22 +405,27 @@ function testConnectEventFired() {
   server.on('connect', function(request, clientSock, head) {
     vassert.assertTrue(clientSock !== null);
     vassert.assertTrue(clientSock !== undefined);
-      clientSock.write('HTTP/1.1 200 Connection Established\r\n' +
-                       'Proxy-agent: Nodyn-Proxy\r\n' +
-                       '\r\n');
-      clientSock.on('data', function(buffer) {
-        vassert.assertEquals('Bonjour', buffer.toString());
-        clientSock.write('Au revoir');
-      });
-      clientSock.end();
+    vassert.assertTrue(head !== null);
+    vassert.assertTrue(head !== undefined);
+    clientSock.write('HTTP/1.1 200 Connection Established\r\n' +
+                     'Proxy-agent: Nodyn-Proxy\r\n' +
+                     '\r\n');
+    clientSock.on('data', function(buffer) {
+      vassert.assertEquals('Bonjour', buffer.toString());
+      clientSock.write('Au revoir');
+    });
+    clientSock.end();
   });
   server.listen(test_options.port, function() {
     test_options.method = 'CONNECT';
-    var request = http.request(test_options);
-    // TODO: Test head 
+    var request = http.request(test_options, function() {
+      vassert.fail("CONNECT requests should not emit 'response' events");
+    });
     request.on('connect', function(res, socket, head) {
       vassert.assertTrue(socket !== null);
       vassert.assertTrue(socket !== undefined);
+      vassert.assertTrue(head !== null);
+      vassert.assertTrue(head !== undefined);
       socket.write('Bonjour');
       socket.on('data', function(buffer) {
         vassert.assertEquals('Au revoir', buffer.toString());

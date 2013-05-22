@@ -104,7 +104,6 @@ var WebServer = module.exports.Server = function(requestListener) {
     socket = new net.Socket();
     socket.setProxy(request.netSocket());
     if (that.listeners('upgrade').length > 0) {
-      // TODO: stick headers into the buffer?
       that.emit('upgrade', incomingMessage, socket, new Buffer());
     } else {
       // If nobody is listening for an upgrade event, then the 
@@ -118,7 +117,7 @@ var WebServer = module.exports.Server = function(requestListener) {
     socket.setProxy(request.netSocket());
     if (that.listeners('connect').length > 0) {
       // Create a node.js Socket from our vert.x NetSocket
-      that.emit('connect', incomingMessage, socket); 
+      that.emit('connect', incomingMessage, socket, new Buffer()); 
     } else {
       // close the connection per the node.js api
       serverResponse.emit('close');
@@ -372,7 +371,6 @@ var httpRequest = module.exports.request = function(options, callback) {
     // Allow node.js style websockets (i.e. direct socket connection)
     if (resp.headers().get('Connection') === "Upgrade") {
       if (clientRequest.listeners('upgrade').length > 0) {
-        // TODO: stick headers in the buffer?
         socket = new net.Socket();
         socket.setProxy(resp.netSocket());
         clientRequest.emit('upgrade', incomingMessage, socket, new Buffer());
@@ -382,19 +380,19 @@ var httpRequest = module.exports.request = function(options, callback) {
         proxy.close();
       }
     }
-    if (options.method === 'CONNECT') {
-      // TODO: stuff headers into the buffer?
+    else if (options.method === 'CONNECT') {
       socket = new net.Socket();
       socket.setProxy(resp.netSocket());
       clientRequest.emit('connect', incomingMessage, socket, new Buffer());
     }
-    if (resp.headers().get('Status') === '100 (Continue)') {
+    else if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');
+    } else {
+      if (callback) {
+        callback(incomingMessage);
+      }
+      clientRequest.emit('response', incomingMessage);
     }
-    if (callback) {
-      callback(incomingMessage);
-    }
-    clientRequest.emit('response', incomingMessage);
   });
   clientRequest = new ClientRequest(request);
 
