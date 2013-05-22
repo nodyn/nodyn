@@ -104,6 +104,7 @@ var WebServer = module.exports.Server = function(requestListener) {
     socket = new net.Socket();
     socket.setProxy(request.netSocket());
     if (that.listeners('upgrade').length > 0) {
+      // TODO: stick headers into the buffer?
       that.emit('upgrade', incomingMessage, socket, new Buffer());
     } else {
       // If nobody is listening for an upgrade event, then the 
@@ -371,10 +372,10 @@ var httpRequest = module.exports.request = function(options, callback) {
     // Allow node.js style websockets (i.e. direct socket connection)
     if (resp.headers().get('Connection') === "Upgrade") {
       if (clientRequest.listeners('upgrade').length > 0) {
-        // Need socket from vert.x 
-        // https://github.com/vert-x/vert.x/issues/610
-        // TODO: also figure out what needs to get stuffed into the buffer
-        clientRequest.emit('upgrade', incomingMessage, null, new Buffer());
+        // TODO: stick headers in the buffer?
+        socket = new net.Socket();
+        socket.setProxy(resp.netSocket());
+        clientRequest.emit('upgrade', incomingMessage, socket, new Buffer());
         clientRequest.emit('socket', null); // pass socket here
       } else {
         // close the connection
@@ -382,10 +383,10 @@ var httpRequest = module.exports.request = function(options, callback) {
       }
     }
     if (options.method === 'CONNECT') {
-      // head = new Buffer();
-      // https://github.com/vert-x/vert.x/issues/610
-      // TODO: also figure out what needs to get stuffed into the buffer
-      clientRequest.emit('connect', incomingMessage, null, null);
+      // TODO: stuff headers into the buffer?
+      socket = new net.Socket();
+      socket.setProxy(resp.netSocket());
+      clientRequest.emit('connect', incomingMessage, socket, new Buffer());
     }
     if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');

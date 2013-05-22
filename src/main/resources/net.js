@@ -82,6 +82,7 @@ var Socket = function(options) {
     }
     if (proxy.dataHandler) {
       proxy.dataHandler( function(buffer) {
+        print("EMITTING DATA");
         that.emit('data', new Buffer(buffer.toString()));
       });
     }
