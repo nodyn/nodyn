@@ -106,20 +106,26 @@ var Socket = function(options) {
 
   // Usage socket.write(string, [encoding], [callback])
   that.write = function() {
+    var args = Array.prototype.slice.call(arguments);
+    callback = null;
     encoding = 'UTF-8';
-    string   = arguments[0];
-    lastArg  = arguments[arguments.length - 1];
+    string   = args[0];
+    lastArg  = args[args.length - 1];
 
     if (typeof lastArg  == 'function') {
       callback = lastArg;
     }
-    if (typeof arguments[1] == 'string') {
-      encoding = arguments[1];
+    if (typeof args[1] == 'string') {
+      encoding = args[1];
     }
 
-    that.proxy.write(string, encoding, function() {
-      if (callback) { callback.apply(callback); }
-    });
+    if (callback) {
+      that.proxy.drainHandler(function() {
+        callback.apply(callback);
+      });
+    }
+    // what is passed could be a buffer
+    that.proxy.write(string.toString(), encoding);
   }
 
   that.destroy = function() { 
@@ -196,27 +202,26 @@ module.exports.createConnection = function() {
   options.localAddr = null;
   callback          = null;
 
-  if (typeof(arguments[0]) == 'object') {
-    options.port = arguments[0].port;
+  var args = Array.prototype.slice.call(arguments);
+  if (typeof(args[0]) == 'object') {
+    options.port = args[0].port;
 
-    if (arguments[0].host) { 
-      options.host = arguments[0].host; 
+    if (args[0].host) { 
+      options.host = args[0].host; 
     }
-    if (arguments[0].localAddress) { 
-      options.localAddr = arguments[0].localAddress; 
-    }
-    if (typeof(arguments[1]) == 'function') { 
-      callback = arguments[1]; 
+    if (args[0].localAddress) { 
+      options.localAddr = args[0].localAddress; 
     }
   } 
-  else if (typeof(arguments[0]) == 'number') {
-    options.port = arguments[0];
-    if (typeof(arguments[1]) == 'string') { 
-      options.host = arguments[1]; 
+  else if (typeof(args[0]) == 'number') {
+    options.port = args[0];
+    if (typeof(args[1]) == 'string') { 
+      options.host = args[1]; 
     }
-    else if (typeof(arguments[1] == 'function')) { 
-      callback = arguments[1]; 
-    }
+  }
+  lastArg = args[args.length - 1];
+  if (typeof lastArg  == 'function') {
+    callback = lastArg;
   }
 
   sock = new Socket();

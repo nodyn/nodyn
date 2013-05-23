@@ -51,19 +51,27 @@ function testConnect() {
 }
 
 function testSocketReadWrite() {
+  completedCallback = false;
   server = net.createServer();
   server.on('connection', function(socket) { 
     socket.on('data', function(buffer) {
       vassert.assertEquals('object', typeof buffer);
       vassert.assertEquals("crunchy bacon", buffer.toString());
-      socket.destroy();
-      server.close();
-      vassert.testComplete();
+      socket.write('with chocolate', function() {
+        completedCallback = true;
+      });
     });
   });
   server.listen(8800, function() {
     socket = net.connect(8800, function() {
       socket.write("crunchy bacon");
+      socket.on('data', function(buffer) {
+        vassert.assertEquals('with chocolate', buffer.toString());
+        vassert.assertEquals(true, completedCallback);
+        socket.destroy();
+        server.close();
+        vassert.testComplete();
+      });
     });
   });
 }
