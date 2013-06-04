@@ -1,5 +1,10 @@
 package org.projectodd.nodyn.integration.javascript;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.vertx.testtools.ScriptClassRunner;
+import org.vertx.testtools.TestVerticleInfo;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -18,9 +23,11 @@ package org.projectodd.nodyn.integration.javascript;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 
-public class FsIntegrationTests extends AbstractJavascriptIntegrationTest {
-    public FsIntegrationTests() {
-        super( "fs/fs_test.js" );
+@TestVerticleInfo(filenameFilter = "fs_.+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
+@RunWith(ScriptClassRunner.class)
+public class FsIntegrationTests {
+    @Test
+    public void __vertxDummy() {
     }
     
 }

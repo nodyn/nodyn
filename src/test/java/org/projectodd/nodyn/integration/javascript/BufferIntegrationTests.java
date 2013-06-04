@@ -2,6 +2,11 @@ package org.projectodd.nodyn.integration.javascript;
 
 import java.io.UnsupportedEncodingException;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.vertx.testtools.ScriptClassRunner;
+import org.vertx.testtools.TestVerticleInfo;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -20,15 +25,20 @@ import java.io.UnsupportedEncodingException;
  * @author Lance Ball
  */
 
-public class BufferIntegrationTests extends AbstractJavascriptIntegrationTest {
-    public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
-    public static byte[] UTF8_BYTE_STRING;
-    public static byte[] ASCII_BYTE_STRING;
+@TestVerticleInfo(filenameFilter = "buffer_.+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
+@RunWith(ScriptClassRunner.class)
+public class BufferIntegrationTests {
+    public final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
+    public byte[] UTF8_BYTE_STRING;
+    public byte[] ASCII_BYTE_STRING;
     
-    public BufferIntegrationTests() throws UnsupportedEncodingException {
-        super( "buffer/buffer_test.js" );
-        UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
-        UTF8_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
+    @Test
+    public void __vertxDummy() {
+        try {
+            UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
+            UTF8_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
-    
 }

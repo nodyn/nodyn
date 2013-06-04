@@ -1,5 +1,10 @@
 package org.projectodd.nodyn.integration.javascript;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.vertx.testtools.ScriptClassRunner;
+import org.vertx.testtools.TestVerticleInfo;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -18,9 +23,10 @@ package org.projectodd.nodyn.integration.javascript;
  * @author Lance Ball
  */
 
-public class CryptoIntegrationTests extends AbstractJavascriptIntegrationTest {
-    public CryptoIntegrationTests() {
-        super( "crypto/crypto_test.js" );
+@TestVerticleInfo(filenameFilter = "crypto_.+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
+@RunWith(ScriptClassRunner.class)
+public class CryptoIntegrationTests {
+    @Test
+    public void __vertxDummy() {
     }
-    
 }
