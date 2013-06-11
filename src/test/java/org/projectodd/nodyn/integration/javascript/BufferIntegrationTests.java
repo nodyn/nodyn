@@ -28,9 +28,9 @@ import org.vertx.testtools.TestVerticleInfo;
 @TestVerticleInfo(filenameFilter = "buffer_.+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
 @RunWith(ScriptClassRunner.class)
 public class BufferIntegrationTests {
-    public final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
-    public byte[] UTF8_BYTE_STRING;
-    public byte[] ASCII_BYTE_STRING;
+    public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
+    public static byte[] UTF8_BYTE_STRING;
+    public static byte[] ASCII_BYTE_STRING;
     
     @Test
     public void __vertxDummy() {
