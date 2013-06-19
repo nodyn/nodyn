@@ -62,4 +62,20 @@ function testLoadAvg() {
   vassert.testComplete();
 }
 
+function testNetworkInterfaces() {
+  var interfaces = os.networkInterfaces();
+  // Since this is so machine-specific, let's
+  // just verify that the basic object structure
+  // is node.js compliant...
+  for (var key in interfaces) {
+    var addresses = interfaces[key];
+    addresses.forEach(function(a) {
+      vassert.assertTrue(a.address.constructor === String);
+      vassert.assertTrue(a.family.constructor === String);
+      vassert.assertTrue(a.internal.constructor === Boolean);
+    });
+  }
+  vassert.testComplete();
+}
+
 vertxTest.startTests(this);
