@@ -1,5 +1,6 @@
-timer     = require('vertx/timer');
-container = require('vertx/container');
+vertx     = require('vertx');
+timer     = vertx.timer;
+container = vertx.container;
 console   = require('node_console');
 
 process.title = "Nodyn";
@@ -93,7 +94,7 @@ process.memoryUsage = function() {
 }
 
 process.nextTick = function(callback, args) {
-  timer.runOnContext(function() {
+  vertx.runOnContext(function() {
     callback(args);
   });
 }
