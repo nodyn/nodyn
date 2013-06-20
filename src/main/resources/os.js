@@ -28,8 +28,30 @@ exports.cpus = function() {
 }
 
 exports.networkInterfaces = function() {
-  // TODO
-  return "NOT IMPLEMENTED";
+  var interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+  var ifs = {};
+
+  while (interfaces.hasMoreElements()) {
+    var iface = interfaces.nextElement();
+    var addresses = iface.getInetAddresses();
+    var addrs = [];
+
+    while (addresses.hasMoreElements()) {
+      var addr = addresses.nextElement();
+      // A rather crude test for 'IPv6-ness'
+      var ipfamily = addr.getHostAddress().indexOf(":") != -1 ? 'IPv6' : 'IPv4';
+      var info = {
+        address: addr.getHostAddress().toString(),
+        family: ipfamily,
+        internal: addr.isLoopbackAddress()
+      };
+      addrs.push(info);
+    }
+
+    ifs[iface.getName()] = addrs;
+  }
+
+  return ifs;
 }
 
 exports.tmpdir = exports.tmpDir = function() {
