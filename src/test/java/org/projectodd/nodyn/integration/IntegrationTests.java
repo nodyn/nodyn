@@ -1,9 +1,4 @@
-package org.projectodd.nodyn.integration.javascript;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.vertx.testtools.ScriptClassRunner;
-import org.vertx.testtools.TestVerticleInfo;
+package org.projectodd.nodyn.integration;
 
 /*
  * Copyright 2013 Red Hat, Inc.
@@ -20,12 +15,23 @@ import org.vertx.testtools.TestVerticleInfo;
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * @author Lance Ball
+ * @author <a href="http://tfox.org">Tim Fox</a>
  */
 
-@TestVerticleInfo(filenameFilter = "crypto_.+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
+import org.vertx.testtools.ScriptClassRunner;
+import org.vertx.testtools.TestVerticleInfo;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+/**
+ * This is dummy JUnit test class which is used to run any JavaScript test
+ * scripts as JUnit tests.
+ * 
+ * The scripts go in src/test/resources.
+ */
+@TestVerticleInfo(filenameFilter = ".+_test\\.js", funcRegex = "[\\s]+(test[^\\s(]+):[\\s]+function")
 @RunWith(ScriptClassRunner.class)
-public class CryptoIntegrationTests {
+public class IntegrationTests {
     @Test
     public void __vertxDummy() {
     }

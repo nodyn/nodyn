@@ -54,12 +54,13 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         
         @Override
         protected ExecutionContext initializeRootContext() {
-            return ExecutionContext.createGlobalExecutionContext(factory.getRuntime(), new InitializationListener()
+            return ExecutionContext.createGlobalExecutionContext(getRuntime(), new InitializationListener()
             {
                 @Override
                 public void initialize(ExecutionContext context) {
                     try {
-                        loadScript(context, "node.js");
+                        getRuntime().evaluate("include('node.js')");
+//                        loadScript(context, "node.js");
                     } catch (Exception e) {
                         System.err.println("[ERROR] Cannot initialize Nodyn. " + e.getMessage());
                         e.printStackTrace();
