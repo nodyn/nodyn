@@ -23,6 +23,8 @@ import org.vertx.testtools.TestVerticleInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * This is dummy JUnit test class which is used to run any JavaScript test
  * scripts as JUnit tests.
@@ -32,7 +34,17 @@ import org.junit.runner.RunWith;
 @TestVerticleInfo(filenameFilter = ".+_test\\.js", funcRegex = "[\\s]+(test[^\\s(]+):[\\s]+function")
 @RunWith(ScriptClassRunner.class)
 public class IntegrationTests {
+    public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
+    public static byte[] UTF8_BYTE_STRING;
+    public static byte[] ASCII_BYTE_STRING;
+
     @Test
     public void __vertxDummy() {
+        try {
+            UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
+            UTF8_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 }
