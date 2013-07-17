@@ -97,12 +97,11 @@ var NetTests = {
       socket.setTimeout(300, function() {
         vassert.fail("Should not have timed out");
       });
-      socket.setTimeout(0);
+      socket.setTimeout(0); // cancels the timeout we just set
     });
     server.listen(8800, function() {
       socket = net.connect(8800, function() {
         timer.setTimer(500, function() {
-          socket.destroy();
           server.close();
           vassert.testComplete();
         });
@@ -115,8 +114,7 @@ var NetTests = {
     server.listen(8800, function() {
       net.connect(8800, function(socket) {
           vassert.assertEquals('127.0.0.1', socket.remoteAddress);
-          // Long vs. Int causes failure here
-          vassert.assertEquals('8800', socket.remotePort.toString());
+          vassert.assertTrue(8800 == socket.remotePort);
           socket.destroy();
           server.close();
           vassert.testComplete();
@@ -127,12 +125,13 @@ var NetTests = {
   testServerAddress: function() {
     server = net.createServer();
     server.listen(8800, function() {
-      address = server.address();
-      vassert.assertEquals(8800, address.port);
-      // TODO: Vert.x does not provide bind address info?
-      vassert.assertEquals("0.0.0.0", address.address);
-      // vassert.assertEquals("IPv4", address.family);
-      vassert.testComplete();
+      net.connect(8800, function(socket) {
+        address = server.address();
+        vassert.assertTrue(8800 == address.port);
+        vassert.assertEquals("0.0.0.0", address.address);
+        vassert.assertEquals("IPv4", address.family);
+        vassert.testComplete();
+      });
     });
   }
 }

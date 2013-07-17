@@ -39,9 +39,6 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             global.defineGlobalProperty("process", process); 
             global.defineGlobalProperty("Buffer", bufferType); 
             global.defineGlobalProperty("__filename", filename);
-            // We have to do this to make the vertx object global
-            // I do not understand why
-//            global.defineGlobalProperty("vertx", new DynObject(global));
             return global;
         }
     }

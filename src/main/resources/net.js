@@ -7,7 +7,11 @@ var EventEmitter  = require('events').EventEmitter
 var Server = function( connectionListener ) {
   var proxy    = net.createNetServer();
   var that     = this;
-  that.address = {}
+  that.addr    = {
+    port: 0,
+    family: "IPv4",
+    address: '127.0.0.1'
+  }
 
   if (connectionListener) {
       that.on('connection', connectionListener);
@@ -34,22 +38,22 @@ var Server = function( connectionListener ) {
     proxy.connectHandler( function(sock) {
       nodeSocket = new Socket();
       nodeSocket.setProxy(sock);
+      // TODO: This is a hack, methinks
+      that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6'
       that.emit('connection', nodeSocket);
     });
 
     // listen for incoming connections
     proxy.listen(port, host, function() {
-      // TODO: Vert.x does not provide bind address information?
-      // server.address.family = (address.address.address.length) == 4 ? 'IPv4' : 'IPv6'
-      that.address.port      = port;
-      that.address.host      = host;
-      that.address.address   = host;
+      that.addr.port      = proxy.port();
+      that.addr.host      = proxy.host();
+      that.addr.address   = proxy.host();
       that.emit('listening');
     });
   }
 
   that.address = function() {
-    return that.address;
+    return that.addr;
   }
 
   that.close = function(callback) {
@@ -160,11 +164,10 @@ var Socket = function(options) {
   that.setTimeout = function(msec, timeout) { 
     if (that.timeoutId) {
       timer.cancelTimer(that.timeoutId);
+      that.removeAllListeners('timeout');
     }
-    if (msec > 0) {
-      if (timeout) {
-        that.on('timeout', timeout);
-      }
+    if (msec > 0 && timeout) {
+      that.on('timeout', timeout);
       that.timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
     }
   }

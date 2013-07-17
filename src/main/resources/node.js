@@ -104,3 +104,6 @@ process.nextTick = function(callback, args) {
 // node executable in process.config
 process.config = {}
 
+console.log("Node.js ContextClassLoader:  " 
+    + java.lang.System.identityHashCode(java.lang.Thread.currentThread().getContextClassLoader()));
+

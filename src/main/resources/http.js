@@ -387,10 +387,8 @@ var httpRequest = module.exports.request = function(options, callback) {
     }
     else if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');
-    } else {
-      if (callback) {
-        callback(incomingMessage);
-      }
+    } else if (callback) {
+      clientRequest.on('response', callback);
       clientRequest.emit('response', incomingMessage);
     }
   });
