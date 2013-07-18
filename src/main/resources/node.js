@@ -1,7 +1,9 @@
 vertx     = require('vertx');
+process   = require('process');
+console   = require('node_console');
+
 timer     = vertx.timer;
 container = vertx.container;
-console   = require('node_console');
 
 process.title = "Nodyn";
 global.require = require;

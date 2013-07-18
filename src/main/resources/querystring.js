@@ -1,5 +1,5 @@
 var QueryString = function() {
-  this._qs = process.binding('QueryString')
+  this._qs = nodyn.QueryString;
 
   this.escape = function(str) {
     return this._qs.escape(str)

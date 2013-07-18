@@ -6,38 +6,32 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-import org.dynjs.runtime.AbstractNativeFunction;
-import org.dynjs.runtime.DynArray;
-import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.JSObject;
-import org.dynjs.runtime.Types;
+import org.dynjs.runtime.*;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 public class QueryString extends DynObject {
     
     public QueryString(GlobalObject globalObject) {
         super(globalObject);
-        Binding.setProperty(this, "escape", new AbstractNativeFunction(globalObject) {
+        setProperty(this, "escape", new AbstractNativeFunction(globalObject) {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
                 return QueryString.escape(Types.toString(context, args[0]));
             }
         });
-        Binding.setProperty(this, "unescape", new AbstractNativeFunction(globalObject) {
+        setProperty(this, "unescape", new AbstractNativeFunction(globalObject) {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
                 return QueryString.unescape(Types.toString(context, args[0]));
             }
         });
-        Binding.setProperty(this, "stringify", new AbstractNativeFunction(globalObject) {
+        setProperty(this, "stringify", new AbstractNativeFunction(globalObject) {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
                 return QueryString.stringify(context, args);
             }
         });
-        Binding.setProperty(this, "parse", new AbstractNativeFunction(globalObject) {
+        setProperty(this, "parse", new AbstractNativeFunction(globalObject) {
             @Override
             public Object call(ExecutionContext context, Object self, Object... args) {
                 return QueryString.parse(context, args);
@@ -45,7 +39,7 @@ public class QueryString extends DynObject {
         });
     }
 
-    private static String stringify(ExecutionContext context, Object[] args) {
+    public static String stringify(ExecutionContext context, Object[] args) {
         if (args[0] instanceof JSObject) {
             JSObject obj = (JSObject) args[0];
             String sep = "&";
@@ -83,7 +77,7 @@ public class QueryString extends DynObject {
         return "";
     }
 
-    private static JSObject parse(ExecutionContext context, Object[] args) {
+    public static JSObject parse(ExecutionContext context, Object[] args) {
         DynObject obj = new DynObject(context.getGlobalObject());
         String string = Types.toString(context, args[0]);
         if (args[1] != Types.UNDEFINED) {
@@ -111,7 +105,7 @@ public class QueryString extends DynObject {
         return obj;
     }
 
-    private static String escape(String querystring) {
+    public static String escape(String querystring) {
         try {
             return URLEncoder.encode(querystring, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -120,12 +114,23 @@ public class QueryString extends DynObject {
         }
     }
     
-    private static String unescape(String querystring) {
+    public static String unescape(String querystring) {
         try {
             return URLDecoder.decode(querystring, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return querystring;
         }
+    }
+
+    public static void setProperty(DynObject __this, String name, final Object value) {
+        __this.defineOwnProperty(null, name, new PropertyDescriptor() {
+            {
+                set("Value", value );
+                set("Writable", false);
+                set("Enumerable", true);
+                set("Configurable", false);
+            }
+        }, false);
     }
 }
