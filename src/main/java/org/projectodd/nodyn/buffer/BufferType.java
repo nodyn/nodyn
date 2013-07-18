@@ -1,4 +1,4 @@
-package org.projectodd.nodyn.bindings.buffer;
+package org.projectodd.nodyn.buffer;
 
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
@@ -8,7 +8,7 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodyn.bindings.buffer.prototype.ByteLength;
+import org.projectodd.nodyn.buffer.prototype.ByteLength;
 
 public class BufferType extends  AbstractNativeFunction { 
     public BufferType(GlobalObject globalObject) {

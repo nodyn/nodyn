@@ -1,4 +1,4 @@
-package org.projectodd.nodyn.bindings.buffer;
+package org.projectodd.nodyn.buffer;
 
 import java.io.UnsupportedEncodingException;
 
@@ -10,11 +10,11 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodyn.bindings.buffer.prototype.Copy;
-import org.projectodd.nodyn.bindings.buffer.prototype.Fill;
-import org.projectodd.nodyn.bindings.buffer.prototype.Slice;
-import org.projectodd.nodyn.bindings.buffer.prototype.ToString;
-import org.projectodd.nodyn.bindings.buffer.prototype.Write;
+import org.projectodd.nodyn.buffer.prototype.Copy;
+import org.projectodd.nodyn.buffer.prototype.Fill;
+import org.projectodd.nodyn.buffer.prototype.Slice;
+import org.projectodd.nodyn.buffer.prototype.ToString;
+import org.projectodd.nodyn.buffer.prototype.Write;
 
 public class Buffer extends DynObject {
     public enum Encoding {

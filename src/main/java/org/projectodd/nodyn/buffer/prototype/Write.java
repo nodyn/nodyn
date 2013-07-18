@@ -1,11 +1,11 @@
-package org.projectodd.nodyn.bindings.buffer.prototype;
+package org.projectodd.nodyn.buffer.prototype;
 
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Types;
-import org.projectodd.nodyn.bindings.buffer.Buffer;
+import org.projectodd.nodyn.buffer.Buffer;
 
 public class Write extends AbstractNativeFunction {
     private final Buffer.Encoding encoding;

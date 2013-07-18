@@ -1,4 +1,4 @@
-package org.projectodd.nodyn.bindings.buffer.prototype;
+package org.projectodd.nodyn.buffer.prototype;
 
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;

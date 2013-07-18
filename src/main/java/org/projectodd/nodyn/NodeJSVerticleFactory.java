@@ -8,8 +8,8 @@ import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.runtime.InitializationListener;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
-import org.projectodd.nodyn.bindings.QueryString;
-import org.projectodd.nodyn.bindings.buffer.BufferType;
+import org.projectodd.nodyn.util.QueryString;
+import org.projectodd.nodyn.buffer.BufferType;
 import org.vertx.java.platform.Verticle;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {

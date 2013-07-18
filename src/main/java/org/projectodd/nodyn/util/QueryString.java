@@ -1,4 +1,4 @@
-package org.projectodd.nodyn.bindings;
+package org.projectodd.nodyn.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
