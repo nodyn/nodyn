@@ -16,35 +16,33 @@ var test_options = {
 var server = http.createServer();
 
 var HttpTests = {
-  xtestCreateServerReturnsServer: function() {
+  testCreateServerReturnsServer: function() {
     vassert.assertTrue(server instanceof http.Server);
-    server.close();
     vassert.testComplete();
   },
 
-  xtestServerListeningEvent: function() {
+  testServerListeningEvent: function() {
     server.listen(test_options.port, function() {
-      server.close();
       vassert.testComplete();
     });
   },
 
-  xtestCreateServerWithRequestListener: function() {
+  testCreateServerWithRequestListener: function() {
     var called = false;
     var server = http.createServer(function() {
       called = true;
     });
     // simulate a request event
     server.emit('request');
-    server.close();
     vassert.assertTrue(called);
     vassert.testComplete();
   },
 
-  xtestRequestNoCallback: function() {
+  testRequestNoCallback: function() {
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
         vassert.assertEquals('crispy bacon', data.toString());
+        server.close();
         vassert.testComplete();
       });
       response.end();
@@ -56,7 +54,7 @@ var HttpTests = {
     });
   },
 
-  xtestServerResponseWrite: function() {
+  testServerResponseWrite: function() {
     var server = http.createServer(function(request, response) {
       vassert.assertEquals(false, response.headersSent);
       response.write('crunchy bacon');
@@ -75,7 +73,7 @@ var HttpTests = {
     });
   },
 
-  xtestServerResponseWriteEnd: function() {
+  testServerResponseWriteEnd: function() {
     var server = http.createServer(function(request, response) {
       vassert.assertEquals(false, response.headersSent);
       response.end('crunchy bacon');
@@ -85,8 +83,8 @@ var HttpTests = {
       var request = http.request(test_options, function(response) {
         response.on('data', function(message) {
           vassert.assertEquals('crunchy bacon', message);
-          vassert.testComplete();
           server.close();
+          vassert.testComplete();
         });
       });
       request.end();
@@ -94,7 +92,7 @@ var HttpTests = {
   },
 
   // both request and response
-  xtestMessageHeaders: function() {
+  testMessageHeaders: function() {
     var server = http.createServer(function(request, response) {
       vassert.assertEquals(test_headers['x-custom-header'], request.headers['x-custom-header']);
       var body = 'crunchy bacon';
@@ -118,14 +116,14 @@ var HttpTests = {
         vassert.assertNotNull(response.headers['Date']);
         vassert.assertTrue(response.headers['Date'] != undefined);
         vassert.assertEquals('type=ninja,language=javascript', response.headers['Set-Cookie']);
-        vassert.testComplete();
         server.close();
+        vassert.testComplete();
       });
       request.end();
     });
   },
 
-  xtestTrailers: function() {
+  testTrailers: function() {
     var server = http.createServer(function(request, response) {
       var body = 'crunchy bacon';
       response.writeHead(200, {'Content-Type': 'text/plain',
@@ -273,20 +271,15 @@ var HttpTests = {
     });
   },
 
-  DEFERREDtestRequestMethod: function() {
+  testRequestMethod: function() {
     var server = http.createServer(function(request, response) {
       vassert.assertEquals('HEAD', request.method);
-      response.end();
+      response.end("OK");
+      vassert.testComplete();
     });
     server.listen(test_options.port, function() {
       test_options.method = 'HEAD';
-      // TODO: This should not produce a stack
-      // https://github.com/vert-x/vert.x/issues/569
-      var request = http.request(test_options, function(response) {
-        server.close();
-        vassert.testComplete();
-      });
-      request.end();
+      http.request(test_options).end();
     });
   },
 
@@ -390,8 +383,7 @@ var HttpTests = {
     });
   },
 
-  // TODO: FIX ME
-  DEFERREDtestConnectEventFired: function() {
+  testConnectEventFired: function() {
     server.on('request', function(request, response) {
       vassert.fail("CONNECT requests should not issue 'request' events");
       vassert.testComplete();
@@ -423,16 +415,15 @@ var HttpTests = {
         socket.write('Bonjour');
         socket.on('data', function(buffer) {
           vassert.assertEquals('Au revoir', buffer.toString());
-          vassert.testComplete();
           server.close();
+          vassert.testComplete();
         });
       });
       request.end();
     });
   },
 
-  // TODO: FIX ME
-  DEFERREDtestConnectionUpgrade: function() {
+  testConnectionUpgrade: function() {
     var server = http.createServer(function(req, resp) {
       resp.writeHead(200, {'Content-Type': 'text/plain'});
       resp.end('later!');
@@ -459,13 +450,13 @@ var HttpTests = {
         vassert.assertEquals('Upgrade', resp.headers['Connection']);
 
         //  TODO: pending https://github.com/vert-x/vert.x/issues/610
-  //      socket.on('data', function(buffer) {
-  //        vassert.assertEquals('object', typeof buffer);
-  //        vassert.assertEquals("fajitas", buffer.toString());
-  //        socket.destroy();
+        //socket.on('data', function(buffer) {
+        //  vassert.assertEquals('object', typeof buffer);
+        //  vassert.assertEquals("fajitas", buffer.toString());
+        //  socket.destroy();
           server.close();
           vassert.testComplete();
-  //      });
+        //});
       });
     });
     
@@ -500,8 +491,5 @@ var HttpTests = {
       vassert.testComplete();
     });
   }
-}
-vertxStop = function() {
-  print("YOOHOO");
 }
 vertxTest.startTests(HttpTests);

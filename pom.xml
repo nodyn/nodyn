@@ -56,8 +56,8 @@
     <version.junit>4.7</version.junit>
     <!-- TODO: Remove the netty dependency (QueryString) -->
     <version.netty>3.6.1.Final</version.netty>
-    <version.vertx>2.0.0-CR4-SNAPSHOT</version.vertx>
-    <version.vertx.tests>2.0.0-CR3-SNAPSHOT</version.vertx.tests>
+    <version.vertx>2.0.0-final</version.vertx>
+    <version.vertx.tests>2.0.0-final</version.vertx.tests>
     <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
   </properties>
   <repositories>
