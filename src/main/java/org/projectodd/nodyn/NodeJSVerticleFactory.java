@@ -12,6 +12,8 @@ import org.projectodd.nodyn.util.QueryString;
 import org.projectodd.nodyn.buffer.BufferType;
 import org.vertx.java.platform.Verticle;
 
+import java.io.*;
+
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     private GlobalObjectFactory globalObjectFactory = new NodeJSGlobalObjectFactory();
     private String filename;
@@ -54,11 +56,24 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             {
                 @Override
                 public void initialize(ExecutionContext context) {
-                    try {
-                        getRuntime().evaluate("include('node.js')");
-                    } catch (Exception e) {
-                        System.err.println("[ERROR] Cannot initialize Nodyn. " + e.getMessage());
-                        e.printStackTrace();
+                    // not sure why this is necessary, but if we just have `process = require('process')` in node.js
+                    // it's not loaded globally. We must both define the global property right here, and also
+                    // require the file from within node.js - strange.
+                    // I still don't really understand how to make something truly global in dynjs
+                    GlobalObject globalObject = context.getGlobalObject();
+                    globalObject.defineGlobalProperty("process", runtime.newRunner().withContext(context).withSource("require('process')").execute());
+                    globalObject.defineGlobalProperty("console", runtime.newRunner().withContext(context).withSource("require('node_console')").execute());
+                    InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream("node.js");
+                    if (is != null) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                        runtime.newRunner().withSource(reader).evaluate();
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                            // ignore
+                        }
+                    } else {
+                        System.err.println("[ERROR] Cannot initialize Nodyn.");
                     }
                 }
             });
