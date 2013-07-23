@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
  * <p>This class is immutable and thread-safe.</p>
  *
  * @version $Id$
- * @see CharEncoding
+ * @see <a href="http://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/CharEncoding.html">CharEncoding</a>
  * @see <a href="http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
  * @since 1.4
  */
@@ -42,10 +42,9 @@ public class StringUtils {
      *
      * @param string the String to encode, may be {@code null}
      * @return encoded bytes, or {@code null} if the input string was {@code null}
-     * @throws NullPointerException Thrown if {@link Charsets#US_ASCII} is not initialized, which should never happen since it is
+     * @throws NullPointerException Thrown if {@link #US_ASCII} is not initialized, which should never happen since it is
      *                              required by the Java platform specification.
      * @see <a href="http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html">Standard charsets</a>
-     * @see #getBytesUnchecked(String, String)
      * @since As of 1.7, throws {@link NullPointerException} instead of UnsupportedEncodingException
      */
     public static byte[] getBytesUsAscii(final String string) {
@@ -58,7 +57,7 @@ public class StringUtils {
      * @param bytes The bytes to be decoded into characters
      * @return A new <code>String</code> decoded from the specified array of bytes using the US-ASCII charset,
      *         or {@code null} if the input byte array was {@code null}.
-     * @throws NullPointerException Thrown if {@link Charsets#US_ASCII} is not initialized, which should never happen since it is
+     * @throws NullPointerException Thrown if {@link #US_ASCII} is not initialized, which should never happen since it is
      *                              required by the Java platform specification.
      * @since As of 1.7, throws {@link NullPointerException} instead of UnsupportedEncodingException
      */
