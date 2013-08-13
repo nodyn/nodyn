@@ -21,6 +21,11 @@ var ProcessTests = {
     vassert.testComplete();
   },
 
+  testStdIn: function() {
+    vassert.assertEquals('java.io.BufferedInputStream', typeof process.stdin);
+    vassert.testComplete();
+  },
+
   testVersion: function() {
     vassert.assertEquals(org.projectodd.nodyn.Node.VERSION, process.version);
     vassert.assertNotNull(process.versions);

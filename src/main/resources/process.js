@@ -78,6 +78,8 @@ var Process = function() {
   this.cwd = function() {
     return System.getProperty("user.dir");
   }
+
+  this.stdin = java.lang.System.in;
 }
 
 var process = new Process();
