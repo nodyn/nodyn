@@ -75,6 +75,7 @@ process.noDeprecation = false;
 process.traceDeprecation = false;
 
 EventEmitter               = require('events').EventEmitter
+process.EventEmitter       = EventEmitter
 process.on                 = EventEmitter.prototype.on
 process.addListener        = EventEmitter.prototype.addListener
 process.once               = EventEmitter.prototype.once
