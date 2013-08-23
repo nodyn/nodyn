@@ -26,7 +26,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     @Override
     public Verticle createVerticle(String main) throws Exception {
         this.filename = main;
-        return new NodeJSVerticle(this, main);
+        return new NodeJSVerticle(runtime, main);
     }
 
     private class NodeJSGlobalObjectFactory extends DynJSGlobalObjectFactory {
@@ -46,13 +46,13 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     
     protected class NodeJSVerticle extends DynJSVerticle {
 
-        public NodeJSVerticle(DynJSVerticleFactory factory, String scriptName) {
-            super(factory, scriptName);
+        public NodeJSVerticle(DynJS runtime, String scriptName) {
+            super(runtime, scriptName);
         }
         
         @Override
         protected ExecutionContext initializeRootContext() {
-            return ExecutionContext.createGlobalExecutionContext(getRuntime(), new InitializationListener()
+            return ExecutionContext.createGlobalExecutionContext(runtime, new InitializationListener()
             {
                 @Override
                 public void initialize(ExecutionContext context) {

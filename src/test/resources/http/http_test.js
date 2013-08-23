@@ -13,37 +13,37 @@ var test_options = {
   headers: test_headers
 }
 
-var server = http.createServer();
-
 var HttpTests = {
   testCreateServerReturnsServer: function() {
-    vassert.assertTrue(server instanceof http.Server);
+    vassert.assertTrue(http.createServer() instanceof http.Server);
     vassert.testComplete();
   },
 
   testServerListeningEvent: function() {
+    var server = http.createServer();
     server.listen(test_options.port, function() {
-      vassert.testComplete();
+      server.close(function() {
+        vassert.testComplete();
+      });
     });
   },
 
   testCreateServerWithRequestListener: function() {
-    var called = false;
     var server = http.createServer(function() {
-      called = true;
+      // getting here means it worked
+      vassert.testComplete();
     });
     // simulate a request event
     server.emit('request');
-    vassert.assertTrue(called);
-    vassert.testComplete();
   },
 
   testRequestNoCallback: function() {
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
         vassert.assertEquals('crispy bacon', data.toString());
-        server.close();
-        vassert.testComplete();
+        server.close(function() {
+          vassert.testComplete();
+        });
       });
       response.end();
     });
@@ -65,8 +65,9 @@ var HttpTests = {
       var request = http.request(test_options, function(response) {
         response.on('data', function(message) {
           vassert.assertEquals('crunchy bacon', message);
-          server.close();
-          vassert.testComplete();
+          server.close(function() {
+            vassert.testComplete();
+          });
         });
       });
       request.end();
@@ -83,8 +84,9 @@ var HttpTests = {
       var request = http.request(test_options, function(response) {
         response.on('data', function(message) {
           vassert.assertEquals('crunchy bacon', message);
-          server.close();
-          vassert.testComplete();
+          server.close(function() {
+            vassert.testComplete();
+          });
         });
       });
       request.end();
@@ -116,8 +118,9 @@ var HttpTests = {
         vassert.assertNotNull(response.headers['Date']);
         vassert.assertTrue(response.headers['Date'] != undefined);
         vassert.assertEquals('type=ninja,language=javascript', response.headers['Set-Cookie']);
-        server.close();
-        vassert.testComplete();
+        server.close(function() {
+          vassert.testComplete();
+        });
       });
       request.end();
     });
@@ -138,8 +141,9 @@ var HttpTests = {
         vassert.assertEquals('X-Custom-Trailer', response.headers['Trailers']);
         response.on('end', function() {
           vassert.assertEquals('a trailer', response.trailers['X-Custom-Trailer']);
-          server.close();
-          vassert.testComplete();
+          server.close(function() {
+            vassert.testComplete();
+          });
         });
       });
       request.end();
@@ -165,17 +169,16 @@ var HttpTests = {
       var request = http.request(test_options, function(res) {
         res.resume();
         res.on('end', function() {
-          server.close();
-          vassert.assertEquals(expected, result);
-          setTimeout(function() {
+          server.close(function() {
+            vassert.assertEquals(expected, result);
             vassert.testComplete();
-          }, 100);
+          });
         });
       }).end(expected);
     });
   },
 
-  DEFERREDtestPauseAndResume: function() {
+  testPauseAndResume: function() {
     var expectedServer = 'Request Body from Client';
     var resultServer = '';
     var expectedClient = 'Response Body from Server';
@@ -216,7 +219,7 @@ var HttpTests = {
     });
   },
 
-  DEFERREDtestStatusCode: function() {
+  testStatusCode: function() {
     var server = http.createServer(function(request, response) {
       response.end("OK");
     });
@@ -337,13 +340,14 @@ var HttpTests = {
   },
 
   testServerTimeoutDefault: function() {
+    var server = http.createServer();
     vassert.assertEquals(120000, server.timeout);
     vassert.testComplete();
   },
 
   testServerSetTimeout: function() {
     var timedOut = false;
-    server.setTimeout(10, function(sock) {
+    http.createServer().setTimeout(10, function(sock) {
       timedOut = true;
       sock.close();
     });
@@ -355,6 +359,7 @@ var HttpTests = {
 
   testServerCloseEvent: function() {
     var closed = false;
+    var server = http.createServer();
     server.on('close', function() {
       closed = true;
     });
@@ -365,6 +370,7 @@ var HttpTests = {
   },
 
   testCheckContinueEvent: function() {
+    var server = http.createServer();
     server.on('checkContinue', function(request, response) {
       response.writeContinue();
       response.end();
@@ -384,6 +390,7 @@ var HttpTests = {
   },
 
   testConnectEventFired: function() {
+    var server = http.createServer();
     server.on('request', function(request, response) {
       vassert.fail("CONNECT requests should not issue 'request' events");
       vassert.testComplete();
@@ -463,6 +470,7 @@ var HttpTests = {
   },
 
   testServerMaxHeadersCountDefaultValue: function() {
+    var server = http.createServer();
     vassert.assertEquals(1000, server.maxHeadersCount);
     server.maxHeadersCount = 500;
     vassert.assertEquals(500, server.maxHeadersCount);
@@ -486,6 +494,7 @@ var HttpTests = {
   },
 
   testRequestReturnsClientRequest: function() {
+    var server = http.createServer();
     server.listen(test_options.port, function() {
       vassert.assertTrue(http.request(test_options) instanceof http.ClientRequest);
       vassert.testComplete();
