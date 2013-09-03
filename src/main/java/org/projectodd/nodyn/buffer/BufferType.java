@@ -61,8 +61,6 @@ public class BufferType extends  AbstractNativeFunction {
         });
         prototype.defineReadOnlyProperty(globalObject, "byteLength", new ByteLength(globalObject));
         PropertyDescriptor descriptor = PropertyDescriptor.newPropertyDescriptorForObjectInitializer(this);
-//        descriptor.set(PropertyDescriptor.Names.ENUMERABLE, true);
-//        descriptor.set(PropertyDescriptor.Names.VALUE, this);
         prototype.defineOwnProperty(null, "constructor", descriptor, false);
         return prototype;
     }

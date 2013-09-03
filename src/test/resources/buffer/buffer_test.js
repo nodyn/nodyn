@@ -26,7 +26,7 @@ var BufferTests = {
     var b = new Buffer('cheez', 'utf16le');
     vassert.assertEquals('cheez', b.toString());
     // TODO: Why does this test fail?
-    //vassert.assertEquals('c\u0000h\u0000e\u0000e\u0000z\u0000', b.toString('utf16le'));
+    // vassert.assertEquals('c\u0000h\u0000e\u0000e\u0000z\u0000', b.toString('utf16le'));
     vassert.testComplete();
   },
 

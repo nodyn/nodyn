@@ -1,20 +1,10 @@
 package org.projectodd.nodyn.buffer;
 
-import java.io.UnsupportedEncodingException;
-
 import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.AbstractNativeFunction;
-import org.dynjs.runtime.DynArray;
-import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.PropertyDescriptor;
-import org.dynjs.runtime.Types;
-import org.projectodd.nodyn.buffer.prototype.Copy;
-import org.projectodd.nodyn.buffer.prototype.Fill;
-import org.projectodd.nodyn.buffer.prototype.Slice;
-import org.projectodd.nodyn.buffer.prototype.ToString;
-import org.projectodd.nodyn.buffer.prototype.Write;
+import org.dynjs.runtime.*;
+import org.projectodd.nodyn.buffer.prototype.*;
+
+import java.io.UnsupportedEncodingException;
 
 public class Buffer extends DynObject {
     public enum Encoding {
@@ -81,6 +71,10 @@ public class Buffer extends DynObject {
         return sourceEnd - sourceStart;
     }
     
+    public String toString(Encoding encoding) {
+        return delegate.toString(BufferType.getCharset(encoding));
+    }
+
     @Override
     public String toString() {
         return delegate.toString(BufferType.getCharset(encoding));
@@ -131,7 +125,6 @@ public class Buffer extends DynObject {
     }
     
     public long getLength() {
-        System.err.println("LEN: " + this.length);
         return this.length;
     }
 
