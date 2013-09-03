@@ -59,6 +59,7 @@
     <version.vertx>2.0.0-final</version.vertx>
     <version.vertx.tests>2.0.0-final</version.vertx.tests>
     <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
+    <version.dynjs>0.1.2-SNAPSHOT</version.dynjs>
   </properties>
   <repositories>
     <repository>
@@ -115,6 +116,11 @@
       <artifactId>vertx-platform</artifactId>
       <version>${version.vertx}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.dynjs</groupId>
+      <artifactId>dynjs</artifactId>
+      <version>${version.dynjs}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

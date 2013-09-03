@@ -124,13 +124,9 @@ public class QueryString extends DynObject {
     }
 
     public static void setProperty(DynObject __this, String name, final Object value) {
-        __this.defineOwnProperty(null, name, new PropertyDescriptor() {
-            {
-                set("Value", value );
-                set("Writable", false);
-                set("Enumerable", true);
-                set("Configurable", false);
-            }
-        }, false);
+        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor(true);
+        descriptor.set(PropertyDescriptor.Names.ENUMERABLE, true);
+        descriptor.set(PropertyDescriptor.Names.VALUE, value);
+        __this.defineOwnProperty(null, name, descriptor, false);
     }
 }

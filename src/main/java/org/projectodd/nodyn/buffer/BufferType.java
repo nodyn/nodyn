@@ -15,14 +15,9 @@ public class BufferType extends  AbstractNativeFunction {
         super(globalObject);
         this.setClassName("Buffer");
         final DynObject prototype = initializePrototype(globalObject);
-        defineOwnProperty(null, "prototype", new PropertyDescriptor() {
-            {
-                set("Value", prototype);
-                set("Writable", false);
-                set("Configurable", false);
-                set("Enumerable", false);
-            }
-        }, false);
+        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor(true);
+        descriptor.set(PropertyDescriptor.Names.VALUE, prototype);
+        defineOwnProperty(null, "prototype", descriptor, false);
         setPrototype(prototype);
     }
 
@@ -65,14 +60,10 @@ public class BufferType extends  AbstractNativeFunction {
             }
         });
         prototype.defineReadOnlyProperty(globalObject, "byteLength", new ByteLength(globalObject));
-        prototype.defineOwnProperty(null, "constructor", new PropertyDescriptor() {
-            {
-                set("Value", this);
-                set("Writable", false);
-                set("Configurable", false);
-                set("Enumerable", true);
-            }
-        }, false);
+        PropertyDescriptor descriptor = PropertyDescriptor.newPropertyDescriptorForObjectInitializer(this);
+//        descriptor.set(PropertyDescriptor.Names.ENUMERABLE, true);
+//        descriptor.set(PropertyDescriptor.Names.VALUE, this);
+        prototype.defineOwnProperty(null, "constructor", descriptor, false);
         return prototype;
     }
 

@@ -38,7 +38,6 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             node.put("buffer", bufferType);
             node.put("QueryString", new QueryString(global));
             global.defineGlobalProperty("nodyn", node);
-            global.defineGlobalProperty("Buffer", bufferType);
             global.defineGlobalProperty("__filename", filename);
             return global;
         }

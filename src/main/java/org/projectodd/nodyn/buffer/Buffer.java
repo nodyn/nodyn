@@ -93,31 +93,20 @@ public class Buffer extends DynObject {
             Long numberValue = Types.toUint32(context, value);
             byte val = (byte) (numberValue.byteValue() & 0xff);
             delegate.setByte(possibleIndex.intValue(), val);
-//            System.err.println("BUFFER PUT INDEX: " + possibleIndex);
-//            System.err.println("BUFFER PUT/GET: " + val + "/" + (delegate.getByte(possibleIndex.intValue()) & 0xff));
         } else {
             super.put(context, name, value, shouldThrow);
         }
     }
-    
+
     @Override
-    public Object getOwnProperty(ExecutionContext context, String name) {
+    public Object get(ExecutionContext context, String name) {
         Number possibleIndex = Types.toNumber(context, name);
         if (isIndex(possibleIndex)) {
-            int value = this.delegate.getByte(possibleIndex.intValue()) & 0xff;
-            PropertyDescriptor desc = new PropertyDescriptor();
-            desc.set(name, value);
-            desc.setConfigurable(true);
-            desc.setEnumerable(true);
-            desc.setWritable(true);
-            desc.setValue(value);
-//            System.err.println("BUFFER GET INDEX: " + name);
-//            System.err.println("BUFFER GET: " + value);
-            return desc;
+            return this.delegate.getByte(possibleIndex.intValue()) & 0xff;
         }
-        return super.getOwnProperty(context, name);
+        return super.get(context, name);
     }
-    
+
     public long write(String string, Encoding encoding, int offset, int maxLength) {
         int length = Math.min(maxLength, string.length());
         if (length == 0) { return 0; }
@@ -142,6 +131,7 @@ public class Buffer extends DynObject {
     }
     
     public long getLength() {
+        System.err.println("LEN: " + this.length);
         return this.length;
     }
 
