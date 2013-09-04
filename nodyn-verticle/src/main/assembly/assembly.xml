@@ -1,0 +1,17 @@
+<assembly>
+  <id>mod</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <outputDirectory></outputDirectory>
+      <directory>target/mods/${module.name}</directory>
+      <includes>
+        <include>**</include>
+      </includes>
+      <filtered>false</filtered>
+    </fileSet>
+  </fileSets>
+</assembly>

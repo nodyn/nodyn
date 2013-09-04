@@ -4,22 +4,26 @@
   <groupId>org.projectodd</groupId>
   <artifactId>nodyn</artifactId>
   <version>0.1.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
   <name>Nodyn</name>
-  <url>http://www.github.com/projectodd/nodyn</url>
+  <url>http://nodyn.io/</url>
+
   <description>
         Node.js, in Java! With Vert.x!
-    </description>
+  </description>
+
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
   </parent>
+
   <scm>
     <connection>scm:git:git://github.com/projectodd/nodyn.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/projectodd/nodyn.git</developerConnection>
     <url>http://github.com/projectodd/node</url>
   </scm>
+
   <developers>
     <developer>
       <name>Lance Ball</name>
@@ -28,6 +32,7 @@
       <organizationUrl>http://projectodd.org</organizationUrl>
     </developer>
   </developers>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -35,8 +40,8 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <properties>
-    <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
     <!-- encodings -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -58,9 +63,11 @@
     <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.0.0-final</version.vertx>
     <version.vertx.tests>2.0.0-final</version.vertx.tests>
+    <version.lang-js.verticle>1.0.0-SNAPSHOT</version.lang-js.verticle>
     <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
     <version.dynjs>0.1.2-SNAPSHOT</version.dynjs>
   </properties>
+
   <repositories>
     <repository>
       <id>projectodd-upstream</id>
@@ -99,23 +106,13 @@
       </snapshots>
     </repository>
   </repositories>
+
   <dependencies>
     <dependency>
+      <!-- TODO - remove this -->
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
       <version>${version.netty}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <version>${version.vertx}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-platform</artifactId>
-      <version>${version.vertx}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.dynjs</groupId>
@@ -124,8 +121,8 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>lang-dynjs</artifactId>
-      <version>${version.dynjs.verticle}</version>
+      <artifactId>lang-js</artifactId>
+      <version>${version.lang-js.verticle}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -146,6 +143,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <modules>
+    <module>nodyn-verticle</module>
+    <module>nodyn-standalone</module>
+  </modules>
+
   <profiles>
     <profile>
       <id>buildhive</id>
@@ -178,141 +181,8 @@
       </build>
     </profile>
   </profiles>
+
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>2.4</version>
-      </extension>
-    </extensions>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven.compiler.plugin.version}</version>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>${maven.resources.plugin.version}</version>
-        <configuration>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <overwrite>true</overwrite>
-              <outputDirectory>${basedir}/target/mods/${module.name}</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>target/classes</directory>
-                  <filtering>false</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>${maven.dependency.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>copy-mod-dependencies-to-target</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>target/mods/${module.name}/lib</outputDirectory>
-              <includeScope>runtime</includeScope>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven.assembly.plugin.version}</version>
-        <configuration>
-          <appendAssemblyId>false</appendAssemblyId>
-          <descriptors>
-            <descriptor>src/main/assembly/assembly.xml</descriptor>
-          </descriptors>
-          <attach>true</attach>
-        </configuration>
-        <executions>
-          <execution>
-            <id>assemble</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>${maven.clean.plugin.version}</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}/target/mods</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven.surefire.plugin.version}</version>
-        <configuration>
-          <disableXmlReport>true</disableXmlReport>
-          <argLine>-Xss2048k</argLine>
-          <verbose>true</verbose>
-          <forkCount>0</forkCount>
-          <includes>
-            <include>**unit/*Test*.java</include>
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven.failsafe.plugin.version}</version>
-        <configuration>
-          <systemProperties>
-            <property>
-              <name>vertx.mods</name>
-              <value>target/mods</value>
-            </property>
-          </systemProperties>
-          <includes>
-            <include>**/integration/**</include>
-          </includes>
-          <useSystemClassloader>false</useSystemClassloader>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -354,5 +224,25 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>2.4</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
+
 </project>
