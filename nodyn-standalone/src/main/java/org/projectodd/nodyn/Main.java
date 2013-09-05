@@ -25,6 +25,7 @@ import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.projectodd.nodyn.buffer.BufferType;
+import org.projectodd.nodyn.modules.NpmModuleProvider;
 import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -116,6 +117,7 @@ public class Main {
         globalObject.defineGlobalProperty("nodyn", node);
         globalObject.defineGlobalProperty("global", globalObject);
         globalObject.defineGlobalProperty("__filename", "repl");
+        new NpmModuleProvider(globalObject);
 
         InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream("node.js");
         if (is != null) {

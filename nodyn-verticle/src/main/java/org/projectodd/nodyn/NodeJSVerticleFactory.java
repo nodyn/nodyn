@@ -8,6 +8,7 @@ import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.runtime.InitializationListener;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
+import org.projectodd.nodyn.modules.NpmModuleProvider;
 import org.projectodd.nodyn.util.QueryString;
 import org.projectodd.nodyn.buffer.BufferType;
 import org.vertx.java.platform.Verticle;
@@ -39,6 +40,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             node.put("QueryString", new QueryString(global));
             global.defineGlobalProperty("nodyn", node);
             global.defineGlobalProperty("__filename", filename);
+            new NpmModuleProvider(global);
             return global;
         }
     }
