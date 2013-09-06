@@ -2,15 +2,15 @@ var util = require('util')
 
 var DefaultLogger = function() {
   this.info = function(msg) {
-    System.out.println(msg);
+    java.lang.System.out.println(msg);
   }
 
   this.error = function(msg) {
-    System.err.println(msg);
+    java.lang.System.err.println(msg);
   }
 
   this.trace = function( label, ex ) {
-    System.err.println("ERROR: " + label);
+    java.lang.System.err.println("ERROR: " + label);
     ex.printStackTrace();
   }
 }

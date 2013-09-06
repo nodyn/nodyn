@@ -61,7 +61,6 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
 
             // first check to see if there is a package.json in the directory
             File pkg = new File(loadPath + "/" + moduleName, "package.json");
-            System.err.println("Looking for package: " + pkg.getAbsolutePath());
             if (pkg.exists()) {
                 // load the JSON and find the main module file to consider
                 try {
