@@ -24,6 +24,7 @@ import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 import org.projectodd.nodyn.buffer.BufferType;
 import org.projectodd.nodyn.modules.NpmModuleProvider;
 import org.projectodd.nodyn.util.QueryString;
@@ -34,15 +35,16 @@ import java.io.*;
 
 public class Main {
 
-    private Arguments dynJsArguments;
+    private NodynArguments dynJsArguments;
     private CmdLineParser parser;
     private String[] arguments;
     private PrintStream stream;
     private Config config;
     private DynJS runtime;
+    private Vertx vertx;
 
     public Main(PrintStream stream, String[] args) {
-        this.dynJsArguments = new Arguments();
+        this.dynJsArguments = new NodynArguments();
         this.parser = new CmdLineParser(dynJsArguments);
         this.parser.setUsageWidth(80);
         this.arguments = args;
@@ -104,7 +106,11 @@ public class Main {
         config = dynJsArguments.getConfig();
         config.setOutputStream(this.stream);
         runtime = new DynJS(config);
-        Vertx vertx = VertxFactory.newVertx();
+        if (dynJsArguments.isClustered()) {
+            vertx = VertxFactory.newVertx("localhost");
+        } else {
+            vertx = VertxFactory.newVertx();
+        }
         GlobalObject globalObject = runtime.getExecutionContext().getGlobalObject();
         globalObject.defineGlobalProperty("__jvertx", vertx);
 
@@ -132,5 +138,16 @@ public class Main {
             System.err.println("[ERROR] Cannot initialize Nodyn.");
         }
 
+    }
+
+    class NodynArguments extends Arguments {
+        static final String CLUSTERED = "--clustered";
+
+        @Option(name = NodynArguments.CLUSTERED, usage = "run a clustered instance on the localhost")
+        private boolean isClustered = false;
+
+        public boolean isClustered() {
+            return isClustered;
+        }
     }
 }
