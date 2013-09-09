@@ -3,49 +3,74 @@
 [![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/)
 
 ## Hey, What's Nodyn?
-### The Project Formerly Known as NodeJ
 
 Nodyn is a [node.js](http://nodejs.org) compatible framework, running on the
-JVM and powered by the [DynJS](https://github.com/dynjs/dynjs) Javascript
-runtime. "Why do that?", you may ask. Well, imagine running your node app on
+JVM. It's powered by the [DynJS](https://github.com/dynjs/dynjs) Javascript
+runtime and [Vert.x](http://vertx.io), the massively scalable, asynchronous,
+polyglot application platform. 
+
+"Why do that?", you may ask. Well, imagine running your node app on
 the JVM where you immediately have access to all that the Java world has to
 provide - directly from Javascript. You've got the entire Java ecosystem at
-your disposal. And since DynJS is cross-language compatible, why not throw in a
-little JRuby or Clojure with your app if you want. It's all available on the
-JVM. Neat, right? We thought so, and thus we decided to try and make it happen.
+your disposal. Since DynJS is cross-language compatible, why not throw in a
+little JRuby or Clojure with your app if you want.  And with Vert.x built in,
+clustering your applications are a breeze.
 
-## How Do I Run It?
+## Usage
 
-Be prepared to get your hands dirty. Nodyn is still a work in progress and it's
-evolving daily. But for now, if you want to run it, you need to be willing to
-build it from source. And to do that, you'll need to build vert.x from source.
-But for now, because you asked....
+There are two ways to run Nodyn: as a standalone REPL with vertx embedded, or
+as as a [language module](http://vertx.io/language_support.html) in Vert.x.
 
-    $ git clone https://github.com/vert-x/vert.x.git
-    $ cd vert.x
-    $ ./gradlew collectDeps
-    $ ./gradlew distTar
+### Running Nodyn as a Vert.x Language Module
 
-This will put the complete vert.x installation in
-`build/vert.x-2.0.0-SNAPSHOT`. Just update your `$PATH` to include
-`/path/to/repo/vert.x/build/vert.x-2.0.0-SNAPSHOT/bin`. 
+By default, Vert.x runs Javascript applications using the Rhino Javascript
+runtime.  But this is configurable in vert.x. You can configure your
+application to use Nodyn by creating a `langs.properties` file at the root of
+your project that looks like this.
 
-Then, you'll need to build Nodyn. 
+    nodyn=org.projectodd~nodyn~0.1.1-SNAPSHOT:org.projectodd.nodyn.NodeJSVerticleFactory
+    .js=nodyn
+
+Make sure that you have Vert.x 2.x or better installed, and start your application.
+
+    $ vertx run myApplication.js
+
+### Running Nodyn in Standalone Mode
+
+Nodyn doesn't yet have an initial release. Until then, to use it, you will need
+to build from source or download a CI SNAPSHOT from
+[Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn-standalone/0.1.1-SNAPSHOT/).
+Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary. 
+You can use the binary to start an application from a Javascript file, or use the
+REPL to experiment with small snippets of code on the command line.
+
+  $ ./bin/nodyn
+  Usage: nodyn [--console |--debug | --help | --version |FILE]
+  Starts the nodyn console or executes FILENAME depending the parameters
+
+   FILE        : File to be executed by dynjs
+   --clustered : Run a clustered instance on the localhost
+   --console   : Opens a REPL console to test small expressions.
+   --debug     : Run REPL in debug mode.
+   --help      : Shows current screen. Running without parameters also shows this.
+   --version   : Shows current dynjs version.
+
+It is possible to start a small cluster on a single machine by using the
+`--clustered` option. For example this will start the REPL in clustered mode.
+
+    $./bin/nodyn --clustered --console
+
+Execute this in multiple terminals to experiment with the clustered event bus
+provided by Vert.x
+
+
+## Building Nodyn
+
+To build nodyn from source, check out the repo, and run `mvn install`.
 
     $ git clone https://github.com/projectodd/nodyn.git
     $ cd nodyn
     $ mvn install
-
-By default, vert.x runs Javascript with Rhino. Change this to use lang-dynjs
-and Nodyn by creating a `langs.properties` file at the root of your project
-that looks like this.
-
-    nodejs=org.projectodd~nodyn~0.1.1-SNAPSHOT:org.projectodd.nodyn.NodeJSVerticleFactory
-    .js=nodejs
-
-Now you should be able to run Nodyn through vert.x like so.
-
-    $ vertx run someFile.js
 
 ## API Completion Status
 
