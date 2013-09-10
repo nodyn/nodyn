@@ -1,11 +1,14 @@
 var vertxTest = require("vertx_tests");
 var vassert   = vertxTest.vassert;
+var System    = java.lang.System;
+var userDir   = System.getProperty('user.dir');
+var userHome  = System.getProperty('user.home');
 
 var ModulesTest = {
   testSetsLoadPath: function() {
-    vassert.assertTrue(require.paths.indexOf(java.lang.System.getProperty('user.dir') + "/node_modules") >= 0);
-    vassert.assertTrue(require.paths.indexOf(java.lang.System.getProperty('user.home') + "/node_modules") >= 0);
-    vassert.assertTrue(require.paths.indexOf(java.lang.System.getProperty('user.home') + "/.node_modules") >= 0);
+    vassert.assertTrue(require.paths.indexOf(userDir + "/node_modules") >= 0);
+    vassert.assertTrue(require.paths.indexOf(userHome + "/node_modules") >= 0);
+    vassert.assertTrue(require.paths.indexOf(userHome + "/.node_modules") >= 0);
     vassert.testComplete();
   },
 
@@ -20,8 +23,10 @@ var ModulesTest = {
     vassert.assertEquals(mod.flavor, "cool ranch");
     vassert.testComplete();
   },
+
 }
-require.addLoadPath(java.lang.System.getProperty('user.dir') + "/src/test/resources/modules");
+
+require.addLoadPath(userDir + "/src/test/resources/modules");
 vertxTest.startTests(ModulesTest);
 
 

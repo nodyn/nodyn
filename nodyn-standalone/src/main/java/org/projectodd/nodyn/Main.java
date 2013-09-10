@@ -106,6 +106,7 @@ public class Main {
         config = dynJsArguments.getConfig();
         config.setOutputStream(this.stream);
         runtime = new DynJS(config);
+
         if (dynJsArguments.isClustered()) {
             vertx = VertxFactory.newVertx("localhost");
         } else {
