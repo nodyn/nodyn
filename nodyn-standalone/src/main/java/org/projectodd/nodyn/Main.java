@@ -91,7 +91,7 @@ public class Main {
 
     private void startRepl() {
         initializeRuntime();
-        Repl repl = new Repl(runtime, System.in, stream, "Welcome to nodyn. ^D to exit.", "nodyn> ");
+        Repl repl = new Repl(runtime, System.in, stream, "Welcome to nodyn. ^D to exit.", "nodyn> ", System.getProperty("user.dir") + "/nodyn.log");
         repl.run();
     }
 

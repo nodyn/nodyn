@@ -94,7 +94,10 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 try {
                     String jsonString = new Scanner(pkg).useDelimiter("\\A").next();
                     JsonObject jsonObject = new JsonObject(jsonString);
-                    String moduleMain = jsonObject.getString("main");
+
+                    // If there is no main in package.json, default to index.js
+                    String moduleMain = jsonObject.getString("main", "index.js");
+
                     return new File(loadPath + "/" + moduleName, normalizeName(moduleMain));
                 } catch (FileNotFoundException e) {
                     System.err.println("Error loading " + pkg.getAbsolutePath());
