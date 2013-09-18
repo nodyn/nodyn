@@ -7,4 +7,5 @@ target/
 .settings
 .project
 dynjs-linker.log
+nodyn.log
 nodyn-standalone/bin/*
