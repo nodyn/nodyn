@@ -34,10 +34,10 @@ var Process = function() {
 
   this.binding = {};
   this.binding.constants = {
-    O_RDONLY: Mode.READ,
-    O_WRONLY: Mode.WRITE,
-    O_RDWR: Mode.WRITE,
-    O_APPEND: Open.APPEND,
+    O_RDONLY: Mode.READ.toString(),
+    O_WRONLY: Mode.WRITE.toString(),
+    O_RDWR: Mode.WRITE.toString(),
+    O_APPEND: Open.APPEND.toString(),
     S_IMFT: 0
   };
 
@@ -78,8 +78,6 @@ var Process = function() {
   this.cwd = function() {
     return System.getProperty("user.dir");
   }
-
-  this.stdin = java.lang.System.in;
 }
 
 var process = new Process();

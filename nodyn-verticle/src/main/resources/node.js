@@ -20,6 +20,12 @@ process.stderr = {
   }
 }
 
+// TODO: Fix this
+process.stdin = {
+  read: function() {
+  }
+}
+
 Buffer = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 
