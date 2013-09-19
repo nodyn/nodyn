@@ -29,7 +29,6 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
     private Require require;
 
     public NpmModuleProvider(GlobalObject globalObject) {
-        super(globalObject);
         require = (Require) globalObject.get("require");
         if (require != null) {
             // global npm modules
