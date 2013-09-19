@@ -200,6 +200,10 @@ function arrayToHash(array) {
 
 
 function formatValue(ctx, value, recurseTimes) {
+  // if it's a Java object without JS smarts, just return the type
+  if ((typeof value).indexOf('java.') === 0) {
+    return String(value);
+  }
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
   if (ctx.customInspect && value && typeof value.inspect === 'function' &&
