@@ -60,7 +60,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                     InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream("node.js");
                     if (is != null) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                        runtime.newRunner().withSource(reader).evaluate();
+                        runtime.newRunner().withContext(context).withSource(reader).evaluate();
                         try {
                             is.close();
                         } catch (IOException e) {
