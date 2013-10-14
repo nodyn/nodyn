@@ -21,7 +21,7 @@ public class Copy extends AbstractNativeFunction {
         Buffer target = (Buffer) args[0];
         int targetStart  = 0; 
         int sourceStart  = 0; 
-        int sourceEnd    = (int) source.toString().getBytes().length; // totally stupid
+        int sourceEnd    = source.toString().getBytes().length; // totally stupid
         if (args[1] instanceof Number) {
             targetStart = ((Number)args[1]).intValue();
         }

@@ -4,7 +4,7 @@ import org.projectodd.nodyn.crypto.encoders.Encoder;
 
 public class Util {
 
-    public enum Type { HASH, HMAC };
+    public enum Type { HASH, HMAC }
 
     // Translate algorithm names between Node.js and Java
     public static String formatter(String algorithm, Type type) {

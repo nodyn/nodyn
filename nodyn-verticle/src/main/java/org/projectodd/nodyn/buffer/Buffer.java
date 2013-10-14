@@ -119,9 +119,8 @@ public class Buffer extends DynObject {
     // *the same* underlying memory, so changes to one buffer are reflected
     // in its slices. Is this a feature or side effect?
     public Object slice(int start, int end) {
-        Buffer buffer = new Buffer(this.global, end-start);
-//        buffer.copy(this.getBuffer(), 0, start, end);
-        return buffer;
+        //        buffer.copy(this.getBuffer(), 0, start, end);
+        return new Buffer(this.global, end-start);
     }
     
     public long getLength() {
