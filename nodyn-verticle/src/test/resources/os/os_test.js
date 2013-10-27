@@ -1,6 +1,8 @@
+var javaProcess = new org.projectodd.nodyn.process.Process();
 var vertxTest = require('vertx_tests');
 var vassert   = vertxTest.vassert;
 
+var isWindows = process.platform === 'win32';
 var os = require('os');
 
 var OsTests = {
@@ -43,7 +45,7 @@ var OsTests = {
   },
 
   testOsPlatform: function() {
-    vassert.assertEquals("java", os.platform());
+    vassert.assertEquals(javaProcess.platform(), os.platform());
     vassert.testComplete();
   },
 
@@ -56,10 +58,17 @@ var OsTests = {
   },
 
   testLoadAvg: function() {
+	// http://nodejs.org/api/os.html#os_os_loadavg - windows always returns [0, 0, 0]
     vassert.assertEquals(3, os.loadavg().length);
-    vassert.assertTrue(os.loadavg()[0] > 0);
-    vassert.assertTrue(os.loadavg()[1] > 0);
-    vassert.assertTrue(os.loadavg()[2] > 0);
+    if(isWindows) {
+      vassert.assertTrue(os.loadavg()[0] == 0);
+      vassert.assertTrue(os.loadavg()[1] == 0);
+      vassert.assertTrue(os.loadavg()[2] == 0);
+    } else {
+      vassert.assertTrue(os.loadavg()[0] > 0);
+      vassert.assertTrue(os.loadavg()[1] > 0);
+      vassert.assertTrue(os.loadavg()[2] > 0);
+    }
     vassert.testComplete();
   },
 

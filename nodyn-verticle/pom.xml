@@ -43,6 +43,11 @@
       <artifactId>lang-dynjs</artifactId>
       <version>${version.dynjs.verticle}</version>
     </dependency>
+    <dependency>
+	   <groupId>org.apache.commons</groupId>
+	   <artifactId>commons-lang3</artifactId>
+	   <version>${version.commons.lang}</version>
+	</dependency>
   </dependencies>
 
   <build>

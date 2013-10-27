@@ -4,11 +4,21 @@ var System    = java.lang.System;
 var userDir   = System.getProperty('user.dir');
 var userHome  = System.getProperty('user.home');
 
+var isWindows = process.platform === 'win32';
+var fileSep   = System.getProperty("file.separator");
+
 var ModulesTest = {
   testSetsLoadPath: function() {
-    vassert.assertTrue(require.paths.indexOf(userDir + "/node_modules") >= 0);
-    vassert.assertTrue(require.paths.indexOf(userHome + "/node_modules") >= 0);
-    vassert.assertTrue(require.paths.indexOf(userHome + "/.node_modules") >= 0);
+	if(isWindows) {
+		appdata = System.getenv("APPDATA");
+		vassert.assertTrue(require.paths.indexOf(appdata + fileSep + "npm"
+				+ fileSep + "node_modules") >= 0);
+	} else {
+		vassert.assertTrue(require.paths.indexOf("/usr/local/lib/node_modules") >= 0);
+	}
+    vassert.assertTrue(require.paths.indexOf(userDir + fileSep + "node_modules") >= 0);
+    vassert.assertTrue(require.paths.indexOf(userHome + fileSep + "node_modules") >= 0);
+    vassert.assertTrue(require.paths.indexOf(userHome + fileSep + ".node_modules") >= 0);
     vassert.testComplete();
   },
 

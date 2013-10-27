@@ -1,3 +1,4 @@
+var javaProcess = new org.projectodd.nodyn.process.Process();
 vertx     = require('vertx');
 process   = require('process');
 console   = require('node_console');
@@ -75,8 +76,8 @@ clearTimeout = function(id) {
 
 clearInterval = clearTimeout;
 
-process.arch = "java";
-process.platform = "java";
+process.arch = javaProcess.arch();
+process.platform = javaProcess.platform();
 process.noDeprecation = false;
 process.traceDeprecation = false;
 

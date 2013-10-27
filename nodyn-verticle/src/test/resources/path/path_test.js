@@ -3,25 +3,46 @@ var vassert   = vertxTest.vassert;
 
 var path = require('path');
 
+var isWindows = process.platform === 'win32';
+
+var fileSep = java.lang.System.getProperty("file.separator");
+
 var PathTests = {
   testNormalize: function() {
-    vassert.assertEquals("/foo/bar/baz/asdf", path.normalize('/foo/bar//baz/asdf/quux/..'));
+	  if(isWindows) {
+		  vassert.assertEquals("\\foo\\bar\\baz\\asdf", path.normalize('/foo/bar//baz/asdf/quux/..'));
+	  } else {
+		  vassert.assertEquals("/foo/bar/baz/asdf", path.normalize('/foo/bar//baz/asdf/quux/..'));
+	  }
     vassert.testComplete();
   },
 
   testJoin: function() {
-    vassert.assertEquals("/foo/bar/baz/asdf", path.join('/foo', 'bar', 'baz/asdf', 'quux', '..'));
-    vassert.assertEquals("foo/bar", path.join('foo', {}, 'bar'));
+	  if(isWindows) {
+		  vassert.assertEquals("\\foo\\bar\\baz\\asdf", path.join('/foo', 'bar', 'baz/asdf', 'quux', '..'));
+		  vassert.assertEquals("foo\\bar", path.join('foo', {}, 'bar'));
+	  } else {
+		  vassert.assertEquals("/foo/bar/baz/asdf", path.join('/foo', 'bar', 'baz/asdf', 'quux', '..'));
+		  vassert.assertEquals("foo/bar", path.join('foo', {}, 'bar'));
+	  }
     vassert.testComplete();
   },
 
   testResolve: function() {
-    vassert.assertEquals("/foo/bar/baz", path.resolve('/foo/bar', './baz'));
+	  if(isWindows) {
+		  vassert.assertEquals("c:\\foo\\bar\\baz", path.resolve('c:/foo/bar', './baz'));
+	  } else {
+		  vassert.assertEquals("/foo/bar/baz", path.resolve('/foo/bar', './baz'));
+	  }
     vassert.testComplete();
   },
 
   testRelative: function() {
-    vassert.assertEquals("../../impl/bbb", path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'));
+	  if(isWindows) {
+		  vassert.assertEquals("..\\..\\impl\\bbb", path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'));
+	  } else {
+		  vassert.assertEquals("../../impl/bbb", path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb'));
+	  }
     vassert.testComplete();
   },
 
@@ -42,7 +63,7 @@ var PathTests = {
   },
 
   testPathSep: function() {
-    vassert.assertEquals(java.lang.System.getProperty("file.separator"), path.sep);
+    vassert.assertEquals(fileSep, path.sep);
     vassert.testComplete();
   }
 }

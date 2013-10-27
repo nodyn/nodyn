@@ -37,14 +37,21 @@ public class IntegrationTests {
     public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
     public static byte[] UTF8_BYTE_STRING;
     public static byte[] ASCII_BYTE_STRING;
+    public static byte[] UTF8_TEST_WRITE_BUFFER;
 
     @Test
     public void __vertxDummy() {
         try {
             UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
-            UTF8_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
+            ASCII_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
+            
+            UTF8_TEST_WRITE_BUFFER = "½ + ¼ = ¾".getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static byte[] toBytes(String string) {
+    	return string.getBytes();
     }
 }
