@@ -5,6 +5,7 @@ var Harness     = org.projectodd.nodyn.integration.IntegrationTests;
 var TEST_STRING = Harness.TEST_STRING;
 var UTF8_BYTES  = Harness.UTF8_BYTE_STRING;
 var ASCII_BYTES = Harness.ASCII_BYTE_STRING;
+var UTF8_TEST_WRITE_BUFFER = Harness.UTF8_TEST_WRITE_BUFFER;
 
 var BufferTests = {
   testSafeConstructor: function() {
@@ -42,7 +43,13 @@ var BufferTests = {
     len = b.write('\u00bd + \u00bc = \u00be', 0);
     vassert.assertEquals("12", ""+len);
     vassert.assertEquals("9", ""+b._charsWritten);
-    vassert.assertEquals('½ + ¼ = ¾', b.toString('utf8', 0, len));
+//    vassert.assertEquals('½ + ¼ = ¾', b.toString('utf8', 0, len));
+    utf8Bytes = Harness.toBytes(b.toString('utf8', 0, len));
+    idx = 0;
+    for (_byte in utf8Bytes) {
+      vassert.assertEquals(UTF8_TEST_WRITE_BUFFER[idx], _byte);
+      idx = idx+1;
+    }
     vassert.testComplete();
   },
 

@@ -2,6 +2,8 @@ var vertxTest = require('vertx_tests');
 var vassert   = vertxTest.vassert;
 var timer     = require('vertx/timer');
 
+var javaProcess = new org.projectodd.nodyn.process.Process();
+
 var ProcessTests = {
   testProcessObject: function() {
     vassert.assertNotNull(process);
@@ -45,12 +47,12 @@ var ProcessTests = {
   },
 
   testArch: function() {
-    vassert.assertEquals('java', process.arch);
+    vassert.assertEquals(javaProcess.arch(), process.arch);
     vassert.testComplete();
   },
 
   testPlatform: function() {
-    vassert.assertEquals('java', process.platform);
+    vassert.assertEquals(javaProcess.platform(), process.platform);
     vassert.testComplete();
   },
 

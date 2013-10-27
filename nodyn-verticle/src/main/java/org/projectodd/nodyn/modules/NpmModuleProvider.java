@@ -1,19 +1,24 @@
 package org.projectodd.nodyn.modules;
 
+import static org.apache.commons.lang3.SystemUtils.FILE_SEPARATOR;
+import static org.apache.commons.lang3.SystemUtils.USER_DIR;
+import static org.apache.commons.lang3.SystemUtils.USER_HOME;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.builtins.Require;
 import org.dynjs.runtime.modules.FilesystemModuleProvider;
 import org.vertx.java.core.json.JsonObject;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import org.projectodd.nodyn.process.Process;
 
 /**
  * Extends DynJS FilesystemModuleProvider to support Node.js Modules API
@@ -26,20 +31,32 @@ import java.util.Scanner;
  */
 public class NpmModuleProvider extends FilesystemModuleProvider {
 
+	private static final String NODE_MODULES = "node_modules";
+	
     private Require require;
 
     public NpmModuleProvider(GlobalObject globalObject) {
         require = (Require) globalObject.get("require");
         if (require != null) {
             // global npm modules
-            require.pushLoadPath("/usr/local/lib/node_modules");
+
+        	// Ideally the Process instance should be injected, easier testing
+			if (new Process().isWindows()) {
+				String appdata = System.getenv("APPDATA");
+				if (isNotBlank(appdata)) {
+					require.pushLoadPath(appdata + FILE_SEPARATOR + "npm"
+							+ FILE_SEPARATOR + NODE_MODULES);
+				}
+			} else {
+				require.pushLoadPath("/usr/local/lib/" + NODE_MODULES);
+			}
 
             // npm modules in $HOME
-            require.pushLoadPath(System.getProperty("user.home") + "/.node_modules");
-            require.pushLoadPath(System.getProperty("user.home") + "/node_modules");
+            require.pushLoadPath(USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES);
+            require.pushLoadPath(USER_HOME + FILE_SEPARATOR + NODE_MODULES);
 
             // npm modules in cwd
-            require.pushLoadPath(System.getProperty("user.dir") + "/node_modules");
+            require.pushLoadPath(USER_DIR + FILE_SEPARATOR + NODE_MODULES);
 
             // Inform dynjs that we exist
             require.addModuleProvider(this);

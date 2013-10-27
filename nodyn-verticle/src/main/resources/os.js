@@ -19,6 +19,7 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var isWindows = process.platform === 'win32';
 var util = require('util');
 
 exports.cpus = function() {
@@ -70,9 +71,14 @@ exports.uptime = function() {
 }
 
 exports.loadavg = function() {
-  avg = java.lang.management.ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
-  // node.js likes 1/5/15 minute averages -  we'll just do one 3x
-  return [avg, avg, avg];
+  if(isWindows) {
+	// http://nodejs.org/api/os.html#os_os_loadavg - windows always returns [0, 0, 0]
+	return [0, 0, 0];	
+  } else {
+    avg = java.lang.management.ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+    // node.js likes 1/5/15 minute averages -  we'll just do one 3x
+    return [avg, avg, avg];
+  }
 }
 
 exports.totalmem = function() {
@@ -96,11 +102,11 @@ exports.arch = function() {
 };
 
 exports.platform = function() {
-  return "java";
+  return process.platform;
 };
 
 exports.getNetworkInterfaces = util.deprecate(function() {
   return exports.networkInterfaces();
 }, 'getNetworkInterfaces is now called `os.networkInterfaces`.');
 
-exports.EOL = process.platform === 'win32' ? '\r\n' : '\n';
+exports.EOL = isWindows ? '\r\n' : '\n';
