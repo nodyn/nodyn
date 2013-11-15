@@ -15,7 +15,7 @@ var Fs = function() {
         callback(result);
       }
     });
-  }
+  };
 
   this.writeFile = function() {
     filename = arguments[0];
@@ -36,17 +36,17 @@ var Fs = function() {
     }
 
     fs.writeFile(filename, data, callback);
-  }
+  };
 
   this.mkdir = function(path, mode, callback) {
     //for now we ignore the mode as vertx api expect a unix perms string
     //CreateParent boolean will always be false as NodeJS do not support this option
     fs.mkDir(path, false, convertModeToString(mode), callback);
-  }
+  };
 
   this.mkdirSync = function(path, mode) {
     fs.mkDirSync(path, false, convertModeToString(mode));
-  }
+  };
 
   var invertAndConvert = function(x){
     var e = parseInt(x).toString(2);
@@ -73,7 +73,7 @@ var Fs = function() {
       convertedString = convertedString.concat("x");
     }
     return convertedString;
-  }
+  };
    
   var convertModeToString = function(mode) {
     if (modeCache[mode]) {
@@ -87,9 +87,9 @@ var Fs = function() {
     }
     modeCache[mode] = result;
     return result;
-  }
+  };
 
   var modeCache = {};
-}
+};
 
-module.exports = new Fs()
+module.exports = new Fs();
