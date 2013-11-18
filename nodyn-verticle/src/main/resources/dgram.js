@@ -35,6 +35,15 @@ Socket = function(type, callback) {
     if (callback) {
       that.on('listening', callback);
     }
+
+    delegate.exceptionHandler(function(err) {
+      that.emit('error', err);
+    });
+
+    delegate.dataHandler(function(packet) {
+      that.emit('message', packet.data, {address: packet.sender, bytes: packet.data.length()});
+    });
+
     delegate.listen(port, host, function() {
       that.emit('listening');
     });
@@ -50,6 +59,20 @@ Socket = function(type, callback) {
     localAddr =  delegate.localAddress();
     return localAddr;
   };
+
+  this.setBroadcast = function(flag) {
+    delegate.broadcast(flag);
+  };
+
+  this.setMulticastTTL = function(ttl) {
+    delegate.setMulticastTimeToLive(ttl);
+  };
+
+  this.setTTL = this.setMulticastTTL;
+
+  this.setMulticastLoopback = function(loopback) {
+    delegate.multicastLoopbackMode(loopback);
+  }
 };
 
 
