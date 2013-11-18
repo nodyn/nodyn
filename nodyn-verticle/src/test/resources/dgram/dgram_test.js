@@ -49,7 +49,18 @@ dgramTest = {
       socket.on('close', function() { vassert.testComplete(); });
       socket.close();
     });
+  },
+
+  // only tests the existence of the functions and not their behavior
+  testConfigurationFunctions: function() {
+    var socket = dgram.createSocket();
+    vassert.assertEquals('function', typeof socket.setBroadcast);
+    vassert.assertEquals('function', typeof socket.setMulticastTTL);
+    vassert.assertEquals('function', typeof socket.setTTL);
+    vassert.assertEquals('function', typeof socket.setMulticastLoopback);
+    vassert.testComplete();
   }
+
 };
 
 vertxTest.startTests(dgramTest);
