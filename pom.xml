@@ -63,8 +63,8 @@
     <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.1M1</version.vertx>
     <version.testtools>2.0.2-final</version.testtools>
-    <version.lang-js.verticle>1.0.0-Beta1</version.lang-js.verticle>
-    <version.dynjs.verticle>1.0.0-Beta1</version.dynjs.verticle>
+    <version.lang-js.verticle>1.0.0-SNAPSHOT</version.lang-js.verticle>
+    <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
     <version.dynjs>0.2.0</version.dynjs>
     <version.commons.lang>3.1</version.commons.lang>
   </properties>

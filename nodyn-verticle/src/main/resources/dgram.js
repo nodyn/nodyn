@@ -2,8 +2,6 @@ var udp          = require('vertx/datagram');
 var util         = require('util');
 var EventEmitter = require('events').EventEmitter;
 
-dgram = {};
-
 Socket = function(type, callback) {
   var that = this;
   var ipv4 = true;
@@ -13,30 +11,44 @@ Socket = function(type, callback) {
 
   // if a callback is provided, set it up as the message listener
   if (callback) {
-    this.on('message', callback);
+    that.on('message', callback);
   }
 
   var delegate = new udp.DatagramSocket(ipv4);
+  var inetAddress; // underlying Java object
+
   delegate.dataHandler(function(packet) {
     // TODO: Should we wrap the data in a buffer?
     that.emit('message', packet.data, packet.sender);
   });
 
-  this.bind = function(port, address, callback) {
-    switch(typeof address) {
+  this.bind = function(port, host, callback) {
+    switch(typeof host) {
       case 'function':
-        callback = address;
+        callback = host;
+        host = '0.0.0.0';
         break;
       case 'undefined':
-        address = '0.0.0.0';
+        host = '0.0.0.0';
         break;
     }
     if (callback) {
-      this.on('listening', callback);
+      that.on('listening', callback);
     }
-    delegate.listen(port, address, function() {
-      this.emit('listening');
+    delegate.listen(port, host, function() {
+      that.emit('listening');
     });
+  };
+
+  this.close = function() {
+    delegate.close(function() {
+      that.emit('close');
+    });
+  };
+
+  this.address = function() {
+    localAddr =  delegate.localAddress();
+    return localAddr;
   };
 };
 

@@ -23,7 +23,31 @@ dgramTest = {
     vassert.assertTrue(socket !== null);
     vassert.assertEquals('function', typeof socket.bind);
     socket.bind(54321, function() {
-      vassert.testComplete();
+      socket.on('close', function() { vassert.testComplete(); });
+      socket.close();
+    });
+  },
+
+  testSocketClose: function() {
+    var socket = dgram.createSocket();
+    vassert.assertTrue(socket !== null);
+    vassert.assertEquals('function', typeof socket.close);
+    socket.on('close', function() { vassert.testComplete(); });
+    socket.close();
+  },
+
+  testSocketAddress: function() {
+    var socket = dgram.createSocket();
+    vassert.assertTrue(socket !== null);
+    vassert.assertEquals('function', typeof socket.address);
+    socket.bind(54321, function() {
+      var addr = socket.address();
+      vassert.assertEquals('object', typeof addr);
+      vassert.assertEquals('string', typeof addr.address);
+      vassert.assertEquals('string', typeof addr.family);
+      vassert.assertEquals('number', typeof addr.port);
+      socket.on('close', function() { vassert.testComplete(); });
+      socket.close();
     });
   }
 };
