@@ -85,6 +85,15 @@ Socket = function(type, callback) {
       that.emit('listening');
     }, null, mcastIface);
   };
+
+  this.send = function(buf, offset, length, port, address, callback) {
+    // todo - deal with offset and length ffs
+    delegate.send(address, port, buf, function() {
+      if (typeof callback === 'function') {
+        callback.call();
+      }
+    });
+  };
 };
 
 

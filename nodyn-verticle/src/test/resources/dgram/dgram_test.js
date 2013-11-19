@@ -1,3 +1,4 @@
+var Buffer    = require('vertx/buffer');
 var vertxTest = require('vertx_tests');
 var vassert   = vertxTest.vassert;
 
@@ -59,9 +60,29 @@ dgramTest = {
     vassert.assertEquals('function', typeof socket.setTTL);
     vassert.assertEquals('function', typeof socket.setMulticastLoopback);
     vassert.testComplete();
-  }
+  },
 
+  testSendReceive: function() {
+    var peer1 = dgram.createSocket();
+    var peer2 = dgram.createSocket();
+    var buffer = new Buffer('turkey dinner');
+
+    peer1.on('error', unexpectedError);
+    peer2.on('error', unexpectedError);
+
+    peer2.on('message', function(msg, rinfo) {
+      peer1.on('close', peer2.close);
+      peer2.on('close', function() { vassert.testComplete(); });
+      peer1.close();
+    });
+
+    peer2.bind(54321, function() {
+      peer1.send(buffer, 0, buffer.length(), 54321, '0.0.0.0', buffer);
+    });
+  }
 };
+
+var unexpectedError = function() { vassert.fail("Unexpected error"); };
 
 vertxTest.startTests(dgramTest);
 
