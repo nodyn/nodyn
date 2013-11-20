@@ -2,12 +2,14 @@
 var Fs = function() {
   var fs = require('vertx/file_system');
 
-  this.readdir      = fs.readDir;
-  this.readdirSync  = fs.readDirSync;
-  this.rename       = fs.move;
-  this.renameSync   = fs.moveSync;
-  this.truncate     = fs.truncate;
-  this.truncateSync = fs.truncateSync;
+  this.readdir       = fs.readDir;
+  this.readdirSync   = fs.readDirSync;
+  this.rename        = fs.move;
+  this.renameSync    = fs.moveSync;
+  this.truncate      = fs.truncate;
+  this.truncateSync  = fs.truncateSync;
+  this.ftruncate     = fs.truncate;
+  this.ftruncateSync = fs.truncateSync;
 
   this.exists = function(path, callback) {
     fs.exists(path, function(err, result) {
