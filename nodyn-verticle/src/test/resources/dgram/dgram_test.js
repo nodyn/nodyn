@@ -71,13 +71,100 @@ dgramTest = {
     peer2.on('error', unexpectedError);
 
     peer2.on('message', function(msg, rinfo) {
+      vassert.assertEquals(buffer.toString(), msg.toString());
       peer1.on('close', peer2.close);
       peer2.on('close', function() { vassert.testComplete(); });
       peer1.close();
     });
 
     peer2.bind(54321, function() {
-      peer1.send(buffer, 0, buffer.length(), 54321, '0.0.0.0', buffer);
+      peer1.send(buffer, 0, buffer.length(), 54321, '0.0.0.0');
+    });
+  },
+
+  testEcho: function() {
+    var peer1 = dgram.createSocket();
+    var peer2 = dgram.createSocket();
+    var buffer = new Buffer('turkey dinner');
+
+    peer1.on('error', unexpectedError);
+    peer2.on('error', unexpectedError);
+
+    peer1.on('message', function(msg, rinfo) {
+      vassert.assertEquals(buffer.toString(), msg.toString());
+      peer1.send(msg, 0, msg.length(), rinfo.port, rinfo.address);
+    });
+
+    peer2.on('message', function(msg, rinfo) {
+      vassert.assertEquals(buffer.toString(), msg.toString());
+      peer1.on('close', peer2.close);
+      peer2.on('close', function() { vassert.testComplete(); });
+      peer1.close();
+    });
+
+    peer2.bind(54321, function() {
+      peer1.bind(54321, function() {
+        peer2.send(buffer, 0, buffer.length(), 54321, '0.0.0.0');
+      });
+    });
+  },
+
+  testBroadcast: function() {
+    var peer1 = dgram.createSocket();
+    var peer2 = dgram.createSocket();
+
+    peer1.setBroadcast(true);
+    peer2.setBroadcast(true);
+
+    var buffer = new Buffer('turkey dinner');
+
+    peer1.on('error', unexpectedError);
+    peer2.on('error', unexpectedError);
+
+    peer1.on('message', function(msg, rinfo) {
+      vassert.assertEquals(buffer.toString(), msg.toString());
+      peer1.on('close', peer2.close);
+      peer2.on('close', function() { vassert.testComplete(); });
+      peer1.close();
+    });
+
+    peer1.bind(54321, function() {
+      peer2.send(buffer, 0, buffer.length(), 54321, '255.255.255.255');
+    });
+  },
+
+  DEFERREDtestAddDropMembership: function() {
+    var buffer = new Buffer('steak frites');
+    var groupAddress = '230.0.0.1';
+    var received = false;
+
+    var peer1 = dgram.createSocket();
+    var peer2 = dgram.createSocket();
+
+    peer2.on('message', function(msg, rinfo) {
+      vassert.assertEquals(buffer.toString(), msg.toString());
+
+      // now drop peer2's membership in the group and fail if it gets any more messages
+      peer2.dropMembership(groupAddress);
+
+      peer2.on('message', function(msg, rinfo) {
+        vassert.fail("Should have dropped group membership");
+      });
+
+      // send another message to the group and wait to see if
+      // peer2 gets it - if not, end succesfully
+      peer1.send(buffer, 0, buffer.length(), 54321, groupAddress, function() {
+        setTimeout(function() {
+          vassert.testComplete();
+        }, 1000);
+      });
+    });
+
+    peer2.bind(54321, '127.0.0.1', function() {
+      peer2.addMembership(groupAddress);
+
+      // send a message to the multicast group
+      peer1.send(buffer, 0, buffer.length(), 54321, groupAddress);
     });
   }
 };

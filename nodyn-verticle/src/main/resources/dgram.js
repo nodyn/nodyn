@@ -75,15 +75,11 @@ Socket = function(type, callback) {
   };
 
   this.addMembership = function(mcastAddr, mcastIface) {
-    delegate.listenMulticastGroup(mcastAddr, function() {
-      that.emit('listening');
-    }, null, mcastIface);
+    delegate.listenMulticastGroup(mcastAddr, function() {}, null, mcastIface);
   };
 
   this.dropMembership = function(mcastAddr, mcastIface) {
-    delegate.unlistenMulticastGroup(mcastAddr, function() {
-      that.emit('listening');
-    }, null, mcastIface);
+    delegate.unlistenMulticastGroup(mcastAddr, function() {}, null, mcastIface);
   };
 
   this.send = function(buf, offset, length, port, address, callback) {
