@@ -261,11 +261,11 @@ var HttpTests = {
 
   testRequestWrite: function() {
     var server = http.createServer(function(request, response) {
-      response.end();
       request.on('data', function(data) {
         vassert.assertEquals("cheese muffins", data.toString());
         vassert.testComplete();
       });
+      response.end();
     });
     server.listen(test_options.port, function() {
       var request = http.request(test_options, function() {});
@@ -277,12 +277,13 @@ var HttpTests = {
   testRequestMethod: function() {
     var server = http.createServer(function(request, response) {
       vassert.assertEquals('HEAD', request.method);
-      response.end("OK");
-      vassert.testComplete();
+      response.end();
     });
     server.listen(test_options.port, function() {
       test_options.method = 'HEAD';
-      http.request(test_options).end();
+      http.request(test_options, function() {
+        vassert.testComplete();
+      }).end();
     });
   },
 

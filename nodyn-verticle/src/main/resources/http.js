@@ -4,7 +4,7 @@ var util  = require('util');
 var http  = require('vertx/http');
 var timer = require('vertx/timer');
 
-var EventEmitter = require('events').EventEmitter
+var EventEmitter = require('events').EventEmitter;
 
 var WebServer = module.exports.Server = function(requestListener) {
   var that   = this;
@@ -27,7 +27,7 @@ var WebServer = module.exports.Server = function(requestListener) {
     that.proxy.close(function() { 
       that.emit('close'); 
     });
-  }
+  };
 
   // port, [hostname], [callback]
   that.listen = function() {
@@ -48,6 +48,9 @@ var WebServer = module.exports.Server = function(requestListener) {
 
     // setup a connection handler in vert.x
     that.proxy.requestHandler( function(request) {
+      if (request.method() !== 'HEAD') {
+        request.response.chunked(true);
+      }
       var incomingMessage = new IncomingMessage(request);
       var serverResponse  = new ServerResponse(request.response);
 
@@ -79,7 +82,7 @@ var WebServer = module.exports.Server = function(requestListener) {
     that.proxy.listen(port, host, function() {
       that.emit('listening');
     });
-  }
+  };
 
   that.setTimeout = function(msec, callback) {
     if (that.timeoutId) { 
@@ -92,7 +95,7 @@ var WebServer = module.exports.Server = function(requestListener) {
     that.timeoutId = timer.setTimer(msec, function() {
       that.emit('timeout');
     });
-  }
+  };
 
   that.setTimeout(that.timeout, function() {
     that.close();
@@ -124,7 +127,7 @@ var WebServer = module.exports.Server = function(requestListener) {
       serverResponse.end();
     }
   }
-}
+};
 
 var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   var that  = this;
@@ -141,10 +144,10 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
   });
   that.pause  = function() {
     proxy.pause();
-  }
+  };
   that.resume = function() {
     proxy.resume();
-  }
+  };
 
   that.setEncoding = function(enc) {
     try {
@@ -153,7 +156,7 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
       console.error("Cannot find message encoding for: " + enc);
       console.error(err);
     }
-  }
+  };
 
   proxy.dataHandler(function(buffer) {
     that.emit('data', buffer.toString(that.encoding));
@@ -195,7 +198,7 @@ var IncomingMessage = module.exports.IncomingMessage = function(vertxRequest) {
       that.httpVersion = "1.0";
     }
   }
-}
+};
 
 var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   var that         = this;
@@ -203,16 +206,12 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
   that.sendDate    = true;
   that.headersSent = false;
 
-  // node.js defaults to HTTP chunked encoding, whereas vert.x defaults
-  // to non-chunked. Inform vert.x we want chunked for now.
-  proxy.chunked(true);
-
   that.end = function() {
     if (!that.headersSent) {
       that.writeHead();
     }
     proxy.end.apply(proxy, arguments);
-  }
+  };
   
   that.writeHead = function() {
     if (!that.headersSent) {
@@ -228,7 +227,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
       } else if (typeof arguments[1]  == 'object') {
         headers = arguments[1];
       }
-      for( header in headers ) {
+      for( var header in headers ) {
         that.setHeader(header, headers[header]);
       }
       if (statusCode) {
@@ -246,7 +245,7 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
       }
       that.headersSent = true;
     }
-  }
+  };
 
   // response.write(chunk, [encoding])
   that.write = function() {
@@ -260,31 +259,31 @@ var ServerResponse = module.exports.ServerResponse = function(vertxResponse) {
       encode = arguments[1];
     }
     proxy.write(chunk, encode);
-  }
+  };
 
   that.getHeader = function(name) {
     return proxy.headers().get(name);
-  }
+  };
 
   that.setHeader = function(name, value) {
     proxy.putHeader(name, value.toString());
-  }
+  };
 
   that.removeHeader = function(name) {
     proxy.headers().remove(name);
-  }
+  };
 
   that.addTrailers = function(trailers) {
-    for( header in trailers ) {
+    for( var header in trailers ) {
       proxy.putTrailer(header, trailers[header]);
     }
-  }
+  };
 
   that.writeContinue = function() {
     that.setHeader('Status', '100 (Continue)');
     that.writeHead();
-  }
-}
+  };
+};
 
 var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   var that      = this;
@@ -294,7 +293,7 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
   that.end = proxy.end;
   that.write = function() {
     proxy.write.apply(proxy, arguments);
-  }
+  };
   that.abort = that.end; // not really a true abort
 
   that.setTimeout = function(msec, timeout) { 
@@ -307,13 +306,13 @@ var ClientRequest = module.exports.ClientRequest = function(vertxRequest) {
       }
       timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
     }
-  }
+  };
 
   // TODO: These methods are not available on a 
   // vert.x HttpClientRequest...
-  that.setNoDelay = function() {}
-  that.setSocketKeepAlive = function() {}
-}
+  that.setNoDelay = function() {};
+  that.setSocketKeepAlive = function() {};
+};
 
 var DefaultRequestOptions = {
   host:     'localhost',
@@ -321,7 +320,7 @@ var DefaultRequestOptions = {
   method:   'GET',
   path:     '/',
   port:     80
-}
+};
 
 // Make the web server and its ilk emit events
 util.inherits(WebServer, EventEmitter);
@@ -331,14 +330,14 @@ util.inherits(ClientRequest, EventEmitter);
 
 module.exports.createServer = function(requestListener) {
   return new WebServer(requestListener);
-}
+};
 
 module.exports.get = function(options, callback) {
   options.method = 'GET';
   var clientRequest = httpRequest(options, callback);
   clientRequest.end();
   return clientRequest;
-}
+};
 
 var httpRequest = module.exports.request = function(options, callback) {
   switch(typeof options) {
@@ -400,17 +399,17 @@ var httpRequest = module.exports.request = function(options, callback) {
     request.chunked(true);
   }
   if (options.headers) {
-    for (header in options.headers) {
+    for (var header in options.headers) {
       request.putHeader(header, options.headers[header]);
     }
   }
   return clientRequest;
-}
+};
 
 module.exports.createClient = function() {
   // This is deprecated. Use http.request instead
   console.log("http.createClient is deprecated. Please use http.request instead");
-}
+};
 
 var STATUS_CODES = exports.STATUS_CODES = {
   100 : 'Continue',
