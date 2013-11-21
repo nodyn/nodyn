@@ -11,6 +11,8 @@ var Fs = function() {
   this.ftruncate     = fs.truncate;
   this.ftruncateSync = fs.truncateSync;
 
+  this.existsSync    = fs.existsSync;
+
   this.exists = function(path, callback) {
     fs.exists(path, function(err, result) {
       if (callback) {
@@ -18,6 +20,15 @@ var Fs = function() {
       }
     });
   };
+
+  // TODO: Implement chown and friends
+  this.chown  = function() { };
+  this.fchown = this.chown;
+  this.lchown = this.chown;
+
+  this.chownSync  = function() { return false; };
+  this.fchownSync = function() { return false; };
+  this.lchownSync = function() { return false; };
 
   this.writeFile = function() {
     filename = arguments[0];

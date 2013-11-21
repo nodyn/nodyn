@@ -59,6 +59,12 @@ var FsTests = {
     });
   },
 
+  testExistsSync: function() {
+    vassert.assertTrue("File should exist", fs.existsSync(tmpFile.getAbsolutePath()));
+    vassert.assertTrue("File should not exist", !fs.existsSync('/random/something'));
+    vassert.testComplete();
+  },
+
   testTruncate: function() {
     var data = 'Now is the winter of our discontent made glorious summer by this son of York';
     fs.writeFile(tmpFile.getAbsolutePath(), data, function (err) {
