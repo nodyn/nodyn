@@ -83,8 +83,7 @@ var FsTests = {
   testTruncateExtends: function() {
     fs.truncate(tmpFile.getAbsolutePath(), 1024, function(err, result) {
       vassert.assertTrue("File should exist: " + tmpFile.getAbsolutePath(), tmpFile.exists());
-      // https://github.com/eclipse/vert.x/pull/745
-      // vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
+      vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
       vassert.testComplete();
     });
   },
