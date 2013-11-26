@@ -142,8 +142,8 @@ var ProcessTests = {
   },
 
   testUndocumentedProperties: function() {
-    vassert.assertFalse(process.noDeprecation);
-    vassert.assertFalse(process.traceDeprecation);
+    vassert.assertTrue(process.noDeprecation === false);
+    vassert.assertTrue(process.traceDeprecation === false);
     vassert.testComplete();
   }
 }

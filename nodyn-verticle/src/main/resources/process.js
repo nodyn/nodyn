@@ -1,52 +1,104 @@
 var System = java.lang.System;
-var Node   = org.projectodd.nodyn.Node;
-var Java   = System.getProperty("java.version");
-
-var Mode   = java.nio.file.AccessMode;
-var Open   = java.nio.file.StandardOpenOption;
+var vertx  = require('vertx');
 
 var getEnv = function() {
-  env = {}
+  env = {};
   tmpDir = System.getProperty("java.io.tmpdir");
-  if (tmpDir == null || tmpDir == undefined) {
+  if (tmpDir === null || tmpDir === undefined) {
     tmpDir = "/tmp";
   }
-  env['TMPDIR'] = tmpDir;
-  env['TMP']    = tmpDir;
-  env['TEMP']   = tmpDir;
+  env.TMPDIR = tmpDir;
+  env.TMP    = tmpDir;
+  env.TEMP   = tmpDir;
 
   sysenv = System.getenv();
-  for (key in sysenv) {
+  for (var key in sysenv) {
     env[key] = sysenv.get(key).replace('.', '_');
   }
   return env;
-}
+};
 
 var Process = function() {
-  var that = this;
+  var Mode         = java.nio.file.AccessMode;
+  var Open         = java.nio.file.StandardOpenOption;
+  var Node         = org.projectodd.nodyn.Node;
+  var javaProcess  = new org.projectodd.nodyn.process.Process();
+  var EventEmitter = require('events').EventEmitter;
 
+  this.title = "Nodyn";
   this.version = Node.VERSION;
   this.versions = {
       node: Node.VERSION,
-      java: Java
-      // dynjs: 
+      java: System.getProperty("java.version")
   };
 
-  this.binding = {};
-  this.binding.constants = {
-    O_RDONLY: Mode.READ.toString(),
-    O_WRONLY: Mode.WRITE.toString(),
-    O_RDWR: Mode.WRITE.toString(),
-    O_APPEND: Open.APPEND.toString(),
-    S_IMFT: 0
+  this.binding = {
+    constants: {
+      O_RDONLY: Mode.READ.toString(),
+      O_WRONLY: Mode.WRITE.toString(),
+      O_RDWR: Mode.WRITE.toString(),
+      O_APPEND: Open.APPEND.toString(),
+      S_IMFT: 0
+    }
+  };
+
+  this.stdout = {
+    write: function(message) {
+      java.lang.System.out.print(message);
+    }
+  };
+
+  this.stderr = {
+    write: function(message) {
+      java.lang.System.err.print(message);
+    }
+  };
+
+  // TODO: Fix this
+  this.stdin = {
+    read: function() {
+    }
   };
 
   // QueryString initialized in NodeJSVerticleFactory
   this.binding.QueryString = nodyn.QueryString;
 
-  this.noDeprecation = true;
+  this.arch = javaProcess.arch();
+  this.platform = javaProcess.platform();
+  this.noDeprecation = false;
   this.traceDeprecation = false;
-
+  
+  this.EventEmitter       = EventEmitter;
+  this.on                 = EventEmitter.prototype.on;
+  this.addListener        = EventEmitter.prototype.addListener;
+  this.once               = EventEmitter.prototype.once;
+  this.removeListener     = EventEmitter.prototype.removeListener;
+  this.removeAllListeners = EventEmitter.prototype.removeAllListeners;
+  this.setMaxListeners    = EventEmitter.prototype.setMaxListeners;
+  this.listeners          = EventEmitter.prototype.listeners;
+  this.emit               = EventEmitter.prototype.emit;
+  
+  // dynjs.global.__filename = __node.getFilename();
+  // dynjs.global.__dirname  = __node.getDirname();
+  
+  this.memoryUsage = function() {
+    os = require('os');
+    var obj = {};
+    obj.heapTotal = os.totalmem();
+    obj.heapUsed  = os.totalmem() - os.freemem();
+    return obj;
+  };
+  
+  this.nextTick = function(callback, args) {
+    vertx.runOnContext(function() {
+      callback(args);
+    });
+  };
+  
+  // TODO: this.config
+  // Node.js puts the configure options that were used to compile the current
+  // node executable in this.config
+  this.config = {};
   this.env = getEnv();
   this.pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
   this.execPath = System.getProperty("user.dir"); // TODO: This doesn't make much sense
@@ -77,8 +129,7 @@ var Process = function() {
 
   this.cwd = function() {
     return System.getProperty("user.dir");
-  }
-}
+  };
+};
 
-var process = new Process();
-module.exports = process;
+module.exports = new Process();
