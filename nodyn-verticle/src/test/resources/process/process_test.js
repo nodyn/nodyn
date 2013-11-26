@@ -104,7 +104,7 @@ var ProcessTests = {
     var functionCalled = false;
 
     // set an event listener on 'foo'
-    process.on('foo', function() { functionCalled = true }); 
+    process.on('foo', function() { functionCalled = true; }); 
     vassert.assertEquals(1, process.listeners('foo').length);
     process.emit('foo');
     vassert.assertTrue(functionCalled);
@@ -125,7 +125,7 @@ var ProcessTests = {
 
   testNextTick: function() {
     var x = 0;
-    var f = function(y) { x += y; }
+    var f = function(y) { x += y; };
     process.nextTick(f, 10);
     timer.setTimer(100, function() {
       vassert.assertEquals(10, x);
@@ -146,6 +146,6 @@ var ProcessTests = {
     vassert.assertTrue(process.traceDeprecation === false);
     vassert.testComplete();
   }
-}
+};
 
 vertxTest.startTests(ProcessTests);
