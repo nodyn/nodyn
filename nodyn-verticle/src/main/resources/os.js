@@ -23,8 +23,23 @@ var isWindows = process.platform === 'win32';
 var util = require('util');
 
 exports.cpus = function() {
-  // TODO
-  return "NOT IMPLEMENTED";
+  var cores = [];
+  var num = Runtime.getRuntime().availableProcessors();
+  for (var i = 0; i < num; i++) {
+    var details = {
+      model: "unknown",
+      speed: 0,
+      times: {
+        user: 0,
+        nice: 0,
+        sys: 0,
+        idle: 0,
+        irq: 0
+      }
+    };
+    cores.push(details)
+  }
+  return cores;
 }
 
 exports.networkInterfaces = function() {
