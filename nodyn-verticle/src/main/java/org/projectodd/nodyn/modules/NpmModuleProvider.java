@@ -31,8 +31,8 @@ import org.projectodd.nodyn.process.Process;
  */
 public class NpmModuleProvider extends FilesystemModuleProvider {
 
-	private static final String NODE_MODULES = "node_modules";
-	
+    private static final String NODE_MODULES = "node_modules";
+
     private Require require;
 
     public NpmModuleProvider(GlobalObject globalObject) {
@@ -40,16 +40,16 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         if (require != null) {
             // global npm modules
 
-        	// Ideally the Process instance should be injected, easier testing
-			if (new Process().isWindows()) {
-				String appdata = System.getenv("APPDATA");
-				if (isNotBlank(appdata)) {
-					require.pushLoadPath(appdata + FILE_SEPARATOR + "npm"
-							+ FILE_SEPARATOR + NODE_MODULES);
-				}
-			} else {
-				require.pushLoadPath("/usr/local/lib/" + NODE_MODULES);
-			}
+            // Ideally the Process instance should be injected, easier testing
+            if (new Process().isWindows()) {
+                String appdata = System.getenv("APPDATA");
+                if (isNotBlank(appdata)) {
+                    require.pushLoadPath(appdata + FILE_SEPARATOR + "npm"
+                            + FILE_SEPARATOR + NODE_MODULES);
+                }
+            } else {
+                require.pushLoadPath("/usr/local/lib/" + NODE_MODULES);
+            }
 
             // npm modules in $HOME
             require.pushLoadPath(USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES);
@@ -70,7 +70,7 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         File file = new File(moduleID);
         if (file.exists()) {
             List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
-            for (String path: pathsToRoot) {
+            for (String path : pathsToRoot) {
                 runtime.evaluate("require.pushLoadPath('" + path + "')");
             }
             runtime.evaluate("require.pushLoadPath('" + file.getParent() + "')");
@@ -82,7 +82,7 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
             } finally {
                 runtime.evaluate("require.removeLoadPath('" + file.getParent() + "')");
-                for(String path: pathsToRoot) {
+                for (String path : pathsToRoot) {
                     runtime.evaluate("require.removeLoadPath('" + path + "')");
                 }
             }
@@ -96,10 +96,12 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         String fileName = normalizeName(moduleName);
         File file = null;
 
-        for (String loadPath: loadPaths) {
+        for (String loadPath : loadPaths) {
 //            System.err.println("Looking in " + loadPath + " for " + moduleName);
             file = new File(loadPath, fileName);
-            if (file.exists()) { return file; }
+            if (file.exists()) {
+                return file;
+            }
 
             // moduleName.js wasn't found as a file. Look for a directory instead.
             // http://nodejs.org/api/modules.html#modules_folders_as_modules
