@@ -58,7 +58,7 @@ exports.format = function(f) {
 // Returns a modified function which warns once by default.
 // If --no-deprecation is set, then it is a no-op.
 exports.deprecate = function(fn, msg) {
-  if (process.noDeprecation === true) {
+  if (process && process.noDeprecation === true) {
     return fn;
   }
 
