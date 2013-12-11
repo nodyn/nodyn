@@ -23,8 +23,8 @@ var formatRegExp = /%[sdj%]/g;
 exports.format = function(f) {
   if (typeof f !== 'string') {
     var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
+    for (var n = 0; i < arguments.length; n++) {
+      objects.push(inspect(arguments[n]));
     }
     return objects.join(' ');
   }
@@ -274,7 +274,7 @@ function formatValue(ctx, value, recurseTimes) {
     base = ' ' + formatError(value);
   }
 
-  if (keys.length === 0 && (!array || value.length == 0)) {
+  if (keys.length === 0 && (!array || value.length === 0)) {
     return braces[0] + base + braces[1];
   }
 

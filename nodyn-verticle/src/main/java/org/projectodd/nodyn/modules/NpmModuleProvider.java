@@ -80,6 +80,7 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 return true;
             } catch (IOException e) {
                 System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
+                e.printStackTrace();
             } finally {
                 runtime.evaluate("require.removeLoadPath('" + file.getParent() + "')");
                 for (String path : pathsToRoot) {
