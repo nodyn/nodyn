@@ -43,7 +43,7 @@ dgramTest = {
     vassert.assertEquals('function', typeof socket.address);
     socket.bind(54321, function() {
       var addr = socket.address();
-      vassert.assertEquals('object', typeof addr);
+      vassert.assertTrue(addr !== undefined);
       vassert.assertEquals('string', typeof addr.address);
       vassert.assertEquals('string', typeof addr.family);
       vassert.assertEquals('number', typeof addr.port);

@@ -41,7 +41,8 @@ Socket = function(type, callback) {
     });
 
     delegate.dataHandler(function(packet) {
-      that.emit('message', packet.data, {address: packet.sender, bytes: packet.data.length()});
+      that.emit('message', packet.data(), 
+        {address: packet.sender, bytes: packet.data().length()});
     });
 
     delegate.listen(port, host, function() {
