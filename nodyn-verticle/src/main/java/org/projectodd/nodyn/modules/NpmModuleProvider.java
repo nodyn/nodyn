@@ -44,19 +44,19 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
             if (new Process().isWindows()) {
                 String appdata = System.getenv("APPDATA");
                 if (isNotBlank(appdata)) {
-                    require.pushLoadPath(appdata + FILE_SEPARATOR + "npm"
-                            + FILE_SEPARATOR + NODE_MODULES);
+                    require.pushLoadPath((appdata + FILE_SEPARATOR + "npm"
+                            + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
                 }
             } else {
                 require.pushLoadPath("/usr/local/lib/" + NODE_MODULES);
             }
 
             // npm modules in $HOME
-            require.pushLoadPath(USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES);
-            require.pushLoadPath(USER_HOME + FILE_SEPARATOR + NODE_MODULES);
+            require.pushLoadPath((USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES).replace(File.separatorChar, '/'));
+            require.pushLoadPath((USER_HOME + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
 
             // npm modules in cwd
-            require.pushLoadPath(USER_DIR + FILE_SEPARATOR + NODE_MODULES);
+            require.pushLoadPath((USER_DIR + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
 
             // Inform dynjs that we exist
             require.addModuleProvider(this);
@@ -71,9 +71,9 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         if (file.exists()) {
             List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
             for (String path : pathsToRoot) {
-                runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + path + "')").evaluate();
+                runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + path.replace(File.separatorChar, '/') + "')").evaluate();
             }
-            runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + file.getParent() + "')").evaluate();
+            runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + file.getParent().replace(File.separatorChar, '/') + "')").evaluate();
             try {
 //                System.err.println("Loading: " + file.getAbsolutePath());
                 runtime.newRunner().withContext(context).withSource(file).execute();
@@ -82,9 +82,9 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
                 e.printStackTrace();
             } finally {
-                runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + file.getParent() + "')").evaluate();
+                runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + file.getParent().replace(File.separatorChar, '/') + "')").evaluate();
                 for (String path : pathsToRoot) {
-                    runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + path + "')").evaluate();
+                    runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + path.replace(File.separatorChar, '/') + "')").evaluate();
                 }
             }
         }
@@ -136,7 +136,7 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         LinkedList<String> list = new LinkedList<>();
         File parent = new File(currentDir);
         while (parent != null) {
-            list.push(parent.getAbsolutePath() + "/node_modules");
+            list.push(parent.getAbsolutePath() + File.separatorChar + "node_modules");
             parent = parent.getParentFile();
         }
         return list;
