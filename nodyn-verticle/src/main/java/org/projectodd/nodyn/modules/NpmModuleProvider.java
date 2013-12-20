@@ -71,9 +71,9 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
         if (file.exists()) {
             List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
             for (String path : pathsToRoot) {
-                runtime.evaluate("require.pushLoadPath('" + path + "')");
+                runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + path + "')").evaluate();
             }
-            runtime.evaluate("require.pushLoadPath('" + file.getParent() + "')");
+            runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + file.getParent() + "')").evaluate();
             try {
 //                System.err.println("Loading: " + file.getAbsolutePath());
                 runtime.newRunner().withContext(context).withSource(file).execute();
@@ -82,9 +82,9 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
                 e.printStackTrace();
             } finally {
-                runtime.evaluate("require.removeLoadPath('" + file.getParent() + "')");
+                runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + file.getParent() + "')").evaluate();
                 for (String path : pathsToRoot) {
-                    runtime.evaluate("require.removeLoadPath('" + path + "')");
+                    runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + path + "')").evaluate();
                 }
             }
         }
