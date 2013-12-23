@@ -34,6 +34,12 @@ var ModulesTest = {
     vassert.testComplete();
   },
 
+  testFindsAndLoadsJsonFiles: function() {
+    json = require('./conf.json');
+    vassert.assertTrue("somevalue" === json.somekey);
+    vassert.testComplete();
+  }
+
 }
 
 require.addLoadPath(userDir + "/src/test/resources/modules");

@@ -10,6 +10,10 @@ global.require = require;
 Buffer = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 
+require.loadJSON = function(file) {
+  return JSON.parse(vertx.fileSystem.readFileSync(file).toString());
+};
+
 setTimeout = function() {
   var args = Array.prototype.slice.call(arguments);
 

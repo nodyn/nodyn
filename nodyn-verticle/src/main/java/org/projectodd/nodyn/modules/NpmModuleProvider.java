@@ -1,9 +1,12 @@
 package org.projectodd.nodyn.modules;
 
-import static org.apache.commons.lang3.SystemUtils.FILE_SEPARATOR;
-import static org.apache.commons.lang3.SystemUtils.USER_DIR;
-import static org.apache.commons.lang3.SystemUtils.USER_HOME;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.builtins.Require;
+import org.dynjs.runtime.modules.FilesystemModuleProvider;
+import org.projectodd.nodyn.process.Process;
+import org.vertx.java.core.json.JsonObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,13 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.builtins.Require;
-import org.dynjs.runtime.modules.FilesystemModuleProvider;
-import org.vertx.java.core.json.JsonObject;
-import org.projectodd.nodyn.process.Process;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.SystemUtils.*;
 
 /**
  * Extends DynJS FilesystemModuleProvider to support Node.js Modules API
@@ -69,13 +67,16 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
     protected boolean load(DynJS runtime, ExecutionContext context, String moduleID) {
         File file = new File(moduleID);
         if (file.exists()) {
+            if (file.getName().endsWith(".json")) {
+                runtime.newRunner().withContext(context).withSource("module.exports = require.loadJSON('" + file.getAbsolutePath() + "');").execute();
+                return true;
+            }
             List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
             for (String path : pathsToRoot) {
                 runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + path.replace(File.separatorChar, '/') + "')").evaluate();
             }
             runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + file.getParent().replace(File.separatorChar, '/') + "')").evaluate();
             try {
-//                System.err.println("Loading: " + file.getAbsolutePath());
                 runtime.newRunner().withContext(context).withSource(file).execute();
                 return true;
             } catch (IOException e) {
@@ -94,17 +95,24 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
 
     @Override
     protected File findFile(List<String> loadPaths, String moduleName) {
-        String fileName = normalizeName(moduleName);
-        File file = null;
+        String fileName;
+        if (moduleName.endsWith(".js") || moduleName.endsWith(".json")) {
+            fileName = moduleName;
+        } else {
+            fileName = moduleName + ".js";
+        }
 
+        File file = null;
         for (String loadPath : loadPaths) {
-//            System.err.println("Looking in " + loadPath + " for " + moduleName);
             file = new File(loadPath, fileName);
             if (file.exists()) {
                 return file;
             }
 
-            // moduleName.js wasn't found as a file. Look for a directory instead.
+            // Node also looks for .json files and will load those as well, but wtf?
+            // http://nodejs.org/api/modules.html#modules_file_modules
+
+            // moduleName.js/json wasn't found as a file. Look for a directory instead.
             // http://nodejs.org/api/modules.html#modules_folders_as_modules
             // first check to see if there is a package.json in the directory
             File pkg = new File(loadPath + "/" + moduleName, "package.json");
