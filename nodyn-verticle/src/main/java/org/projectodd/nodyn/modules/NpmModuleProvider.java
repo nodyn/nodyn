@@ -1,8 +1,6 @@
 package org.projectodd.nodyn.modules;
 
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.Require;
 import org.dynjs.runtime.modules.FilesystemModuleProvider;
 import org.projectodd.nodyn.process.Process;
@@ -67,25 +65,33 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
     protected boolean load(DynJS runtime, ExecutionContext context, String moduleID) {
         File file = new File(moduleID);
         if (file.exists()) {
+            Runner runner    = runtime.newRunner().withContext(context);
+            DynObject module = (DynObject) runner.withSource("module").evaluate();
+
+            // Node also looks for .json files and will load those as well
+            // http://nodejs.org/api/modules.html#modules_file_modules
             if (file.getName().endsWith(".json")) {
-                runtime.newRunner().withContext(context).withSource("module.exports = require.loadJSON('" + file.getAbsolutePath() + "');").execute();
+                module.put("exports", runner.withSource("require.loadJSON('" + file.getAbsolutePath() + "');").evaluate());
                 return true;
             }
             List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
             for (String path : pathsToRoot) {
-                runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + path.replace(File.separatorChar, '/') + "')").evaluate();
+                require.pushLoadPath(path.replace(File.separatorChar, '/'));
             }
-            runtime.newRunner().withContext(context).withSource("require.pushLoadPath('" + file.getParent().replace(File.separatorChar, '/') + "')").evaluate();
+            module.put("filename", file.getName());
+            module.put("loaded", false);
+            require.pushLoadPath(file.getParent().replace(File.separatorChar, '/'));
             try {
-                runtime.newRunner().withContext(context).withSource(file).execute();
+                runner.withSource(file).execute();
+                module.put("loaded", true);
                 return true;
             } catch (IOException e) {
                 System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
                 e.printStackTrace();
             } finally {
-                runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + file.getParent().replace(File.separatorChar, '/') + "')").evaluate();
+                require.removeLoadPath(file.getParent().replace(File.separatorChar, '/'));
                 for (String path : pathsToRoot) {
-                    runtime.newRunner().withContext(context).withSource("require.removeLoadPath('" + path.replace(File.separatorChar, '/') + "')").evaluate();
+                    require.removeLoadPath(path.replace(File.separatorChar, '/'));
                 }
             }
         }
@@ -108,10 +114,6 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
             if (file.exists()) {
                 return file;
             }
-
-            // Node also looks for .json files and will load those as well, but wtf?
-            // http://nodejs.org/api/modules.html#modules_file_modules
-
             // moduleName.js/json wasn't found as a file. Look for a directory instead.
             // http://nodejs.org/api/modules.html#modules_folders_as_modules
             // first check to see if there is a package.json in the directory

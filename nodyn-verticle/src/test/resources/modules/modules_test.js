@@ -11,8 +11,7 @@ var ModulesTest = {
   testSetsLoadPath: function() {
 	if(isWindows) {
 		appdata = System.getenv("APPDATA");
-		vassert.assertTrue(require.paths.indexOf(appdata + fileSep + "npm"
-				+ fileSep + "node_modules") >= 0);
+		vassert.assertTrue(require.paths.indexOf(appdata + fileSep + "npm" + fileSep + "node_modules") >= 0);
 	} else {
 		vassert.assertTrue(require.paths.indexOf("/usr/local/lib/node_modules") >= 0);
 	}
@@ -38,9 +37,18 @@ var ModulesTest = {
     json = require('./conf.json');
     vassert.assertTrue("somevalue" === json.somekey);
     vassert.testComplete();
+  },
+
+  testModuleObjectProperties: function() {
+    mod = require('properties');
+    vassert.assertTrue("Module should have a string ID", typeof mod.id === 'string');
+    vassert.assertTrue("Module should have a filename", mod.filename === 'properties.js');
+    vassert.assertTrue("Module should have a loaded property", typeof mod.loaded === 'boolean');
+//    vassert.assertTrue("Module should have a parent", typeof mod.parent === 'object');
+    vassert.testComplete();
   }
 
-}
+};
 
 require.addLoadPath(userDir + "/src/test/resources/modules");
 vertxTest.startTests(ModulesTest);
