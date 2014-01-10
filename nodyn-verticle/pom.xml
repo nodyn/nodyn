@@ -167,6 +167,8 @@
               <vertx.test.timeout>15</vertx.test.timeout>
             </property>
           </systemPropertyVariables>
+          <argLine>-Xss2048k</argLine>
+          <verbose>true</verbose>
           <includes>
             <include>**/integration/**</include>
           </includes>

@@ -65,7 +65,7 @@
     <version.testtools>2.0.2-final</version.testtools>
     <version.lang-js.verticle>1.0.0-SNAPSHOT</version.lang-js.verticle>
     <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
-    <version.dynjs>0.2.0</version.dynjs>
+    <version.dynjs>0.2.1</version.dynjs>
     <version.commons.lang>3.1</version.commons.lang>
   </properties>
 
