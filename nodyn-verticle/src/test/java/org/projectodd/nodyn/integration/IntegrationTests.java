@@ -31,7 +31,7 @@ import java.io.UnsupportedEncodingException;
  * 
  * The scripts go in src/test/resources.
  */
-@TestVerticleInfo(filenameFilter = ".+_test\\.js", funcRegex = "\\n[\\s]+(test[^\\s(]+):[\\s]+function")
+@TestVerticleInfo(filenameFilter = "buffer_test\\.js", funcRegex = "\\n[\\s]+(test[^\\s(]+):[\\s]+function")
 @RunWith(ScriptClassRunner.class)
 public class IntegrationTests {
     public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";

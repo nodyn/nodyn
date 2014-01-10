@@ -183,7 +183,9 @@
             <version>${maven.surefire.plugin.version}</version>
             <configuration>
               <jvm>/opt/jdk/jdk1.7.0/bin/java</jvm>
-              <forkMode>once</forkMode>
+              <systemPropertyVariables>
+                <dynjs.compile.mode>off</dynjs.compile.mode>
+              </systemPropertyVariables>
             </configuration>
           </plugin>
         </plugins>
