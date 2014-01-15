@@ -1,4 +1,3 @@
-
 var Fs = function() {
   var fs = require('vertx/file_system');
 
@@ -10,30 +9,19 @@ var Fs = function() {
   this.truncateSync  = fs.truncateSync;
   this.ftruncate     = fs.truncate;
   this.ftruncateSync = fs.truncateSync;
-
+  this.exists        = delegate(fs.exists);
   this.existsSync    = fs.existsSync;
-
-  this.exists = function(path, callback) {
-    fs.exists(path, function(err, result) {
-      if (callback) {
-        callback(result);
-      }
-    });
-  };
-
-  // TODO: Implement chown and friends
-  this.chown  = function() { };
-  this.fchown = this.chown;
-  this.lchown = this.chown;
-
-  this.chownSync  = function() { return false; };
-  this.fchownSync = function() { return false; };
-  this.lchownSync = function() { return false; };
+  this.chown         = fs.chown;
+  this.fchown        = this.chown;
+  this.lchown        = this.chown;
+  this.chownSync     = fs.chownSync;
+  this.fchownSync    = this.chownSync;
+  this.lchownSync    = this.chownSync;
 
   this.writeFile = function() {
-    filename = arguments[0];
-    data     = arguments[1];
-    callback = arguments[2];
+    var filename = arguments[0];
+    var data     = arguments[1];
+    var callback = arguments[2];
 
     // TODO: Actually use these values somehow
     options  = {
@@ -51,9 +39,22 @@ var Fs = function() {
     fs.writeFile(filename, data, callback);
   };
 
+  this.chmod = function(path, mode, callback) {
+    fs.chmod(path, convertModeToString(mode), callback);
+  };
+  this.fchmod = this.chmod;
+  this.lchmod = this.chmod;
+
+  this.chmodSync = function(path, mode) {
+    fs.chmodSync(path, convertModeToString(mode));
+  };
+  this.fchmodSync = this.chmodSync;
+  this.lchmodSync = this.chmodSync;
+
+
   this.mkdir = function(path, mode, callback) {
-    //for now we ignore the mode as vertx api expect a unix perms string
-    //CreateParent boolean will always be false as NodeJS do not support this option
+    // CreateParent boolean will always be false as NodeJS 
+    // do not support this option
     fs.mkDir(path, false, convertModeToString(mode), callback);
   };
 
@@ -103,6 +104,29 @@ var Fs = function() {
   };
 
   var modeCache = {};
+};
+
+var wrapHandler = function(func) {
+  return function(err, result) {
+    if (err) {
+      return func(err);
+    }
+    return func(result);
+  };
+};
+
+var delegate = function(delegateFunc) {
+  return function() {
+    var last = Array.prototype.pop.call(arguments);
+    var args = Array.prototype.slice.call(arguments);
+    if (typeof last === 'function') {
+      args.push(wrapHandler(last));
+    }
+    if (last !== undefined) {
+      args.push(last);
+    }
+    delegateFunc.apply(delegateFunc, args);
+  };
 };
 
 module.exports = new Fs();

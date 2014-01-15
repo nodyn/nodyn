@@ -15,7 +15,7 @@ vertxStop = function() {
 var FsTests = {
   testRename: function() {
     fs.rename(tmpFile.getAbsolutePath(), basedir + "/granola.txt", function(e) {
-      vassert.assertTrue(e === null);
+      vassert.assertEquals(null, e);
       vassert.assertTrue(newFile.exists());
       vassert.testComplete();
     });
@@ -30,7 +30,7 @@ var FsTests = {
   testRenameNonExistentFile: function() {
     fs.rename("blarg", basedir + "/granola.txt", function(e) {
       vassert.assertFalse(newFile.exists());
-      if (e === null) {
+      if (e === undefined || e === null) {
         vassert.fail("Rename should deliver an exception with a non-existent file");
       }
     });
@@ -159,6 +159,7 @@ var FsTests = {
       vassert.testComplete();
     });
   },
+
 };
 
 vertxTest.startTests(FsTests);
