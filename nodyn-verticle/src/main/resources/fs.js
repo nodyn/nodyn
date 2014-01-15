@@ -1,6 +1,6 @@
-var Fs = function() {
-  var fs = require('vertx/file_system');
+var fs = require('vertx/file_system');
 
+var Fs = function() {
   this.readdir       = fs.readDir;
   this.readdirSync   = fs.readDirSync;
   this.rename        = fs.move;
@@ -62,6 +62,26 @@ var Fs = function() {
     fs.mkDirSync(path, false, convertModeToString(mode));
   };
 
+  this.stat = function(path, callback) {
+    fs.props(path, function(err, result){
+      callback(new Stat(result));
+    });
+  };
+
+  this.statSync = function(path) {
+    return new Stat(fs.propsSync(path));
+  };
+
+  this.lstat = function(path, callback) {
+    fs.lprops(path, function(err, result){
+      callback(new Stat(result));
+    });
+  };
+
+  this.lstatSync = function(path) {
+    return new Stat(fs.lpropsSync(path));
+  };
+
   var invertAndConvert = function(x){
     var e = parseInt(x).toString(2);
     var bitArray = e.split("");
@@ -104,6 +124,13 @@ var Fs = function() {
   };
 
   var modeCache = {};
+};
+
+var Stat = function(delegate) {
+  this.size  = delegate.size;
+  this.atime = new Date(delegate.lastAccessTime);
+  this.mtime = new Date(delegate.lastModifiedTime);
+  this.ctime = new Date(delegate.creationTime);
 };
 
 var wrapHandler = function(func) {
