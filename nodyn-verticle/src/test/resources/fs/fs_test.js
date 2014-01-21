@@ -160,6 +160,33 @@ var FsTests = {
     });
   },
 
+  testOpenReadNotExists: function() {
+    fs.open('some-non-file.txt', 'r', function(e, f) {
+      vassert.assertTrue(e instanceof Error);
+      vassert.testComplete();
+    });
+  },
+
+  testOpenRead: function() {
+    fs.writeFile(tmpFile.getAbsolutePath(), 'bacon', function (err) {
+        if (err) throw err;
+        fs.open(tmpFile.getAbsolutePath(), 'r', null, function(e, f) {
+          vassert.assertTrue(!e);
+          vassert.testComplete();
+        });
+      });
+   },
+
+  testOpenReadWrite: function() {
+    fs.writeFile(tmpFile.getAbsolutePath(), 'cheese', function(err) {
+      if (err) throw err;
+      fs.open(tmpFile.getAbsolutePath(), 'r+', null, function(e, f) {
+        vassert.assertTrue(!e);
+        vassert.testComplete();
+      });
+    });
+  }
+  // TODO: More fs.open tests needed
 };
 
 vertxTest.startTests(FsTests);

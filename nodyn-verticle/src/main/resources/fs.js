@@ -17,6 +17,59 @@ var Fs = function() {
   this.chownSync     = fs.chownSync;
   this.fchownSync    = this.chownSync;
   this.lchownSync    = this.chownSync;
+  this.readlink      = fs.readSymlink;
+  this.readlinkSync  = fs.readSymlinkSync;
+  this.unlink        = fs.unlink;
+  this.unlinkSync    = fs.unlinkSync;
+  this.rmdir         = fs.delete;
+  this.rmdirSync     = fs.deleteSync;
+
+  // TODO: implement these functions
+  this.realpath      = notImplemented("realpath", true);
+  this.realpathSync  = notImplemented("realpathSync", true);
+  this.close         = notImplemented("close");
+  this.closeSync     = notImplemented("closeSync");
+
+  this.open = function(path, flags) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    var func = args.pop();
+    var mode = args.pop();
+    if (!mode) {
+      mode = "666";
+    }
+    var flag = 0;
+    
+    switch(flags) {
+      case 'r': 
+      case 'rs':
+        flag = fs.OPEN_READ;
+        break;
+      case 'r+': 
+      case 'rs+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE;
+        break;
+      case 'w':
+        flag = fs.OPEN_WRITE;
+        break;
+      case 'wx':
+        flag = fs.OPEN_WRITE | fs.CREATE_NEW;
+        break;
+      case 'w+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE;
+        break;
+      case 'wx+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE | fs.CREATE_NEW;
+        break;
+      // TODO: Deal with append modes
+    }
+    var modeString = convertModeToString(mode);
+    fs.open(path, flag, false, convertModeToString(mode), function(e, f) {
+      if (e) {
+        e = new Error(e.toString());
+      }
+      func.apply(func, [e, f]);
+    });
+  };
 
   this.writeFile = function() {
     var filename = arguments[0];
@@ -82,6 +135,17 @@ var Fs = function() {
     return new Stat(fs.lpropsSync(path));
   };
 
+  this.link = function(src, dest, callback) {
+    fs.symlink(dest, src, callback);
+  };
+
+  this.linkSync = function(src, dest) {
+    fs.symlinkSync(dest, src);
+  };
+
+  this.symlink = this.link;
+  this.symlinkSync = this.linkSync;
+
   var invertAndConvert = function(x){
     var e = parseInt(x).toString(2);
     var bitArray = e.split("");
@@ -131,6 +195,17 @@ var Stat = function(delegate) {
   this.atime = new Date(delegate.lastAccessTime);
   this.mtime = new Date(delegate.lastModifiedTime);
   this.ctime = new Date(delegate.creationTime);
+
+  // Bunch of stuff not yet implemented
+  this.dev   = undefined;
+  this.ino   = undefined;
+  this.mode  = undefined;
+  this.nlink = undefined;
+  this.uid   = undefined;
+  this.gid   = undefined;
+  this.rdev  = undefined;
+  this.blksize = undefined;
+  this.blocks  = undefined;
 };
 
 var wrapHandler = function(func) {
@@ -148,11 +223,20 @@ var delegate = function(delegateFunc) {
     var args = Array.prototype.slice.call(arguments);
     if (typeof last === 'function') {
       args.push(wrapHandler(last));
-    }
-    if (last !== undefined) {
+    } else if (last !== undefined) {
       args.push(last);
     }
     delegateFunc.apply(delegateFunc, args);
+  };
+};
+
+var notImplemented = function(name, throws) {
+  return function() {
+    var msg = ["Error:", name, "not implemented"].join(' ');
+    if (throws) {
+      throw new Error(msg);
+    }
+    print(msg);
   };
 };
 
