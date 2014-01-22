@@ -61,7 +61,7 @@
     <dependency>
       <groupId>com.github.akiellor.jasmine</groupId>
       <artifactId>jasmine-cli</artifactId>
-      <version>0.0.12-SNAPSHOT</version>
+      <version>0.0.12</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -226,6 +226,8 @@
               <mainClass>org.jasmine.cli.Main</mainClass>
               <classpathScope>test</classpathScope>
               <arguments>
+                <argument>--format</argument>
+                <argument>DOC</argument>
                 <argument>--pattern</argument>
                 <argument>**/*Spec.js</argument>
               </arguments>
