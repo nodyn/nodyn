@@ -27,43 +27,41 @@ var Fs = function() {
   // TODO: implement these functions
   this.realpath      = notImplemented("realpath", true);
   this.realpathSync  = notImplemented("realpathSync", true);
-  this.close         = notImplemented("close");
-  this.closeSync     = notImplemented("closeSync");
+  this.utimes        = notImplemented("utimes");
+  this.utimesSync    = notImplemented("utimesSync");
+  this.futimes       = notImplemented("futimes");
+  this.futimesSync   = notImplemented("futimesSync");
+
+  this.fsync = function(fd, callback) {
+    fd.flush(callback);
+  };
+
+  this.fsyncSync = function(fd) {
+    fd.flush();
+  };
+
+  this.close = function(fd, callback) {
+    if (!(fd instanceof fs.AsyncFile)) {
+      callback(Error("Don't know how to close " + fd));
+    } else {
+      fd.close(callback);
+    }
+  };
+
+  this.closeSync = function(fd) {
+    if ((fd instanceof fs.AsyncFile)) {
+      fd.close();
+    }
+  };
 
   this.open = function(path, flags) {
     var args = Array.prototype.slice.call(arguments, 2);
     var func = args.pop();
     var mode = args.pop();
-    if (!mode) {
-      mode = "666";
-    }
-    var flag = 0;
-    
-    switch(flags) {
-      case 'r': 
-      case 'rs':
-        flag = fs.OPEN_READ;
-        break;
-      case 'r+': 
-      case 'rs+':
-        flag = fs.OPEN_READ | fs.OPEN_WRITE;
-        break;
-      case 'w':
-        flag = fs.OPEN_WRITE;
-        break;
-      case 'wx':
-        flag = fs.OPEN_WRITE | fs.CREATE_NEW;
-        break;
-      case 'w+':
-        flag = fs.OPEN_READ | fs.OPEN_WRITE;
-        break;
-      case 'wx+':
-        flag = fs.OPEN_READ | fs.OPEN_WRITE | fs.CREATE_NEW;
-        break;
-      // TODO: Deal with append modes
-    }
     var modeString = convertModeToString(mode);
-    fs.open(path, flag, false, convertModeToString(mode), function(e, f) {
+    var flag = mapOpenFlags(flags);
+
+    fs.open(path, flag, false, modeString, function(e, f) {
       if (e) {
         e = new Error(e.toString());
       }
@@ -71,12 +69,17 @@ var Fs = function() {
     });
   };
 
+  this.openSync = function(path, flags, mode) {
+    var modeString = convertModeToString(mode);
+    var flag = mapOpenFlags(flags);
+    return fs.openSync(path, flag, false, modeString);
+  };
+
   this.writeFile = function() {
     var filename = arguments[0];
     var data     = arguments[1];
     var callback = arguments[2];
 
-    // TODO: Actually use these values somehow
     options  = {
       // default values
       'encoding': 'utf8',
@@ -174,6 +177,7 @@ var Fs = function() {
   };
    
   var convertModeToString = function(mode) {
+    if (!mode) { mode = 0666; }
     if (modeCache[mode]) {
       return modeCache[mode];
     }
@@ -185,6 +189,35 @@ var Fs = function() {
     }
     modeCache[mode] = result;
     return result;
+  };
+
+  var mapOpenFlags = function(flags) {
+    var flag = 0;
+    
+    switch(flags) {
+      case 'r': 
+      case 'rs':
+        flag = fs.OPEN_READ;
+        break;
+      case 'r+': 
+      case 'rs+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE;
+        break;
+      case 'w':
+        flag = fs.OPEN_WRITE;
+        break;
+      case 'wx':
+        flag = fs.OPEN_WRITE | fs.CREATE_NEW;
+        break;
+      case 'w+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE;
+        break;
+      case 'wx+':
+        flag = fs.OPEN_READ | fs.OPEN_WRITE | fs.CREATE_NEW;
+        break;
+      // TODO: Deal with append modes
+    }
+    return flag;
   };
 
   var modeCache = {};

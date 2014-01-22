@@ -120,8 +120,7 @@ var FsTests = {
   testFtruncateExtends: function() {
     fs.ftruncate(tmpFile.getAbsolutePath(), 1024, function(err, result) {
       vassert.assertTrue("File should exist: " + tmpFile.getAbsolutePath(), tmpFile.exists());
-      // https://github.com/eclipse/vert.x/pull/745
-      // vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
+      vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
       vassert.testComplete();
     });
   },
@@ -168,25 +167,80 @@ var FsTests = {
   },
 
   testOpenRead: function() {
-    fs.writeFile(tmpFile.getAbsolutePath(), 'bacon', function (err) {
-        if (err) throw err;
-        fs.open(tmpFile.getAbsolutePath(), 'r', null, function(e, f) {
-          vassert.assertTrue(!e);
-          vassert.testComplete();
-        });
-      });
-   },
-
-  testOpenReadWrite: function() {
-    fs.writeFile(tmpFile.getAbsolutePath(), 'cheese', function(err) {
-      if (err) throw err;
-      fs.open(tmpFile.getAbsolutePath(), 'r+', null, function(e, f) {
+    setupTestFile(function(sut) {
+      fs.open(sut.getAbsolutePath(), 'r', null, function(e, f) {
         vassert.assertTrue(!e);
         vassert.testComplete();
       });
     });
-  }
-  // TODO: More fs.open tests needed
+   },
+
+  testOpenReadWrite: function() {
+    setupTestFile(function(sut) {
+      fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
+        vassert.assertTrue(!e);
+        vassert.testComplete();
+      });
+    });
+  },
+
+  testOpenSyncReadNotExists: function() {
+    try {
+      var f = fs.openSync('some-non-file.txt', 'r');
+    } catch(e) {
+      vassert.assertTrue(!!e);
+      vassert.testComplete();
+    }
+  },
+
+  testOpenSyncRead: function() {
+    setupTestFile(function(sut) {
+      var f = fs.openSync(sut.getAbsolutePath(), 'r', null);
+      vassert.assertTrue("ERROR: " + f, !!f);
+      vassert.testComplete();
+    });
+   },
+
+  testOpenSyncReadWrite: function() {
+    setupTestFile(function(sut) {
+      var f = fs.openSync(sut.getAbsolutePath(), 'r+', null);
+      vassert.assertTrue(!!f);
+      vassert.testComplete();
+    });
+  },
+
+  testCloseError: function() {
+    fs.close(null, function(e) {
+      vassert.assertEquals("Don't know how to close null", e.message);
+      vassert.testComplete();
+    });
+  },
+
+  testClose: function() {
+    setupTestFile(function(sut) {
+      fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
+        vassert.assertTrue(!e);
+        fs.close(f, function(ex) {
+          vassert.assertTrue(!e);
+          vassert.testComplete();
+        });
+      });
+    });
+  },
+
+  testCloseSync: function() {
+    setupTestFile(function() {
+      fs.closeSync(null);
+      vassert.testComplete();
+    });
+  },
+};
+
+var setupTestFile = function(func) {
+  fs.writeFile(tmpFile.getAbsolutePath(), 'cheese', function(err) {
+    if (err) throw err;
+    func(tmpFile);
+  });
 };
 
 vertxTest.startTests(FsTests);
