@@ -31,6 +31,22 @@ var Fs = function() {
   this.utimesSync    = notImplemented("utimesSync");
   this.futimes       = notImplemented("futimes");
   this.futimesSync   = notImplemented("futimesSync");
+  this.write         = notImplemented("write");
+  this.writeSync     = notImplemented("writeSync");
+  this.read          = notImplemented("read");
+  this.readSync      = notImplemented("readSync");
+  this.appendFile    = notImplemented("appendFile");
+  this.appendFileSync= notImplemented("appendFileSync");
+  this.watchFile     = notImplemented("watchFile");
+  this.unwatchFile   = notImplemented("unwatchFile");
+  this.watch         = notImplemented("watch");
+
+  this.readFile = function(path) { // [options], callback
+    var args = Array.protottype.slice.call(arguments, 1);
+    var func = args.pop();
+    fs.readFile(path, func);
+  };
+  this.readFileSync = fs.readFileSync;
 
   this.fsync = function(fd, callback) {
     fd.flush(callback);
