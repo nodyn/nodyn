@@ -2,34 +2,38 @@ var vertxTest = require('vertx_tests');
 var vassert   = vertxTest.vassert;
 
 var fs = require('fs');
-var tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
-var basedir = tmpFile.getParent();
-var newFile = new java.io.File(basedir + "/granola.txt");
-var newDirectory = new java.io.File(basedir + "/waffle-recipes");
 
 vertxStop = function() {
-  newFile.delete();
-  newDirectory.delete();
+  __files.forEach(function(f) {
+    if (f.exists()) {
+      f.delete();
+    }
+  });
 };
 
 var FsTests = {
   testRename: function() {
-    fs.rename(tmpFile.getAbsolutePath(), basedir + "/granola.txt", function(e) {
-      vassert.assertEquals(null, e);
+    var newFile = generateTempFileName('rename');
+    setupTestFile(function(sut) {
+      fs.rename(sut.getAbsolutePath(), newFile.getAbsolutePath(), function(e) {
+        vassert.assertEquals(null, e);
+        vassert.assertTrue(newFile.exists());
+        vassert.testComplete();
+      });
+    });
+  },
+
+  testRenameSync: function() {
+    var newFile = generateTempFileName('rename-sync');
+    setupTestFile(function(sut) {
+      fs.renameSync(sut.getAbsolutePath(), newFile.getAbsolutePath());
       vassert.assertTrue(newFile.exists());
       vassert.testComplete();
     });
   },
 
-  testRenameSync: function() {
-    fs.renameSync(tmpFile.getAbsolutePath(), basedir + "/granola.txt");
-    vassert.assertTrue(newFile.exists());
-    vassert.testComplete();
-  },
-
   testRenameNonExistentFile: function() {
-    fs.rename("blarg", basedir + "/granola.txt", function(e) {
-      vassert.assertFalse(newFile.exists());
+    fs.rename("blarg", "/foo/bar", function(e) {
       if (e === undefined || e === null) {
         vassert.fail("Rename should deliver an exception with a non-existent file");
       }
@@ -38,122 +42,114 @@ var FsTests = {
   },
 
   testWriteFile: function() {
-    fs.writeFile(tmpFile.getAbsolutePath(),
-      'Now is the winter of our discontent made glorious summer by this son of York',
-      function (err) {
-        if (err) throw err;
-        fs.exists(tmpFile.getAbsolutePath(), function(exists) {
-          vassert.assertEquals(true, exists);
-          vassert.testComplete();
-        });
-      });
+    var newFile = generateTempFileName('write-file');
+    fs.writeFile(newFile.getAbsolutePath(), data, function (err) {
+      vassert.assertTrue(!err);
+      vassert.assertTrue(fs.existsSync(newFile.getAbsolutePath()));
+      vassert.testComplete();
+    });
   },
 
   testExists: function() {
-    fs.exists(tmpFile.getAbsolutePath(), function(result) {
-      vassert.assertEquals(true, result);
-      fs.exists('/random/something', function(result) {
-        vassert.assertEquals(false, result);
-        vassert.testComplete();
+    setupTestFile(function(sut) {
+      fs.exists(sut.getAbsolutePath(), function(result) {
+        vassert.assertEquals(true, result);
+        fs.exists('/random/something', function(result) {
+          vassert.assertEquals(false, result);
+          vassert.testComplete();
+        });
       });
     });
   },
 
   testExistsSync: function() {
-    vassert.assertTrue("File should exist", fs.existsSync(tmpFile.getAbsolutePath()));
-    vassert.assertTrue("File should not exist", !fs.existsSync('/random/something'));
-    vassert.testComplete();
-  },
-
-  testTruncate: function() {
-    var data = 'Now is the winter of our discontent made glorious summer by this son of York';
-    fs.writeFile(tmpFile.getAbsolutePath(), data, function (err) {
-      if (err) throw err;
-      fs.exists(tmpFile.getAbsolutePath(), function(exists) {
-        vassert.assertEquals(true, exists);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), data.length === tmpFile.length());
-        fs.truncate(tmpFile.getAbsolutePath(), 6, function(err, result) {
-          vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 6);
-          vassert.testComplete();
-        });
-      });
+    setupTestFile(function(sut) {
+      vassert.assertTrue("File should exist", fs.existsSync(sut.getAbsolutePath()));
+      vassert.assertTrue("File should not exist", !fs.existsSync('/random/something'));
+      vassert.testComplete();
     });
   },
 
+  testTruncate: function() {
+    setupTestFile(function(sut) {
+      fs.exists(sut.getAbsolutePath(), function(exists) {
+        vassert.assertEquals(true, exists);
+        vassert.assertTrue("File is incorrect size", data.length === sut.length());
+        fs.truncate(sut.getAbsolutePath(), 6, function(err, result) {
+          vassert.assertTrue("File is incorrect size", sut.length() === 6);
+          vassert.testComplete();
+        });
+      });
+    }, data);
+  },
+
   testTruncateExtends: function() {
-    fs.truncate(tmpFile.getAbsolutePath(), 1024, function(err, result) {
-      vassert.assertTrue("File should exist: " + tmpFile.getAbsolutePath(), tmpFile.exists());
-      vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
-      vassert.testComplete();
+    setupTestFile(function(sut) {
+      fs.truncate(sut.getAbsolutePath(), 1024, function(err, result) {
+        vassert.assertTrue("File should exist: " + sut.getAbsolutePath(), sut.exists());
+        vassert.assertTrue("File is incorrect size: " + sut.length(), sut.length() === 1024);
+        vassert.testComplete();
+      });
     });
   },
 
   testTruncateSync: function() {
-    var data = 'Now is the winter of our discontent made glorious summer by this son of York';
-    fs.writeFile(tmpFile.getAbsolutePath(), data, function (err) {
-      if (err) throw err;
-      fs.exists(tmpFile.getAbsolutePath(), function(exists) {
-        vassert.assertEquals(true, exists);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), data.length === tmpFile.length());
-        fs.truncateSync(tmpFile.getAbsolutePath(), 6);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 6);
-        vassert.testComplete();
-      });
-    });
+    setupTestFile(function(sut) {
+      vassert.assertTrue("File is incorrect size", data.length === sut.length());
+      fs.truncateSync(sut.getAbsolutePath(), 6);
+      vassert.assertTrue("File is incorrect size", sut.length() === 6);
+      vassert.testComplete();
+    }, data);
   },
 
   testFtruncate: function() {
-    var data = 'Now is the winter of our discontent made glorious summer by this son of York';
-    fs.writeFile(tmpFile.getAbsolutePath(), data, function (err) {
-      if (err) throw err;
-      fs.exists(tmpFile.getAbsolutePath(), function(exists) {
-        vassert.assertEquals(true, exists);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), data.length === tmpFile.length());
-        fs.ftruncate(tmpFile.getAbsolutePath(), 6, function(err, result) {
-          vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 6);
-          vassert.testComplete();
-        });
+    setupTestFile(function(sut) {
+      vassert.assertTrue("File is incorrect size", data.length === sut.length());
+        fs.ftruncate(sut.getAbsolutePath(), 6, function(err, result) {
+        vassert.assertTrue("File is incorrect size", sut.length() === 6);
+        vassert.testComplete();
       });
-    });
+    }, data);
   },
 
   testFtruncateExtends: function() {
-    fs.ftruncate(tmpFile.getAbsolutePath(), 1024, function(err, result) {
-      vassert.assertTrue("File should exist: " + tmpFile.getAbsolutePath(), tmpFile.exists());
-      vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 1024);
-      vassert.testComplete();
+    setupTestFile(function(sut) {
+      fs.ftruncate(sut.getAbsolutePath(), 1024, function(err, result) {
+        vassert.assertTrue("File should exist: " + sut.getAbsolutePath(), sut.exists());
+        vassert.assertTrue("File is incorrect size: " + sut.length(), sut.length() === 1024);
+        vassert.testComplete();
+      });
     });
   },
 
   testFtruncateSync: function() {
-    var data = 'Now is the winter of our discontent made glorious summer by this son of York';
-    fs.writeFile(tmpFile.getAbsolutePath(), data, function (err) {
-      if (err) throw err;
-      fs.exists(tmpFile.getAbsolutePath(), function(exists) {
-        vassert.assertEquals(true, exists);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), data.length === tmpFile.length());
-        fs.ftruncateSync(tmpFile.getAbsolutePath(), 6);
-        vassert.assertTrue("File is incorrect size: " + tmpFile.length(), tmpFile.length() === 6);
-        vassert.testComplete();
-      });
-    });
+    setupTestFile(function(sut) {
+      vassert.assertTrue("File is incorrect size", data.length === sut.length());
+      fs.ftruncateSync(sut.getAbsolutePath(), 6);
+      vassert.assertTrue("File is incorrect size", sut.length() === 6);
+      vassert.testComplete();
+    }, data);
   },
 
   testMkdir: function() {
-    fs.mkdir(basedir + "/waffle-recipes", 0755, function(e) {
+    var newDirectory = new java.io.File(tempDir + "/waffle-recipes");
+    fs.mkdir(newDirectory.getAbsolutePath(), 0755, function(e) {
       vassert.assertTrue(newDirectory.exists());
+      newDirectory.delete();
       vassert.testComplete();
     });
   },
 
   testMkdirSync: function() {
-    fs.mkdirSync(basedir + "/waffle-recipes", 0755);
+    var newDirectory = new java.io.File(tempDir + "/waffle-recipes");
+    fs.mkdirSync(newDirectory.getAbsolutePath(), 0755);
     vassert.assertTrue(newDirectory.exists());
+    newDirectory.delete();
     vassert.testComplete();
   },
 
   testReaddir: function() {
-    fs.readdir(basedir, function(e,r) {
+    fs.readdir(tempDir, function(e,r) {
       vassert.assertTrue(r.length>0);
       vassert.testComplete();
     });
@@ -236,11 +232,26 @@ var FsTests = {
   },
 };
 
-var setupTestFile = function(func) {
-  fs.writeFile(tmpFile.getAbsolutePath(), 'cheese', function(err) {
+var generateTempFileName = function(name) {
+  var f = java.io.File.createTempFile(name, '.txt');
+  f.delete();
+  return f;
+};
+
+var setupTestFile = function(func, data) {
+  var tmpFile = java.io.File.createTempFile('nodyn-fs-test', '.txt');
+  if (!data) {
+    data = 'cheese';
+  }
+  fs.writeFile(tmpFile.getAbsolutePath(), data, function(err) {
     if (err) throw err;
+    __files.push(tmpFile);
     func(tmpFile);
   });
 };
+
+var data    = 'To be or not to be';
+var tempDir = java.lang.System.getProperty('java.io.tmpdir');
+var __files = [];
 
 vertxTest.startTests(FsTests);
