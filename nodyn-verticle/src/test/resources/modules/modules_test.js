@@ -23,22 +23,24 @@ var ModulesTest = {
 
   testHas__dirname: function() {
     var dir = new java.io.File('./src/test/resources/modules/somemodule/lib').getCanonicalPath();
+    var subdir = new java.io.File('./src/test/resources/modules/somemodule/lib/subdir').getCanonicalPath();
     var mod = require('somemodule');
     vassert.assertTrue(mod.dirname !== null);
     vassert.assertTrue(mod.dirname !== undefined);
     vassert.assertEquals(dir, mod.dirname);
+    vassert.assertEquals(subdir, mod.subdir);
     vassert.testComplete();
   },
 
   testFindsModuleIndexDotJs: function() {
     mod = require('amodule');
-    vassert.assertEquals(mod.flavor, "nacho cheese");
+    vassert.assertEquals("nacho cheese", mod.flavor);
     vassert.testComplete();
   },
 
   testFindsModulePackageDotJson: function() {
     mod = require('somemodule');
-    vassert.assertEquals(mod.flavor, "cool ranch");
+    vassert.assertEquals("cool ranch", mod.flavor);
     vassert.testComplete();
   },
 

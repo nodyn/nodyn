@@ -64,10 +64,10 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
     }
 
     @Override
-    protected boolean load(DynJS runtime, ExecutionContext context, String moduleID) {
+    protected boolean load(ExecutionContext context, String moduleID) {
         File file = new File(moduleID);
         if (file.exists()) {
-            Runner runner    = runtime.newRunner().withContext(context);
+            Runner runner    = context.getGlobalObject().getRuntime().newRunner().withContext(context);
             DynObject module = (DynObject) runner.withContext(context).withSource("module").evaluate();
 
             // Node also looks for .json files and will load those as well
@@ -84,9 +84,7 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
             module.put("loaded", false);
             require.pushLoadPath(file.getParent().replace(File.separatorChar, '/'));
             try {
-                //System.err.println("Defining global property __dirname: " + file.getParentFile().getCanonicalPath());
-                GlobalObject global = context.getGlobalObject();
-                global.defineReadOnlyGlobalProperty("__dirname", file.getParentFile().getCanonicalPath());
+                setMutableBinding(context, "__dirname", file.getParentFile().getCanonicalPath());
                 runner.withContext(context).withSource(file).execute();
                 module.put("loaded", true);
                 return true;
