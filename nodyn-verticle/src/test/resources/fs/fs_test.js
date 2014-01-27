@@ -230,6 +230,48 @@ var FsTests = {
       vassert.testComplete();
     });
   },
+
+  testReadFile: function() {
+    var contents = "American Cheese";
+    setupTestFile(function(sut) {
+      fs.readFile(sut.getAbsolutePath(), function(err, file) {
+        vassert.assertEquals('object', typeof file);
+        vassert.assertEquals(contents, file.toString('ascii'));
+        vassert.testComplete();
+      });
+    }, contents);
+  },
+
+  testReadFileWithEncoding: function() {
+    var contents = "American Cheese";
+    setupTestFile(function(sut) {
+      fs.readFile(sut.getAbsolutePath(), {encoding:'ascii'}, function(err, str) {
+        vassert.assertEquals('string', typeof str);
+        vassert.assertEquals(contents, str);
+        vassert.testComplete();
+      });
+    }, contents);
+  },
+
+  testReadFileSync: function() {
+    var contents = "American Cheese";
+    setupTestFile(function(sut) {
+      var result = fs.readFileSync(sut.getAbsolutePath());
+      vassert.assertEquals('object', typeof result);
+      vassert.assertEquals(contents, result.toString('ascii'));
+      vassert.testComplete();
+    }, contents);
+  },
+
+  testReadFileSyncWithEncoding: function() {
+    var contents = "American Cheese";
+    setupTestFile(function(sut) {
+      var result = fs.readFileSync(sut.getAbsolutePath(), {encoding: 'ascii'});
+      vassert.assertEquals('string', typeof result);
+      vassert.assertEquals(contents, result);
+      vassert.testComplete();
+    }, contents);
+  }
 };
 
 var generateTempFileName = function(name) {

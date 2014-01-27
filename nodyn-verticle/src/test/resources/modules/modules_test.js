@@ -21,6 +21,15 @@ var ModulesTest = {
     vassert.testComplete();
   },
 
+  testHas__dirname: function() {
+    var dir = new java.io.File('./src/test/resources/modules/somemodule/lib').getCanonicalPath();
+    var mod = require('somemodule');
+    vassert.assertTrue(mod.dirname !== null);
+    vassert.assertTrue(mod.dirname !== undefined);
+    vassert.assertEquals(dir, mod.dirname);
+    vassert.testComplete();
+  },
+
   testFindsModuleIndexDotJs: function() {
     mod = require('amodule');
     vassert.assertEquals(mod.flavor, "nacho cheese");

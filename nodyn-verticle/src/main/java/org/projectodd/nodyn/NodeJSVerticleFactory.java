@@ -25,7 +25,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         return new NodeJSVerticle(new DynJS(config), main);
     }
 
-    private class NodeJSGlobalObjectFactory extends DynJSGlobalObjectFactory {
+    public class NodeJSGlobalObjectFactory extends DynJSGlobalObjectFactory {
         @Override
         public GlobalObject newGlobalObject(final DynJS runtime) {
             GlobalObject global = super.newGlobalObject(runtime);

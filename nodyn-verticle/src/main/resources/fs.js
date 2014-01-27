@@ -42,11 +42,31 @@ var Fs = function() {
   this.watch         = notImplemented("watch");
 
   this.readFile = function(path) { // [options], callback
-    var args = Array.protottype.slice.call(arguments, 1);
+    var args = Array.prototype.slice.call(arguments, 1);
     var func = args.pop();
-    fs.readFile(path, func);
+    var opts = args.pop();
+    if ((typeof opts) === 'string') {
+      opts = { encoding: opts };
+    }
+    fs.readFile(path, function(err, buff) {
+      if (opts && opts.encoding) {
+        func(err, buff.toString(opts.encoding)); 
+      } else {
+        func(err, new Buffer(buff.toString())); 
+      }
+    });
   };
-  this.readFileSync = fs.readFileSync;
+
+  this.readFileSync = function(path, options) {
+    var jBuffer = fs.readFileSync(path);
+    if ((typeof options) === 'string') {
+      options = { encoding: options };
+    }
+    if (options && options.encoding) {
+      return jBuffer.toString(options.encoding); 
+    }
+    return new Buffer(jBuffer.toString());
+  };
 
   this.fsync = function(fd, callback) {
     fd.flush(callback);
