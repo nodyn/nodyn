@@ -151,6 +151,8 @@ var FsTests = {
   testReaddir: function() {
     fs.readdir(tempDir, function(e,r) {
       vassert.assertTrue(r.length>0);
+      // make sure this thing behaves like a JS array
+      vassert.assertEquals('function', (typeof r.forEach));
       vassert.testComplete();
     });
   },

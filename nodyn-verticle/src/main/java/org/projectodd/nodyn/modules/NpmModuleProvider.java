@@ -1,5 +1,6 @@
 package org.projectodd.nodyn.modules;
 
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.Require;
 import org.dynjs.runtime.modules.FilesystemModuleProvider;
@@ -88,9 +89,10 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 runner.withContext(context).withSource(file).execute();
                 module.put("loaded", true);
                 return true;
-            } catch (IOException e) {
-                System.err.println("There was an error loading the module " + moduleID + ". Error message: " + e.getMessage());
-                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("ERROR: Error loading module " + moduleID);
+                System.err.println("ERROR: " + e.getMessage());
+                setMutableBinding(context, "__exception", e);
             } finally {
                 require.removeLoadPath(file.getParent().replace(File.separatorChar, '/'));
                 for (String path : pathsToRoot) {
