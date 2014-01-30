@@ -2,6 +2,7 @@ package org.projectodd.nodyn;
 
 import org.dynjs.Config;
 import org.dynjs.runtime.*;
+import org.dynjs.runtime.builtins.Require;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
 import org.projectodd.nodyn.buffer.BufferType;
@@ -55,7 +56,8 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                     if (is != null) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                         runtime.newRunner().withContext(context).withSource(reader).evaluate();
-                        new NpmModuleProvider(context.getGlobalObject());
+                        Require require = (Require) context.getGlobalObject().get("require");
+                        require.addModuleProvider(new NpmModuleProvider(require));
                         try {
                             is.close();
                         } catch (IOException e) {

@@ -1,9 +1,11 @@
 package org.projectodd.nodyn.modules;
 
-import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.*;
+import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.LexicalEnvironment;
+import org.dynjs.runtime.Runner;
 import org.dynjs.runtime.builtins.Require;
-import org.dynjs.runtime.modules.FilesystemModuleProvider;
+import org.dynjs.runtime.modules.ModuleProvider;
 import org.projectodd.nodyn.process.Process;
 import org.vertx.java.core.json.JsonObject;
 
@@ -26,49 +28,41 @@ import static org.apache.commons.lang3.SystemUtils.*;
  * @see http://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders
  * @see http://nodejs.org/api/modules.html#modules_folders_as_modules
  */
-public class NpmModuleProvider extends FilesystemModuleProvider {
+public class NpmModuleProvider extends ModuleProvider {
 
     private static final String NODE_MODULES = "node_modules";
+    private final Require require;
 
-    private Require require;
-    private GlobalObject globalObject;
+    public NpmModuleProvider(Require require) {
+        this.require = require;
 
-    public NpmModuleProvider(GlobalObject globalObject) {
-        this.globalObject = globalObject;
-        require = (Require) globalObject.get("require");
-        if (require != null) {
-            // global npm modules
-
-            // Ideally the Process instance should be injected, easier testing
-            if (new Process().isWindows()) {
-                String appdata = System.getenv("APPDATA");
-                if (isNotBlank(appdata)) {
-                    require.pushLoadPath((appdata + FILE_SEPARATOR + "npm"
-                            + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
-                }
-            } else {
-                require.pushLoadPath("/usr/local/lib/" + NODE_MODULES);
+        // setup global npm modules
+        // Ideally the Process instance should be injected, easier testing
+        if (new Process().isWindows()) {
+            String appdata = System.getenv("APPDATA");
+            if (isNotBlank(appdata)) {
+                require.addLoadPath((appdata + FILE_SEPARATOR + "npm"
+                        + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
             }
-
-            // npm modules in $HOME
-            require.pushLoadPath((USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES).replace(File.separatorChar, '/'));
-            require.pushLoadPath((USER_HOME + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
-
-            // npm modules in cwd
-            require.pushLoadPath((USER_DIR + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
-
-            // Inform dynjs that we exist
-            require.addModuleProvider(this);
         } else {
-            System.err.println("Can't find require() function");
+            // todo: this should be $NODE_PREFIX or some such
+            require.addLoadPath("/usr/local/lib/" + NODE_MODULES);
         }
+
+        // npm modules in $HOME
+        require.addLoadPath((USER_HOME + FILE_SEPARATOR + "." + NODE_MODULES).replace(File.separatorChar, '/'));
+        require.addLoadPath((USER_HOME + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
+
+        // npm modules in cwd
+        require.addLoadPath((USER_DIR + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/'));
+
     }
 
     @Override
     protected boolean load(ExecutionContext context, String moduleID) {
         File file = new File(moduleID);
         if (file.exists()) {
-            Runner runner    = context.getGlobalObject().getRuntime().newRunner().withContext(context);
+            Runner runner = context.getGlobalObject().getRuntime().newRunner().withContext(context);
             DynObject module = (DynObject) runner.withContext(context).withSource("module").evaluate();
 
             // Node also looks for .json files and will load those as well
@@ -77,81 +71,129 @@ public class NpmModuleProvider extends FilesystemModuleProvider {
                 module.put("exports", runner.withSource("require.loadJSON('" + file.getAbsolutePath() + "');").evaluate());
                 return true;
             }
-            List<String> pathsToRoot = getLoadPathsToRoot(file.getParent());
-            for (String path : pathsToRoot) {
-                require.pushLoadPath(path.replace(File.separatorChar, '/'));
-            }
             module.put("filename", file.getName());
             module.put("loaded", false);
-            require.pushLoadPath(file.getParent().replace(File.separatorChar, '/'));
             try {
                 setMutableBinding(context, "__dirname", file.getParentFile().getCanonicalPath());
                 runner.withContext(context).withSource(file).execute();
                 module.put("loaded", true);
                 return true;
-            } catch (Exception e) {
+            } catch (Error | IOException e) {
                 System.err.println("ERROR: Error loading module " + moduleID);
                 System.err.println("ERROR: " + e.getMessage());
-                setMutableBinding(context, "__exception", e);
-            } finally {
-                require.removeLoadPath(file.getParent().replace(File.separatorChar, '/'));
-                for (String path : pathsToRoot) {
-                    require.removeLoadPath(path.replace(File.separatorChar, '/'));
-                }
+                e.printStackTrace();
             }
         }
         return false;
     }
 
-
+    // http://nodejs.org/api/modules.html#modules_all_together
     @Override
-    protected File findFile(List<String> loadPaths, String moduleName) {
-        String fileName;
-        if (moduleName.endsWith(".js") || moduleName.endsWith(".json")) {
-            fileName = moduleName;
-        } else {
-            fileName = moduleName + ".js";
+    public String generateModuleID(ExecutionContext context, String moduleName) {
+        // FileSystemModuleProvider should handle loading the core modules
+        LexicalEnvironment localEnv = context.getParent().getVariableEnvironment();
+        String dirName = System.getProperty("user.dir");
+        if (localEnv.getRecord().hasBinding(context, "__dirname")) {
+            dirName = (String) localEnv.getRecord().getBindingValue(context, "__dirname", true);
         }
+        String moduleId;
+        final String modulePath = dirName + FILE_SEPARATOR + moduleName;
+        moduleId = resolveAsFile(modulePath);
+        if (moduleId == null) {
+            moduleId = resolveAsDirectory(modulePath);
+        }
+        if (moduleId == null) {
+            moduleId = resolveNodeModules(dirName, moduleName);
+        }
+        return moduleId;
+    }
 
-        File file = null;
-        for (String loadPath : loadPaths) {
-            file = new File(loadPath, fileName);
-            if (file.exists()) {
-                return file;
-            }
-            // moduleName.js/json wasn't found as a file. Look for a directory instead.
-            // http://nodejs.org/api/modules.html#modules_folders_as_modules
-            // first check to see if there is a package.json in the directory
-            File pkg = new File(loadPath + "/" + moduleName, "package.json");
-            if (pkg.exists()) {
-                // load the JSON and find the main module file to consider
-                try {
-                    String jsonString = new Scanner(pkg).useDelimiter("\\A").next();
-                    JsonObject jsonObject = new JsonObject(jsonString);
+    // http://nodejs.org/api/modules.html#modules_all_together
+    private String resolveNodeModules(String dirName, String moduleName) {
+        List<String> paths = getLoadPathsToRoot(dirName.replace(File.separatorChar, '/'));
+        String moduleId = resolveNodeModulesFromPaths(paths, moduleName);
+        if (moduleId == null) {
+            moduleId = resolveNodeModulesFromPaths(require.getLoadPaths(), moduleName);
+        }
+        return moduleId;
+    }
 
-                    // If there is no main in package.json, default to index.js
-                    String moduleMain = jsonObject.getString("main", "index.js");
-
-                    return new File(loadPath + "/" + moduleName, normalizeName(moduleMain));
-                } catch (FileNotFoundException e) {
-                    System.err.println("Error loading " + pkg.getAbsolutePath());
-                }
+    private String resolveNodeModulesFromPaths(List<String> paths, String moduleName) {
+        String moduleId;
+        for (String path : paths) {
+            final String modulePath = path + FILE_SEPARATOR + moduleName;
+            moduleId = resolveAsFile(modulePath);
+            if (moduleId != null) {
+                return moduleId;
             } else {
-                // The last thing we look for is index.js in the module path
-                file = new File(loadPath + "/" + moduleName, "index.js");
-                if (file.exists()) return file;
+                moduleId = resolveAsDirectory(modulePath);
+                if (moduleId != null) {
+                    return moduleId;
+                }
             }
         }
-        return file;
+        return null;
+    }
+
+    // http://nodejs.org/api/modules.html#modules_all_together
+    private String resolveAsDirectory(String dirName) {
+        File packageJson = new File(dirName, "package.json");
+        String moduleId = null;
+        if (packageJson.exists()) {
+            try {
+                // load the JSON and find the main module file to load
+                String jsonString = new Scanner(packageJson).useDelimiter("\\A").next();
+                JsonObject jsonObject = new JsonObject(jsonString);
+                // If there is no main in package.json, default to index.js
+                String moduleMain = jsonObject.getString("main", "index.js");
+                return resolveAsFile(dirName + FILE_SEPARATOR + moduleMain);
+            } catch (FileNotFoundException e) {
+                // shouldn't get here
+            }
+        } else {
+            moduleId = resolveAsFile(dirName + FILE_SEPARATOR + "index.js");
+        }
+        return moduleId;
+    }
+
+    // http://nodejs.org/api/modules.html#modules_all_together
+    private String resolveAsFile(String moduleName) {
+        final String fileName = moduleName.replace(File.separatorChar, '/');
+        File file = new File(fileName);
+        String moduleId = null;
+
+        if (file.exists() && !file.isDirectory()) {
+            moduleId = file.getAbsolutePath();
+        } else {
+            file = new File(fileName + ".js");
+            if (file.exists()) {
+                moduleId = file.getAbsolutePath();
+            }
+        }
+        return moduleId;
     }
 
     // npm modules in CWD up to root
     // http://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders
+    // http://nodejs.org/api/modules.html#modules_all_together
     private List<String> getLoadPathsToRoot(String currentDir) {
+        String rootName = "/";
+        int rootIndex = currentDir.indexOf(NODE_MODULES);
+        if (rootIndex != -1) {
+            rootName = currentDir.substring(0, rootIndex);
+        }
+        File rootDir = new File(rootName);
         LinkedList<String> list = new LinkedList<>();
         File parent = new File(currentDir);
-        while (parent != null) {
-            list.push(parent.getAbsolutePath() + File.separatorChar + "node_modules");
+
+        while ((parent != null) && !parent.getAbsolutePath().equals(rootDir.getAbsolutePath())) {
+            if (!parent.getName().equals(NODE_MODULES)) {
+                final String pathname = (parent.getAbsolutePath() + FILE_SEPARATOR + NODE_MODULES).replace(File.separatorChar, '/');
+                final File nodeModuleDir = new File(pathname);
+                if (nodeModuleDir.exists()) {
+                    list.push(nodeModuleDir.getAbsolutePath());
+                }
+            }
             parent = parent.getParentFile();
         }
         return list;
