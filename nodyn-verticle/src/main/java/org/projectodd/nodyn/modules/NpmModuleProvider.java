@@ -1,9 +1,6 @@
 package org.projectodd.nodyn.modules;
 
-import org.dynjs.runtime.DynObject;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.LexicalEnvironment;
-import org.dynjs.runtime.Runner;
+import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.Require;
 import org.dynjs.runtime.modules.ModuleProvider;
 import org.projectodd.nodyn.process.Process;
@@ -31,6 +28,7 @@ import static org.apache.commons.lang3.SystemUtils.*;
 public class NpmModuleProvider extends ModuleProvider {
 
     private static final String NODE_MODULES = "node_modules";
+    private static final String DIRNAME = "__dirname";
     private final Require require;
 
     public NpmModuleProvider(Require require) {
@@ -59,11 +57,12 @@ public class NpmModuleProvider extends ModuleProvider {
     }
 
     @Override
-    protected boolean load(ExecutionContext context, String moduleID) {
+    public boolean load(ExecutionContext context, String moduleID) {
         File file = new File(moduleID);
         if (file.exists()) {
-            Runner runner = context.getGlobalObject().getRuntime().newRunner().withContext(context);
-            DynObject module = (DynObject) runner.withContext(context).withSource("module").evaluate();
+            final GlobalObject globalObject = context.getGlobalObject();
+            Runner runner = globalObject.getRuntime().newRunner().withContext(context);
+            DynObject module = (DynObject) ModuleProvider.getLocalVar(context, "module");
 
             // Node also looks for .json files and will load those as well
             // http://nodejs.org/api/modules.html#modules_file_modules
@@ -71,10 +70,12 @@ public class NpmModuleProvider extends ModuleProvider {
                 module.put("exports", runner.withSource("require.loadJSON('" + file.getAbsolutePath() + "');").evaluate());
                 return true;
             }
+            module.defineReadOnlyProperty(globalObject, "filename", file.getName());
             module.put("filename", file.getName());
             module.put("loaded", false);
             try {
-                setMutableBinding(context, "__dirname", file.getParentFile().getCanonicalPath());
+                final String canonicalPath = file.getParentFile().getCanonicalPath();
+                ModuleProvider.setLocalVar(context, DIRNAME, canonicalPath);
                 runner.withContext(context).withSource(file).execute();
                 module.put("loaded", true);
                 return true;
@@ -91,10 +92,9 @@ public class NpmModuleProvider extends ModuleProvider {
     @Override
     public String generateModuleID(ExecutionContext context, String moduleName) {
         // FileSystemModuleProvider should handle loading the core modules
-        LexicalEnvironment localEnv = context.getParent().getVariableEnvironment();
-        String dirName = System.getProperty("user.dir");
-        if (localEnv.getRecord().hasBinding(context, "__dirname")) {
-            dirName = (String) localEnv.getRecord().getBindingValue(context, "__dirname", true);
+        String dirName = (String) ModuleProvider.getLocalVar(context.getParent(), DIRNAME);
+        if (dirName == null) {
+            dirName = System.getProperty("user.dir");
         }
         String moduleId;
         final String modulePath = dirName + FILE_SEPARATOR + moduleName;
@@ -162,6 +162,7 @@ public class NpmModuleProvider extends ModuleProvider {
         File file = new File(fileName);
         String moduleId = null;
 
+        //System.err.println("Looking for: " + fileName);
         if (file.exists() && !file.isDirectory()) {
             moduleId = file.getAbsolutePath();
         } else {
