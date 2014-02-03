@@ -61,7 +61,7 @@
     <version.junit>4.7</version.junit>
     <!-- TODO: Remove the netty dependency (QueryString) -->
     <version.netty>3.6.1.Final</version.netty>
-    <version.vertx>2.1M4-SNAPSHOT</version.vertx>
+    <version.vertx>2.1M5</version.vertx>
     <version.testtools>2.0.2-final</version.testtools>
     <version.testtools>2.0.3-final</version.testtools>
     <version.lang-js.verticle>1.0.0-SNAPSHOT</version.lang-js.verticle>
