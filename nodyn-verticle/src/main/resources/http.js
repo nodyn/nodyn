@@ -1,8 +1,8 @@
-var url   = require('url');
-var net   = require('net');
-var util  = require('util');
-var http  = require('vertx/http');
-var timer = require('vertx/timer');
+var url   = NativeRequire.require('url');
+var net   = NativeRequire.require('net');
+var util  = NativeRequire.require('util');
+var http  = NativeRequire.require('vertx/http');
+var timer = NativeRequire.require('vertx/timer');
 
 var EventEmitter = require('events').EventEmitter;
 

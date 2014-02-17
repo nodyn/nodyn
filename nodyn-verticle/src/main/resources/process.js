@@ -1,5 +1,5 @@
 var System = java.lang.System;
-var vertx  = require('vertx');
+var vertx  = NativeRequire.require('vertx');
 
 var getEnv = function() {
   env = {};
@@ -23,7 +23,7 @@ var Process = function() {
   var Open         = java.nio.file.StandardOpenOption;
   var Node         = org.projectodd.nodyn.Node;
   var javaProcess  = new org.projectodd.nodyn.process.Process();
-  var EventEmitter = require('events').EventEmitter;
+  var EventEmitter = NativeRequire.require('events').EventEmitter;
 
   this.title = "Nodyn";
   this.version = Node.VERSION;
@@ -82,7 +82,7 @@ var Process = function() {
   // dynjs.global.__dirname  = __node.getDirname();
   
   this.memoryUsage = function() {
-    os = require('os');
+    os = NativeRequire.require('os');
     var obj = {};
     obj.heapTotal = os.totalmem();
     obj.heapUsed  = os.totalmem() - os.freemem();

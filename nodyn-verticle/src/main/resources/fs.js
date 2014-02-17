@@ -1,4 +1,4 @@
-var fs = require('vertx/file_system');
+var fs = NativeRequire.require('vertx/file_system');
 
 var Fs = function() {
   this.readdir       = fs.readDir;

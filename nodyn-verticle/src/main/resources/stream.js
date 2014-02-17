@@ -19,8 +19,8 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var events = require('events');
-var util = require('util');
+var events = NativeRequire.require('events');
+var util = NativeRequire.require('util');
 
 function Stream() {
   events.EventEmitter.call(this);

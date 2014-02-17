@@ -1,1 +1,1 @@
-module.exports = require('node_console');
+module.exports = NativeRequire.require('node_console');

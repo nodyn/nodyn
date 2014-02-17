@@ -21,7 +21,7 @@
 
 
 var isWindows = process.platform === 'win32';
-var util = require('util');
+var util = NativeRequire.require('util');
 
 
 // resolves . and .. elements in a path array with directory names there
@@ -419,12 +419,12 @@ exports.extname = function(path) {
 
 
 exports.exists = util.deprecate(function(path, callback) {
-  require('fs').exists(path, callback);
+  NativeRequire.require('fs').exists(path, callback);
 }, 'path.exists is now called `fs.exists`.');
 
 
 exports.existsSync = util.deprecate(function(path) {
-  return require('fs').existsSync(path);
+  return NativeRequire.require('fs').existsSync(path);
 }, 'path.existsSync is now called `fs.existsSync`.');
 
 

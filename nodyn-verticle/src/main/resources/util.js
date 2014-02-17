@@ -495,7 +495,7 @@ exports.log = function(msg) {
 
 
 exports.exec = exports.deprecate(function() {
-  return require('child_process').exec.apply(this, arguments);
+  return NativeRequire.require('child_process').exec.apply(this, arguments);
 }, 'util.exec is now called `child_process.exec`.');
 
 

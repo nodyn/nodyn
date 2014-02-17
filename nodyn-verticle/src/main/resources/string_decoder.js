@@ -51,7 +51,7 @@ var StringDecoder = exports.StringDecoder = function(encoding) {
 StringDecoder.prototype.write = function(buffer) {
   var charStr = '';
   var offset = 0;
-  require('console').error(buffer.toString())
+  NativeRequire.require('console').error(buffer.toString())
 
   // if our last write ended with an incomplete multibyte character
   while (this.charLength) {

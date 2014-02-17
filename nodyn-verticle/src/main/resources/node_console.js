@@ -1,4 +1,4 @@
-var util = require('util')
+var util = NativeRequire.require('util')
 
 var DefaultLogger = function() {
   this.info = function(msg) {

@@ -20,7 +20,7 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var isWindows = process.platform === 'win32';
-var util = require('util');
+var util = NativeRequire.require('util');
 
 exports.cpus = function() {
   var cores = [];

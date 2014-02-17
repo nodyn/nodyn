@@ -1,6 +1,6 @@
-var udp          = require('vertx/datagram');
-var util         = require('util');
-var EventEmitter = require('events').EventEmitter;
+var udp          = NativeRequire.require('vertx/datagram');
+var util         = NativeRequire.require('util');
+var EventEmitter = NativeRequire.require('events').EventEmitter;
 
 Socket = function(type, callback) {
   var that = this;

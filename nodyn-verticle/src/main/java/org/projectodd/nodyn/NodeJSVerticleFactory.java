@@ -2,11 +2,9 @@ package org.projectodd.nodyn;
 
 import org.dynjs.Config;
 import org.dynjs.runtime.*;
-import org.dynjs.runtime.builtins.Require;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
 import org.projectodd.nodyn.buffer.BufferType;
-import org.projectodd.nodyn.modules.NpmModuleProvider;
 import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.platform.Verticle;
 
@@ -52,22 +50,25 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             return ExecutionContext.createGlobalExecutionContext(runtime, new InitializationListener() {
                 @Override
                 public void initialize(ExecutionContext context) {
-                    InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream("node.js");
-                    if (is != null) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                        runtime.newRunner().withContext(context).withSource(reader).evaluate();
-                        Require require = (Require) context.getGlobalObject().get("require");
-                        require.addModuleProvider(new NpmModuleProvider(require));
-                        try {
-                            is.close();
-                        } catch (IOException e) {
-                            // ignore
-                        }
-                    } else {
-                        System.err.println("[ERROR] Cannot initialize Nodyn.");
-                    }
+                    initScript(context, "npm_modules.js", runtime);
+                    initScript(context, "node.js", runtime);
                 }
             });
+        }
+
+        private void initScript(ExecutionContext context, String name, DynJS runtime) {
+            InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
+            if (is != null) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                runtime.newRunner().withContext(context).withSource(reader).evaluate();
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            } else {
+                System.err.println("[ERROR] Cannot initialize Nodyn.");
+            }
         }
 
     }

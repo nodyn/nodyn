@@ -32,7 +32,7 @@ var serverAddress = function(srv) {
 };
 
 var DNS = function() {
-  var dns  = require('vertx/dns');
+  var dns  = NativeRequire.require('vertx/dns');
   var addr = serverAddress({host: '127.0.0.1', port: 53});
 
   /**

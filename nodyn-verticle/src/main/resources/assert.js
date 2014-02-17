@@ -23,7 +23,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // UTILITY
-var util = require('util');
+var util = NativeRequire.require('util');
 var pSlice = Array.prototype.slice;
 
 // 1. The assert module provides functions that throw

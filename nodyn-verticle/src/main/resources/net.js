@@ -1,8 +1,8 @@
-var net           = require('vertx/net');
-var timer         = require('vertx/timer');
-var util          = require('util')
-var Stream        = require('stream')
-var EventEmitter  = require('events').EventEmitter
+var net           = NativeRequire.require('vertx/net');
+var timer         = NativeRequire.require('vertx/timer');
+var util          = NativeRequire.require('util')
+var Stream        = NativeRequire.require('stream')
+var EventEmitter  = NativeRequire.require('events').EventEmitter
 
 var Server = function( connectionListener ) {
   var proxy    = net.createNetServer();
