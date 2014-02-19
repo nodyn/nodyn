@@ -38,6 +38,21 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
         }
     }
 
+    public static void initScript(ExecutionContext context, String name, DynJS runtime) {
+        InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            runtime.newRunner().withContext(context).withSource(reader).evaluate();
+            try {
+                is.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        } else {
+            System.err.println("[ERROR] Cannot initialize Nodyn.");
+        }
+    }
+
     protected class NodeJSVerticle extends DynJSVerticle {
 
         public NodeJSVerticle(DynJS runtime, String scriptName) {
@@ -55,22 +70,6 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                 }
             });
         }
-
-        private void initScript(ExecutionContext context, String name, DynJS runtime) {
-            InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
-            if (is != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                runtime.newRunner().withContext(context).withSource(reader).evaluate();
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            } else {
-                System.err.println("[ERROR] Cannot initialize Nodyn.");
-            }
-        }
-
     }
 
 }

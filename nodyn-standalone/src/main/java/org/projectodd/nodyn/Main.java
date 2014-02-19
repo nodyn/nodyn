@@ -20,6 +20,7 @@ import org.dynjs.cli.Arguments;
 import org.dynjs.cli.Repl;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -112,21 +113,22 @@ public class Main {
         }
         GlobalObject globalObject = runtime.getExecutionContext().getGlobalObject();
         globalObject.defineGlobalProperty("__jvertx", vertx);
-
         BufferType bufferType = new BufferType(globalObject);
         DynObject node = new DynObject(globalObject);
         node.put("buffer", bufferType);
-
         node.put("QueryString", new QueryString(globalObject));
-
         globalObject.defineGlobalProperty("nodyn", node);
-        globalObject.defineGlobalProperty("global", globalObject);
         globalObject.defineGlobalProperty("__filename", "repl");
 
-        InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream("node.js");
+        initScript(runtime.getExecutionContext(), "npm_modules.js", runtime);
+        initScript(runtime.getExecutionContext(), "node.js", runtime);
+    }
+
+    private static void initScript(ExecutionContext context, String name, DynJS runtime) {
+        InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            runtime.newRunner().withSource(reader).evaluate();
+            runtime.newRunner().withContext(context).withSource(reader).evaluate();
             try {
                 is.close();
             } catch (IOException e) {
@@ -135,8 +137,9 @@ public class Main {
         } else {
             System.err.println("[ERROR] Cannot initialize Nodyn.");
         }
-
     }
+
+
 
     class NodynArguments extends Arguments {
         static final String CLUSTERED = "--clustered";

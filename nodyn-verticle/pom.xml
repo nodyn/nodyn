@@ -47,7 +47,12 @@
 	   <groupId>org.apache.commons</groupId>
 	   <artifactId>commons-lang3</artifactId>
 	   <version>${version.commons.lang}</version>
-	</dependency>
+	  </dependency>
+    <dependency>
+      <groupId>org.projectodd</groupId>
+      <artifactId>dynjs-npm</artifactId>
+      <version>${version.dynjs-npm}</version>
+    </dependency>
   </dependencies>
 
   <build>

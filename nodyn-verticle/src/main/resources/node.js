@@ -8,7 +8,7 @@ console   = NativeRequire.require('node_console');
 timer     = vertx.timer;
 container = vertx.container;
 
-global.require = require;
+this.require = require;
 
 Buffer = NativeRequire.require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
