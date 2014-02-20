@@ -1,14 +1,9 @@
-// Load the NPM module loader into the global scope
-//load('./npm_modules.js');
-
 vertx     = NativeRequire.require('vertx');
 process   = NativeRequire.require('process');
 console   = NativeRequire.require('node_console');
-
 timer     = vertx.timer;
 container = vertx.container;
-
-this.require = require;
+require   = require;
 
 Buffer = NativeRequire.require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
