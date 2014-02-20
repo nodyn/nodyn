@@ -172,7 +172,7 @@
               <vertx.test.timeout>15</vertx.test.timeout>
             </property>
           </systemPropertyVariables>
-          <argLine>-Xss2048k</argLine>
+          <argLine>-Xss2048k -XX:MaxPermSize=128m</argLine>
           <verbose>true</verbose>
           <includes>
             <include>**/integration/**</include>
