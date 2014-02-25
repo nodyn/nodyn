@@ -3,6 +3,8 @@ var util = require('util'),
     connect = require('connect');
 
 var app = connect()
+  .use(connect.logger())
+//  .use('/public', connect.static(__dirname + '/public'))
   .use(function(req, res) {
     res.end("Hello from Connect on Nodyn!");
   });
