@@ -55,7 +55,7 @@ function WebServer(requestListener) {
       var serverResponse  = new ServerResponse(request.response);
 
       if (request.headers().get('Connection') === 'Upgrade') {
-        handleUpgrade(request, incomingMessage);
+        handleUpgrade(incomingMessage);
       }
       else if (request.headers().get('Expect') == '100-Continue') {
         if (that.listeners('checkContinue').length > 0) {
@@ -63,7 +63,7 @@ function WebServer(requestListener) {
         }
       }
       else if (request.method() === 'CONNECT') {
-        handleConnect(request, incomingMessage, serverResponse);
+        handleConnect(incomingMessage, serverResponse);
       } else {
         that.emit('request', incomingMessage, serverResponse);
       }
@@ -101,13 +101,11 @@ function WebServer(requestListener) {
     that.close();
   });
 
-  function handleUpgrade(request, incomingMessage) {
+  function handleUpgrade(incomingMessage) {
     // Bypass vert.x's builtin websocket handler and let the poor node.js
     // developers do all the hard work on their own.
-    socket = new net.Socket();
-    socket.setProxy(request.netSocket());
     if (that.listeners('upgrade').length > 0) {
-      that.emit('upgrade', incomingMessage, socket, new Buffer());
+      that.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
     } else {
       // If nobody is listening for an upgrade event, then the
       // connection is closed, per the Node.js API
@@ -115,12 +113,9 @@ function WebServer(requestListener) {
     }
   }
 
-  function handleConnect(request, incomingMessage, serverResponse) {
-    socket = new net.Socket();
-    socket.setProxy(request.netSocket());
+  function handleConnect(incomingMessage, serverResponse) {
     if (that.listeners('connect').length > 0) {
-      // Create a node.js Socket from our vert.x NetSocket
-      that.emit('connect', incomingMessage, socket, new Buffer());
+      that.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
     } else {
       // close the connection per the node.js api
       serverResponse.emit('close');
@@ -134,11 +129,26 @@ module.exports.Server = WebServer;
 function IncomingMessage(proxy) {
   var that  = this;
 
-  this.encoding = 'UTF-8';
-  this.headers = {};
+  this.encoding  = 'UTF-8';
+  this.headers   = {};
+  this.pause     = function() { proxy.pause(); };
+  this.resume    = function() { proxy.resume(); };
 
-  this.pause  = function() { proxy.pause(); };
-  this.resume = function() { proxy.resume(); };
+  this.__socket    = new net.Socket();
+  this.__hasSocket = false;
+
+  // Defer getting the socket from proxy until it's
+  // first requested. 
+  Object.defineProperty(this, "socket", {
+    get: function() {
+           if (!that.__hasSocket) {
+             that.__socket.setProxy(proxy.netSocket());
+           }
+           return that.__socket;
+         },
+    set: function() {}, // can't set it 
+    configurable: true,
+    enumerable: true });
 
   this.setEncoding = function(enc) {
     try {
@@ -374,19 +384,15 @@ var httpRequest = module.exports.request = function(options, callback) {
     // Allow node.js style websockets (i.e. direct socket connection)
     if (resp.headers().get('Connection') === "Upgrade") {
       if (clientRequest.listeners('upgrade').length > 0) {
-        socket = new net.Socket();
-        socket.setProxy(resp.netSocket());
-        clientRequest.emit('upgrade', incomingMessage, socket, new Buffer());
-        clientRequest.emit('socket', null); // pass socket here
+        clientRequest.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
+        clientRequest.emit('socket', incomingMessage.socket); 
       } else {
         // close the connection
         proxy.close();
       }
     }
     else if (options.method === 'CONNECT') {
-      socket = new net.Socket();
-      socket.setProxy(resp.netSocket());
-      clientRequest.emit('connect', incomingMessage, socket, new Buffer());
+      clientRequest.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
     }
     else if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');

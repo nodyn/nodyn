@@ -407,15 +407,15 @@ var HttpTests = {
       clientSock.on('data', function(buffer) {
         vassert.assertEquals('Bonjour', buffer.toString());
         clientSock.write('Au revoir');
+        clientSock.end();
       });
-      clientSock.end();
     });
     server.listen(test_options.port, function() {
       test_options.method = 'CONNECT';
-      var request = http.request(test_options, function() {
+      var clientRequest = http.request(test_options, function() {
         vassert.fail("CONNECT requests should not emit 'response' events");
       });
-      request.on('connect', function(res, socket, head) {
+      clientRequest.on('connect', function(res, socket, head) {
         vassert.assertTrue(socket !== null);
         vassert.assertTrue(socket !== undefined);
         vassert.assertTrue(head !== null);
@@ -427,7 +427,7 @@ var HttpTests = {
           vassert.testComplete();
         });
       });
-      request.end();
+      clientRequest.end();
     });
   },
 

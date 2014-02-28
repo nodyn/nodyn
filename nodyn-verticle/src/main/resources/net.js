@@ -1,17 +1,17 @@
 var net           = NativeRequire.require('vertx/net');
 var timer         = NativeRequire.require('vertx/timer');
-var util          = NativeRequire.require('util')
-var Stream        = NativeRequire.require('stream')
-var EventEmitter  = NativeRequire.require('events').EventEmitter
+var util          = NativeRequire.require('util');
+var Stream        = NativeRequire.require('stream');
+var EventEmitter  = NativeRequire.require('events').EventEmitter;
 
-var Server = function( connectionListener ) {
+function Server( connectionListener ) {
   var proxy    = net.createNetServer();
   var that     = this;
   that.addr    = {
     port: 0,
     family: "IPv4",
     address: '127.0.0.1'
-  }
+  };
 
   if (connectionListener) {
       that.on('connection', connectionListener);
@@ -39,7 +39,7 @@ var Server = function( connectionListener ) {
       nodeSocket = new Socket();
       nodeSocket.setProxy(sock);
       // TODO: This is a hack, methinks
-      that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6'
+      that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
       that.emit('connection', nodeSocket);
     });
 
@@ -50,34 +50,34 @@ var Server = function( connectionListener ) {
       that.addr.address   = proxy.host();
       that.emit('listening');
     });
-  }
+  };
 
   that.address = function() {
     return that.addr;
-  }
+  };
 
   that.close = function(callback) {
     proxy.close(function() { 
       if (callback) { that.on('close', callback); }
       that.emit('close'); 
     });
-  }
+  };
 }
 
-var Socket = function(options) {
+function Socket(options) {
   var that = this;
-  that.encoding  = 'utf8';
-  that.writable  = true;
-  that.timeoutId = null;
-  that.remoteAddress = null;
-  that.remotePort = null;
-  that.noDelay = true;
-  that.keepAlive = false;
-  that.initialDelay = 0;
+  this.encoding  = 'utf8';
+  this.writable  = true;
+  this.timeoutId = null;
+  this.remoteAddress = null;
+  this.remotePort = null;
+  this.noDelay = true;
+  this.keepAlive = false;
+  this.initialDelay = 0;
   // TODO: Handle ctor options
   // { fd: null, type: null, allowHalfOpen: false }
 
-  that.setProxy = function(proxy) {
+  this.setProxy = function(proxy) {
     that.proxy = proxy;
     if (proxy.remoteAddress) {
       var inetAddress = proxy.remoteAddress();
@@ -89,10 +89,11 @@ var Socket = function(options) {
         that.emit('data', new Buffer(buffer.toString()));
       });
     }
-  }
+    return that;
+  };
 
   // Usage socket.connect(port, [host], [callback])
-  that.connect = function(port, host, callback) {
+  this.connect = function(port, host, callback) {
     if (host === null || host === undefined) {
       host = 'localhost';
     }
@@ -106,10 +107,10 @@ var Socket = function(options) {
       that.emit('connect', that);
     });
     return that;
-  }
+  };
 
   // Usage socket.write(string, [encoding], [callback])
-  that.write = function() {
+  this.write = function() {
     var args = Array.prototype.slice.call(arguments);
     callback = null;
     encoding = 'UTF-8';
@@ -130,13 +131,15 @@ var Socket = function(options) {
     }
     // what is passed could be a buffer
     that.proxy.write(string.toString(), encoding);
-  }
+  };
 
-  that.destroy = function() { 
-    that.emit('close');
-  }
+  this.destroy = function() { 
+    that.proxy.close(function() {
+      that.emit('close');
+    });
+  };
 
-  that.end = function(data, encoding) {
+  this.end = function(data, encoding) {
     if (data) {
       that.write(data, encoding, function() {
         that.destroy();
@@ -146,22 +149,22 @@ var Socket = function(options) {
       that.destroy();
       that.emit('end');
     }
-  }
+  };
 
-  that.destroySoon = that.end;
+  this.destroySoon = that.end;
 
-  that.setEncoding = function(encoding) { 
+  this.setEncoding = function(encoding) { 
     that.encoding = encoding;
-  }
+  };
 
-  that.pause = function() { 
+  this.pause = function() { 
     that.proxy.pause();
-  }
-  that.resume = function() { 
+  };
+  this.resume = function() { 
     that.proxy.resume();
-  }
+  };
 
-  that.setTimeout = function(msec, timeout) { 
+  this.setTimeout = function(msec, timeout) { 
     if (that.timeoutId) {
       timer.cancelTimer(that.timeoutId);
       that.removeAllListeners('timeout');
@@ -170,21 +173,21 @@ var Socket = function(options) {
       that.on('timeout', timeout);
       that.timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
     }
-  }
+  };
 
-  that.setNoDelay = function(bool) { 
-    that.noDelay = (bool == undefined ? true : bool);
-  }
+  this.setNoDelay = function(bool) { 
+    that.noDelay = (bool === undefined ? true : bool);
+  };
 
-  that.setKeepAlive = function(bool) { 
-    that.keepAlive = (bool == undefined ? true : bool);
-  }
+  this.setKeepAlive = function(bool) { 
+    that.keepAlive = (bool === undefined ? true : bool);
+  };
 
-  that.ref = function() {}
-  that.unref = function() {}
-  that.address = function() { }
-  that.bytesRead = 0;
-  that.bytesWritten = 0;
+  this.ref = function() {};
+  this.unref = function() {};
+  this.address = function() {};
+  this.bytesRead = 0;
+  this.bytesWritten = 0;
 }
 
 // Inheriting from Stream makes Socket an EventEmitter.
@@ -196,10 +199,10 @@ module.exports.Server = Server;
 
 module.exports.createServer = function(connectionListener) {
   return new Server(connectionListener);
-}
+};
 
 module.exports.createConnection = function() {
-  options           = {}
+  options           = {};
   options.host      = 'localhost';
   options.port      = null;
   options.localAddr = null;
@@ -230,6 +233,6 @@ module.exports.createConnection = function() {
   sock = new Socket();
   sock.connect(options.port, options.host, callback);
   return sock;
-}
+};
 module.exports.connect = module.exports.createConnection;
 
