@@ -78,9 +78,6 @@ var Process = function() {
   this.listeners          = EventEmitter.prototype.listeners;
   this.emit               = EventEmitter.prototype.emit;
   
-  // dynjs.global.__filename = __node.getFilename();
-  // dynjs.global.__dirname  = __node.getDirname();
-  
   this.memoryUsage = function() {
     os = NativeRequire.require('os');
     var obj = {};

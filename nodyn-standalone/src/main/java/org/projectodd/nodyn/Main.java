@@ -77,8 +77,11 @@ public class Main {
 
     private void executeFile(String filename) throws IOException {
         try {
-            initializeRuntime();
-            runtime.newRunner().withSource(new File(filename)).execute();
+            final File source = new File(filename);
+            GlobalObject globalObject = initializeRuntime();
+            globalObject.defineGlobalProperty("__filename", source.getName());
+            globalObject.defineGlobalProperty("__dirname", source.getParent());
+            runtime.newRunner().withSource(source).execute();
         } catch (FileNotFoundException e) {
             stream.println("File " + filename + " not found");
         }
@@ -89,7 +92,9 @@ public class Main {
     }
 
     private void startRepl() {
-        initializeRuntime();
+        GlobalObject globalObject = initializeRuntime();
+        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+        globalObject.defineGlobalProperty("__filename", "repl");
         Repl repl = new Repl(runtime, System.in, stream, "Welcome to nodyn. ^D to exit.", "nodyn> ", System.getProperty("user.dir") + "/nodyn.log");
         repl.run();
     }
@@ -101,7 +106,7 @@ public class Main {
         parser.printUsage(stream);
     }
     
-    private void initializeRuntime() {
+    private GlobalObject initializeRuntime() {
         config = dynJsArguments.getConfig();
         config.setOutputStream(this.stream);
         runtime = new DynJS(config);
@@ -118,10 +123,10 @@ public class Main {
         node.put("buffer", bufferType);
         node.put("QueryString", new QueryString(globalObject));
         globalObject.defineGlobalProperty("nodyn", node);
-        globalObject.defineGlobalProperty("__filename", "repl");
 
         initScript(runtime.getExecutionContext(), "npm_modules.js", runtime);
         initScript(runtime.getExecutionContext(), "node.js", runtime);
+        return globalObject;
     }
 
     private static void initScript(ExecutionContext context, String name, DynJS runtime) {

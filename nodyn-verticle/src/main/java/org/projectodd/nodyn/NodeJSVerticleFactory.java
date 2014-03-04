@@ -8,10 +8,7 @@ import org.projectodd.nodyn.buffer.BufferType;
 import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.platform.Verticle;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     private String filename;
@@ -34,6 +31,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             node.put("QueryString", new QueryString(global));
             global.defineGlobalProperty("nodyn", node);
             global.defineGlobalProperty("__filename", filename);
+            global.defineGlobalProperty("__dirname", new File(filename).getParent());
             return global;
         }
     }

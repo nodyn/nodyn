@@ -30,14 +30,15 @@ var GlobalsTests = {
   },
 
   test__filename: function() {
-    // TODO: FIX ME
-    //vassert.assertEquals('string', typeof __filename);
-    //vassert.assertEquals('globals_test.js', __filename);
-    // TODO: __filename should be local to each commonjs module
-    // TODO: Do we bother with __dirname since we're usually 
-    // running from a jar file?
+    vassert.assertEquals('string', typeof __filename);
+    vassert.assertEquals('globals_test.js', __filename);
+    vassert.testComplete();
+  },
+
+  test__dirname: function() {
+    vassert.assertEquals('string', typeof __dirname);
     vassert.testComplete();
   }
-}
+};
 vertxTest.startTests(GlobalsTests);
 
