@@ -53,6 +53,11 @@
       <artifactId>dynjs-npm</artifactId>
       <version>${version.dynjs-npm}</version>
     </dependency>
+      <dependency>
+          <groupId>org.dynjs</groupId>
+          <artifactId>dynjs</artifactId>
+          <version>0.2.2-SNAPSHOT</version>
+      </dependency>
   </dependencies>
 
   <build>
