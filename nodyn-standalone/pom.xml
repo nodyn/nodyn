@@ -28,6 +28,16 @@
       <version>${version.vertx}</version>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+      <version>${version.vertx}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+      <version>${version.hazelcast}</version>
+    </dependency>
+    <dependency>
       <groupId>org.projectodd</groupId>
       <artifactId>nodyn-verticle</artifactId>
       <version>${project.version}</version>

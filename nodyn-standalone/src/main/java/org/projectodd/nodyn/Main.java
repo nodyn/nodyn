@@ -112,6 +112,7 @@ public class Main {
         runtime = new DynJS(config);
 
         if (dynJsArguments.isClustered()) {
+            System.setProperty("vertx.clusterManagerFactory", "org.vertx.java.spi.cluster.impl.hazelcast.HazelcastClusterManagerFactory");
             vertx = VertxFactory.newVertx("localhost");
         } else {
             vertx = VertxFactory.newVertx();
