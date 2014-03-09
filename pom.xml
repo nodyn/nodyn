@@ -65,9 +65,9 @@
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.testtools>2.0.2-final</version.testtools>
     <version.testtools>2.0.3-final</version.testtools>
-    <version.lang-js.verticle>1.0.0-SNAPSHOT</version.lang-js.verticle>
-    <version.dynjs.verticle>1.0.0-SNAPSHOT</version.dynjs.verticle>
-    <version.dynjs>0.2.2-SNAPSHOT</version.dynjs>
+    <version.lang-js.verticle>1.0.0</version.lang-js.verticle>
+    <version.dynjs.verticle>1.0.0</version.dynjs.verticle>
+    <version.dynjs>0.2.2</version.dynjs>
     <version.dynjs-npm>0.0.1-SNAPSHOT</version.dynjs-npm>
     <version.commons.lang>3.1</version.commons.lang>
   </properties>
