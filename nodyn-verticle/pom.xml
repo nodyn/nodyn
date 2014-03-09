@@ -56,7 +56,7 @@
       <dependency>
           <groupId>org.dynjs</groupId>
           <artifactId>dynjs</artifactId>
-          <version>0.2.2-SNAPSHOT</version>
+          <version>0.2.2</version>
       </dependency>
   </dependencies>
 
