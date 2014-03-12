@@ -10,6 +10,10 @@ import org.dynjs.runtime.*;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 public class QueryString extends DynObject {
+
+    public static QueryString newQueryString(GlobalObject global) {
+        return new QueryString(global);
+    }
     
     public QueryString(GlobalObject globalObject) {
         super(globalObject);

@@ -10,7 +10,12 @@ import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
 import org.projectodd.nodyn.buffer.prototype.ByteLength;
 
-public class BufferType extends  AbstractNativeFunction { 
+public class BufferType extends  AbstractNativeFunction {
+
+    public static BufferType newBufferType(GlobalObject global) {
+        return new BufferType(global);
+    }
+
     public BufferType(GlobalObject globalObject) {
         super(globalObject);
         this.setClassName("Buffer");

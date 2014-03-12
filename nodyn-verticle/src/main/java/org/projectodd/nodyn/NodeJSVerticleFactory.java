@@ -17,23 +17,7 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
     public Verticle createVerticle(String main) throws Exception {
         this.filename = main;
         Config config = new Config(getClassLoader());
-        config.setGlobalObjectFactory(new NodeJSGlobalObjectFactory());
         return new NodeJSVerticle(new DynJS(config), main);
-    }
-
-    public class NodeJSGlobalObjectFactory extends DynJSGlobalObjectFactory {
-        @Override
-        public GlobalObject newGlobalObject(final DynJS runtime) {
-            GlobalObject global = super.newGlobalObject(runtime);
-            BufferType bufferType = new BufferType(global);
-            DynObject node = new DynObject(global);
-            node.put("buffer", bufferType);
-            node.put("QueryString", new QueryString(global));
-            global.defineGlobalProperty("nodyn", node);
-            global.defineGlobalProperty("__filename", filename);
-            global.defineGlobalProperty("__dirname", new File(filename).getParent());
-            return global;
-        }
     }
 
     public static void initScript(ExecutionContext context, String name, DynJS runtime) {
@@ -65,6 +49,8 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
                 public void initialize(ExecutionContext context) {
                     initScript(context, "npm_modules.js", runtime);
                     initScript(context, "node.js", runtime);
+                    context.getGlobalObject().defineGlobalProperty("__dirname", new File(filename).getParent());
+                    context.getGlobalObject().defineGlobalProperty("__filename", filename);
                 }
             });
         }

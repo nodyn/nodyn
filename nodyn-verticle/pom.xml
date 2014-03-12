@@ -180,9 +180,6 @@
           <includes>
             <include>**unit/*Test*.java</include>
           </includes>
-          <systemPropertyVariables>
-            <dynjs.compile.mode>off</dynjs.compile.mode>
-          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -193,7 +190,7 @@
           <systemPropertyVariables>
             <vertx.mods>target/mods</vertx.mods>
             <vertx.test.timeout>15</vertx.test.timeout>
-            <dynjs.compile.mode>off</dynjs.compile.mode>
+            <dynjs.compile.mode>OFF</dynjs.compile.mode>
           </systemPropertyVariables>
           <argLine>-Xss2048k -XX:MaxPermSize=128m</argLine>
           <verbose>true</verbose>

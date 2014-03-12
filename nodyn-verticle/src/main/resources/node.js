@@ -1,3 +1,15 @@
+Nodyn = org.projectodd.nodyn;
+
+nodyn     = {
+  buffer: Nodyn.buffer.BufferType.newBufferType(this),
+  QueryString: Nodyn.util.QueryString.newQueryString(this)
+};
+
+__filename = (typeof __filename === 'undefined') ? 
+              'node.js' : __filename;
+__dirname  = (typeof __dirname === 'undefined') ? 
+              java.lang.System.getProperty('user.dir') : __dirname;
+
 vertx     = NativeRequire.require('vertx');
 process   = NativeRequire.require('process');
 console   = NativeRequire.require('node_console');
@@ -23,6 +35,7 @@ setTimeout = function() {
   }
   callback = args[0];
   milliseconds = args[1];
+  if (milliseconds === 0) milliseconds = 1;
 
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout

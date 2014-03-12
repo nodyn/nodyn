@@ -184,7 +184,7 @@
             <configuration>
               <jvm>/opt/jdk/jdk1.7.0/bin/java</jvm>
               <systemPropertyVariables>
-                <dynjs.compile.mode>off</dynjs.compile.mode>
+                <dynjs.compile.mode>OFF</dynjs.compile.mode>
               </systemPropertyVariables>
             </configuration>
           </plugin>
