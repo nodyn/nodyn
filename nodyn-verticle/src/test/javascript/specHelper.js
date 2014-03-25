@@ -1,8 +1,11 @@
-// Leaky, but we need to prime vertx since jasmine tests
-// don't run in the vert.x container
-__jvertx = org.vertx.java.core.VertxFactory.newVertx();
-load('./npm_modules.js');
-load('./node.js');
+// We need to prime vertx since jasmine tests don't run in the vert.x container.
+// Only do this one time
+// TODO: Find a better way to determine if we've loaded than checking NativeRequire
+if ((typeof NativeRequire) !== 'object') {
+  __jvertx = org.vertx.java.core.VertxFactory.newVertx();
+  load('./npm_modules.js');
+  load('./node.js');
+}
 
 // jasmine's fake clock thinks it's using milliseconds,
 // but in fact it's using seconds. Set the timeout increment
