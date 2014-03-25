@@ -65,9 +65,7 @@
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.testtools>2.0.3-final</version.testtools>
     <version.lang-js.verticle>1.1.0-SNAPSHOT</version.lang-js.verticle>
-    <version.dynjs.verticle>1.1.0-SNAPSHOT</version.dynjs.verticle>
     <version.dynjs>0.2.3-SNAPSHOT</version.dynjs>
-    <version.dynjs-npm>0.0.1-SNAPSHOT</version.dynjs-npm>
     <version.commons.lang>3.1</version.commons.lang>
   </properties>
 
@@ -116,16 +114,6 @@
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
       <version>${version.netty}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.dynjs</groupId>
-      <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.projectodd</groupId>
-      <artifactId>dynjs-npm</artifactId>
-      <version>${version.dynjs-npm}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

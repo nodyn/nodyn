@@ -128,9 +128,9 @@ public class QueryString extends DynObject {
     }
 
     public static void setProperty(DynObject __this, String name, final Object value) {
-        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor(true);
-        descriptor.set(PropertyDescriptor.Names.ENUMERABLE, true);
-        descriptor.set(PropertyDescriptor.Names.VALUE, value);
+        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor();
+        descriptor.setEnumerable(true);
+        descriptor.setValue(value);
         __this.defineOwnProperty(null, name, descriptor, false);
     }
 }

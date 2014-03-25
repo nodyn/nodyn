@@ -20,8 +20,8 @@ public class BufferType extends  AbstractNativeFunction {
         super(globalObject);
         this.setClassName("Buffer");
         final DynObject prototype = initializePrototype(globalObject);
-        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor(true);
-        descriptor.set(PropertyDescriptor.Names.VALUE, prototype);
+        PropertyDescriptor descriptor = PropertyDescriptor.newAccessorPropertyDescriptor();
+        descriptor.setValue(prototype);
         defineOwnProperty(null, "prototype", descriptor, false);
         setPrototype(prototype);
     }
