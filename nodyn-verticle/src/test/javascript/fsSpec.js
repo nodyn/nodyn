@@ -3,17 +3,39 @@ var fs = require('fs');
 
 describe("fs module", function() {
 
-  var tmpFile, basedir;
+  var tmpFile, 
+      basedir, 
+      testFiles = [],
+      data = 'now is the winter of our discontent made glorious summer',
+      tempDir = java.lang.System.getProperty('java.io.tmpdir');
 
   beforeEach(function() {
     tmpFile = java.io.File.createTempFile("pork-recipes", ".txt");
     basedir = tmpFile.getParent();
     helper.testComplete(false);
+    testFiles = [];
   });
 
   afterEach(function() {
     tmpFile.delete();
+    testFiles.forEach(function(f) {
+      if (f.exists()) {
+        f.delete();
+      }
+    });
   });
+
+  function setupTestSubject(func, data) {
+    var tmpFile = java.io.File.createTempFile('nodyn-fs-test', '.txt');
+    if (!data) {
+      data = 'cheese';
+    }
+    fs.writeFile(tmpFile.getAbsolutePath(), data, function(err) {
+      if (err) throw err;
+      testFiles.push(tmpFile);
+      func(tmpFile);
+    });
+  }
 
   it("should have a mkdirSync() function", function(){
     var newDirectory = new java.io.File(basedir + "/waffle-recipes");
@@ -62,7 +84,7 @@ describe("fs module", function() {
     });
   });
 
-  it ("should have a writeFile function", function() {
+  it("should have a writeFile function", function() {
     waitsFor(helper.testComplete, "the writeFile operation to complete", 100);
     fs.writeFile(tmpFile.getAbsolutePath(),
       'Now is the winter of our discontent made glorious summer by this son of York',
@@ -73,6 +95,168 @@ describe("fs module", function() {
           helper.testComplete(true);
         });
       });
+  });
+
+  it("should have an exists function", function() {
+    waitsFor(helper.testComplete, "the exists() operation to complete", 100);
+    expect(fs.exists(tmpFile.getAbsolutePath(), function(exists) {
+      expect(exists).toBe(true);
+      expect(fs.exists('/some/invalid/path', function(exists) {
+        expect(exists).toBe(false);
+        helper.testComplete(true);
+      }));
+    }));
+  });
+
+  it("should have an existsSync function", function() {
+    expect(fs.existsSync(tmpFile.getAbsolutePath())).toBe(true);
+    expect(fs.existsSync('/some/invalid/path')).toBe(false);
+  });
+
+  it("should have a truncate function", function() {
+    waitsFor(helper.testComplete, "the truncate test to complete", 100);
+    setupTestSubject(function(sut) {
+      fs.exists(sut.getAbsolutePath(), function(exists) {
+        expect(exists).toBe(true);
+        expect(sut.length()).toBe(data.length);
+        fs.truncate(sut.getAbsolutePath(), 3, function(err, result) {
+          expect(sut.length()).toBe(3);
+          helper.testComplete(true);
+        });
+      });
+    }, data);
+  });
+
+  it("should extend files with trunctate() as well as shorten them", function() {
+    waitsFor(helper.testComplete, "the truncate test to complete", 100);
+    setupTestSubject(function(sut) {
+      fs.truncate(sut.getAbsolutePath(), 1024, function(err, result) {
+        expect(sut.exists()).toBe(true);
+        expect(sut.length()).toBe(1024);
+        helper.testComplete(true);
+      });
+    });
+  });
+
+  it("should provide synchronous truncate()", function() {
+    fs.truncateSync(tmpFile.getAbsolutePath(), 6);
+    expect(tmpFile.length()).toBe(6);
+  });
+
+  it("should provide ftruncate", function() {
+    waitsFor(helper.testComplete, "the ftruncate test to complete", 100);
+    setupTestSubject(function(sut) {
+      expect(sut.length()).toBe(data.length);
+      fs.ftruncate(sut.getAbsolutePath(), 6, function(err, result) {
+        expect(sut.length()).toBe(6);
+        helper.testComplete(true);
+      });
+    }, data);
+  });
+
+  it("should extend files with ftrunctate() as well as shorten them", function() {
+    waitsFor(helper.testComplete, "the ftruncate test to complete", 100);
+    setupTestSubject(function(sut) {
+      fs.ftruncate(sut.getAbsolutePath(), 1024, function(err, result) {
+        expect(sut.exists()).toBe(true);
+        expect(sut.length()).toBe(1024);
+        helper.testComplete(true);
+      });
+    });
+  });
+
+  it("should provide synchronous ftruncate()", function() {
+    fs.ftruncateSync(tmpFile.getAbsolutePath(), 6);
+    expect(tmpFile.length()).toBe(6);
+  });
+
+  it("should provide a mkdir function", function() {
+    waitsFor(helper.testComplete, "the mkdir test to complete", 100);
+    var newDirectory = new java.io.File(tempDir + "/waffle-recipes");
+    fs.mkdir(newDirectory.getAbsolutePath(), 0755, function(e) {
+      expect(newDirectory.exists()).toBe(true);
+      newDirectory.delete();
+      helper.testComplete(true);
+    });
+  });
+
+  it("should provide a synchronous mkdir function", function() {
+    var newDirectory = new java.io.File(tempDir + "/waffle-recipes");
+    fs.mkdirSync(newDirectory.getAbsolutePath(), 0755);
+    expect(newDirectory.exists()).toBe(true);
+    newDirectory.delete();
+  });
+
+  it("should provide a readdir function", function() {
+    waitsFor(helper.testComplete, "the readdir test to complete", 100);
+    fs.readdir(tempDir, function(e,r) {
+      expect(r.length).toBeGreaterThan(0);
+      // make sure this thing behaves like a JS array
+      expect((typeof r.forEach)).toBe('function');
+      helper.testComplete(true);
+    });
+  });
+
+  describe("when opening files", function() {
+
+    it("should error on open read if the file doesn't exist", function() {
+      waitsFor(helper.testComplete, "the open read fails test to complete", 100);
+      fs.open('some-non-file.txt', 'r', function(e, f) {
+        expect(e instanceof Error).toBeTruthy();
+        helper.testComplete(true);
+      });
+    });
+
+    it("should open files for reading", function() {
+      waitsFor(helper.testComplete, "the open files test to complete", 100);
+      setupTestSubject(function(sut) {
+        fs.open(sut.getAbsolutePath(), 'r', null, function(e, f) {
+          expect(e).toBeFalsy();
+          helper.testComplete(true);
+        });
+      });
+    });
+
+    it("should open files for writing", function() {
+      waitsFor(helper.testComplete, "the open files for writing test to complete", 100);
+      setupTestSubject(function(sut) {
+        fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
+          expect(e).toBeFalsy();
+          helper.testComplete(true);
+        });
+      });
+    });
+
+    describe("synchronously", function() {
+
+      it("should error on openSync read if the file doesn't exist", function() {
+        try {
+          var f = fs.openSync('some-non-file.txt', 'r');
+        } catch(e) {
+          expect(e instanceof Error).toBeTruthy();
+        }
+      });
+
+      it("should open files with openSync in write mode", function() {
+        waitsFor(helper.testComplete, "the openSync write test to complete", 100);
+        setupTestSubject(function(sut) {
+          var f = fs.openSync(sut.getAbsolutePath(), 'r+', null);
+          expect(f).toBeTruthy();
+          helper.testComplete(true);
+        });
+      });
+
+      it("should open files with openSync in read mode", function() {
+        waitsFor(helper.testComplete, "the openSync read test to complete", 100);
+        setupTestSubject(function(sut) {
+          var f = fs.openSync(sut.getAbsolutePath(), 'r', null);
+          expect(f).toBeTruthy();
+          helper.testComplete(true);
+        });
+      });
+
+    });
+
   });
 
 });

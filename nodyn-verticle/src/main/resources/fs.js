@@ -108,7 +108,11 @@ var Fs = function() {
   this.openSync = function(path, flags, mode) {
     var modeString = convertModeToString(mode);
     var flag = mapOpenFlags(flags);
-    return fs.openSync(path, flag, false, modeString);
+    try {
+      return fs.openSync(path, flag, true, modeString);
+    } catch(e) {
+      throw new Error(e.toString());
+    }
   };
 
   this.writeFile = function() {
@@ -213,7 +217,9 @@ var Fs = function() {
   };
    
   var convertModeToString = function(mode) {
-    if (!mode) { mode = 0666; }
+    if (!mode) { 
+      mode = 0666; 
+    }
     if (modeCache[mode]) {
       return modeCache[mode];
     }

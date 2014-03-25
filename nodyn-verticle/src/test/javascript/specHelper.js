@@ -1,11 +1,8 @@
 // Leaky, but we need to prime vertx since jasmine tests
 // don't run in the vert.x container
 __jvertx = org.vertx.java.core.VertxFactory.newVertx();
-
 load('./npm_modules.js');
 load('./node.js');
-
-require('vertx');
 
 // jasmine's fake clock thinks it's using milliseconds,
 // but in fact it's using seconds. Set the timeout increment

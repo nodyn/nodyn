@@ -222,6 +222,9 @@
             <configuration>
               <mainClass>org.jasmine.cli.Main</mainClass>
               <classpathScope>test</classpathScope>
+              <systemPropertyVariables>
+                <dynjs.compile.mode>OFF</dynjs.compile.mode>
+              </systemPropertyVariables>
               <arguments>
                 <argument>--format</argument>
                 <argument>DOC</argument>
