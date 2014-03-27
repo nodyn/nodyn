@@ -11,9 +11,9 @@ import java.net.SocketAddress;
 /**
  * @author Bob McWhirter
  */
-public class ConnectionEventHandler extends EventEmittingHandler {
+public class ServerEventHandler extends EventEmittingHandler {
 
-    public ConnectionEventHandler(EventBroker broker) {
+    public ServerEventHandler(EventBroker broker) {
         super(broker);
     }
 

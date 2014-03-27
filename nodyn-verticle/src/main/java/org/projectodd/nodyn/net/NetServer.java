@@ -6,6 +6,10 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.projectodd.nodyn.Context;
+import org.projectodd.nodyn.EventBroker;
+import org.projectodd.nodyn.net.netty.ConnectionEventHandler;
+import org.projectodd.nodyn.net.netty.ServerEventHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -14,7 +18,7 @@ import java.util.function.Consumer;
 /**
  * @author Bob McWhirter
  */
-public class NetServer extends ChannelInitializer<NioSocketChannel> {
+public class NetServer extends EventBroker {
 
     public static class Event {
         public static final String LISTENING = "listening";
@@ -23,18 +27,23 @@ public class NetServer extends ChannelInitializer<NioSocketChannel> {
         public static final String ERROR = "error";
     }
 
-    private final EventLoopGroup eventLoopGroup;
+    private final Context context;
+
     private int port;
     private String host;
     private Consumer<NioSocketChannel> channelInitializer;
     private Channel channel;
 
-    public NetServer(EventLoopGroup eventLoopGroup) {
-        this.eventLoopGroup = eventLoopGroup;
+    public NetServer() {
+        this( new Context() );
+    }
+
+    public NetServer(Context context) {
+        this.context = context;
     }
 
     protected EventLoopGroup eventLoopGroup() {
-        return this.eventLoopGroup;
+        return this.context.eventLoopGroup();
     }
 
     public void port(int port) {
@@ -71,8 +80,8 @@ public class NetServer extends ChannelInitializer<NioSocketChannel> {
                 .channel(NioServerSocketChannel.class)
                 .group(eventLoopGroup())
                 .localAddress(localAddress())
-                .childHandler(this);
-
+                .handler( new ServerChannelInitializer() )
+                .childHandler(new ConnectionChannelInitializer());
         this.channel = serverBootstrap.bind(localAddress()).channel();
     }
 
@@ -80,10 +89,20 @@ public class NetServer extends ChannelInitializer<NioSocketChannel> {
         this.channel.close();
     }
 
-    @Override
-    protected void initChannel(NioSocketChannel channel) throws Exception {
-        if (this.channelInitializer != null) {
-            this.channelInitializer.accept(channel);
+    private class ServerChannelInitializer extends ChannelInitializer<NioServerSocketChannel> {
+        @Override
+        protected void initChannel(NioServerSocketChannel channel) throws Exception {
+            channel.pipeline().addLast(new ServerEventHandler(NetServer.this));
+        }
+    }
+
+    private class ConnectionChannelInitializer extends ChannelInitializer<NioSocketChannel> {
+        @Override
+        protected void initChannel(NioSocketChannel channel) throws Exception {
+            channel.pipeline().addLast( new ConnectionEventHandler( NetServer.this ) );
+            if (NetServer.this.channelInitializer != null) {
+                NetServer.this.channelInitializer.accept(channel);
+            }
         }
     }
 }

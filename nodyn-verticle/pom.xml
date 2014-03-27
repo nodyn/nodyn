@@ -23,6 +23,7 @@
 
   <properties>
     <module.name>${project.groupId}~${project.artifactId}~${project.version}</module.name>
+    <test.pattern>**/*Spec.js</test.pattern>
   </properties>
 
   <dependencies>
@@ -226,7 +227,7 @@
                 <argument>--format</argument>
                 <argument>DOC</argument>
                 <argument>--pattern</argument>
-                <argument>**/*Spec.js</argument>
+                <argument>${test.pattern}</argument>
                 <argument>--compile-mode</argument>
                 <argument>OFF</argument>
               </arguments>

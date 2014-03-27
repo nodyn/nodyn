@@ -1,8 +1,7 @@
 package org.projectodd.nodyn.net.netty;
 
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import org.projectodd.nodyn.net.EventBroker;
+import org.projectodd.nodyn.EventBroker;
 
 /**
  * @author Bob McWhirter

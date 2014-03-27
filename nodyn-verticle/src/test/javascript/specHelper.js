@@ -13,6 +13,13 @@ if ((typeof NativeRequire) !== 'object') {
 jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
 
+var jasmineEnv = jasmine.getEnv();
+var origCallback = jasmineEnv.currentRunner_.finishCallback;
+jasmineEnv.currentRunner_.finishCallback = function() {
+    origCallback.call(this);
+    process.context.shutdown();
+};
+
 (function() {
   var Helper = function() {
     __complete = false;

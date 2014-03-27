@@ -25,6 +25,7 @@ var Process = function() {
   var javaProcess  = new org.projectodd.nodyn.process.Process();
   var EventEmitter = NativeRequire.require('events').EventEmitter;
 
+  this.context = new org.projectodd.nodyn.Context();
   this.title = "Nodyn";
   this.version = Node.VERSION;
   this.versions = {
