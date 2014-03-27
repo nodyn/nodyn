@@ -18,26 +18,20 @@ public class ConnectionEventHandler extends EventEmittingHandler {
     }
 
     @Override
-    public void bind(ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise future) throws Exception {
-        emit( NetServer.Event.LISTENING );
-        super.bind(ctx, localAddress, future);
-    }
-
-    @Override
     public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise future) throws Exception {
-        emit(NetServer.Event.CONNECTION, new NetSocket( ctx.channel()) );
+        emit(NetSocket.Event.CONNECT);
         super.connect(ctx, remoteAddress, localAddress, future);
     }
 
     @Override
     public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
-        emit( NetServer.Event.CLOSE );
+        emit( NetSocket.Event.CLOSE );
         super.close(ctx, future);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        emit( NetServer.Event.ERROR );
+        emit( NetSocket.Event.ERROR );
         super.exceptionCaught(ctx, cause);
     }
 
