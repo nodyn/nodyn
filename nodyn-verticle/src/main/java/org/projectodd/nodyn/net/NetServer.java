@@ -31,7 +31,6 @@ public class NetServer extends EventBroker {
 
     private int port;
     private String host;
-    private Consumer<NioSocketChannel> channelInitializer;
     private Channel channel;
 
     public NetServer() {
@@ -66,14 +65,6 @@ public class NetServer extends EventBroker {
         return new InetSocketAddress(this.host, this.port);
     }
 
-    public void initializer(Consumer<NioSocketChannel> initializer) {
-        this.channelInitializer = initializer;
-    }
-
-    public Consumer<NioSocketChannel> initializer() {
-        return this.channelInitializer;
-    }
-
     public void listen() {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap
@@ -100,9 +91,6 @@ public class NetServer extends EventBroker {
         @Override
         protected void initChannel(NioSocketChannel channel) throws Exception {
             channel.pipeline().addLast( new ConnectionEventHandler( NetServer.this ) );
-            if (NetServer.this.channelInitializer != null) {
-                NetServer.this.channelInitializer.accept(channel);
-            }
         }
     }
 }

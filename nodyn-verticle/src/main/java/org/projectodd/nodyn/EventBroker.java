@@ -16,18 +16,18 @@ public class EventBroker {
             return;
         }
 
-        for ( Consumer<Object[]> each : this.handlers.get( event ) ) {
-            each.accept( args );
+        for ( EventConsumer each : this.handlers.get( event ) ) {
+            each.consume( args );
         }
     }
 
 
-    public void on(String event, Consumer<Object[]> handler) {
+    public void on(String event, EventConsumer consumer) {
         if (!this.handlers.containsKey(event)) {
-            this.handlers.put(event, new HashSet<Consumer<Object[]>>());
+            this.handlers.put(event, new HashSet<EventConsumer>());
         }
-        this.handlers.get(event).add(handler);
+        this.handlers.get(event).add(consumer);
     }
 
-    private Map<String, Set<Consumer<Object[]>>> handlers = new HashMap<>();
+    private Map<String, Set<EventConsumer>> handlers = new HashMap<>();
 }
