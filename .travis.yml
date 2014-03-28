@@ -5,5 +5,5 @@ jdk:
   - oraclejdk7
   - openjdk7
 notifications:
-  irc: "irc.freenode.org#dynjs"
+  irc: "irc.freenode.org#nodyn"
 
