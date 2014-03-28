@@ -85,9 +85,10 @@
   };
 
   Require.root = System.getProperty('user.dir');
-  Require.cache = {};
-  Require.extensions = {};
   require = Require;
+  require.cache = {};
+  require.extensions = {};
+  require.resolve = Require.resolve;
 
   function loadModule(file, parent) {
     var module = new Module(file, parent);
