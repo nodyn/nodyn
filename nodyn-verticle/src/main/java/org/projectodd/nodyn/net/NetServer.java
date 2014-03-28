@@ -13,7 +13,6 @@ import org.projectodd.nodyn.net.netty.ServerEventHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.function.Consumer;
 
 /**
  * @author Bob McWhirter
