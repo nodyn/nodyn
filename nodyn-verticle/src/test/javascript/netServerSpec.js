@@ -49,32 +49,31 @@ describe( "net.Server", function() {
     });
   });
 
-/*
-    testSocketReadWrite: function() {
-      completedCallback = false;
-      server = net.createServer();
-      server.on('connection', function(socket) {
+
+  it("should allow reading and writing from both client/server connections", function() {
+    completedCallback = false;
+    server = net.createServer();
+    server.on('connection', function(socket) {
+      socket.on('data', function(buffer) {
+        expect(typeof buffer).toBe('object');
+        expect(buffer.toString()).toBe('crunchy bacon');
+        socket.write('with chocolate', function() {
+          completedCallback = true;
+        });
+      });
+    });
+    server.listen(8800, function() {
+      socket = net.connect(8800, function() {
+        socket.write("crunchy bacon");
         socket.on('data', function(buffer) {
-          vassert.assertEquals('object', typeof buffer);
-          vassert.assertEquals("crunchy bacon", buffer.toString());
-          socket.write('with chocolate', function() {
-            completedCallback = true;
-          });
+          expect(buffer.toString()).toBe('with chocolate');
+          expect(completedCallback).toBe(true);
+          socket.destroy();
+          server.close();
+          helper.testComplete(true);
         });
       });
-      server.listen(8800, function() {
-        socket = net.connect(8800, function() {
-          socket.write("crunchy bacon");
-          socket.on('data', function(buffer) {
-            vassert.assertEquals('with chocolate', buffer.toString());
-            vassert.assertEquals(true, completedCallback);
-            socket.destroy();
-            server.close();
-            vassert.testComplete();
-          });
-        });
-      });
-    },
-    */
+    });
+  });
 
 });
