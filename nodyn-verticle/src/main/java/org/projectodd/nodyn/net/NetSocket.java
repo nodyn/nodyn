@@ -13,11 +13,14 @@ import java.nio.charset.Charset;
  * @author Bob McWhirter
  */
 public class NetSocket extends EventBroker {
-
     public static class Event {
-        public static final String CONNECT = "connection";
-        public static final String CLOSE = "close";
+        public static final String CONNECT = "connect";
+        public static final String DATA = "data";
+        public static final String END = "end";
+        public static final String TIMEOUT = "timeout";
+        public static final String DRAIN = "drain";
         public static final String ERROR = "error";
+        public static final String CLOSE = "close";
     }
 
     private final Channel channel;

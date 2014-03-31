@@ -11,9 +11,31 @@ function Server( connectionListener ) {
     address: '127.0.0.1'
   };
 
+  // bridge callbacks since they can be set before listen() is called
+
+  proxy.on( "connection", function(sock) {
+    nodeSocket = new Socket();
+    nodeSocket.setProxy(sock);
+    // TODO: This is a hack, methinks
+    that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
+    that.emit('connection', nodeSocket);
+  });
+
+  proxy.on( "listening", function() {
+    that.addr.port      = proxy.port();
+    that.addr.host      = proxy.host();
+    that.addr.address   = proxy.host();
+    that.emit('listening');
+  });
+
+  proxy.on("close", function() {
+    that.emit( "close" );
+  });
+
   if (connectionListener) {
-      that.on('connection', connectionListener);
+    that.on('connection', connectionListener);
   }
+
 
   // Usage server.listen(port, [host], [backlog], [callback])
   that.listen = function() {
@@ -34,21 +56,6 @@ function Server( connectionListener ) {
       that.on('listening', callback);
     }
 
-    proxy.on( "connection", function(sock) {
-      nodeSocket = new Socket();
-      nodeSocket.setProxy(sock);
-      // TODO: This is a hack, methinks
-      that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
-      that.emit('connection', nodeSocket);
-    });
-
-    proxy.on( "listening", function() {
-      that.addr.port      = proxy.port();
-      that.addr.host      = proxy.host();
-      that.addr.address   = proxy.host();
-      that.emit('listening');
-    });
-
     proxy.host( host );
     proxy.port( port );
     // listen for incoming connections
@@ -64,9 +71,6 @@ function Server( connectionListener ) {
     if (callback)  {
       that.on( "close", callback );
     }
-    proxy.on("close", function() {
-      emit( "close" );
-    });
     proxy.close();
   };
 }
@@ -84,16 +88,24 @@ function Socket(options) {
   // TODO: Handle ctor options
   // { fd: null, type: null, allowHalfOpen: false }
 
+  this.bridgeEvents = function(proxy) {
+    proxy.on("data", function(buffer) {
+      that.emit("data", new Buffer( buffer.toString()));
+    });
+
+    proxy.on("connect", function() {
+      that.emit( "connect" );
+    });
+  };
+
   this.setProxy = function(proxy) {
     that.proxy = proxy;
     var inetAddress = proxy.remoteAddress();
     that.remoteAddress = inetAddress.address.hostName;
     that.remotePort = inetAddress.port;
 
-    proxy.on("data", function(buffer) {
-      that.emit("data", new Buffer( buffer.toString()));
-    });
 
+    that.bridgeEvents( proxy );
     return that;
   };
 
@@ -106,11 +118,14 @@ function Socket(options) {
       that.on('connect', callback);
     }
 
-    client = net.createNetClient();
-    client.connect( port, host, function(err, sock) {
-      that.setProxy( sock );
-      that.emit('connect', that);
-    });
+    //client = net.createNetClient();
+    client = new org.projectodd.nodyn.net.NetClient( process.context );
+    client.host( host );
+    client.port( port );
+
+    that.bridgeEvents( client );
+
+    client.connect();
     return that;
   };
 
