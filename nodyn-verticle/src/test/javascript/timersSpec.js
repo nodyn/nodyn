@@ -21,7 +21,6 @@ describe("The timers module", function() {
     setTimeout(function() {
       x = x+1;
     }, 100);
-    expect(x).toBe(0);
     timer.setTimer(200, function() {
       expect(x).toBe(1);
       helper.testComplete(true);
@@ -35,8 +34,10 @@ describe("The timers module", function() {
       x = z+y;
     }, 1, 5, 45);
     timer.setTimer(1, function() {
-      expect(x).toBe(50);
-      helper.testComplete(true);
+      timer.setTimer(100, function() {
+        expect(x).toBe(50);
+        helper.testComplete(true);
+      });
     });
   });
 
