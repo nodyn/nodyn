@@ -24,6 +24,10 @@ require.loadJSON = function(file) {
   return JSON.parse(vertx.fileSystem.readFileSync(file).toString());
 };
 
+// Stdout and Stderr
+stderr = java.lang.System.err;
+stdout = java.lang.System.out;
+
 setTimeout = function() {
   var args = Array.prototype.slice.call(arguments);
 
