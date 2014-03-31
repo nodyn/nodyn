@@ -33,11 +33,9 @@ describe("The timers module", function() {
     setTimeout(function(y, z) { 
       x = z+y;
     }, 1, 5, 45);
-    timer.setTimer(1, function() {
-      timer.setTimer(100, function() {
-        expect(x).toBe(50);
-        helper.testComplete(true);
-      });
+    timer.setTimer(100, function() {
+      expect(x).toBe(50);
+      helper.testComplete(true);
     });
   });
 
@@ -57,11 +55,12 @@ describe("The timers module", function() {
   it('should pass testSetInterval', function() {
     var x = 0;
     waitsFor(helper.testComplete, "the setInterval test to complete", 3);
-    setInterval(function() {
+    var id = setInterval(function() {
       x = x+1;
     }, 10);
-    timer.setTimer(100, function() {
+    timer.setTimer(150, function() {
       expect(x).toBeGreaterThan(1);
+      clearInterval(id);
       helper.testComplete(true);
     });
   });
@@ -77,6 +76,10 @@ describe("The timers module", function() {
       expect(x).toBe(0);
       helper.testComplete(true);
     });
+  });
+
+  beforeEach(function() {
+    helper.testComplete(false);
   });
 
 });
