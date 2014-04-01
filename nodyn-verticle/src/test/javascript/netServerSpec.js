@@ -1,5 +1,5 @@
 var helper = require('specHelper');
-var net = require( "net-x" );
+var net = require( "net" );
 
 describe( "net.Server", function() {
 
