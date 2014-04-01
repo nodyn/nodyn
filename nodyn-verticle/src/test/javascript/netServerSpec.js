@@ -57,7 +57,6 @@ describe( "net.Server", function() {
     });
     waitsFor(helper.testComplete, "waiting for connection handler to fire", 3);
   });
-  /*
 
 
   it("should allow reading and writing from both client/server connections", function() {
@@ -73,37 +72,81 @@ describe( "net.Server", function() {
       });
     });
     server.listen(8800, function() {
-      java.lang.System.err.println( "server is listening" );
       socket = net.connect(8800, function() {
         socket.write("crunchy bacon");
         socket.on('data', function(buffer) {
-          java.lang.System.err.println( "client got data" );
           expect(buffer.toString()).toBe('with chocolate');
           expect(completedCallback).toBe(true);
           socket.destroy();
           server.close();
-          java.lang.System.err.println( "client/server complete" );
           helper.testComplete(true);
         });
       });
     });
+    waitsFor(helper.testComplete, "waiting for read/write to complete", 3);
   });
 
   it("should support an idle socket timeout", function() {
     server = net.createServer();
     server.on('connection', function(socket) {
       socket.setTimeout(10, function() {
-        java.lang.System.err.println( "timeout fired" );
         socket.destroy();
         server.close();
         helper.testComplete(true);
       });
-      java.lang.System.err.println( "timeout set" );
     });
     server.listen(8800, function() {
       socket = net.connect(8800);
     });
+    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
   });
 
-*/
+  it("should allow cancellation of an idle socket timeout", function() {
+    server = net.createServer();
+    server.on('connection', function(socket) {
+      socket.setTimeout(300, function() {
+        expect(true).toBe(false);
+      });
+      socket.setTimeout(0); // cancels the timeout we just set
+    });
+    server.listen(8800, function() {
+      socket = net.connect(8800, function() {
+        timer.setTimer(500, function() {
+          server.close();
+          helper.testComplete(true);
+        });
+      });
+     });
+    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
+  });
+
+
+  it( "should provide a remote address", function() {
+    server = net.createServer();
+    server.listen(8800, function() {
+      net.connect(8800, function(socket) {
+        expect(socket.remoteAddress).toBe('127.0.0.1');
+        expect(socket.remotePort).toBe(8800);
+        socket.destroy();
+        server.close();
+        helper.testComplete(true);
+      });
+    });
+    waitsFor(helper.testComplete, "waiting for socket address to be checked", 3);
+  });
+
+  it( "should provide a server address", function() {
+    server = net.createServer();
+    server.listen(8800, function() {
+      net.connect(8800, function(socket) {
+        address = server.address();
+        expect(address.port).toBe(8800);
+        expect(address.address).toBe('0.0.0.0');
+        expect(address.family).toBe('IPv4');
+        helper.testComplete(true);
+      });
+    });
+    waitsFor(helper.testComplete, "waiting for server address to be checked", 3);
+  });
+
 });
