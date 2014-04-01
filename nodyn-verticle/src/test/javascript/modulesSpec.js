@@ -9,9 +9,53 @@ var fileSep   = System.getProperty("file.separator");
 
 require.root  = userDir + "/src/test/resources/modules";
 
+var matchers = {
+  toHaveModuleProperties: function(properties_file) {
+    var mod = this.actual;
+
+    if ( (typeof mod.id) != 'string' ) {
+      this.message = function(){ return 'Expected typeof mod.id to be "string" but was ' + ( typeof mod.id ); };
+      return false;
+    }
+
+    if ( mod.filename !== properties_file ) {
+      this.message = function(){ 'Expected mod.filename to be ' + properties_file + ", but was " + mod.filename; };
+      return false;
+    }
+
+    if ( (typeof mod.loaded) != 'boolean' ) {
+      this.message = function(){ return 'Expected typeof mod.loaded to be "boolean" but was ' + ( typeof mod.loaded ); };
+      return false;
+    }
+
+    if ( (typeof mod.parent) != 'object' ) {
+      this.message = function(){ return 'Expected typeof mod.parent to be "object" but was ' + ( typeof mod.parent ); };
+      return false;
+    }
+
+    if ( (typeof mod.parent.filename) != 'string' ) {
+      this.message = function(){ return 'Expected typeof mod.parent.filename to be "string" byt was ' + ( typeof mod.parent.filename ); };
+      return false;
+    }
+
+    if ( (typeof mod.children) != 'object' ) {
+      this.message = function(){ return 'Expected typeof mod.childrento be "object" byt was ' + ( typeof mod.children); };
+      return false;
+    }
+
+    return true;
+  }
+};
+
 describe( "modules", function() {
 
   beforeEach(function() {
+    //java.lang.System.err.println( "** JASMINE: " + jasmine );
+    //java.lang.System.err.println( "** JASMINE.getEnv(): " + jasmine.getEnv() );
+    //java.lang.System.err.println( "** JASMINE.addMatchers: " + jasmine.addMatchers );
+    //java.lang.System.err.println( "** JASMINE.Matchers: " + jasmine.Matchers );
+    //jasmine.getEnv().addMatchers( matchers );
+    this.addMatchers( matchers );
     helper.testComplete(false);
   });
 
@@ -44,149 +88,14 @@ describe( "modules", function() {
     helper.testComplete(true);
   });
 
-
-/*
-  it("should have all the correct functions defined", function() {
-    expect(typeof net.Server).toBe('function');
-    expect(typeof net.Socket).toBe('function');
-    expect(typeof net.createServer).toBe('function');
-    expect(typeof net.connect).toBe('function');
-    expect(typeof net.createConnection).toBe('function');
+  it("should have appropriate properties", function() {
+    expect(require('parent')).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
 
-  it("should fire a 'listening' event", function() {
-    server = net.createServer();
-    server.listen(8800, function() {
-      server.close();
-      helper.testComplete(true);
-    });
-    waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 3);
+  it("should properties loaded from define getter, whatever that means...", function() {
+    expect(require('defineGetter').props).toHaveModuleProperties(require.root + '/properties.js');
+    helper.testComplete(true);
   });
-
-  it("should fire a 'close' event registered prior to close()", function() {
-    server = net.createServer();
-    server.on('close', function(e) {
-      helper.testComplete(true);
-    });
-    server.listen(8800, function() {
-      server.close();
-    });
-    waitsFor(helper.testComplete, "waiting for .on(close) to fire", 3);
-
-  });
-
-  it("should fire a 'close' event on a callback passed to close()", function() {
-    server = net.createServer();
-    server.listen(8800, function() {
-      server.close(function() {
-        helper.testComplete(true);
-      });
-    });
-    waitsFor(helper.testComplete, "waiting for close handler to fire", 3);
-  });
-
-  it("should fire a 'connect' callback on client connection", function() {
-    server = net.createServer();
-    server.listen(8800, function() {
-      net.connect(8800, function(socket) {
-        server.close();
-        helper.testComplete(true);
-      });
-    });
-    waitsFor(helper.testComplete, "waiting for connection handler to fire", 3);
-  });
-
-
-  it("should allow reading and writing from both client/server connections", function() {
-    completedCallback = false;
-    server = net.createServer();
-    server.on('connection', function(socket) {
-      socket.on('data', function(buffer) {
-        expect(typeof buffer).toBe('object');
-        expect(buffer.toString()).toBe('crunchy bacon');
-        socket.write('with chocolate', function() {
-          completedCallback = true;
-        });
-      });
-    });
-    server.listen(8800, function() {
-      socket = net.connect(8800, function() {
-        socket.write("crunchy bacon");
-        socket.on('data', function(buffer) {
-          expect(buffer.toString()).toBe('with chocolate');
-          expect(completedCallback).toBe(true);
-          socket.destroy();
-          server.close();
-          helper.testComplete(true);
-        });
-      });
-    });
-    waitsFor(helper.testComplete, "waiting for read/write to complete", 3);
-  });
-
-  it("should support an idle socket timeout", function() {
-    server = net.createServer();
-    server.on('connection', function(socket) {
-      socket.setTimeout(10, function() {
-        socket.destroy();
-        server.close();
-        helper.testComplete(true);
-      });
-    });
-    server.listen(8800, function() {
-      socket = net.connect(8800);
-    });
-    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
-  });
-
-  it("should allow cancellation of an idle socket timeout", function() {
-    server = net.createServer();
-    server.on('connection', function(socket) {
-      socket.setTimeout(300, function() {
-        expect(true).toBe(false);
-      });
-      socket.setTimeout(0); // cancels the timeout we just set
-    });
-    server.listen(8800, function() {
-      socket = net.connect(8800, function() {
-        timer.setTimer(500, function() {
-          server.close();
-          helper.testComplete(true);
-        });
-      });
-     });
-    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
-  });
-
-
-  it( "should provide a remote address", function() {
-    server = net.createServer();
-    server.listen(8800, function() {
-      net.connect(8800, function(socket) {
-        expect(socket.remoteAddress).toBe('127.0.0.1');
-        expect(socket.remotePort).toBe(8800);
-        socket.destroy();
-        server.close();
-        helper.testComplete(true);
-      });
-    });
-    waitsFor(helper.testComplete, "waiting for socket address to be checked", 3);
-  });
-
-  it( "should provide a server address", function() {
-    server = net.createServer();
-    server.listen(8800, function() {
-      net.connect(8800, function(socket) {
-        address = server.address();
-        expect(address.port).toBe(8800);
-        expect(address.address).toBe('0.0.0.0');
-        expect(address.family).toBe('IPv4');
-        helper.testComplete(true);
-      });
-    });
-    waitsFor(helper.testComplete, "waiting for server address to be checked", 3);
-  });
-  */
 
 });
