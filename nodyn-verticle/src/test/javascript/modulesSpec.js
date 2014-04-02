@@ -7,7 +7,7 @@ var userHome  = System.getProperty('user.home');
 var isWindows = process.platform === 'win32';
 var fileSep   = System.getProperty("file.separator");
 
-require.root  = userDir + "/src/test/resources/modules";
+require.root  = userDir + "/src/test/javascript";
 
 var matchers = {
   toHaveModuleProperties: function(properties_file) {
@@ -60,8 +60,8 @@ describe( "modules", function() {
   });
 
   it("should have mod.dirname", function() {
-    var dir = new java.io.File('./src/test/resources/modules/somemodule/lib').getCanonicalPath();
-    var subdir = new java.io.File('./src/test/resources/modules/somemodule/lib/subdir').getCanonicalPath();
+    var dir = new java.io.File('./src/test/javascript/somemodule/lib').getCanonicalPath();
+    var subdir = new java.io.File('./src/test/javascript/somemodule/lib/subdir').getCanonicalPath();
     var mod = require('somemodule');
     expect(mod.dirname).not.toBe(null);
     expect(mod.dirname).not.toBe(undefined);
