@@ -3,6 +3,7 @@ var timer         = NativeRequire.require('vertx/timer');
 var util          = NativeRequire.require('util');
 var Stream        = NativeRequire.require('stream');
 var EventEmitter  = NativeRequire.require('events').EventEmitter;
+var nodyn         = NativeRequire.require('nodyn');
 
 function Server( connectionListener ) {
   var proxy    = net.createNetServer();
@@ -190,13 +191,9 @@ function Socket(options) {
   this.bytesWritten = 0;
 }
 
-// Inheriting from Stream makes Socket an EventEmitter.
 util.inherits(Socket, Stream);
-util._extend(Socket.prototype, EventEmitter.prototype);
-util._extend(Server.prototype, EventEmitter.prototype);
-//util.inherits(Server, EventEmitter);
-
-
+nodyn.makeEventEmitter(Socket);
+nodyn.makeEventEmitter(Server);
 
 module.exports.Socket = Socket;
 module.exports.Server = Server;
