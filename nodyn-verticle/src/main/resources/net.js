@@ -5,68 +5,92 @@ var Stream        = NativeRequire.require('stream');
 var EventEmitter  = NativeRequire.require('events').EventEmitter;
 var nodyn         = NativeRequire.require('nodyn');
 
+// ------------------------------------------------------------------------
+// Server
+// ------------------------------------------------------------------------
+
 function Server( connectionListener ) {
-  var proxy    = net.createNetServer();
-  var that     = this;
-  that.addr    = {
+  if (!(this instanceof Server)) return new Server(connectionListener);
+  this.proxy = net.createNetServer();
+
+  this.addr = {
     port: 0,
     family: "IPv4",
     address: '127.0.0.1'
   };
 
   if (connectionListener) {
-      that.on('connection', connectionListener);
+    this.on('connection', connectionListener);
   }
 
-  // Usage server.listen(port, [host], [backlog], [callback])
-  that.listen = function() {
-    callback = null;
-    host = '0.0.0.0';
-    port = arguments[0];
-    lastArg = arguments[arguments.length - 1];
-
-    if (typeof lastArg  == 'function') {
-      callback = lastArg;
-    }
-    if (typeof arguments[1]  == 'string') {
-      host = arguments[1];
-    }
-
-    // activate the 'listening' callback
-    if (callback) { that.on('listening', callback); }
-
-    // setup a connection handler in vert.x
-    proxy.connectHandler( function(sock) {
-      nodeSocket = new Socket();
-      nodeSocket.setProxy(sock);
-      // TODO: This is a hack, methinks
-      that.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
-      that.emit('connection', nodeSocket);
-    });
-
-    // listen for incoming connections
-    proxy.listen(port, host, function() {
-      that.addr.port      = proxy.port();
-      that.addr.host      = proxy.host();
-      that.addr.address   = proxy.host();
-      that.emit('listening');
-    });
-  };
-
-  that.address = function() {
-    return that.addr;
-  };
-
-  that.close = function(callback) {
-    proxy.close(function() { 
-      if (callback) { that.on('close', callback); }
-      that.emit('close'); 
-    });
-  };
+  // setup a connection handler in vert.x
+  this.proxy.connectHandler( function(sock) {
+    nodeSocket = new Socket();
+    nodeSocket.setProxy(sock);
+    // TODO: This is a hack, methinks
+    this.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
+    this.emit('connection', nodeSocket);
+  }.bind(this));
 }
 
+// Always do this BEFORE defining .prototype functions
+util.inherits(Socket, Stream);
+
+// Usage server.listen(port, [host], [backlog], [callback])
+Server.prototype.listen = function() {
+  callback = null;
+  host = '0.0.0.0';
+  port = arguments[0];
+  lastArg = arguments[arguments.length - 1];
+
+  if (typeof lastArg  == 'function') {
+    callback = lastArg;
+  }
+  if (typeof arguments[1]  == 'string') {
+    host = arguments[1];
+  }
+  // activate the 'listening' callback
+  if (callback) {
+    this.on('listening', callback);
+  }
+
+  // listen for incoming connections
+  this.proxy.listen(port, host, function() {
+    this.addr.port      = this.proxy.port();
+    this.addr.host      = this.proxy.host();
+    this.addr.address   = this.proxy.host();
+    this.emit('listening');
+  }.bind(this));
+}
+
+Server.prototype.address = function() {
+  return this.addr;
+};
+
+Server.prototype.close = function(callback) {
+  if (callback) {
+    this.on('close', callback);
+  }
+
+  this.proxy.close(function() {
+    this.emit('close');
+  }.bind(this));
+}
+
+nodyn.makeEventEmitter(Server);
+module.exports.Server = Server;
+
+module.exports.createServer = function(connectionListener) {
+  return new Server(connectionListener);
+};
+
+// ------------------------------------------------------------------------
+// Socket
+// ------------------------------------------------------------------------
+
 function Socket(options) {
-  var that = this;
+  if (!(this instanceof Socket)) return new Socket(options);
+
   this.encoding  = 'utf8';
   this.writable  = true;
   this.timeoutId = null;
@@ -75,43 +99,49 @@ function Socket(options) {
   this.noDelay = true;
   this.keepAlive = false;
   this.initialDelay = 0;
+
+  this.bytesRead = 0;
+  this.bytesWritten = 0;
+
   // TODO: Handle ctor options
   // { fd: null, type: null, allowHalfOpen: false }
+}
 
-  this.setProxy = function(proxy) {
-    that.proxy = proxy;
-    if (proxy.remoteAddress) {
-      var inetAddress = proxy.remoteAddress();
-      that.remoteAddress = inetAddress.ipaddress;
-      that.remotePort = inetAddress.port;
-    }
-    if (proxy.dataHandler) {
-      proxy.dataHandler( function(buffer) {
-        that.emit('data', new Buffer(buffer.toString()));
-      });
-    }
-    return that;
-  };
+Socket.prototype.setProxy = function(proxy) {
+  this.proxy = proxy;
+  if (this.proxy.remoteAddress) {
+    var inetAddress = this.proxy.remoteAddress();
+    this.remoteAddress = inetAddress.ipaddress;
+    this.remotePort = inetAddress.port;
+  }
+  if (this.proxy.dataHandler) {
+    this.proxy.dataHandler( function(buffer) {
+      this.emit('data', new Buffer(buffer.toString()));
+    }.bind(this));
+  }
+  return this;
+}
 
-  // Usage socket.connect(port, [host], [callback])
-  this.connect = function(port, host, callback) {
-    if (host === null || host === undefined) {
-      host = 'localhost';
-    }
-    if (typeof callback  == 'function') {
-      that.on('connect', callback);
-    }
+// Usage socket.connect(port, [host], [callback])
+Socket.prototype.connect = function(port, host, callback) {
+  if (host === null || host === undefined) {
+    this.host = 'localhost';
+  }
 
-    client = net.createNetClient();
-    client.connect( port, host, function(err, sock) {
-      that.setProxy( sock );
-      that.emit('connect', that);
-    });
-    return that;
-  };
+  if (callback) {
+    this.on('connect', callback);
+  }
 
-  // Usage socket.write(string, [encoding], [callback])
-  this.write = function() {
+  this.client = net.createNetClient();
+  this.client.connect( port, host, function(err, sock) {
+    this.setProxy( sock );
+    this.emit('connect', this);
+  }.bind(this));
+  return this;
+}
+
+// Usage socket.write(string, [encoding], [callback])
+Socket.prototype.write = function() {
     var args = Array.prototype.slice.call(arguments);
     callback = null;
     encoding = 'UTF-8';
@@ -126,81 +156,74 @@ function Socket(options) {
     }
 
     if (callback) {
-      that.proxy.drainHandler(function() {
+      this.proxy.drainHandler(function() {
         callback.apply(callback);
-      });
+      }.bind(this));
     }
     // what is passed could be a buffer
-    that.proxy.write(string.toString(), encoding);
-  };
-
-  this.destroy = function() { 
-    that.proxy.close(function() {
-      that.emit('close');
-    });
-  };
-
-  this.end = function(data, encoding) {
-    if (data) {
-      that.write(data, encoding, function() {
-        that.destroy();
-        that.emit('end');
-      });
-    } else {
-      that.destroy();
-      that.emit('end');
-    }
-  };
-
-  this.destroySoon = that.end;
-
-  this.setEncoding = function(encoding) { 
-    that.encoding = encoding;
-  };
-
-  this.pause = function() { 
-    that.proxy.pause();
-  };
-  this.resume = function() { 
-    that.proxy.resume();
-  };
-
-  this.setTimeout = function(msec, timeout) { 
-    if (that.timeoutId) {
-      timer.cancelTimer(that.timeoutId);
-      that.removeAllListeners('timeout');
-    }
-    if (msec > 0 && timeout) {
-      that.on('timeout', timeout);
-      that.timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
-    }
-  };
-
-  this.setNoDelay = function(bool) { 
-    that.noDelay = (bool === undefined ? true : bool);
-  };
-
-  this.setKeepAlive = function(bool) { 
-    that.keepAlive = (bool === undefined ? true : bool);
-  };
-
-  this.ref = function() {};
-  this.unref = function() {};
-  this.address = function() {};
-  this.bytesRead = 0;
-  this.bytesWritten = 0;
+    this.proxy.write(string.toString(), encoding);
 }
 
-util.inherits(Socket, Stream);
+Socket.prototype.destroy = function() {
+  this.proxy.close(function() {
+    this.emit('close');
+  }.bind(this));
+}
+
+Socket.prototype.end = function(data, encoding) {
+  if (data) {
+    this.write(data, encoding, function() {
+      this.destroy();
+      this.emit('end');
+    }.bind(this));
+  } else {
+    this.destroy();
+    this.emit('end');
+  }
+}
+
+Socket.prototype.destroySoon = Socket.prototype.end;
+
+Socket.prototype.setEncoding = function(encoding) {
+  this.encoding = encoding;
+};
+
+Socket.prototype.pause = function() {
+  this.proxy.pause();
+};
+
+Socket.prototype.resume = function() {
+  this.proxy.resume();
+}
+
+Socket.prototype.setTimeout = function(msec, timeout) {
+  if (this.timeoutId) {
+    timer.cancelTimer(this.timeoutId);
+    this.removeAllListeners('timeout');
+  }
+  if (msec > 0 && timeout) {
+    this.on('timeout', timeout);
+    this.timeoutId = timer.setTimer(msec, function() {
+      this.emit('timeout');
+    }.bind(this));
+  }
+}
+
+Socket.prototype.setNoDelay = function(bool) {
+  this.noDelay = (bool === undefined ? true : bool);
+}
+
+Socket.prototype.setKeepAlive = function(bool) {
+  this.keepAlive = (bool === undefined ? true : bool);
+}
+
+Socket.prototype.ref = function() {};
+Socket.prototype.unref = function() {};
+Socket.prototype.address = function() {};
+
 nodyn.makeEventEmitter(Socket);
-nodyn.makeEventEmitter(Server);
 
 module.exports.Socket = Socket;
-module.exports.Server = Server;
-
-module.exports.createServer = function(connectionListener) {
-  return new Server(connectionListener);
-};
 
 module.exports.createConnection = function() {
   options           = {};
@@ -235,5 +258,6 @@ module.exports.createConnection = function() {
   sock.connect(options.port, options.host, callback);
   return sock;
 };
+
 module.exports.connect = module.exports.createConnection;
 
