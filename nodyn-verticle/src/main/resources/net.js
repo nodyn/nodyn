@@ -192,7 +192,11 @@ function Socket(options) {
 
 // Inheriting from Stream makes Socket an EventEmitter.
 util.inherits(Socket, Stream);
-util.inherits(Server, EventEmitter);
+util._extend(Socket.prototype, EventEmitter.prototype);
+util._extend(Server.prototype, EventEmitter.prototype);
+//util.inherits(Server, EventEmitter);
+
+
 
 module.exports.Socket = Socket;
 module.exports.Server = Server;

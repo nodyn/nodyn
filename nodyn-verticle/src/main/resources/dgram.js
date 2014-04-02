@@ -94,7 +94,7 @@ Socket = function(type, callback) {
 };
 
 
-util.inherits(Socket, EventEmitter);
+util._extend(Socket.prototype, EventEmitter.prototype);
 
 module.exports.createSocket = createSocket = function(type, callback) {
   return new Socket(type, callback);
