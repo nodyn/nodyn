@@ -50,11 +50,6 @@ var matchers = {
 describe( "modules", function() {
 
   beforeEach(function() {
-    //java.lang.System.err.println( "** JASMINE: " + jasmine );
-    //java.lang.System.err.println( "** JASMINE.getEnv(): " + jasmine.getEnv() );
-    //java.lang.System.err.println( "** JASMINE.addMatchers: " + jasmine.addMatchers );
-    //java.lang.System.err.println( "** JASMINE.Matchers: " + jasmine.Matchers );
-    //jasmine.getEnv().addMatchers( matchers );
     this.addMatchers( matchers );
     helper.testComplete(false);
   });
@@ -97,5 +92,16 @@ describe( "modules", function() {
     expect(require('defineGetter').props).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
+
+  it("should properly isolate", function() {
+    require('module-isolation/module-a.js');
+    try {
+      var shouldThrow = EventEmitter;
+      expect(false).toBe(true);
+    } catch (err) {
+      expect(err instanceof ReferenceError).toBe(true);
+    }
+    helper.testComplete(true);
+  })
 
 });
