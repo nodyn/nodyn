@@ -227,6 +227,51 @@ describe("fs module", function() {
       });
     });
 
+    it("should provide an error if attempting to close null", function() {
+      waitsFor(helper.testComplete, "the close callback to return an error", 100);
+      fs.close(null, function(e) {
+        expect(e.message).toBe("Don't know how to close null");
+        helper.testComplete(true);
+      });
+    });
+
+    it("should close", function() {
+      waitsFor(helper.testComplete, "the close callback to finish", 100);
+      setupTestSubject(function(sut) {
+        fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
+          expect(!e).toBe(true);
+          fs.close(f, function(ex) {
+            expect(!ex).toBe(true);
+            helper.testComplete(true);
+          });
+        });
+      });
+    });
+
+    it("should be able to read a file contents", function() {
+      waitsFor(helper.testComplete, "the readFile to complete", 100);
+      var contents = "American Cheese";
+      setupTestSubject(function(sut) {
+        fs.readFile(sut.getAbsolutePath(), function(err, file) {
+          expect(typeof file).toBe('object');
+          expect(file.toString('ascii')).toBe(contents);
+          helper.testComplete(true);
+        });
+      }, contents);
+    });
+
+    it("should be abel to read a file using encoding", function() {
+      waitsFor(helper.testComplete, "the readFile to complete", 100);
+      var contents = "American Cheese";
+      setupTestSubject(function(sut) {
+        fs.readFile(sut.getAbsolutePath(), {encoding:'ascii'}, function(err, str) {
+          expect(typeof str).toBe('string');
+          expect(str).toBe(contents);
+          helper.testComplete(true);
+        });
+      }, contents);
+    });
+
     describe("synchronously", function() {
 
       it("should error on openSync read if the file doesn't exist", function() {
@@ -253,6 +298,35 @@ describe("fs module", function() {
           expect(f).toBeTruthy();
           helper.testComplete(true);
         });
+      });
+
+      it("should close files synchronously, even non-filedescriptors", function() {
+        setupTestSubject(function() {
+          fs.closeSync(null);
+          helper.testComplete(true);
+        });
+      });
+
+      it("should be able to read a file", function() {
+        waitsFor(helper.testComplete, "the read to complete", 100);
+        var contents = "American Cheese";
+        setupTestSubject(function(sut) {
+          var result = fs.readFileSync(sut.getAbsolutePath());
+          expect(typeof result).toBe('object');
+          expect(result.toString('ascii')).toBe(contents);
+          helper.testComplete(true);
+        }, contents);
+      });
+
+      it("should be able to read a file with encoding", function() {
+        waitsFor(helper.testComplete, "the read to complete", 100);
+        var contents = "American Cheese";
+        setupTestSubject(function(sut) {
+          var result = fs.readFileSync(sut.getAbsolutePath(), {encoding: 'ascii'});
+          expect(typeof result).toBe('string');
+          expect(result).toBe(contents);
+          helper.testComplete(true);
+        }, contents);
       });
 
     });
