@@ -1,5 +1,5 @@
 var helper = require('specHelper');
-EventEmitter = require('events').EventEmitter;
+var EventEmitter = require('events').EventEmitter;
 
 describe('events module', function() {
 
