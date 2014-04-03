@@ -1,11 +1,11 @@
+var helper    = require('specHelper');
 var net       = require('net');
-var vertxTest = require('vertx_tests');
-var vassert   = vertxTest.vassert;
-var console   = require('vertx/console');
 
 
-vertxTest.startTests( {
-  DEFERREDtestNetPauseAndResume: function() {
+describe('The net module', function() {
+  // TODO: FIXME
+  xit('should handle pause and resume', function() {
+    waitsFor(helper.testComplete, "The net pause/resume test", 10);
     var N = 200;
     var recv = '', chars_recved = 0;
 
@@ -33,11 +33,11 @@ vertxTest.startTests( {
       setTimeout(function() {
         chars_recved = recv.length;
         console.log('pause at: ' + chars_recved);
-        vassert.assertEquals(true, chars_recved > 1);
+        expect(chars_recved).toBeGreaterThan(1);
         client.pause();
         setTimeout(function() {
           console.log('resume at: ' + chars_recved);
-          vassert.assertEquals(chars_recved, recv.length);
+          expect(recv.length).toBe(chars_recved);
           client.resume();
 
           setTimeout(function() {
@@ -47,7 +47,7 @@ vertxTest.startTests( {
 
             setTimeout(function() {
               console.log('resume at: ' + chars_recved);
-              vassert.assertEquals(chars_recved, recv.length);
+              expect(recv.length).toBe(chars_recved);
               client.resume();
 
             }, 500);
@@ -59,11 +59,13 @@ vertxTest.startTests( {
       }, 500);
 
       client.on('end', function() {
-        vassert.assertEquals(N, recv.length);
+        expect(N).toBe(recv.length);
         server.close();
         client.end();
+        helper.testComplete(true);
       });
     });
     server.listen(8800);
-  }
+  });
 });
+
