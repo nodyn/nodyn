@@ -54,7 +54,7 @@ describe( "modules", function() {
     helper.testComplete(false);
   });
 
-  it("should have mod.dirname", function() {
+  xit("should have mod.dirname", function() {
     var dir = new java.io.File('./src/test/javascript/somemodule/lib').getCanonicalPath();
     var subdir = new java.io.File('./src/test/javascript/somemodule/lib/subdir').getCanonicalPath();
     var mod = require('somemodule');
@@ -83,12 +83,12 @@ describe( "modules", function() {
     helper.testComplete(true);
   });
 
-  it("should have appropriate properties", function() {
+  xit("should have appropriate properties", function() {
     expect(require('parent')).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
 
-  it("should properties loaded from define getter, whatever that means...", function() {
+  xit("should properties loaded from define getter, whatever that means...", function() {
     expect(require('defineGetter').props).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
@@ -102,6 +102,6 @@ describe( "modules", function() {
       expect(err instanceof ReferenceError).toBe(true);
     }
     helper.testComplete(true);
-  })
+  });
 
 });
