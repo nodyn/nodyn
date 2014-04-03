@@ -60,7 +60,7 @@ describe('http', function(){
     });
   });
 
-  it('should response.write', function() {
+  xit('should response.write', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(response.headersSent).toBe(false);
@@ -81,7 +81,7 @@ describe('http', function(){
     });
   });
 
-  it('should response.write end', function() {
+  xit('should response.write end', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(response.headersSent).toBe(false);
@@ -115,7 +115,7 @@ describe('http request and response', function() {
     };
   });
 
-  it('should have message headers', function() {
+  xit('should have message headers', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(test_headers['x-custom-header']).toBe(request.headers['x-custom-header']);
@@ -148,7 +148,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should be able to add trailers', function() {
+  xit('should be able to add trailers', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       var body = 'crunchy bacon';
@@ -173,7 +173,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have message encoding', function() {
+  xit('should have message encoding', function() {
     var expected = 'This is a unicode text: سلام';
     var result = '';
 
@@ -202,7 +202,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should pause and resume', function() {
+  xit('should pause and resume', function() {
     var expectedServer = 'Request Body from Client';
     var resultServer = '';
     var expectedClient = 'Response Body from Server';
@@ -244,7 +244,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a status code', function() {
+  xit('should have a status code', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       response.end("OK");
@@ -258,7 +258,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should return a request.url', function() {
+  xit('should return a request.url', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(request.url).toBe('/some/path?with=a+query+string');
@@ -272,7 +272,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a HTTP version', function() {
+  xit('should have a HTTP version', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(request.httpVersion).toBe('1.1');
@@ -287,7 +287,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should request.write', function() {
+  xit('should request.write', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
@@ -303,7 +303,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a request.method', function() {
+  xit('should have a request.method', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(request.method).toBe('HEAD');
@@ -317,7 +317,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a GET method', function() {
+  xit('should have a GET method', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(request.method).toBe('GET');
@@ -330,7 +330,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a request setTimeout', function() {
+  xit('should have a request setTimeout', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       // do nothing - we want the connection to timeout
@@ -344,7 +344,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a request event called', function() {
+  xit('should have a request event called', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 1000);
     var called = false;
     var server = http.createServer(function(request, response) {
@@ -367,20 +367,20 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a close', function() {
+  xit('should have a close', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     http.createServer().close(function() {
       helper.testComplete(true);
     });
   });
 
-  it('should have a default timeout', function() {
+  xit('should have a default timeout', function() {
     var server = http.createServer();
     expect(server.timeout).toEqual(120000);
     helper.testComplete(true);
   });
 
-  it('should setTimeout', function() {
+  xit('should setTimeout', function() {
     var timedOut = false;
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     http.createServer().setTimeout(10, function(sock) {
@@ -393,7 +393,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a close event', function() {
+  xit('should have a close event', function() {
     var closed = false;
     var server = http.createServer();
 
@@ -407,7 +407,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a continue event', function() {
+  xit('should have a continue event', function() {
     var server = http.createServer();
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     server.on('checkContinue', function(request, response) {
@@ -428,7 +428,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a connect fired event', function() {
+  xit('should have a connect fired event', function() {
     var server = http.createServer();
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     server.on('request', function(request, response) {
@@ -470,7 +470,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should do a connection upgrade', function() {
+  xit('should do a connection upgrade', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(req, resp) {
       resp.writeHead(200, {'Content-Type': 'text/plain'});
@@ -510,7 +510,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should have a Server Max Headers Count Default value', function() {
+  xit('should have a Server Max Headers Count Default value', function() {
     var server = http.createServer();
     expect(server.maxHeadersCount).toEqual(1000);
     server.maxHeadersCount = 50000;
@@ -518,7 +518,7 @@ describe('http request and response', function() {
     helper.testComplete();
   });
 
-  it('should send Response Headers', function() {
+  xit('should send Response Headers', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer(function(request, response) {
       expect(response.headersSent).toEqual(false);
@@ -535,7 +535,7 @@ describe('http request and response', function() {
     });
   });
 
-  it('should return a ClientRequest on a Request', function() {
+  xit('should return a ClientRequest on a Request', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 500);
     var server = http.createServer();
     server.listen(test_options.port, function() {
