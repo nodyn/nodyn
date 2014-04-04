@@ -29,7 +29,11 @@ describe("Buffer", function() {
     // expect(b.toString()).toBe('c\u0000h\u0000e\u0000e\u0000z\u0000');
   });
 
-  it('should pass testArrayConstructor', function() {
+  // compared to node, new Buffer( array_of_chars ) shouldn't actually
+  // do what this test asserts it should.  Array-of-octets is what's
+  // supported, not array-of-strings (since JS has no idea of a char,
+  // only strings when in quotes.
+  xit('should pass testArrayConstructor', function() {
     var b = new Buffer(['b', 'a', 'c', 'o', 'n']);
     expect(b.length).toBe(5);
     expect(b.toString()).toBe("bacon");

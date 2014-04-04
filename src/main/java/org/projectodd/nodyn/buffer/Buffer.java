@@ -28,8 +28,8 @@ public class Buffer extends DynObject {
     public Buffer(GlobalObject globalObject, DynArray items) {
         this(globalObject, "", Types.toUint32(null, items.get(null, "length")), Encoding.UTF8);
         for(int i=0; i<length; i++) {
-            String c = Types.toString(null, items.get(null, "" + i));
-            delegate.appendString(c);
+            byte b = Types.toInt32( null, items.get( null, "" + i ) ).byteValue();
+            delegate.appendByte( b );
         }
     }
 
