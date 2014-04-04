@@ -105,7 +105,7 @@ describe("crypto module", function() {
       expect(hmac.digest('hex')).toBe('35c01c110092e5dcf9dcf4ca73dfd2ebc1e7b6a69de8036336b3afec8027e74858ebda7ff5061d8b8985189c6061d65c0c9a05c06c6b972d6113743e578faa17');
   });
 
-  xit('should pass testBase64MD5HmacDigest', function() {
+  it('should pass testBase64MD5HmacDigest', function() {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('md5', key);
       hmac.update('Where the skies are so blue ');
@@ -113,7 +113,7 @@ describe("crypto module", function() {
       expect(hmac.digest('base64')).toBe('9B5ohAJcK6YSaN9lPOFssw==');
   });
 
-  xit('should pass testBase64SHA1HmacDigest', function() {
+  it('should pass testBase64SHA1HmacDigest', function() {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('sha1', key);
       hmac.update('Where the skies are so blue ');
@@ -121,7 +121,7 @@ describe("crypto module", function() {
       expect(hmac.digest('base64')).toBe('bw3/sbPPi2EnZIcyI+6wStgftQc=');
   });
 
-  xit('should pass testBase64SHA256HmacDigest', function() {
+  it('should pass testBase64SHA256HmacDigest', function() {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('sha256', key);
       hmac.update('Where the skies are so blue ');
@@ -129,7 +129,7 @@ describe("crypto module", function() {
       expect(hmac.digest('base64')).toBe('orejSxzuXB23Q7pT1anvuEbiN9URQE0N+mOspf0aKG8=');
   });
 
-  xit('should pass testBase64SHA512HmacDigest', function() {
+  it('should pass testBase64SHA512HmacDigest', function() {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('sha512', key);
       hmac.update('Where the skies are so blue ');
