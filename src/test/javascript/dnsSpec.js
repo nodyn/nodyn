@@ -3,7 +3,7 @@ var dns        = require('dns');
 describe('The dns module', function() {
 
   var server     = null; // server instance set in prepareDns
-  var DnsServer  = org.vertx.testtools.TestDnsServer;
+  var DnsServer  = org.projectodd.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
     helper.testComplete(false);

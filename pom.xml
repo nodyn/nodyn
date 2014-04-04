@@ -59,13 +59,13 @@
 
     <!-- dependency versions -->
     <version.junit>4.7</version.junit>
-    <!-- TODO: Remove the netty dependency (QueryString) -->
+    <!-- TODO: Update the netty dependency (QueryString) -->
     <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.1RC1</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
-    <version.testtools>2.0.3-final</version.testtools>
     <version.lang-js.verticle>1.1.0-SNAPSHOT</version.lang-js.verticle>
     <version.dynjs>0.2.3-SNAPSHOT</version.dynjs>
+    <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
 
@@ -145,15 +145,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert</artifactId>
-      <version>1.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>testtools</artifactId>
-      <version>${version.testtools}</version>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-protocol-dns</artifactId>
+      <version>${version.apacheds}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
