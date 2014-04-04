@@ -1,7 +1,7 @@
-package org.projectodd.nodyn.integration;
+package org.projectodd.nodyn.buffer;
 
 /*
- * Copyright 2013 Red Hat, Inc.
+ * Copyright 2014 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -15,42 +15,30 @@ package org.projectodd.nodyn.integration;
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author <a href="http://lanceball.com">Lance Ball</a>
  */
-
-import org.vertx.testtools.ScriptClassRunner;
-import org.vertx.testtools.TestVerticleInfo;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.UnsupportedEncodingException;
 
 /**
- * This is dummy JUnit test class which is used to run any JavaScript test
- * scripts as JUnit tests.
- * 
- * The scripts go in src/test/resources.
+ * Some test fixtures for bufferSpec.js
  */
-@TestVerticleInfo(filenameFilter = ".+x_test\\.js", funcRegex = "\\n[\\s]+(test[^\\s(]+):[\\s]+function")
-@RunWith(ScriptClassRunner.class)
-public class IntegrationTests {
+public class BufferHarness {
     public static final String TEST_STRING = "Now is the winter of our discontent made glorious summer";
     public static byte[] UTF8_BYTE_STRING;
     public static byte[] ASCII_BYTE_STRING;
     public static byte[] UTF8_TEST_WRITE_BUFFER;
 
-    @Test
-    public void __vertxDummy() {
-        try {
-            UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
-            ASCII_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");
-            
-            UTF8_TEST_WRITE_BUFFER = "½ + ¼ = ¾".getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    static {
+      try {
+        UTF8_BYTE_STRING = TEST_STRING.getBytes("UTF-8");
+        ASCII_BYTE_STRING = TEST_STRING.getBytes("US-ASCII");;
+        UTF8_TEST_WRITE_BUFFER = "½ + ¼ = ¾".getBytes("UTF-8");
+      } catch(Exception e) {
+        System.err.println("ERROR: Cannot instantiate test fixtures.");
+      }
     }
-    
+
     public static byte[] toBytes(String string) {
     	return string.getBytes();
     }
