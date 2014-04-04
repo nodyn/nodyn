@@ -4,7 +4,7 @@
   <groupId>org.projectodd</groupId>
   <artifactId>nodyn</artifactId>
   <version>0.1.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>Nodyn</name>
   <url>http://nodyn.io/</url>
 
@@ -67,6 +67,9 @@
     <version.lang-js.verticle>1.1.0-SNAPSHOT</version.lang-js.verticle>
     <version.dynjs>0.2.3-SNAPSHOT</version.dynjs>
     <version.commons.lang>3.1</version.commons.lang>
+    <version.jasmine>0.0.12</version.jasmine>
+
+    <test.pattern>**/*Spec.js</test.pattern>
   </properties>
 
   <repositories>
@@ -117,7 +120,22 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <version>${version.vertx}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-platform</artifactId>
+      <version>${version.vertx}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
       <artifactId>lang-js</artifactId>
+      <version>${version.lang-js.verticle}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>lang-dynjs</artifactId>
       <version>${version.lang-js.verticle}</version>
     </dependency>
     <dependency>
@@ -138,12 +156,28 @@
       <version>${version.testtools}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.dynjs</groupId>
+      <artifactId>dynjs</artifactId>
+      <version>${version.dynjs}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.akiellor.jasmine</groupId>
+      <artifactId>jasmine-cli</artifactId>
+      <version>${version.jasmine}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.dynjs</groupId>
+          <artifactId>dynjs</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.projectodd.rephract</groupId>
+          <artifactId>rephract</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
-
-  <modules>
-    <module>nodyn-verticle</module>
-    <module>nodyn-standalone</module>
-  </modules>
 
   <profiles>
     <profile>
@@ -239,6 +273,58 @@
           <target>1.7</target>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${maven.assembly.plugin.version}</version>
+        <configuration>
+          <attach>true</attach>
+          <descriptors>
+            <descriptor>src/main/assembly/assembly.xml</descriptor>
+          </descriptors>
+          <attach>true</attach>
+        </configuration>
+        <executions>
+          <execution>
+            <id>assemble</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>Jasmine Integration Tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.jasmine.cli.Main</mainClass>
+              <classpathScope>test</classpathScope>
+              <systemPropertyVariables>
+                <dynjs.compile.mode>OFF</dynjs.compile.mode>
+              </systemPropertyVariables>
+              <arguments>
+                <argument>--format</argument>
+                <argument>DOC</argument>
+                <argument>--pattern</argument>
+                <argument>${test.pattern}</argument>
+                <argument>--compile-mode</argument>
+                <argument>OFF</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

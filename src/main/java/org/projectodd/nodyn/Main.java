@@ -58,7 +58,7 @@ public class Main {
         try {
             parser.parseArgument(arguments);
 
-            if (dynJsArguments.isHelp() || dynJsArguments.isEmpty()) {
+            if (dynJsArguments.isHelp()) { // || dynJsArguments.isEmpty()) {
                 showUsage();
             } else if (dynJsArguments.getFilename() != null) {
                 executeFile(dynJsArguments.getFilename());
