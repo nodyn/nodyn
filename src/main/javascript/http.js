@@ -2,190 +2,189 @@ var url   = NativeRequire.require('url');
 var net   = NativeRequire.require('net');
 var util  = NativeRequire.require('util');
 var http  = NativeRequire.require('vertx/http');
-var timer = NativeRequire.require('vertx/timer');
+var Timer = NativeRequire.require('vertx/timer');
+var nodyn = NativeRequire.require('nodyn');
 
 var EventEmitter = require('events').EventEmitter;
 
 function WebServer(requestListener) {
-  var that   = this;
-  that.proxy = http.createHttpServer();
-
-  // default socket timeout value (2 minutes)
-  that.timeout = 120000;
-  that.timeoutId = null;
+  this.proxy = http.createHttpServer();
 
   // default limit for incoming headers
   // TODO: Actually implement limits
-  that.maxHeadersCount = 1000;
+  this.maxHeadersCount = 1000;
 
   if (requestListener) {
-    that.on('request', requestListener);
+    this.on('request', requestListener);
   }
 
-  that.close = function(callback) {
-    if (callback) { that.on('close', callback); }
-    that.proxy.close(function() {
-      that.emit('close');
-    });
-  };
-
-  // port, [hostname], [callback]
-  that.listen = function() {
-    callback = null;
-    host = '0.0.0.0';
-    port = arguments[0];
-    lastArg = arguments[arguments.length - 1];
-
-    if (typeof lastArg  == 'function') {
-      callback = lastArg;
-    }
-    if (typeof arguments[1]  == 'string') {
-      host = arguments[1];
-    }
-
-    // activate the 'listening' callback
-    if (callback) { that.on('listening', callback); }
-
-    // setup a connection handler in vert.x
-    that.proxy.requestHandler( function(request) {
-      if (request.method() !== 'HEAD') {
-        request.response.chunked(true);
-      }
-      var incomingMessage = new IncomingMessage(request);
-      var serverResponse  = new ServerResponse(request.response);
-
-      if (request.headers().get('Connection') === 'Upgrade') {
-        handleUpgrade(incomingMessage);
-      }
-      else if (request.headers().get('Expect') == '100-Continue') {
-        if (that.listeners('checkContinue').length > 0) {
-          that.emit('checkContinue', incomingMessage, serverResponse);
-        }
-      }
-      else if (request.method() === 'CONNECT') {
-        handleConnect(incomingMessage, serverResponse);
-      } else {
-        that.emit('request', incomingMessage, serverResponse);
-      }
-
-      // handle incoming data
-      request.dataHandler(function(buffer) {
-        incomingMessage.emit('data', buffer);
-      });
-
-      request.endHandler(function() {
-        incomingMessage.emit('end');
-      });
-    });
-
-    // listen for incoming connections
-    that.proxy.listen(port, host, function() {
-      that.emit('listening');
-    });
-  };
-
-  that.setTimeout = function(msec, callback) {
-    if (that.timeoutId) {
-      timer.cancelTimer(that.timeoutId);
-      that.removeAllListeners('timeout');
-    }
-    that.on('timeout', function() {
-      callback(that);
-    });
-    that.timeoutId = timer.setTimer(msec, function() {
-      that.emit('timeout');
-    });
-  };
-
-  that.setTimeout(that.timeout, function() {
-    that.close();
-  });
-
-  function handleUpgrade(incomingMessage) {
-    // Bypass vert.x's builtin websocket handler and let the poor node.js
-    // developers do all the hard work on their own.
-    if (that.listeners('upgrade').length > 0) {
-      that.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
-    } else {
-      // If nobody is listening for an upgrade event, then the
-      // connection is closed, per the Node.js API
-      socket.end();
-    }
-  }
-
-  function handleConnect(incomingMessage, serverResponse) {
-    if (that.listeners('connect').length > 0) {
-      that.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
-    } else {
-      // close the connection per the node.js api
-      serverResponse.emit('close');
-      serverResponse.end();
-    }
-  }
+  // default socket timeout value (2 minutes)
+  this.timeout = 120000;
+  this.setTimeout(this.timeout, function() {
+    this.close();
+  }.bind(this));
+  this.timeoutId = null;
 }
-util.inherits(WebServer, EventEmitter);
+
+WebServer.prototype.setTimeout = function(msec, callback) {
+  if (this.timeoutId) {
+    Timer.cancelTimer(this.timeoutId);
+    this.removeAllListeners('timeout');
+  }
+  this.on('timeout', function() {
+    callback(this);
+  }.bind(this));
+  this.timeoutId = Timer.setTimer(msec, function() {
+    this.emit('timeout');
+  }.bind(this));
+};
+
+WebServer.prototype.close = function(callback) {
+  if (callback) { this.on('close', callback); }
+  this.proxy.close(function() {
+    this.emit('close');
+  }.bind(this));
+};
+
+WebServer.prototype.listen = function(port /*, hostname, callback */) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  var last = args.pop();
+  var host = '0.0.0.0';
+
+  switch(typeof last) {
+    case 'function':
+      // activate the 'listening' callback
+      this.on('listening', last);
+      host = args.pop() || host;
+      break;
+    case 'string':
+      host = last;
+      break;
+  }
+
+  // setup a connection handler in vert.x
+  this.proxy.requestHandler( function(request) {
+    if (request.method() !== 'HEAD') {
+      request.response.chunked(true);
+    }
+    var incomingMessage = new IncomingMessage(request);
+    var serverResponse  = new ServerResponse(request.response);
+
+    if (request.headers().get('Connection') === 'Upgrade') {
+      handleUpgrade(this, incomingMessage);
+    }
+    else if (request.headers().get('Expect') == '100-Continue') {
+      if (this.listeners('checkContinue').length > 0) {
+        this.emit('checkContinue', incomingMessage, serverResponse);
+      }
+    }
+    else if (request.method() === 'CONNECT') {
+      handleConnect(this, incomingMessage, serverResponse);
+    } else {
+      this.emit('request', incomingMessage, serverResponse);
+    }
+
+    // handle incoming data
+    request.dataHandler(function(buffer) {
+      incomingMessage.emit('data', buffer);
+    });
+
+    request.endHandler(function() {
+      incomingMessage.emit('end');
+    });
+  }.bind(this));
+
+  // listen for incoming connections
+  this.proxy._to_java_server().listen(port, host, function(future) {
+    if (future.succeeded()) this.emit('listening');
+    else {
+      this.emit('error', new Error(future.cause().message()));
+      this.close();
+    }
+
+  }.bind(this));
+};
+
+nodyn.makeEventEmitter(WebServer);
 module.exports.Server = WebServer;
 
+module.exports.createServer = function(requestListener) {
+  return new WebServer(requestListener);
+};
+
+function handleUpgrade(server, incomingMessage) {
+  // Bypass vert.x's builtin websocket handler and let the poor node.js
+  // developers do all the hard work on their own.
+  if (server.listeners('upgrade').length > 0) {
+    server.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
+  } else {
+    // If nobody is listening for an upgrade event, then the
+    // connection is closed, per the Node.js API
+    incomingMessage.socket.end();
+  }
+}
+
+function handleConnect(server, incomingMessage, serverResponse) {
+  if (server.listeners('connect').length > 0) {
+    server.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
+  } else {
+    // close the connection per the node.js api
+    serverResponse.emit('close');
+    serverResponse.end();
+  }
+}
+
+
 function IncomingMessage(proxy) {
-  var that  = this;
-
-  this.encoding  = 'UTF-8';
-  this.headers   = {};
-  this.pause     = function() { proxy.pause(); };
-  this.resume    = function() { proxy.resume(); };
-
+  this.encoding    = 'UTF-8';
+  this.headers     = {};
+  this.trailers    = {};
+  this.pause       = function() { proxy.pause(); };
+  this.resume      = function() { proxy.resume(); };
   this.__socket    = new net.Socket();
   this.__hasSocket = false;
 
-  // Defer getting the socket from proxy until it's
-  // first requested. 
+  // Defer getting the socket from proxy until it's first requested. 
   Object.defineProperty(this, "socket", {
     get: function() {
-           if (!that.__hasSocket) {
-             that.__socket.setProxy(proxy.netSocket());
+           if (!this.__hasSocket) {
+             this.__socket.setProxy(proxy.netSocket());
            }
-           return that.__socket;
-         },
+           return this.__socket;
+         }.bind(this),
     set: function() {}, // can't set it 
     configurable: true,
     enumerable: true });
 
-  this.setEncoding = function(enc) {
-    try {
-      that.encoding = java.nio.charset.Charset.forName(enc).toString();
-    } catch(err) {
-      console.error("Cannot find message encoding for: " + enc);
-      console.error(err);
-    }
-  };
-
   // set the headers based on what's in the proxy
   proxy.headers().forEach(function (name, value) {
-    if (that.headers[name]) {
-      that.headers[name] = that.headers[name] + "; " + value;
+    if (this.headers[name]) {
+      this.headers[name] = this.headers[name] + "; " + value;
     } else {
-      that.headers[name] = value;
+      this.headers[name] = value;
     }
-  });
+  }.bind(this));
 
-  // setup our vertx handlers
+  // when data arrives, emit an event
   proxy.dataHandler(function(buffer) {
-    that.emit('data', buffer.toString(that.encoding));
-  });
+    this.emit('data', buffer.toString(this.encoding));
+  }.bind(this));
+
+  // when the request/response ends make sure we deal with any
+  // trailers that are a part of the message, then emit an end event
   proxy.endHandler(function() {
     if (proxy.trailers) {
       // make sure we have all the trailers from the response object
-      that.trailers = {};
       proxy.trailers().forEach(function (name, value) {
-        if (that.trailers[name]) {
-          that.trailers[name] = that.trailers[name] + "; " + value;
+        if (this.trailers[name]) {
+          this.trailers[name] = this.trailers[name] + "; " + value;
         } else {
-          that.trailers[name] = value;
+          this.trailers[name] = value;
         }
-      });
+      }.bind(this));
     }
-    that.emit('end');
-  });
+    this.emit('end');
+  }.bind(this));
 
   // Node.js uses IncomingMessage for both the server and the client
   // That makes this class a little bulky as we check the type
@@ -193,144 +192,154 @@ function IncomingMessage(proxy) {
   if (proxy.statusCode) {
     // it's a client response message
     // vert.x HttpClientResponse
-    that.statusCode = proxy.statusCode();
+    this.statusCode = proxy.statusCode();
   } else {
     // It's a server request message
     // vert.x HttpServerRequest
-    that.url = proxy.uri();
-    that.method = proxy.method();
+    this.url = proxy.uri();
+    this.method = proxy.method();
     if (proxy.version && proxy.version() === "HTTP_1_1") {
-      that.httpMajorVersion = 1;
-      that.httpMinorVersion = 1;
-      that.httpVersion = "1.1";
+      this.httpMajorVersion = 1;
+      this.httpMinorVersion = 1;
+      this.httpVersion = "1.1";
     } else {
-      that.httpMajorVersion = 1;
-      that.httpMinorVersion = 0;
-      that.httpVersion = "1.0";
+      this.httpMajorVersion = 1;
+      this.httpMinorVersion = 0;
+      this.httpVersion = "1.0";
     }
   }
 }
-util.inherits(IncomingMessage, EventEmitter);
+
+IncomingMessage.prototype.setEncoding = function(enc) {
+  try {
+    this.encoding = java.nio.charset.Charset.forName(enc).toString();
+  } catch(err) {
+    console.error("Cannot find message encoding for: " + enc);
+    console.error(err);
+  }
+};
+
+nodyn.makeEventEmitter(IncomingMessage);
 module.exports.IncomingMessage = IncomingMessage;
 
-function ServerResponse(vertxResponse) {
-  var that         = this;
-  var proxy        = vertxResponse;
-  that.sendDate    = true;
-  that.headersSent = false;
-
-  that.end = function() {
-    if (!that.headersSent) {
-      that.writeHead();
-    }
-    proxy.end.apply(proxy, arguments);
-  };
-
-  that.writeHead = function() {
-    if (!that.headersSent) {
-      reasonPhrase = null;
-      statusCode   = arguments[0];
-      headers      = {};
-
-      if (typeof arguments[1]  == 'string') {
-        reasonPhrase = arguments[1];
-        if (arguments[2]) {
-          headers = arguments[2];
-        }
-      } else if (typeof arguments[1]  == 'object') {
-        headers = arguments[1];
-      }
-      for( var header in headers ) {
-        that.setHeader(header, headers[header]);
-      }
-      if (statusCode) {
-        proxy.statusCode(statusCode);
-      }
-      if (reasonPhrase) {
-        proxy.statusMessage(reasonPhrase);
-      }
-      // default HTTP date header
-      if (!proxy.headers().get('Date')) {
-        that.setHeader('Date', new Date().toUTCString());
-      }
-      if (that.getHeader('Content-Length')) {
-        proxy.chunked(false);
-      }
-      that.headersSent = true;
-    }
-  };
-
-  // response.write(chunk, [encoding])
-  that.write = function() {
-    var length = 0;
-    var chunk  = arguments[0];
-    var encode = "UTF-8";
-    if (!that.headersSent) {
-      that.writeHead();
-    }
-    if (typeof arguments[1] == 'string') {
-      encode = arguments[1];
-    }
-    proxy.write(chunk, encode);
-  };
-
-  that.getHeader = function(name) {
-    return proxy.headers().get(name);
-  };
-
-  that.setHeader = function(name, value) {
-    proxy.putHeader(name, value.toString());
-  };
-
-  that.removeHeader = function(name) {
-    proxy.headers().remove(name);
-  };
-
-  that.addTrailers = function(trailers) {
-    for( var header in trailers ) {
-      proxy.putTrailer(header, trailers[header]);
-    }
-  };
-
+function ServerResponse(proxy) {
+  this.proxy       = proxy;
+  this.sendDate    = true;
+  this.headersSent = false;
 }
-util.inherits(ServerResponse, EventEmitter);
+
+ServerResponse.prototype.end = function( /* data, encoding */ ) {
+  if (!this.headersSent) {
+    this.writeHead();
+  }
+  this.proxy.end.apply(this.proxy, arguments);
+};
+
+ServerResponse.prototype.writeHead = 
+function( statusCode /*, reasonPhrase, headers */) {
+  var args = Array.prototype.slice.call(arguments, 1),
+      reasonPhrase = null,
+      headers = {};
+
+  var last = args.pop();
+  switch(typeof last) {
+    case 'object':
+      reasonPhrase = args.pop();
+      headers = last;
+      break;
+    case 'string':
+      reasonPhrase = last;
+      break;
+  }
+
+  if (!this.headersSent) {
+    this.proxy.statusCode(statusCode);
+    for( var header in headers ) {
+      this.setHeader(header, headers[header]);
+    }
+    if (reasonPhrase) {
+      this.proxy.statusMessage(reasonPhrase);
+    }
+    // default HTTP date header
+    if (!this.proxy.headers().get('Date')) {
+      this.setHeader('Date', new Date().toUTCString());
+    }
+    if (this.getHeader('Content-Length')) {
+      this.proxy.chunked(false);
+    }
+    this.headersSent = true;
+  }
+};
+
+ServerResponse.prototype.write = function(chunk, encoding) {
+  var length = 0,
+      encode = encoding || "UTF-8";
+  if (!this.headersSent) this.writeHead(); 
+  this.proxy.write(chunk, encode);
+};
+
+ServerResponse.prototype.getHeader = function(name) {
+  return this.proxy.headers().get(name);
+};
+
+ServerResponse.prototype.setHeader = function(name, value) {
+  this.proxy.putHeader(name, value.toString());
+};
+
+ServerResponse.prototype.removeHeader = function(name) {
+  this.proxy.headers().remove(name);
+};
+
+ServerResponse.prototype.addTrailers = function(trailers) {
+  for( var header in trailers ) {
+    this.proxy.putTrailer(header, trailers[header]);
+  }
+};
 
 ServerResponse.prototype.writeContinue = function() {
   this.setHeader('Status', '100 (Continue)');
   this.writeHead();
 };
 
+nodyn.makeEventEmitter(ServerResponse);
 module.exports.ServerResponse = ServerResponse;
 
-function ClientRequest(vertxRequest) {
-  var that      = this;
-  var proxy     = vertxRequest;
-  var timeoutId = null;
-
-  that.end = proxy.end;
-  that.write = function() {
-    proxy.write.apply(proxy, arguments);
-  };
-  that.abort = that.end; // not really a true abort
-
-  that.setTimeout = function(msec, timeout) {
-    if (timeoutId) {
-      timer.cancelTimer(timeoutId);
-    }
-    if (msec > 0) {
-      if (timeout) {
-        that.on('timeout', timeout);
-      }
-      timeoutId = timer.setTimer(msec, function() { that.emit('timeout'); });
-    }
-  };
-
+function ClientRequest(proxy) {
+  this.proxy = proxy;
+  this.timeoutId = null;
   // TODO: These methods are not available on a
   // vert.x HttpClientRequest...
-  that.setNoDelay = function() {};
-  that.setSocketKeepAlive = function() {};
+  this.setNoDelay = function() {};
+  this.setSocketKeepAlive = function() {};
 }
-util.inherits(ClientRequest, EventEmitter);
+
+ClientRequest.prototype.write = function() {
+  this.proxy.write.apply(this.proxy, arguments);
+};
+
+ClientRequest.prototype.end = function() {
+  this.proxy.end.apply(this.proxy, arguments);
+};
+
+ClientRequest.prototype.abort = function() {
+  this.proxy.end.apply(this.proxy, arguments);
+};
+
+ClientRequest.prototype.setTimeout = function(msec, timeout) {
+  if (this.timeoutId) {
+    Timer.cancelTimer(this.timeoutId);
+  }
+  if (msec > 0) {
+    if (timeout) {
+      this.on('timeout', timeout);
+    }
+    this.timeoutId = Timer.setTimer(msec, function() { 
+      this.emit('timeout'); 
+    }.bind(this));
+  }
+};
+
+nodyn.makeEventEmitter(ClientRequest);
 module.exports.ClientRequest = ClientRequest;
 
 var DefaultRequestOptions = {
@@ -341,10 +350,6 @@ var DefaultRequestOptions = {
   port:     80
 };
 
-
-module.exports.createServer = function(requestListener) {
-  return new WebServer(requestListener);
-};
 
 module.exports.get = function(options, callback) {
   options.method = 'GET';
