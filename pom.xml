@@ -209,6 +209,11 @@
   </profiles>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/javascript</directory>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
