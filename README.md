@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/projectodd/nodyn.png)](http://travis-ci.org/projectodd/nodyn)
+[![Build Status](https://secure.travis-ci.org/nodyn/nodyn.png)](http://travis-ci.org/nodyn/nodyn)
 
 [![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/)
 
@@ -68,7 +68,7 @@ provided by Vert.x
 
 To build nodyn from source, check out the repo, and run `mvn install`.
 
-    $ git clone https://github.com/projectodd/nodyn.git
+    $ git clone https://github.com/nodyn/nodyn.git
     $ cd nodyn
     $ mvn install
 
