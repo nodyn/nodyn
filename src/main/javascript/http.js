@@ -2,7 +2,6 @@ var url   = NativeRequire.require('url');
 var net   = NativeRequire.require('net');
 var util  = NativeRequire.require('util');
 var http  = NativeRequire.require('vertx/http');
-var Timer = NativeRequire.require('vertx/timer');
 var nodyn = NativeRequire.require('nodyn');
 
 var EventEmitter = require('events').EventEmitter;
@@ -13,30 +12,30 @@ function WebServer(requestListener) {
   // default limit for incoming headers
   // TODO: Actually implement limits
   this.maxHeadersCount = 1000;
+  // default socket timeout value (2 minutes)
+  this.timeout   = 120000;
+  this.timeoutId = null;
 
   if (requestListener) {
     this.on('request', requestListener);
   }
 
-  // default socket timeout value (2 minutes)
-  this.timeout = 120000;
   this.setTimeout(this.timeout, function() {
     this.close();
   }.bind(this));
-  this.timeoutId = null;
 }
 
 WebServer.prototype.setTimeout = function(msec, callback) {
   if (this.timeoutId) {
-    Timer.cancelTimer(this.timeoutId);
+    clearTimeout(this.timeoutId);
     this.removeAllListeners('timeout');
   }
   this.on('timeout', function() {
     callback(this);
   }.bind(this));
-  this.timeoutId = Timer.setTimer(msec, function() {
+  this.timeoutId = setTimeout(function() {
     this.emit('timeout');
-  }.bind(this));
+  }.bind(this), msec);
 };
 
 WebServer.prototype.close = function(callback) {
@@ -327,15 +326,15 @@ ClientRequest.prototype.abort = function() {
 
 ClientRequest.prototype.setTimeout = function(msec, timeout) {
   if (this.timeoutId) {
-    Timer.cancelTimer(this.timeoutId);
+    cancelTimeout(this.timeoutId);
   }
   if (msec > 0) {
     if (timeout) {
       this.on('timeout', timeout);
     }
-    this.timeoutId = Timer.setTimer(msec, function() { 
+    this.timeoutId = setTimeout(function() { 
       this.emit('timeout'); 
-    }.bind(this));
+    }.bind(this), msec);
   }
 };
 
@@ -385,7 +384,7 @@ var httpRequest = module.exports.request = function(options, callback) {
 
   // The vert.x request
   var request = proxy.request(options.method, options.path, function(resp) {
-    incomingMessage = new IncomingMessage(resp);
+    var incomingMessage = new IncomingMessage(resp);
     // Allow node.js style websockets (i.e. direct socket connection)
     if (resp.headers().get('Connection') === "Upgrade") {
       if (clientRequest.listeners('upgrade').length > 0) {

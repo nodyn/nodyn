@@ -13,7 +13,8 @@ __dirname  = (typeof __dirname === 'undefined') ?
 vertx     = NativeRequire.require('vertx');
 process   = NativeRequire.require('process');
 console   = NativeRequire.require('node_console');
-timer     = vertx.timer;
+
+Timer     = vertx.timer;
 container = vertx.container;
 require   = require;
 
@@ -37,14 +38,14 @@ setTimeout = function() {
   if (typeof args[1] != 'number') {
     throw "setTimeout requires a number as the second argument";
   }
-  callback = args[0];
-  milliseconds = args[1];
+  var callback = args[0];
+  var milliseconds = args[1];
   if (milliseconds === 0) milliseconds = 1;
 
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return timer.setTimer(milliseconds, function() {
+  return Timer.setTimer(milliseconds, function() {
     callback.apply(callback, args);
   });
 };
@@ -64,13 +65,13 @@ setInterval = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return timer.setPeriodic(milliseconds, function() {
+  return Timer.setPeriodic(milliseconds, function() {
     callback.apply(callback, args);
   });
 };
 
 clearTimeout = function(id) {
-  timer.cancelTimer(id);
+  Timer.cancelTimer(id);
 };
 
 clearInterval = clearTimeout;
