@@ -25,7 +25,7 @@ as as a [language module](http://vertx.io/language_support.html) in Vert.x.
 
 Nodyn doesn't yet have an initial release. Until then, to use it, you will need
 to build from source or download a CI SNAPSHOT from
-[Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn-standalone/0.1.1-SNAPSHOT/).
+[Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn/0.1.1-SNAPSHOT/).
 Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary. 
 You can use the binary to start an application from a Javascript file, or use the
 REPL to experiment with small snippets of code on the command line.
