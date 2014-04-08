@@ -1,5 +1,4 @@
 var net           = NativeRequire.require('vertx/net');
-var timer         = NativeRequire.require('vertx/timer');
 var util          = NativeRequire.require('util');
 var Stream        = NativeRequire.require('stream');
 var EventEmitter  = NativeRequire.require('events').EventEmitter;
@@ -61,7 +60,7 @@ Server.prototype.listen = function() {
     this.addr.address   = this.proxy.host();
     this.emit('listening');
   }.bind(this));
-}
+};
 
 Server.prototype.address = function() {
   return this.addr;
@@ -75,7 +74,7 @@ Server.prototype.close = function(callback) {
   this.proxy.close(function() {
     this.emit('close');
   }.bind(this));
-}
+};
 
 nodyn.makeEventEmitter(Server);
 module.exports.Server = Server;
@@ -120,7 +119,7 @@ Socket.prototype.setProxy = function(proxy) {
     }.bind(this));
   }
   return this;
-}
+};
 
 // Usage socket.connect(port, [host], [callback])
 Socket.prototype.connect = function(port, host, callback) {
@@ -138,7 +137,7 @@ Socket.prototype.connect = function(port, host, callback) {
     this.emit('connect', this);
   }.bind(this));
   return this;
-}
+};
 
 // Usage socket.write(string, [encoding], [callback])
 Socket.prototype.write = function() {
@@ -162,13 +161,13 @@ Socket.prototype.write = function() {
     }
     // what is passed could be a buffer
     this.proxy.write(string.toString(), encoding);
-}
+};
 
 Socket.prototype.destroy = function() {
   this.proxy.close(function() {
     this.emit('close');
   }.bind(this));
-}
+};
 
 Socket.prototype.end = function(data, encoding) {
   if (data) {
@@ -180,7 +179,7 @@ Socket.prototype.end = function(data, encoding) {
     this.destroy();
     this.emit('end');
   }
-}
+};
 
 Socket.prototype.destroySoon = Socket.prototype.end;
 
@@ -194,28 +193,28 @@ Socket.prototype.pause = function() {
 
 Socket.prototype.resume = function() {
   this.proxy.resume();
-}
+};
 
 Socket.prototype.setTimeout = function(msec, timeout) {
   if (this.timeoutId) {
-    timer.cancelTimer(this.timeoutId);
+    clearTimeout(this.timeoutId);
     this.removeAllListeners('timeout');
   }
   if (msec > 0 && timeout) {
     this.on('timeout', timeout);
-    this.timeoutId = timer.setTimer(msec, function() {
+    this.timeoutId = setTimeout(function() {
       this.emit('timeout');
-    }.bind(this));
+    }.bind(this), msec);
   }
-}
+};
 
 Socket.prototype.setNoDelay = function(bool) {
   this.noDelay = (bool === undefined ? true : bool);
-}
+};
 
 Socket.prototype.setKeepAlive = function(bool) {
   this.keepAlive = (bool === undefined ? true : bool);
-}
+};
 
 Socket.prototype.ref = function() {};
 Socket.prototype.unref = function() {};

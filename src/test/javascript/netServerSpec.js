@@ -111,10 +111,10 @@ describe( "net.Server", function() {
     });
     server.listen(8800, function() {
       socket = net.connect(8800, function() {
-        timer.setTimer(500, function() {
+        setTimeout(function() {
           server.close();
           helper.testComplete(true);
-        });
+        }, 500);
       });
      });
     waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
