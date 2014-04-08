@@ -17,7 +17,7 @@ describe( "net.Server", function() {
   });
 
   it("should fire a 'listening' event", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.listen(8800, function() {
       server.close();
       helper.testComplete(true);
@@ -26,7 +26,7 @@ describe( "net.Server", function() {
   });
 
   it("should fire a 'close' event registered prior to close()", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.on('close', function(e) {
       helper.testComplete(true);
     });
@@ -38,7 +38,7 @@ describe( "net.Server", function() {
   });
 
   it("should fire a 'close' event on a callback passed to close()", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.listen(8800, function() {
       server.close(function() {
         helper.testComplete(true);
@@ -48,7 +48,7 @@ describe( "net.Server", function() {
   });
 
   it("should fire a 'connect' callback on client connection", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.listen(8800, function() {
       net.connect(8800, function(socket) {
         server.close();
@@ -60,8 +60,8 @@ describe( "net.Server", function() {
 
 
   it("should allow reading and writing from both client/server connections", function() {
-    completedCallback = false;
-    server = net.createServer();
+    var completedCallback = false;
+    var server = net.createServer();
     server.on('connection', function(socket) {
       socket.on('data', function(buffer) {
         expect(typeof buffer).toBe('object');
@@ -72,7 +72,7 @@ describe( "net.Server", function() {
       });
     });
     server.listen(8800, function() {
-      socket = net.connect(8800, function() {
+      var socket = net.connect(8800, function() {
         socket.write("crunchy bacon");
         socket.on('data', function(buffer) {
           expect(buffer.toString()).toBe('with chocolate');
@@ -87,7 +87,7 @@ describe( "net.Server", function() {
   });
 
   it("should support an idle socket timeout", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.on('connection', function(socket) {
       socket.setTimeout(10, function() {
         socket.destroy();
@@ -96,13 +96,13 @@ describe( "net.Server", function() {
       });
     });
     server.listen(8800, function() {
-      socket = net.connect(8800);
+      var socket = net.connect(8800);
     });
     waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
   });
 
   it("should allow cancellation of an idle socket timeout", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.on('connection', function(socket) {
       socket.setTimeout(300, function() {
         expect(true).toBe(false);
@@ -110,7 +110,7 @@ describe( "net.Server", function() {
       socket.setTimeout(0); // cancels the timeout we just set
     });
     server.listen(8800, function() {
-      socket = net.connect(8800, function() {
+      var socket = net.connect(8800, function() {
         setTimeout(function() {
           server.close();
           helper.testComplete(true);
@@ -122,7 +122,7 @@ describe( "net.Server", function() {
 
 
   it( "should provide a remote address", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.listen(8800, function() {
       net.connect(8800, function(socket) {
         expect(socket.remoteAddress).toBe('127.0.0.1');
@@ -136,17 +136,50 @@ describe( "net.Server", function() {
   });
 
   it( "should provide a server address", function() {
-    server = net.createServer();
+    var server = net.createServer();
     server.listen(8800, function() {
       net.connect(8800, function(socket) {
-        address = server.address();
+        var address = server.address();
         expect(address.port).toBe(8800);
         expect(address.address).toBe('0.0.0.0');
         expect(address.family).toBe('IPv4');
+        socket.destroy();
+        server.close();
         helper.testComplete(true);
       });
     });
     waitsFor(helper.testComplete, "waiting for server address to be checked", 3);
   });
 
+  it("should emit error events", function() {
+    var server = net.createServer();
+    var error  = new Error('phoney baloney');
+    waitsFor(helper.testComplete, "waiting for server to error", 3);
+
+    server.on('connection', function(socket) {
+      socket.on('data', function(buffer) {
+        expect(typeof buffer).toBe('object');
+        expect(buffer.toString()).toBe('crunchy bacon');
+        socket.write('with chocolate');
+        socket.emit('error', error);
+        socket.destroy();
+      });
+    });
+
+    server.on('error', function(e) {
+      expect(e).toBe(error);
+      helper.testComplete(true);
+    });
+
+    server.listen(8800, function() {
+      var socket = net.connect(8800, function() {
+        socket.write("crunchy bacon");
+        socket.on('data', function(buffer) {
+          expect(buffer.toString()).toBe('with chocolate');
+          socket.destroy();
+          server.close();
+        });
+      });
+    });
+  });
 });

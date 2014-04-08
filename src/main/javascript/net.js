@@ -24,10 +24,16 @@ function Server( connectionListener ) {
 
   // setup a connection handler in vert.x
   this.proxy.connectHandler( function(sock) {
-    nodeSocket = new Socket();
-    nodeSocket.setProxy(sock);
     // TODO: This is a hack, methinks
     this.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
+
+    var nodeSocket = new Socket();
+    nodeSocket.setProxy(sock);
+
+    nodeSocket.on('error', function(e) { 
+      this.emit('error', e);
+    }.bind(this));
+
     this.emit('connection', nodeSocket);
   }.bind(this));
 }
@@ -123,6 +129,11 @@ Socket.prototype.setProxy = function(proxy) {
       this.emit('end', this);
     }.bind(this));
   }
+  if (this.proxy.exceptionHandler) {
+    this.proxy.exceptionHandler( function(err) {
+      this.emit('error', err);
+    }.bind(this));
+  }
   return this;
 };
 
@@ -160,6 +171,7 @@ Socket.prototype.write = function() {
 
     if (callback) {
       this.proxy.drainHandler(function() {
+        this.emit('drain');
         callback.apply(callback);
       }.bind(this));
     }

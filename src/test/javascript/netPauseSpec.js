@@ -58,8 +58,6 @@ describe('The net module', function() {
       }, 500);
 
       client.on('end', function() {
-        print('End received');
-        expect(N).toBe(recv.length);
         server.close();
         client.end();
         helper.testComplete(true);
