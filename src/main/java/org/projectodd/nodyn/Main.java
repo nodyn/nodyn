@@ -15,14 +15,11 @@
  */
 package org.projectodd.nodyn;
 
-import org.dynjs.Config;
 import org.dynjs.cli.Arguments;
-import org.dynjs.cli.Repl;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
-import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.projectodd.nodyn.buffer.BufferType;
@@ -32,102 +29,84 @@ import org.vertx.java.core.VertxFactory;
 
 import java.io.*;
 
-public class Main {
+public class Main extends org.dynjs.cli.Main {
 
-    private NodynArguments dynJsArguments;
+    public static final String WELCOME_MESSAGE = "nodyn console."
+            + System.lineSeparator()
+            + "Type exit and press ENTER or ^D to leave."
+            + System.lineSeparator();
+
+    private NodynArguments arguments;
     private CmdLineParser parser;
-    private String[] arguments;
-    private PrintStream stream;
-    private Config config;
-    private DynJS runtime;
     private Vertx vertx;
 
     public Main(PrintStream stream, String[] args) {
-        this.dynJsArguments = new NodynArguments();
-        this.parser = new CmdLineParser(dynJsArguments);
+        super(stream, args);
+        this.arguments = new NodynArguments();
+        this.parser = new CmdLineParser(arguments);
         this.parser.setUsageWidth(80);
-        this.arguments = args;
-        this.stream = stream;
     }
 
     public static void main(String[] args) throws IOException {
         new Main(System.out, args).run();
     }
 
-    void run() throws IOException {
-        try {
-            parser.parseArgument(arguments);
-
-            if (dynJsArguments.isHelp()) { // || dynJsArguments.isEmpty()) {
-                showUsage();
-            } else if (dynJsArguments.getFilename() != null) {
-                executeFile(dynJsArguments.getFilename());
-            } else if (dynJsArguments.isConsole()) {
-                startRepl();
-            } else if (dynJsArguments.isVersion()) {
-                showVersion();
-            }
-
-        } catch (CmdLineException e) {
-            stream.println(e.getMessage());
-            stream.println();
-            showUsage();
-        }
+    @Override
+    protected void showVersion() {
+        super.showVersion();
+        getOutputStream().println("Nodyn: " + Node.VERSION);
     }
 
-    private void executeFile(String filename) throws IOException {
-        try {
-            final File source = new File(filename);
-            GlobalObject globalObject = initializeRuntime();
-            globalObject.defineGlobalProperty("__filename", source.getName());
-            globalObject.defineGlobalProperty("__dirname", source.getParent());
-            runtime.newRunner().withSource(source).execute();
-        } catch (FileNotFoundException e) {
-            stream.println("File " + filename + " not found");
-        }
-    }
+    @Override
+    protected DynJS initializeRuntime() {
+        DynJS runtime = super.initializeRuntime();
 
-    private void showVersion() {
-        stream.println("dynjs " + DynJS.VERSION);
-    }
-
-    private void startRepl() {
-        GlobalObject globalObject = initializeRuntime();
-        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-        globalObject.defineGlobalProperty("__filename", "repl");
-        Repl repl = new Repl(runtime, System.in, stream, "Welcome to nodyn. ^D to exit.", "nodyn> ", System.getProperty("user.dir") + "/nodyn.log");
-        repl.run();
-    }
-
-    private void showUsage() {
-        StringBuilder usageText = new StringBuilder("Usage: nodyn [--console |--debug | --help | --version |FILE]\n");
-        usageText.append("Starts the nodyn console or executes FILENAME depending the parameters\n");
-        stream.println(usageText.toString());
-        parser.printUsage(stream);
-    }
-    
-    private GlobalObject initializeRuntime() {
-        config = dynJsArguments.getConfig();
-        config.setOutputStream(this.stream);
-        runtime = new DynJS(config);
-
-        if (dynJsArguments.isClustered()) {
+        if (arguments.isClustered()) {
             System.setProperty("vertx.clusterManagerFactory", "org.vertx.java.spi.cluster.impl.hazelcast.HazelcastClusterManagerFactory");
+            // TODO: Make this more configurable
             vertx = VertxFactory.newVertx("localhost");
         } else {
             vertx = VertxFactory.newVertx();
         }
+
         GlobalObject globalObject = runtime.getExecutionContext().getGlobalObject();
+        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+        globalObject.defineGlobalProperty("__filename", "repl"); // TODO: This should be a file name sometimes
         globalObject.defineGlobalProperty("__jvertx", vertx);
-        BufferType bufferType = new BufferType(globalObject);
+
         DynObject node = new DynObject(globalObject);
-        node.put("buffer", bufferType);
+        node.put("buffer", new BufferType(globalObject));
         node.put("QueryString", new QueryString(globalObject));
         globalObject.defineGlobalProperty("nodyn", node);
 
         initScript(runtime.getExecutionContext(), "npm_modules.js", runtime);
         initScript(runtime.getExecutionContext(), "node.js", runtime);
-        return globalObject;
+        return runtime;
+    }
+
+    @Override
+    protected String getBinaryName() {
+        return "nodyn";
+    }
+
+    @Override
+    protected CmdLineParser getParser() {
+        return this.parser;
+    }
+
+    @Override
+    protected Arguments getArguments() {
+        return this.arguments;
+    }
+
+    @Override
+    protected String getWelcomeMessage() {
+        return WELCOME_MESSAGE;
+    }
+
+    @Override
+    protected String getPrompt() {
+        return "nodyn> ";
     }
 
     private static void initScript(ExecutionContext context, String name, DynJS runtime) {
@@ -144,8 +123,6 @@ public class Main {
             System.err.println("[ERROR] Cannot initialize Nodyn.");
         }
     }
-
-
 
     class NodynArguments extends Arguments {
         static final String CLUSTERED = "--clustered";
