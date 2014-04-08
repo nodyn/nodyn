@@ -21,6 +21,37 @@ clustering your applications are a breeze.
 There are two ways to run Nodyn: as a standalone REPL with vertx embedded, or
 as as a [language module](http://vertx.io/language_support.html) in Vert.x.
 
+### Running Nodyn in Standalone Mode
+
+Nodyn doesn't yet have an initial release. Until then, to use it, you will need
+to build from source or download a CI SNAPSHOT from
+[Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn-standalone/0.1.1-SNAPSHOT/).
+Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary. 
+You can use the binary to start an application from a Javascript file, or use the
+REPL to experiment with small snippets of code on the command line.
+
+    $ ./bin/nodyn -h                                           ✭
+    usage: nodyn --ast --classpath (-cp) <FILE:FILE:...> --clustered --console --debug --eval (-e) EXPR --help (-h) --properties --version (-v)
+
+     ARGS                              : Arguments
+     --ast                             : Displays sources AST
+     --classpath (-cp) <FILE:FILE:...> : Append items to classpath
+     --clustered                       : run a clustered instance on the localhost
+     --console                         : Opens a REPL console.
+     --debug                           : Enables debug mode.
+     --eval (-e) EXPR                  : Evaluates the given expression
+     --help (-h)                       : Shows this help screen.
+     --properties                      : Shows config properties.
+     --version (-v)                    : Shows current dynjs version.
+
+It is possible to start a small cluster on a single machine by using the
+`--clustered` option. For example this will start the REPL in clustered mode.
+
+    $./bin/nodyn --clustered --console
+
+Execute this in multiple terminals to experiment with the clustered event bus
+provided by Vert.x
+
 ### Running Nodyn as a Vert.x Language Module
 
 By default, Vert.x runs Javascript applications using the Rhino Javascript
@@ -34,35 +65,6 @@ your project that looks like this.
 Make sure that you have Vert.x 2.x or better installed, and start your application.
 
     $ vertx run myApplication.js
-
-### Running Nodyn in Standalone Mode
-
-Nodyn doesn't yet have an initial release. Until then, to use it, you will need
-to build from source or download a CI SNAPSHOT from
-[Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn-standalone/0.1.1-SNAPSHOT/).
-Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary. 
-You can use the binary to start an application from a Javascript file, or use the
-REPL to experiment with small snippets of code on the command line.
-
-  $ ./bin/nodyn
-  Usage: nodyn [--console |--debug | --help | --version |FILE]
-  Starts the nodyn console or executes FILENAME depending the parameters
-
-   FILE        : File to be executed by dynjs
-   --clustered : Run a clustered instance on the localhost
-   --console   : Opens a REPL console to test small expressions.
-   --debug     : Run REPL in debug mode.
-   --help      : Shows current screen. Running without parameters also shows this.
-   --version   : Shows current dynjs version.
-
-It is possible to start a small cluster on a single machine by using the
-`--clustered` option. For example this will start the REPL in clustered mode.
-
-    $./bin/nodyn --clustered --console
-
-Execute this in multiple terminals to experiment with the clustered event bus
-provided by Vert.x
-
 
 ## Building Nodyn
 
