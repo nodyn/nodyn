@@ -1,8 +1,8 @@
 var url   = NativeRequire.require('url');
 var net   = NativeRequire.require('net');
 var util  = NativeRequire.require('util');
-var http  = NativeRequire.require('vertx/http');
 var nodyn = NativeRequire.require('nodyn');
+var http  = NativeRequire.require('vertx/http');
 
 var EventEmitter = require('events').EventEmitter;
 

@@ -1,10 +1,9 @@
 var helper    = require('specHelper');
 var net       = require('net');
 
-
 describe('The net module', function() {
-  // TODO: FIXME
-  xit('should handle pause and resume', function() {
+  it('should handle pause and resume on a socket', function() {
+    helper.testComplete(false);
     waitsFor(helper.testComplete, "The net pause/resume test", 10);
     var N = 200;
     var recv = '', chars_recved = 0;
@@ -31,22 +30,22 @@ describe('The net module', function() {
       });
 
       setTimeout(function() {
-        chars_recved = recv.length;
-        console.log('pause at: ' + chars_recved);
-        expect(chars_recved).toBeGreaterThan(1);
         client.pause();
+        chars_recved = recv.length;
+        console.log('1 pause at: ' + chars_recved);
+        expect(chars_recved).toBeGreaterThan(1);
         setTimeout(function() {
-          console.log('resume at: ' + chars_recved);
+          console.log('1 resume at: ' + chars_recved);
           expect(recv.length).toBe(chars_recved);
           client.resume();
 
           setTimeout(function() {
-            chars_recved = recv.length;
-            console.log('pause at: ' + chars_recved);
             client.pause();
+            chars_recved = recv.length;
+            console.log('2 pause at: ' + chars_recved);
 
             setTimeout(function() {
-              console.log('resume at: ' + chars_recved);
+              console.log('2 resume at: ' + chars_recved);
               expect(recv.length).toBe(chars_recved);
               client.resume();
 
@@ -59,6 +58,7 @@ describe('The net module', function() {
       }, 500);
 
       client.on('end', function() {
+        print('End received');
         expect(N).toBe(recv.length);
         server.close();
         client.end();

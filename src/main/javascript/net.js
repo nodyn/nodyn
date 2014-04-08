@@ -118,6 +118,11 @@ Socket.prototype.setProxy = function(proxy) {
       this.emit('data', new Buffer(buffer.toString()));
     }.bind(this));
   }
+  if (this.proxy.endHandler) {
+    this.proxy.endHandler( function() {
+      this.emit('end', this);
+    }.bind(this));
+  }
   return this;
 };
 
@@ -131,8 +136,7 @@ Socket.prototype.connect = function(port, host, callback) {
     this.on('connect', callback);
   }
 
-  this.client = net.createNetClient();
-  this.client.connect( port, host, function(err, sock) {
+  net.createNetClient().connect( port, host, function(err, sock) {
     this.setProxy( sock );
     this.emit('connect', this);
   }.bind(this));
@@ -173,11 +177,9 @@ Socket.prototype.end = function(data, encoding) {
   if (data) {
     this.write(data, encoding, function() {
       this.destroy();
-      this.emit('end');
     }.bind(this));
   } else {
     this.destroy();
-    this.emit('end');
   }
 };
 
