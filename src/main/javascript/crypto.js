@@ -35,5 +35,5 @@ var Hmac = module.exports.Hmac = function(algorithm, key) {
 // Stream types and functionality that we do not support yet.
 // Let's see how well we do by just inheriting from our current
 // Stream implementation.
-util.inherits(Stream, Hash);
+util.inherits(Hash, Stream);
 
