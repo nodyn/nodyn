@@ -278,7 +278,7 @@ describe('http request and response', function() {
   // TODO: Looks like there is some kind of race condition here
   // because this generates an NPE in DefaultHttpClientRequest.java
   // on line 449.
-  xit('should request.write', function() {
+  it('should request.write', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 3);
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
