@@ -165,10 +165,6 @@
           <groupId>org.dynjs</groupId>
           <artifactId>dynjs</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.projectodd.rephract</groupId>
-          <artifactId>rephract</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
   </dependencies>

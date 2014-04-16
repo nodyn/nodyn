@@ -59,7 +59,7 @@ describe( "net.Server", function() {
   });
 
 
-  it("should allow reading and writing from both client/server connections", function() {
+  xit("should allow reading and writing from both client/server connections", function() {
     var completedCallback = false;
     var server = net.createServer();
     server.on('connection', function(socket) {
