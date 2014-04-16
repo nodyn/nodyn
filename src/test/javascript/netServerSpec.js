@@ -62,25 +62,24 @@ describe( "net.Server", function() {
   xit("should allow reading and writing from both client/server connections", function() {
     var completedCallback = false;
     var server = net.createServer();
-    server.on('connection', function(socket) {
-      socket.on('data', function(buffer) {
-        expect(typeof buffer).toBe('object');
-        expect(buffer.toString()).toBe('crunchy bacon');
-        socket.write('with chocolate', function() {
-          completedCallback = true;
+    server.on('connection', function(conn) {
+      conn.on('data', function(buff) {
+        print("SERVER GOT BUFFER: " + buff.toString());
+        expect(buff.toString()).toBe('crunchy bacon');
+        conn.write('with chocolate', function() {
+          helper.testComplete(true);
+          server.close();
         });
       });
     });
     server.listen(8800, function() {
       var socket = net.connect(8800, function() {
-        socket.write("crunchy bacon");
         socket.on('data', function(buffer) {
+          print("CLIENT GOT BUFFER: " + buffer.toString());
           expect(buffer.toString()).toBe('with chocolate');
-          expect(completedCallback).toBe(true);
           socket.destroy();
-          server.close();
-          helper.testComplete(true);
         });
+        socket.write("crunchy bacon");
       });
     });
     waitsFor(helper.testComplete, "waiting for read/write to complete", 3);
