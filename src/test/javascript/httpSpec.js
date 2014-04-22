@@ -418,7 +418,7 @@ describe('http request and response', function() {
     });
   });
 
-  xit('should have a connect fired event', function() {
+  it('should have a connect fired event', function() {
     var server = http.createServer();
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 3);
     server.on('request', function(request, response) {
