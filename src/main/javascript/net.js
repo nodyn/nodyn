@@ -1,7 +1,6 @@
 var net           = NativeRequire.require('vertx/net');
 var util          = NativeRequire.require('util');
 var Stream        = NativeRequire.require('stream');
-var EventEmitter  = NativeRequire.require('events').EventEmitter;
 var nodyn         = NativeRequire.require('nodyn');
 
 // ------------------------------------------------------------------------

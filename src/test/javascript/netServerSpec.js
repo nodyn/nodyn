@@ -59,12 +59,11 @@ describe( "net.Server", function() {
   });
 
 
-  xit("should allow reading and writing from both client/server connections", function() {
+  it("should allow reading and writing from both client/server connections", function() {
     var completedCallback = false;
     var server = net.createServer();
     server.on('connection', function(conn) {
       conn.on('data', function(buff) {
-        print("SERVER GOT BUFFER: " + buff.toString());
         expect(buff.toString()).toBe('crunchy bacon');
         conn.write('with chocolate', function() {
           helper.testComplete(true);
@@ -75,7 +74,6 @@ describe( "net.Server", function() {
     server.listen(8800, function() {
       var socket = net.connect(8800, function() {
         socket.on('data', function(buffer) {
-          print("CLIENT GOT BUFFER: " + buffer.toString());
           expect(buffer.toString()).toBe('with chocolate');
           socket.destroy();
         });
