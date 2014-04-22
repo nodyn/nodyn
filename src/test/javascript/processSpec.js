@@ -115,8 +115,8 @@ describe('process', function() {
     });
   });
 
-  xit('should pass testMemoryUsage', function() {
-    expect(process.memoryUsage).toBe('function');
+  it('should pass testMemoryUsage', function() {
+    expect(typeof process.memoryUsage).toBe('function');
     memory = process.memoryUsage();
     // TODO: Find Sigar replacement
     expect(memory.heapTotal > memory.heapUsed).toBe(true);
