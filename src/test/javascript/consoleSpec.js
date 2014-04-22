@@ -26,7 +26,7 @@ describe("console", function() {
   it('should write traces', function() {
     expect(typeof console.trace).toBe('function');
     // too noisy
-    //console.trace('label');
+    console.trace('test error label');
   });
 
   it('should write dir messages', function() {
