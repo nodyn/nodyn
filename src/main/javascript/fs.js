@@ -160,7 +160,7 @@ var Fs = function() {
 
   this.stat = function(path, callback) {
     fs.props(path, function(err, result){
-      callback(new Stat(result));
+      callback(err, new Stat(result));
     });
   };
 
@@ -170,7 +170,7 @@ var Fs = function() {
 
   this.lstat = function(path, callback) {
     fs.lprops(path, function(err, result){
-      callback(new Stat(result));
+      callback(err, new Stat(result));
     });
   };
 
@@ -270,6 +270,18 @@ var Stat = function(delegate) {
   this.atime = new Date(delegate.lastAccessTime);
   this.mtime = new Date(delegate.lastModifiedTime);
   this.ctime = new Date(delegate.creationTime);
+
+  this.isFile  = function() {
+    return delegate.isRegularFile;
+  };
+
+  this.isDirectory  = function() {
+    return delegate.isDirectory;
+  };
+
+  this.isSymbolicLink  = function() {
+    return delegate.isSymbolicLink;
+  };
 
   // Bunch of stuff not yet implemented
   this.dev   = undefined;

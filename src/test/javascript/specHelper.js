@@ -12,6 +12,7 @@ if ((typeof NativeRequire) !== 'object') {
 // to one second.
 jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
+var fs = require('fs');
 
 (function() {
   var Helper = function() {
@@ -23,7 +24,19 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
       }
       return __complete;
     };
-  };
-  module.exports = new Helper();
 
+    this.writeFixture  = function(func, data) {
+      var tmpFile = java.io.File.createTempFile('nodyn-spec', '.txt');
+      if (!data) {
+        data = 'This is a fixture file used for testing. It may be deleted.';
+      }
+      fs.writeFile(tmpFile.getAbsolutePath(), data, function(err) {
+        if (err) throw err;
+        func(tmpFile);
+      });
+    };
+
+  };
+
+  module.exports = new Helper();
 })();
