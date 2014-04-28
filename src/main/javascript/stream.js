@@ -19,16 +19,29 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var events = NativeRequire.require('events');
-var util = NativeRequire.require('util');
-
-function Stream() {
-  events.EventEmitter.call(this);
-}
-util.inherits(Stream, events.EventEmitter);
 module.exports = Stream;
+
+var EE = require('events').EventEmitter;
+var util = require('util');
+
+util.inherits(Stream, EE);
+Stream.Readable = require('_stream_readable');
+Stream.Writable = require('_stream_writable');
+Stream.Duplex = require('_stream_duplex');
+Stream.Transform = require('_stream_transform');
+Stream.PassThrough = require('_stream_passthrough');
+
 // Backwards-compat with node 0.4.x
 Stream.Stream = Stream;
+
+
+
+// old-style streams.  Note that the pipe method (the only relevant
+// part of this class) is overridden in the Readable class.
+
+function Stream() {
+  EE.call(this);
+}
 
 Stream.prototype.pipe = function(dest, options) {
   var source = this;
@@ -71,13 +84,13 @@ Stream.prototype.pipe = function(dest, options) {
     if (didOnEnd) return;
     didOnEnd = true;
 
-    if (typeof dest.destroy === 'function') dest.destroy();
+    if (util.isFunction(dest.destroy)) dest.destroy();
   }
 
   // don't leave dangling pipes when there are errors.
   function onerror(er) {
     cleanup();
-    if (this.listeners('error').length === 0) {
+    if (EE.listenerCount(this, 'error') === 0) {
       throw er; // Unhandled stream error in pipe.
     }
   }

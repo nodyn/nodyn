@@ -1,5 +1,5 @@
-var util = NativeRequire.require('util');
-var Stream = NativeRequire.require('stream');
+var util = require('util');
+var Stream = require('stream');
 
 module.exports.createHash = function(algorithm) {
   return new Hash(algorithm);
