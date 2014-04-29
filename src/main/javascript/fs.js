@@ -220,7 +220,7 @@ FS.createReadStream = function(path, opts) {
 
 FS.ReadStream = function(path, opts) {
   Stream.Readable.call(this);
-  fs.open(path, fs.OPEN_READ, openReadable(this));
+  fs.open(path, fs.OPEN_READ, openReadable(this, opts || {}));
 };
 util.inherits(FS.ReadStream, Stream.Readable);
 
@@ -228,7 +228,11 @@ FS.ReadStream.prototype._read = function(size) {
   this.resume();
 };
 
-function openReadable(readable) {
+function openReadable(readable, opts) {
+  var start = opts.start || 0;
+  var end   = opts.end;
+  var read  = 0;
+
   return function(err, asyncFile) {
     readable.emit('open');
     readable.pause();
