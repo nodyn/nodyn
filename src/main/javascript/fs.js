@@ -218,36 +218,116 @@ FS.createReadStream = function(path, opts) {
   return new FS.ReadStream(path, opts);
 };
 
-FS.ReadStream = function(path, opts) {
+FS.ReadStream = function(path, options) {
   Stream.Readable.call(this);
-  fs.open(path, fs.OPEN_READ, openReadable(this, opts || {}));
+  options = util._extend({
+    highWaterMark: 64 * 1024
+  }, options || {});
+
+  this.path = path;
+  this.fd = options.hasOwnProperty('fd') ? options.fd : null;
+  this.flags = options.hasOwnProperty('flags') ? options.flags : 'r';
+  this.mode = options.hasOwnProperty('mode') ? options.mode : 438; /*=0666*/
+
+  this.start = options.hasOwnProperty('start') ? options.start : undefined;
+  this.end = options.hasOwnProperty('end') ? options.end : undefined;
+  this.autoClose = options.hasOwnProperty('autoClose') ?
+      options.autoClose : true;
+  this.pos = undefined;
+
+  if (!util.isUndefined(this.start)) {
+    if (!util.isNumber(this.start)) {
+      throw TypeError('start must be a Number');
+    }
+    if (util.isUndefined(this.end)) {
+      this.end = Infinity;
+    } else if (!util.isNumber(this.end)) {
+      throw TypeError('end must be a Number');
+    }
+
+    if (this.start > this.end) {
+      throw new Error('start must be <= end');
+    }
+
+    this.pos = this.start;
+  }
+
+  if (!util.isNumber(this.fd))
+    this.open();
+
+  this.on('end', function() {
+    if (this.autoClose) {
+      this.destroy();
+    }
+  });
 };
+
 util.inherits(FS.ReadStream, Stream.Readable);
+
+FS.ReadStream.prototype.open = function() {
+  fs.open(this.path, fs.OPEN_READ, openReadable(this));
+};
 
 FS.ReadStream.prototype._read = function(size) {
   this.resume();
 };
 
-function openReadable(readable, opts) {
-  var start = opts.start || 0;
-  var end   = opts.end;
-  var read  = 0;
+FS.ReadStream.prototype.destroy = function() {
+  if (this.destroyed)
+    return;
+  this.destroyed = true;
 
+  if (this.fd instanceof fs.AsyncFile) {
+    this.close();
+  }
+};
+
+FS.ReadStream.prototype.close = function(cb) {
+  var self = this;
+  if (cb) this.once('close', cb);
+
+  if (this.closed || !(this.fd instanceof fs.AsyncFile)) {
+    if (!(this.fd instanceof fs.AsyncFile)) {
+      this.once('open', close);
+      return;
+    }
+    return process.nextTick(this.emit.bind(this.fd, 'close'));
+  }
+  this.closed = true;
+  close();
+
+  function close(fd) {
+    FS.close(fd || self.fd, function(er) {
+      if (er) self.emit('error', er);
+      else self.emit('close');
+    });
+    self.fd = null;
+  }
+};
+
+function openReadable(readable) {
   return function(err, asyncFile) {
-    readable.emit('open');
-    readable.pause();
-
+    if (err) {
+      if (readable.autoClose) {
+        readable.destroy();
+      }
+      readable.emit('error', err);
+      return;
+    }
     asyncFile.endHandler(function(buffer) {
-      // end of file signified in Node.js as null
+      // end of file signified in node.js as null
       readable.push(null);
     });
 
     asyncFile.dataHandler(function(buffer) {
-      var str = buffer.toString(); // Hmm
+      var str = buffer.toString(); // hmm
       if (!readable.push(str)) {
         readable.pause();
       }
     });
+    readable.fd = asyncFile;
+    readable.pause();
+    readable.emit('open', asyncFile);
   };
 }
 
@@ -350,7 +430,7 @@ var mapOpenFlags = function(flags) {
     case 'wx+':
       flag = fs.OPEN_READ | fs.OPEN_WRITE | fs.CREATE_NEW;
       break;
-    // TODO: Deal with append modes
+    // todo: deal with append modes
   }
   return flag;
 };
