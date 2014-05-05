@@ -316,12 +316,13 @@ ClientRequest.prototype.write = function() {
   this.proxy.write.apply(this.proxy, arguments);
 };
 
-ClientRequest.prototype.end = function() {
-  this.proxy.end.apply(this.proxy, arguments);
+ClientRequest.prototype.end = function(b) {
+  if (b) this.proxy.end(b);
+  else this.proxy.end();
 };
 
-ClientRequest.prototype.abort = function() {
-  this.proxy.end.apply(this.proxy, arguments);
+ClientRequest.prototype.abort = function(b) {
+  this.proxy.end();
 };
 
 ClientRequest.prototype.setTimeout = function(msec, timeout) {

@@ -275,20 +275,17 @@ describe('http request and response', function() {
     });
   });
 
-  // TODO: Looks like there is some kind of race condition here
-  // because this generates an NPE in DefaultHttpClientRequest.java
-  // on line 449.
   it('should request.write', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5);
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
         expect(data.toString()).toBe("cheese muffins");
         response.end();
+        server.close(function() { helper.testComplete(true); });
       });
     });
     server.listen(test_options.port, function() {
       var request = http.request(test_options, function() {
-        server.close(function() { helper.testComplete(true); });
       });
       request.write("cheese muffins");
       request.end();
