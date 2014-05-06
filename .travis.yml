@@ -1,7 +1,8 @@
 language: java
-install: mvn clean install -DskipTests=true 
+install: mvn clean install -Dmaven.test.skip=true 
 script: mvn test verify
 jdk:
+  - oraclejdk8
   - oraclejdk7
   - openjdk7
 notifications:
