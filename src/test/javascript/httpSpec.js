@@ -45,9 +45,10 @@ describe('http', function(){
     var server = http.createServer(function(request, response) {
       request.on('data', function(data) {
         expect('crispy bacon').toBe(data.toString());
-        server.close(function() { helper.testComplete(true); });
+        response.end();
+        server.on('close', function() { helper.testComplete(true); });
+        server.close();
       });
-      response.end();
     });
     test_options.method = 'POST';
     server.listen(test_options.port, function() {

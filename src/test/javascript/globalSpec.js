@@ -26,7 +26,7 @@ describe("Nodyn globals", function() {
 
   it('should pass test__filename', function() {
     expect(typeof __filename).toBe('string');
-    expect(__filename).toMatch(/.*globalSpec.js/);
+    expect(__filename).toMatch(/.*node.js/);
   });
 
   it('should pass test__dirname', function() {

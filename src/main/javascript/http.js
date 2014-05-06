@@ -39,9 +39,10 @@ WebServer.prototype.setTimeout = function(msec, callback) {
 };
 
 WebServer.prototype.close = function(callback) {
-  if (callback) { this.on('close', callback); }
+  if (callback) this.once('close', callback);
+
   this.proxy.close(function() {
-    this.emit('close');
+    process.nextTick(this.emit.bind(this, 'close'));
   }.bind(this));
 };
 
