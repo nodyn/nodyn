@@ -194,6 +194,8 @@
                 <configuration>
                   <mainClass>org.jasmine.cli.Main</mainClass>
                   <classpathScope>test</classpathScope>
+                  <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                  <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
                   <systemPropertyVariables>
                     <dynjs.compile.mode>OFF</dynjs.compile.mode>
                   </systemPropertyVariables>
