@@ -12,7 +12,6 @@ jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
 
 var fs = require('vertx/file_system');
-
 var jasmineEnv = jasmine.getEnv();
 var origCallback = jasmineEnv.currentRunner_.finishCallback;
 

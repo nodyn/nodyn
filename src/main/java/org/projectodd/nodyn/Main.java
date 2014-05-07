@@ -73,6 +73,7 @@ public class Main extends org.dynjs.cli.Main {
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
         globalObject.defineGlobalProperty("__filename", "repl"); // TODO: This should be a file name sometimes
         globalObject.defineGlobalProperty("__jvertx", vertx);
+        globalObject.defineGlobalProperty("global", globalObject);
 
         DynObject node = new DynObject(globalObject);
         node.put("buffer", new BufferType(globalObject));
