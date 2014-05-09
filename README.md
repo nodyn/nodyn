@@ -1,13 +1,11 @@
 [![Build Status](https://secure.travis-ci.org/nodyn/nodyn.png)](http://travis-ci.org/nodyn/nodyn)
 
-[![Build Status](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/badge/icon)](https://buildhive.cloudbees.com/job/projectodd/job/nodyn/)
-
 ## Hey, What's Nodyn?
 
 Nodyn is a [node.js](http://nodejs.org) compatible framework, running on the
 JVM. It's powered by the [DynJS](https://github.com/dynjs/dynjs) Javascript
 runtime and [Vert.x](http://vertx.io), the massively scalable, asynchronous,
-polyglot application platform. 
+polyglot application platform.
 
 "Why do that?", you may ask. Well, imagine running your node app on
 the JVM where you immediately have access to all that the Java world has to
@@ -26,7 +24,7 @@ as as a [language module](http://vertx.io/language_support.html) in Vert.x.
 Nodyn doesn't yet have an initial release. Until then, to use it, you will need
 to build from source or download a CI SNAPSHOT from
 [Sontype](https://oss.sonatype.org/content/repositories/snapshots/org/projectodd/nodyn/0.1.1-SNAPSHOT/).
-Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary. 
+Download the latest zip file from Sonatype. It will contain a `./bin/nodyn` binary.
 You can use the binary to start an application from a Javascript file, or use the
 REPL to experiment with small snippets of code on the command line.
 
@@ -77,4 +75,3 @@ To build nodyn from source, check out the repo, and run `mvn install`.
 ## API Completion Status
 
 See http://nodyn.io/compatibility
-
