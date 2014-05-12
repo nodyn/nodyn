@@ -75,9 +75,9 @@ FS.readFile = function(path) { // [options], callback
   }
   fs.readFile(path, function(err, buff) {
     if (opts && opts.encoding) {
-      func(err, buff.toString(opts.encoding)); 
+      func(err, buff.toString(opts.encoding));
     } else {
-      func(err, new Buffer(buff.toString())); 
+      func(err, new Buffer(buff.toString()));
     }
   });
 };
@@ -88,7 +88,7 @@ FS.readFileSync = function(path, options) {
     options = { encoding: options };
   }
   if (options && options.encoding) {
-    return jBuffer.toString(options.encoding); 
+    return jBuffer.toString(options.encoding);
   }
   return new Buffer(jBuffer.toString());
 };
@@ -174,7 +174,7 @@ FS.lchmodSync = FS.chmodSync;
 
 
 FS.mkdir = function(path, mode, callback) {
-  // CreateParent boolean will always be false as NodeJS 
+  // CreateParent boolean will always be false as NodeJS
   // do not support this option
   fs.mkDir(path, false, convertModeToString(mode), callback);
 };
@@ -327,7 +327,7 @@ function openReadable(readable) {
     });
     readable.fd = asyncFile;
     readable.pause();
-    readable.emit('open', asyncFile);
+    process.nextTick(readable.emit.bind(readable, 'open'));
   };
 }
 
@@ -387,11 +387,11 @@ var invertAndConvert = function(x) {
   }
   return convertedString;
 };
- 
+
 var modeCache = {};
 var convertModeToString = function(mode) {
-  if (!mode) { 
-    mode = 0666; 
+  if (!mode) {
+    mode = 0666;
   }
   if (modeCache[mode]) {
     return modeCache[mode];
@@ -408,13 +408,13 @@ var convertModeToString = function(mode) {
 
 var mapOpenFlags = function(flags) {
   var flag = 0;
-  
+
   switch(flags) {
-    case 'r': 
+    case 'r':
     case 'rs':
       flag = fs.OPEN_READ;
       break;
-    case 'r+': 
+    case 'r+':
     case 'rs+':
       flag = fs.OPEN_READ | fs.OPEN_WRITE;
       break;

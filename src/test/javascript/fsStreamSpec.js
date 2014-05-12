@@ -11,7 +11,7 @@ describe("fs.createReadStream", function() {
   it("should return an fs.ReadStream", function() {
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
-      var readStream = fs.createReadStream('sample.txt');
+      var readStream = fs.createReadStream(f.getAbsolutePath());
       expect(readStream).toBeTruthy();
       expect(readStream instanceof fs.ReadStream).toBeTruthy();
       expect(readStream instanceof stream.Readable).toBeTruthy();
@@ -28,7 +28,6 @@ describe("fs.createReadStream", function() {
       this.fail('fs.createReadStream should fail with ENOENT');
     } catch(e) {
     }
-      
   });
 
 });
@@ -44,9 +43,9 @@ describe("fs.ReadStream", function() {
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
-      var result = '', 
+      var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
-      
+
       readStream.on('data', function(chunk) {
         result += chunk;
       });
@@ -85,14 +84,14 @@ describe("fs.ReadStream", function() {
     });
   });
 
-  xit("should emit 'open' when the file has opened.", function() {
+  it("should emit 'open' when the file has opened.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
-      var result = '', 
+      var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
-      
+
     // TODO: Is this a race condition? Enquiring minds want to know
       readStream.on('open', function() {
         f.delete();
@@ -106,10 +105,10 @@ describe("fs.ReadStream", function() {
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
-      var result = '', 
+      var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath(),
             {start: 5, end: 20});
-      
+
       readStream.on('data', function(chunk) {
         result += chunk;
       });
