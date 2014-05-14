@@ -19,7 +19,7 @@ container = vertx.container;
 require   = require;
 
 Buffer = NativeRequire.require('buffer').Buffer;
-SlowBuffer = Buffer.SlowBuffer;
+//SlowBuffer = Buffer.SlowBuffer;
 
 require.loadJSON = function(file) {
   return JSON.parse(vertx.fileSystem.readFileSync(file).toString());
