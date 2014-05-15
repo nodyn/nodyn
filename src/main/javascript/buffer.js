@@ -1,5 +1,4 @@
-
-var vertx = org.vertx.java.core.VertxFactory.newVertx();
+"use strict";
 
 var Helper = org.projectodd.nodyn.buffer.Helper;
 
@@ -16,9 +15,7 @@ function Buffer() {
       __get__: function(name) {
         var index = Number(name);
         if ( ( typeof index ) == 'number' && ( index != NaN) ) {
-          value = this.delegate.getByte( index );
-          value = value & 0xFF;
-          return value;
+          return this.delegate.getByte( index ) & 0xFF;
         }
       },
       __set__: function(name, value) {
@@ -39,8 +36,8 @@ function Buffer() {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.toString() );
     } else if ( ( typeof first ) == 'object' && first.length ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.length );
-      for ( i = 0 ; i < first.length ; ++i ) {
-        self[i] = first[i] & 0xFF;
+      for ( var i = 0 ; i < first.length ; ++i ) {
+        self[i] = first[i];
       }
     }
   } else if ( arguments.length == 2 ) {
@@ -263,7 +260,7 @@ Buffer.prototype.fill = function(value,offset,end) {
     byte = Number(value);
   }
 
-  for ( i = offset ; i < end ; ++i ) {
+  for ( var i = offset ; i < end ; ++i ) {
     this.delegate.setByte( i, byte );
   }
 };
@@ -303,7 +300,7 @@ Buffer.concat = function(list,len) {
 
   if ( ! len ) {
     len = 0;
-    for ( i = 0 ; i < list.length ; ++i ) {
+    for ( var i = 0 ; i < list.length ; ++i ) {
       len += list[i].length;
     }
   }
@@ -311,7 +308,7 @@ Buffer.concat = function(list,len) {
   var b = new Buffer(len);
   var start = 0;
 
-  for ( i = 0 ; i < list.length ; ++i ) {
+  for ( var i = 0 ; i < list.length ; ++i ) {
     start = list[i].copy( b, start );
   }
 
