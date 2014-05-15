@@ -92,21 +92,37 @@ var bufferToString = function(enc,start,end) {
   }
 };
 
-Buffer.prototype.write = function(str,offset,len,enc) {
+Buffer.prototype.write = function(/*str,offset,len,enc*/) {
 
-  if ( arguments.length < 2 ) {
+  var str = arguments[0];
+  var offset = 0;;
+  var len = this.length - offset;
+  var enc = 'utf8';
+
+  if ( arguments.length == 1 ) {
     offset = 0;
+  } else if ( arguments.length == 2 ) {
+    if ( typeof arguments[1] == 'number' ) {
+      offset = arguments[1];
+    } else {
+      enc = argumnets[1];
+    }
+  } else if ( arguments.length == 3 ) {
+    offset = arguments[1];
+    if ( typeof arguments[2] == 'number' ) {
+      len = arguments[2];
+    } else {
+      enc = arguments[2];
+    }
+  } else if ( arguments.length == 4 ) {
+    offset = arguments[1];
+    len = arguments[2];
+    enc = arguments[3];
   }
 
-  if ( arguments.length < 3 ) {
-    enc = 'utf-8';
-  }
+  enc = encodingToJava(enc);
 
-  if ( arguments.length == 4 ) {
-    enc = encodingToJava(enc);
-  }
-
-  var numChars = Math.min( str.length, this.length - offset );
+  var numChars = Math.min( str.length, this.length - offset, len );
   str = str.substring(0, numChars );
 
   var bytes = Helper.bytes( str, enc );
