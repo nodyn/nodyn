@@ -428,6 +428,43 @@ describe("Buffer", function() {
       expect(buf.readUInt32LE(0)).toBe( 3221225472 );
     });
 
+    it( "should be able to read four bytes as BE/LE floats", function() {
+      var buf = new Buffer(4);
+
+      buf.writeFloatBE(0xCAFEBABE, 0);
+      // <Buffer 4f 4a fe bb>
+      expect( buf[0] ).toBe( 0x4f );
+      expect( buf[1] ).toBe( 0x4a );
+      expect( buf[2] ).toBe( 0xfe );
+      expect( buf[3] ).toBe( 0xbb );
+
+      var buf = new Buffer(4);
+      buf.writeFloatLE(0xcafebabe, 0);
+      // <Buffer bb fe 4a 4f>
+      expect( buf[0] ).toBe( 0xbb );
+      expect( buf[1] ).toBe( 0xfe );
+      expect( buf[2] ).toBe( 0x4a );
+      expect( buf[3] ).toBe( 0x4f );
+
+      buf.writeFloatBE( 39.99, 0 );
+      var val = buf.readFloatBE(0);
+      var delta = val - 39.99;
+      expect( delta ).toBeLessThan( 1 );
+
+try {
+      buf.writeFloatLE( 39.99, 0 );
+      var val = buf.readFloatLE(0);
+      var delta = val - 39.99;
+      expect( delta ).toBeLessThan( 1 );
+      } catch (e) {
+      System.err.println(e );
+      e.printStackTrace();
+      }
+
+    });
+
+    });
+
   });
 
 });

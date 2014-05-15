@@ -269,15 +269,25 @@ Buffer.prototype.writeInt32BE = function(value,offset,noAssert) {
 // Float
 
 Buffer.prototype.readFloatLE = function(offset,noAssert) {
+  var b = java.nio.ByteBuffer.allocate(4).order( java.nio.ByteOrder.LITTLE_ENDIAN );
+  var bytes = this.delegate.getBytes(offset, offset+4);
+  b.put( bytes );
+  b.flip();
+  return b.getFloat();
 };
 
 Buffer.prototype.readFloatBE = function(offset,noAssert) {
+  return this.delegate.getFloat(offset);
 };
 
 Buffer.prototype.writeFloatLE = function(value,offset,noAssert) {
+  var b = java.nio.ByteBuffer.allocate(4).order( java.nio.ByteOrder.LITTLE_ENDIAN );
+  b.putFloat(value);
+  this.delegate.setBytes(offset,b.array());
 };
 
 Buffer.prototype.writeFloatBE = function(value,offset,noAssert) {
+  this.delegate.setFloat(offset, value);
 };
 
 
