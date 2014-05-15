@@ -164,6 +164,15 @@ Buffer.prototype.copy = function(targetBuf,targetStart,sourceStart,sourceEnd) {
 };
 
 Buffer.prototype.slice = function(start,end) {
+  var b = new Buffer(0);
+  if ( ! start ) {
+    start = 0;
+  }
+  if ( ! end ) {
+    end = this.length;
+  }
+  b.delegate = new org.vertx.java.core.buffer.Buffer( this.delegate.byteBuf.slice( start, end ) );
+  return b;
 };
 
 Buffer.prototype.readUInt8 = function(offset,noAssert) {

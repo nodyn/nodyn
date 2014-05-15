@@ -51,13 +51,13 @@ describe("Buffer", function() {
     expect( b[2] ).toBe( 111 );
   });
 
-    it("should handle write() with str, offset and enc", function() {
-      b = new Buffer(3);
-      expect( b.write( 'foo', 1, 'utf8' ) ).toBe(2);
-      expect( b[0] ).toBe( 0 );
-      expect( b[1] ).toBe( 102 );
-      expect( b[2] ).toBe( 111 );
-    });
+  it("should handle write() with str, offset and enc", function() {
+    b = new Buffer(3);
+    expect( b.write( 'foo', 1, 'utf8' ) ).toBe(2);
+    expect( b[0] ).toBe( 0 );
+    expect( b[1] ).toBe( 102 );
+    expect( b[2] ).toBe( 111 );
+  });
 
   it('should pass testBufferFill', function() {
     var b = new Buffer(4);
@@ -340,6 +340,16 @@ describe("Buffer", function() {
     buff.writeInt16BE( -420, 2 );
     expect(buff.readInt16BE(0)).toBe( 2 );
     expect(buff.readInt16BE(2)).toBe( -420 );
+  });
+
+  it( 'should provide for live/linked slices', function() {
+    var buf = new Buffer( "original" );
+    var slice = buf.slice();
+    expect(slice.toString()).toBe("original");
+    buf[1] = 66;
+    expect(slice.toString()).toBe("oBiginal");
+    slice[3] = 66;
+    expect(buf.toString()).toBe("oBiBinal");
   });
 
 });
