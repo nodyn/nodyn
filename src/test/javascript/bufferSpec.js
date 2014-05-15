@@ -451,18 +451,10 @@ describe("Buffer", function() {
       var delta = val - 39.99;
       expect( delta ).toBeLessThan( 1 );
 
-try {
       buf.writeFloatLE( 39.99, 0 );
       var val = buf.readFloatLE(0);
       var delta = val - 39.99;
       expect( delta ).toBeLessThan( 1 );
-      } catch (e) {
-      System.err.println(e );
-      e.printStackTrace();
-      }
-
-    });
-
     });
 
   });
