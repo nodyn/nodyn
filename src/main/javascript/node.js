@@ -1,7 +1,6 @@
 Nodyn = org.projectodd.nodyn;
 
 nodyn     = {
-  buffer: Nodyn.buffer.BufferType.newBufferType(this),
   QueryString: Nodyn.util.QueryString.newQueryString(this)
 };
 

@@ -1,11 +1,11 @@
 package org.projectodd.nodyn;
 
 import org.dynjs.Config;
-import org.dynjs.runtime.*;
+import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.InitializationListener;
 import org.dynjs.vertx.DynJSVerticle;
 import org.dynjs.vertx.DynJSVerticleFactory;
-import org.projectodd.nodyn.buffer.BufferType;
-import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.platform.Verticle;
 
 import java.io.*;

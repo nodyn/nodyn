@@ -22,7 +22,6 @@ import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.projectodd.nodyn.buffer.BufferType;
 import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -76,7 +75,6 @@ public class Main extends org.dynjs.cli.Main {
         globalObject.defineGlobalProperty("global", globalObject);
 
         DynObject node = new DynObject(globalObject);
-        node.put("buffer", new BufferType(globalObject));
         node.put("QueryString", new QueryString(globalObject));
         globalObject.defineGlobalProperty("nodyn", node);
 
