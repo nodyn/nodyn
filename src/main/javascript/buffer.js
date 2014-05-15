@@ -15,7 +15,7 @@ function Buffer() {
     {
       __get__: function(name) {
         var index = Number(name);
-        if ( ( typeof index ) == 'number' ) {
+        if ( ( typeof index ) == 'number' && ( index != NaN) ) {
           value = this.delegate.getByte( index );
           value = value & 0xFF;
           return value;
@@ -23,7 +23,7 @@ function Buffer() {
       },
       __set__: function(name, value) {
         var index = Number(name);
-        if ( ( typeof index) == 'number' ) {
+        if ( ( typeof index) == 'number' && ( index != NaN )) {
           var byte = Number(value) & 0xFF;
           this.delegate.setByte( index, byte );
           return byte;
@@ -37,6 +37,11 @@ function Buffer() {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first );
     } else if ( ( typeof first ) == 'string' ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.toString() );
+    } else if ( ( typeof first ) == 'object' && first.length ) {
+      self.delegate = new org.vertx.java.core.buffer.Buffer( first.length );
+      for ( i = 0 ; i < first.length ; ++i ) {
+        self[i] = first[i] & 0xFF;
+      }
     }
   } else if ( arguments.length == 2 ) {
     var str = arguments[0];
@@ -50,21 +55,23 @@ function Buffer() {
 }
 
 function encodingToJava(enc) {
-  enc = enc.toLowerCase();
-  if ( enc == 'utf8') {
-    return 'utf-8';
+  if ( ! Buffer.isEncoding(enc) ) {
+    throw new TypeError( 'Unknown encoding: ' + enc );
   }
-  if ( enc == 'ascii' ) {
+  enc = enc.toLowerCase();
+  if ( enc == 'ascii' || enc == 'us-ascii') {
     return 'us-ascii';
   }
-  if ( enc == 'ucs2' ) {
-    return 'ucs-2';
+
+  if ( enc == 'utf8' || enc == 'utf-8') {
+    return 'utf-8';
   }
-  if ( enc == 'utf16le' ) {
+
+  if ( enc == 'ucs2' || enc == 'utf16le' || enc == 'utf-16le' ) {
     return 'utf-16le';
   }
 
-  return 'utf-8';
+  return enc;
 }
 
 Object.defineProperty( Buffer.prototype, "length", {
@@ -117,15 +124,37 @@ Buffer.prototype.toJSON = function() {
 };
 
 Buffer.prototype.copy = function(targetBuf,targetStart,sourceStart,sourceEnd) {
-};
+  if ( ! targetStart ) {
+    targetStart = 0;
+  }
+  if ( ! sourceStart ) {
+    sourceStart = 0;
+  }
+  if ( ! sourceEnd ) {
+    sourceEnd = this.length;
+  }
 
-Buffer.prototype.slice = function(start,end) {
+  if ( targetStart > ( targetBuf.length - 1 ) ) {
+    throw new RangeError( "targetStart out of bounds" );
+  }
+
+  var sourceLen = sourceEnd - sourceStart;
+  var destLen = targetBuf.length - targetStart;
+
+  if ( sourceLen > destLen ) {
+    sourceLen = destLen;
+  }
+
+  var source = this.delegate.getBuffer( sourceStart, sourceStart + sourceLen );
+  targetBuf.delegate.setBuffer( targetStart, source );
+  return sourceLen;
 };
 
 Buffer.prototype.slice = function(start,end) {
 };
 
 Buffer.prototype.readUInt8 = function(offset,noAssert) {
+  return this.delegate.getByte( offset ) & 0xFF;
 };
 
 Buffer.prototype.readUInt16LE = function(offset,noAssert) {
@@ -141,12 +170,14 @@ Buffer.prototype.readUInt32BE = function(offset,noAssert) {
 };
 
 Buffer.prototype.readInt8 = function(offset,noAssert) {
+  return this.delegate.getByte( offset );
 };
 
 Buffer.prototype.readInt16LE = function(offset,noAssert) {
 };
 
 Buffer.prototype.readInt16BE = function(offset,noAssert) {
+  return this.delegate.getShort( offset );
 };
 
 Buffer.prototype.readInt32LE = function(offset,noAssert) {
@@ -183,12 +214,14 @@ Buffer.prototype.writeUInt32BE = function(value,offset,noAssert) {
 };
 
 Buffer.prototype.writeInt8 = function(value,offset,noAssert) {
+  this.delegate.setByte(offset, value);
 };
 
 Buffer.prototype.writeInt16LE = function(value,offset,noAssert) {
 };
 
 Buffer.prototype.writeInt16BE = function(value,offset,noAssert) {
+  this.delegate.setShort(offset, value);
 };
 
 Buffer.prototype.writeInt32LE = function(value,offset,noAssert) {
@@ -210,11 +243,84 @@ Buffer.prototype.writeDoubleBE = function(value,offset,noAssert) {
 };
 
 Buffer.prototype.fill = function(value,offset,end) {
+  if ( ! offset ) {
+    offset = 0;
+  }
+
+  if ( ! end ) {
+    end = this.length;
+  }
+
+  if ( end > this.length ) {
+    throw new RangeError( 'end out of bounds' );
+  }
+
+  var byte;
+
+  if ( typeof value == 'string' ) {
+    byte = value.charCodeAt(0);
+  } else {
+    byte = Number(value);
+  }
+
+  for ( i = offset ; i < end ; ++i ) {
+    this.delegate.setByte( i, byte );
+  }
 };
 
-Buffer.prototype.SlowBuffer = Buffer;
+// Class methods
 
-module.exports = Buffer;
+Buffer.byteLength = function(str,enc) {
+  if ( ! enc ) {
+    enc = 'utf8';
+  }
+
+  return Helper.bytes(str, encodingToJava(enc)).length;
+}
+
+Buffer.isEncoding = function(enc) {
+  return [
+    'ascii', 'us-ascii',
+    'utf8', 'utf-8',
+    'utf16le', 'utf-16le', 'ucs2',
+    'base64',
+    'binary',
+    'hex' ].indexOf( enc ) >= 0;
+}
+
+Buffer.isBuffer = function(obj) {
+  return Buffer.prototype.isPrototypeOf( obj );
+}
+
+Buffer.concat = function(list,len) {
+  if ( ! list || list.length == 0 ) {
+    return new Buffer(0);
+  }
+
+  if ( list.length == 1 ) {
+    return list[0];
+  }
+
+  if ( ! len ) {
+    len = 0;
+    for ( i = 0 ; i < list.length ; ++i ) {
+      len += list[i].length;
+    }
+  }
+
+  var b = new Buffer(len);
+  var start = 0;
+
+  for ( i = 0 ; i < list.length ; ++i ) {
+    start = list[i].copy( b, start );
+  }
+
+  return b;
+}
+
+Buffer.SlowBuffer = Buffer;
+
+module.exports.Buffer = Buffer;
 /*
 var Buffer = module.exports.Buffer = nodyn.buffer;
 

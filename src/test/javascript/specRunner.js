@@ -28,6 +28,7 @@ describe('Nodyn', function() {
 
     fs.readDir('src/test/javascript', '.+Spec.js', function(err, arr) {
       for(var i in arr) {
+        System.err.println( "::: " + arr[i] );
         require(arr[i]);
       }
       complete = true;

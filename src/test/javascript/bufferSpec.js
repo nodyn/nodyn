@@ -7,8 +7,6 @@ var UTF8_TEST_WRITE_BUFFER = Harness.UTF8_TEST_WRITE_BUFFER;
 
 var helper = require('specHelper');
 
-var Buffer = require('buffer');
-
 describe("Buffer", function() {
 
   it('should pass testSafeConstructor', function() {
@@ -45,7 +43,6 @@ describe("Buffer", function() {
     }
   });
 
-/*
   it('should pass testBufferFill', function() {
     var b = new Buffer(4);
     b.fill(72, 0, 4);
@@ -60,6 +57,7 @@ describe("Buffer", function() {
     expect(b.toString()).toBe("HHHH");
   });
 
+
   it('should pass testBufferFillWithStringAndDefaultOffsetAndLength', function() {
     var b = new Buffer(4);
     b.fill('h');
@@ -68,13 +66,13 @@ describe("Buffer", function() {
   });
 
   // TODO: Do we want to throw here? Node.js does, but not sure
-  // if it's ideal, since vertx doesn't care about overfilling the 
+  // if it's ideal, since vertx doesn't care about overfilling the
   // buffer. Do/should programs depend on this behavior?
   it('should pass testBufferOverfull', function() {
     var b = new Buffer(4);
     try {
       b.fill(1, 0, 5);
-//      this.fail("Buffer.fill should throw");
+      this.fail("Buffer.fill should throw");
     } catch(e) {
     }
   });
@@ -134,13 +132,23 @@ describe("Buffer", function() {
   });
 
   it('should pass testBufferCopyWithBadTargetStart', function() {
-    // in node.js this would throw, but we can
-    // just expand the buffer. should we? let's do.
     var source = new Buffer(4);
     var dest   = new Buffer(4);
     source.fill(72, 0, 3);
-    expect(source.copy(dest, 4, 0, 2)).toBe(2);
-    expect(dest.length).toBe(6);
+    try {
+      source.copy(dest, 4, 0, 2 );
+      this.fail( "targetStart out of bounds should fail" );
+    } catch (e) {
+    }
+  });
+
+  it('should pass only copy into available room', function() {
+    var source = new Buffer(4);
+    var dest   = new Buffer(4);
+    source.fill(72, 0, 3);
+    dest.fill(65, 0, 3);
+    expect(source.copy(dest, 2, 0, 4 )).toBe(2);
+    expect(dest.toString()).toBe( 'AAHH');
   });
 
   it('should pass testBufferCopyWithBadSourceStartLength', function() {
@@ -163,6 +171,7 @@ describe("Buffer", function() {
     }
   });
 
+/*
   it('should pass testBufferUtf8Write', function() {
     var b = new Buffer(70);
     b.fill(0);
@@ -239,11 +248,15 @@ describe("Buffer", function() {
       idx = idx+1;
     }
   });
+  */
 
   it('should pass testBufferIsEncoding', function() {
-    ['utf8', 'utf-8', 
-     'ascii', 'us-ascii', 
-     'ucf2', 'ucf-2', 'utf16le', 'utf-16le'].forEach( function(enc) {
+    [ 'ascii', 'us-ascii',
+      'utf8', 'utf-8',
+      'utf16le', 'utf-16le', 'ucs2',
+      'base64',
+      'binary',
+      'hex' ].forEach( function(enc) {
       expect(Buffer.isEncoding(enc)).toBe(true);
     });
     var unsupported = ['foo', 'bar', 'taco'];
@@ -256,6 +269,7 @@ describe("Buffer", function() {
     expect(Buffer.isBuffer(new Buffer())).toBe(true);
     expect(Buffer.isBuffer(new Array())).toBe(false);
   });
+
 
   it('should pass testBufferConcat', function() {
     var x = new Buffer(5);
@@ -285,9 +299,31 @@ describe("Buffer", function() {
     buff[0] = 0x3;
     buff[1] = 0x23;
     buff[2] = 0x42;
+    buff[3] = 0xFF;
     expect(buff.readUInt8(0)).toBe(0x3);
     expect(buff.readUInt8(1)).toBe(0x23);
     expect(buff.readUInt8(2)).toBe(0x42);
+    expect(buff.readUInt8(3)).toBe(0xFF);
   });
-  */
+
+  it('should read/write signed 8-bit ints', function() {
+    var buff = new Buffer(3);
+    buff.writeInt8(-127,0);
+    buff.writeInt8(127,1);
+    buff.writeInt8(2,2);
+    buff.writeInt8(-2,3);
+    expect(buff.readInt8(0)).toBe(-127);
+    expect(buff.readInt8(1)).toBe(127);
+    expect(buff.readInt8(2)).toBe(2);
+    expect(buff.readInt8(3)).toBe(-2);
+  });
+
+  it( 'should read/write signed 16-bit ints', function() {
+    var buff = new Buffer(4);
+    buff.writeInt16BE( 2, 0 );
+    buff.writeInt16BE( -420, 2 );
+    expect(buff.readInt16BE(0)).toBe( 2 );
+    expect(buff.readInt16BE(2)).toBe( -420 );
+  });
+
 });
