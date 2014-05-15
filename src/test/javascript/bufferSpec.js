@@ -43,6 +43,22 @@ describe("Buffer", function() {
     }
   });
 
+  it("should handle write() with just str and enc", function() {
+    b = new Buffer(3);
+    expect( b.write( 'foo', 'utf8' ) ).toBe(3);
+    expect( b[0] ).toBe( 102 );
+    expect( b[1] ).toBe( 111 );
+    expect( b[2] ).toBe( 111 );
+  });
+
+    it("should handle write() with str, offset and enc", function() {
+      b = new Buffer(3);
+      expect( b.write( 'foo', 1, 'utf8' ) ).toBe(2);
+      expect( b[0] ).toBe( 0 );
+      expect( b[1] ).toBe( 102 );
+      expect( b[2] ).toBe( 111 );
+    });
+
   it('should pass testBufferFill', function() {
     var b = new Buffer(4);
     b.fill(72, 0, 4);

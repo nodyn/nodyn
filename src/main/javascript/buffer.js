@@ -105,7 +105,7 @@ Buffer.prototype.write = function(/*str,offset,len,enc*/) {
     if ( typeof arguments[1] == 'number' ) {
       offset = arguments[1];
     } else {
-      enc = argumnets[1];
+      enc = arguments[1];
     }
   } else if ( arguments.length == 3 ) {
     offset = arguments[1];
