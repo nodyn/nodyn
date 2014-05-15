@@ -353,21 +353,45 @@ describe("Buffer", function() {
   });
 
   describe( "reading and writing", function() {
+    it ( "should be able to read two bytes as positive BE/LE unsigned ints", function() {
+      var buf = new Buffer(2);
+
+      buf.writeUInt16BE( 32768, 0 );
+      expect(buf.readUInt16BE(0)).toBe( 32768 );
+      expect(buf.readUInt16LE(0)).toBe( 128 );
+
+      buf = new Buffer(2);
+
+      buf.writeUInt16LE( 32768, 0 );
+      expect(buf.readUInt16LE(0)).toBe( 32768 );
+      expect(buf.readUInt16BE(0)).toBe( 128 );
+    });
+
     it ( "should be able to read two bytes as positive BE/LE signed ints", function() {
       var buf = new Buffer(2);
+
       buf.writeInt16BE( 2142, 0 );
       expect(buf.readInt16BE(0)).toBe( 2142 );
       expect(buf.readInt16LE(0)).toBe( 24072 );
+
+      buf = new Buffer(2);
+
+      buf.writeInt16LE( 2142, 0 );
+      expect(buf.readInt16LE(0)).toBe( 2142 );
+      expect(buf.readInt16BE(0)).toBe( 24072 );
     });
 
     it ( "should be able to read two bytes as negative BE/LE signed ints", function() {
+
       var buf = new Buffer(2);
       buf.writeInt16BE( -2142, 0 );
       expect(buf.readInt16BE(0)).toBe( -2142 );
       expect(buf.readInt16LE(0)).toBe( -23817 );
-      buf.writeInt16LE( -23817 );
-      expect(buf.readInt16LE(0)).toBe( -23817 );
-      expect(buf.readInt16BE(0)).toBe( -2142 );
+
+      buf = new Buffer(2);
+      buf.writeInt16LE( -2142, 0 );
+      expect(buf.readInt16LE(0)).toBe( -2142 );
+      expect(buf.readInt16BE(0)).toBe( -23817 );
     });
 
   });

@@ -197,15 +197,19 @@ Buffer.prototype.writeInt8 = function(value,offset,noAssert) {
 // 16-bit Unsigned
 
 Buffer.prototype.readUInt16LE = function(offset,noAssert) {
+  return java.lang.Short.reverseBytes( this.delegate.getShort( offset ) ) & 0xFFFF;
 };
 
 Buffer.prototype.readUInt16BE = function(offset,noAssert) {
+  return this.delegate.getShort( offset ) & 0xFFFF;
 };
 
 Buffer.prototype.writeUInt16LE = function(value,offset,noAssert) {
+  this.delegate.setShort(offset, java.lang.Short.reverseBytes( value ) );
 };
 
 Buffer.prototype.writeUInt16BE = function(value,offset,noAssert) {
+  this.delegate.setShort(offset, value);
 };
 
 // 16-bit Signed
@@ -219,6 +223,7 @@ Buffer.prototype.readInt16BE = function(offset,noAssert) {
 };
 
 Buffer.prototype.writeInt16LE = function(value,offset,noAssert) {
+  this.delegate.setShort(offset, java.lang.Short.reverseBytes( value) );
 };
 
 Buffer.prototype.writeInt16BE = function(value,offset,noAssert) {
