@@ -352,4 +352,24 @@ describe("Buffer", function() {
     expect(buf.toString()).toBe("oBiBinal");
   });
 
+  describe( "reading and writing", function() {
+    it ( "should be able to read two bytes as positive BE/LE signed ints", function() {
+      var buf = new Buffer(2);
+      buf.writeInt16BE( 2142, 0 );
+      expect(buf.readInt16BE(0)).toBe( 2142 );
+      expect(buf.readInt16LE(0)).toBe( 24072 );
+    });
+
+    it ( "should be able to read two bytes as negative BE/LE signed ints", function() {
+      var buf = new Buffer(2);
+      buf.writeInt16BE( -2142, 0 );
+      expect(buf.readInt16BE(0)).toBe( -2142 );
+      expect(buf.readInt16LE(0)).toBe( -23817 );
+      buf.writeInt16LE( -23817 );
+      expect(buf.readInt16LE(0)).toBe( -23817 );
+      expect(buf.readInt16BE(0)).toBe( -2142 );
+    });
+
+  });
+
 });

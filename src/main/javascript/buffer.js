@@ -175,52 +175,31 @@ Buffer.prototype.slice = function(start,end) {
   return b;
 };
 
+// 8-bit Unsigned
+
 Buffer.prototype.readUInt8 = function(offset,noAssert) {
   return this.delegate.getByte( offset ) & 0xFF;
 };
 
-Buffer.prototype.readUInt16LE = function(offset,noAssert) {
+Buffer.prototype.writeUInt8 = function(value,offset,noAssert) {
 };
 
-Buffer.prototype.readUInt16BE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readUInt32LE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readUInt32BE = function(offset,noAssert) {
-};
+// 8-bit Signed
 
 Buffer.prototype.readInt8 = function(offset,noAssert) {
   return this.delegate.getByte( offset );
 };
 
-Buffer.prototype.readInt16LE = function(offset,noAssert) {
+Buffer.prototype.writeInt8 = function(value,offset,noAssert) {
+  this.delegate.setByte(offset, value);
 };
 
-Buffer.prototype.readInt16BE = function(offset,noAssert) {
-  return this.delegate.getShort( offset );
+// 16-bit Unsigned
+
+Buffer.prototype.readUInt16LE = function(offset,noAssert) {
 };
 
-Buffer.prototype.readInt32LE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readInt32BE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readFloatLE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readFloatBE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readDoubleLE = function(offset,noAssert) {
-};
-
-Buffer.prototype.readDoubleBE = function(offset,noAssert) {
-};
-
-Buffer.prototype.writeUInt8 = function(value,offset,noAssert) {
+Buffer.prototype.readUInt16BE = function(offset,noAssert) {
 };
 
 Buffer.prototype.writeUInt16LE = function(value,offset,noAssert) {
@@ -229,14 +208,14 @@ Buffer.prototype.writeUInt16LE = function(value,offset,noAssert) {
 Buffer.prototype.writeUInt16BE = function(value,offset,noAssert) {
 };
 
-Buffer.prototype.writeUInt32LE = function(value,offset,noAssert) {
+// 16-bit Signed
+
+Buffer.prototype.readInt16LE = function(offset,noAssert) {
+  return java.lang.Short.reverseBytes( this.delegate.getShort( offset ) );
 };
 
-Buffer.prototype.writeUInt32BE = function(value,offset,noAssert) {
-};
-
-Buffer.prototype.writeInt8 = function(value,offset,noAssert) {
-  this.delegate.setByte(offset, value);
+Buffer.prototype.readInt16BE = function(offset,noAssert) {
+  return this.delegate.getShort( offset );
 };
 
 Buffer.prototype.writeInt16LE = function(value,offset,noAssert) {
@@ -246,10 +225,41 @@ Buffer.prototype.writeInt16BE = function(value,offset,noAssert) {
   this.delegate.setShort(offset, value);
 };
 
+// 32-bit Unsigned
+
+Buffer.prototype.readUInt32LE = function(offset,noAssert) {
+};
+
+Buffer.prototype.readUInt32BE = function(offset,noAssert) {
+};
+
+Buffer.prototype.writeUInt32LE = function(value,offset,noAssert) {
+};
+
+Buffer.prototype.writeUInt32BE = function(value,offset,noAssert) {
+};
+
+// 32-bit Signed
+
+Buffer.prototype.readInt32LE = function(offset,noAssert) {
+};
+
+Buffer.prototype.readInt32BE = function(offset,noAssert) {
+};
+
+
 Buffer.prototype.writeInt32LE = function(value,offset,noAssert) {
 };
 
 Buffer.prototype.writeInt32BE = function(value,offset,noAssert) {
+};
+
+// Float
+
+Buffer.prototype.readFloatLE = function(offset,noAssert) {
+};
+
+Buffer.prototype.readFloatBE = function(offset,noAssert) {
 };
 
 Buffer.prototype.writeFloatLE = function(value,offset,noAssert) {
@@ -258,11 +268,22 @@ Buffer.prototype.writeFloatLE = function(value,offset,noAssert) {
 Buffer.prototype.writeFloatBE = function(value,offset,noAssert) {
 };
 
+
+// Double
+
+Buffer.prototype.readDoubleLE = function(offset,noAssert) {
+};
+
+Buffer.prototype.readDoubleBE = function(offset,noAssert) {
+};
+
 Buffer.prototype.writeDoubleLE = function(value,offset,noAssert) {
 };
 
 Buffer.prototype.writeDoubleBE = function(value,offset,noAssert) {
 };
+
+// Class functions
 
 Buffer.prototype.fill = function(value,offset,end) {
   if ( ! offset ) {
@@ -341,31 +362,8 @@ Buffer.concat = function(list,len) {
 }
 
 Buffer.SlowBuffer = Buffer;
-
 module.exports.Buffer = Buffer;
-/*
-var Buffer = module.exports.Buffer = nodyn.buffer;
-
-// For now, let's not distinguish between SlowBuffer and
-// Buffer. We'll see if we need to do otherwise later.
-Buffer.prototype.SlowBuffer = Buffer;
-
-Buffer.prototype.concat = function() {
-  var args   = Array.prototype.slice.call(arguments, 0);
-  var list   = args[0];
-  var start  = 0;
-  var buffer = new Buffer();
-
-  if (list == undefined || list == null || list.length == 0) {
-    return new Buffer();
-  } else if (list.length == 1) {
-    return list[0];
-  }
-  list.forEach( function(buff) {
-    start = start + buff.copy(buffer, start);
-  });
-  return buffer;
+module.exports.buffer = {
+  INSPECT_MAX_BYTES: 50
 }
-
-*/
 
