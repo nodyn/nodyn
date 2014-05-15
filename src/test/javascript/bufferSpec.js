@@ -394,6 +394,40 @@ describe("Buffer", function() {
       expect(buf.readInt16BE(0)).toBe( -23817 );
     });
 
+    it ( "should be able to read four bytes as positive BE/LE unsigned ints", function() {
+      var buf = new Buffer(4);
+
+      buf.writeUInt32BE( 2147483648, 0 );
+      expect(buf.readUInt32BE(0)).toBe( 2147483648 );
+      expect(buf.readUInt32LE(0)).toBe( 128 );
+
+      buf = new Buffer(4);
+
+      buf.writeUInt32LE( 2147483648, 0 );
+      expect(buf.readUInt32LE(0)).toBe( 2147483648 );
+      expect(buf.readUInt32BE(0)).toBe( 128 );
+    });
+
+    it ( "should be able to read four bytes as BE/LE signed ints", function() {
+      var buf = new Buffer(4);
+      buf.writeUInt32BE( 3221225472, 0 );
+
+      expect(buf.readInt32BE(0)).toBe( -1073741824);
+      expect(buf.readInt32LE(0)).toBe( 192 )
+
+      buf = new Buffer(4);
+      buf.writeInt32BE( -1073741824, 0 );
+      expect(buf.readInt32BE(0)).toBe( -1073741824);
+      expect(buf.readInt32LE(0)).toBe( 192 )
+      expect(buf.readUInt32BE(0)).toBe( 3221225472 );
+
+      buf = new Buffer(4);
+      buf.writeInt32LE( -1073741824, 0 );
+      expect(buf.readInt32LE(0)).toBe( -1073741824);
+      expect(buf.readInt32BE(0)).toBe( 192 )
+      expect(buf.readUInt32LE(0)).toBe( 3221225472 );
+    });
+
   });
 
 });
