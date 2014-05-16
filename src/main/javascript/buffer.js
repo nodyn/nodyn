@@ -234,11 +234,30 @@ Buffer.prototype.writeInt16BE = function(value,offset,noAssert) {
 // 32-bit Unsigned
 
 Buffer.prototype.readUInt32LE = function(offset,noAssert) {
-  return java.lang.Integer.toUnsignedLong( java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) ) & 0xFFFFFFFF );
+  //return java.lang.Integer.toUnsignedLong( java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) ) & 0xFFFFFFFF );
+  var val = java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) );
+  val = val & 0xFFFFFFFF;
+  if ( val < 0 ) {
+    if ( val == -2147483648 ) {
+      val = 0;
+    }
+    val = Number(-val);
+    val = val + 2147483648;
+  }
+  return val;
 };
 
 Buffer.prototype.readUInt32BE = function(offset,noAssert) {
-  return java.lang.Integer.toUnsignedLong( this.delegate.getInt( offset ) & 0xFFFFFFFF );
+  var val = this.delegate.getInt( offset );
+  val = val & 0xFFFFFFFF;
+  if ( val < 0 ) {
+    if ( val == -2147483648 ) {
+      val = 0;
+    }
+    val = Number(-val);
+    val = val + 2147483648;
+  }
+  return val;
 };
 
 Buffer.prototype.writeUInt32LE = function(value,offset,noAssert) {

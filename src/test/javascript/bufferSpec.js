@@ -409,15 +409,34 @@ describe("Buffer", function() {
     it ( "should be able to read four bytes as positive BE/LE unsigned ints", function() {
       var buf = new Buffer(4);
 
-      buf.writeUInt32BE( 2147483648, 0 );
-      expect(buf.readUInt32BE(0)).toBe( 2147483648 );
-      expect(buf.readUInt32LE(0)).toBe( 128 );
+      buf.writeUInt32BE( 3221225472, 0 );
+      expect(buf.readUInt32BE(0)).toBe( 3221225472);
+      expect(buf.readUInt32LE(0)).toBe( 192 );
+      expect(buf.readInt32BE(0)).toBe(-1073741824);
 
       buf = new Buffer(4);
 
-      buf.writeUInt32LE( 2147483648, 0 );
-      expect(buf.readUInt32LE(0)).toBe( 2147483648 );
-      expect(buf.readUInt32BE(0)).toBe( 128 );
+      buf.writeUInt32LE( 3221225472, 0 );
+      expect(buf.readUInt32LE(0)).toBe( 3221225472);
+      expect(buf.readUInt32BE(0)).toBe( 192 );
+      expect(buf.readInt32LE(0)).toBe(-1073741824);
+
+      // --
+
+       buf = new Buffer(4);
+
+       buf.writeUInt32BE( 2147483648, 0 );
+       expect(buf.readUInt32BE(0)).toBe( 2147483648 );
+       expect(buf.readUInt32LE(0)).toBe( 128 );
+       expect(buf.readInt32BE(0)).toBe( -2147483648 );
+
+       buf = new Buffer(4);
+
+       buf.writeUInt32LE( 2147483648, 0 );
+       expect(buf.readUInt32LE(0)).toBe( 2147483648 );
+       expect(buf.readUInt32BE(0)).toBe( 128 );
+       expect(buf.readInt32LE(0)).toBe( -2147483648 );
+
     });
 
     it ( "should be able to read four bytes as BE/LE signed ints", function() {
