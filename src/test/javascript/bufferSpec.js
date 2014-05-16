@@ -310,38 +310,6 @@ describe("Buffer", function() {
     expect(Buffer.concat([]).length).toBe(0);
   });
 
-  it('should pass testReadUInt8', function() {
-    var buff = new Buffer(3);
-    buff[0] = 0x3;
-    buff[1] = 0x23;
-    buff[2] = 0x42;
-    buff[3] = 0xFF;
-    expect(buff.readUInt8(0)).toBe(0x3);
-    expect(buff.readUInt8(1)).toBe(0x23);
-    expect(buff.readUInt8(2)).toBe(0x42);
-    expect(buff.readUInt8(3)).toBe(0xFF);
-  });
-
-  it('should read/write signed 8-bit ints', function() {
-    var buff = new Buffer(3);
-    buff.writeInt8(-127,0);
-    buff.writeInt8(127,1);
-    buff.writeInt8(2,2);
-    buff.writeInt8(-2,3);
-    expect(buff.readInt8(0)).toBe(-127);
-    expect(buff.readInt8(1)).toBe(127);
-    expect(buff.readInt8(2)).toBe(2);
-    expect(buff.readInt8(3)).toBe(-2);
-  });
-
-  it( 'should read/write signed 16-bit ints', function() {
-    var buff = new Buffer(4);
-    buff.writeInt16BE( 2, 0 );
-    buff.writeInt16BE( -420, 2 );
-    expect(buff.readInt16BE(0)).toBe( 2 );
-    expect(buff.readInt16BE(2)).toBe( -420 );
-  });
-
   it( 'should provide for live/linked slices', function() {
     var buf = new Buffer( "original" );
     var slice = buf.slice();
@@ -353,6 +321,50 @@ describe("Buffer", function() {
   });
 
   describe( "reading and writing", function() {
+
+    it('should be able to read/write one byte as unsigned integers', function() {
+      var buff = new Buffer(4);
+      buff[0] = 0x3;
+      buff[1] = 0x23;
+      buff[2] = 0x42;
+      buff[3] = 0xFF;
+      expect(buff.readUInt8(0)).toBe(0x3);
+      expect(buff.readUInt8(1)).toBe(0x23);
+      expect(buff.readUInt8(2)).toBe(0x42);
+      expect(buff.readUInt8(3)).toBe(0xFF);
+
+      var buf = new Buffer(4);
+      buf.writeUInt8(0x3,0);
+      buf.writeUInt8(0x23,0);
+      buf.writeUInt8(0x42,0);
+      buf.writeUInt8(0xFF,0);
+
+      expect(buff.readUInt8(0)).toBe(0x3);
+      expect(buff.readUInt8(1)).toBe(0x23);
+      expect(buff.readUInt8(2)).toBe(0x42);
+      expect(buff.readUInt8(3)).toBe(0xFF);
+    });
+
+    it('should read/write signed 8-bit ints', function() {
+      var buff = new Buffer(3);
+      buff.writeInt8(-127,0);
+      buff.writeInt8(127,1);
+      buff.writeInt8(2,2);
+      buff.writeInt8(-2,3);
+      expect(buff.readInt8(0)).toBe(-127);
+      expect(buff.readInt8(1)).toBe(127);
+      expect(buff.readInt8(2)).toBe(2);
+      expect(buff.readInt8(3)).toBe(-2);
+    });
+
+    it( 'should read/write signed 16-bit ints', function() {
+      var buff = new Buffer(4);
+      buff.writeInt16BE( 2, 0 );
+      buff.writeInt16BE( -420, 2 );
+      expect(buff.readInt16BE(0)).toBe( 2 );
+      expect(buff.readInt16BE(2)).toBe( -420 );
+    });
+
     it ( "should be able to read two bytes as positive BE/LE unsigned ints", function() {
       var buf = new Buffer(2);
 
@@ -438,7 +450,7 @@ describe("Buffer", function() {
       expect( buf[2] ).toBe( 0xfe );
       expect( buf[3] ).toBe( 0xbb );
 
-      var buf = new Buffer(4);
+      buf = new Buffer(4);
       buf.writeFloatLE(0xcafebabe, 0);
       // <Buffer bb fe 4a 4f>
       expect( buf[0] ).toBe( 0xbb );
@@ -452,8 +464,22 @@ describe("Buffer", function() {
       expect( delta ).toBeLessThan( 1 );
 
       buf.writeFloatLE( 39.99, 0 );
-      var val = buf.readFloatLE(0);
+      val = buf.readFloatLE(0);
+      delta = val - 39.99;
+      expect( delta ).toBeLessThan( 1 );
+    });
+
+    it( "should be able to read eight bytes as BE/LE doubles", function() {
+      var buf = new Buffer(8);
+      buf.writeDoubleBE( 39.99, 0 );
+      var val = buf.readDoubleBE(0);
       var delta = val - 39.99;
+      expect( delta ).toBeLessThan( 1 );
+
+      buf = new Buffer(8);
+      buf.writeDoubleLE( 39.99, 0 );
+      val = buf.readDoubleLE(0);
+      delta = val - 39.99;
       expect( delta ).toBeLessThan( 1 );
     });
 

@@ -182,6 +182,7 @@ Buffer.prototype.readUInt8 = function(offset,noAssert) {
 };
 
 Buffer.prototype.writeUInt8 = function(value,offset,noAssert) {
+  return this.delegate.getByte( offset ) & 0xFF;
 };
 
 // 8-bit Signed
@@ -294,15 +295,25 @@ Buffer.prototype.writeFloatBE = function(value,offset,noAssert) {
 // Double
 
 Buffer.prototype.readDoubleLE = function(offset,noAssert) {
+  var b = java.nio.ByteBuffer.allocate(8).order( java.nio.ByteOrder.LITTLE_ENDIAN );
+  var bytes = this.delegate.getBytes(offset, offset+8);
+  b.put( bytes );
+  b.flip();
+  return b.getDouble();
 };
 
 Buffer.prototype.readDoubleBE = function(offset,noAssert) {
+  return this.delegate.getDouble(offset);
 };
 
 Buffer.prototype.writeDoubleLE = function(value,offset,noAssert) {
+  var b = java.nio.ByteBuffer.allocate(8).order( java.nio.ByteOrder.LITTLE_ENDIAN );
+  b.putDouble(value);
+  this.delegate.setBytes(offset,b.array());
 };
 
 Buffer.prototype.writeDoubleBE = function(value,offset,noAssert) {
+  this.delegate.setDouble(offset, value);
 };
 
 // Class functions
