@@ -17,7 +17,7 @@ describe('The dns module', function() {
     var ip = '10.0.0.1';
     waitsFor(helper.testComplete, "the dns lookup test to complete", 100);
     prepareDns(DnsServer.testResolveA(ip), function() {
-      dns.lookup("vertx.io", function(err, address, family) {
+      dns.lookup("nodyn.io", function(err, address, family) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", address !== null).toBeTruthy();
         expect("Unexpected address: " + address, ip === address).toBeTruthy();
@@ -32,7 +32,7 @@ describe('The dns module', function() {
     var ip = '10.0.0.1';
     waitsFor(helper.testComplete, "the dns resolve test to complete", 100);
     prepareDns(DnsServer.testResolveA(ip), function() {
-      dns.resolve("vertx.io", function(err, addresses) {
+      dns.resolve("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", addresses !== null).toBeTruthy();
         expect("Unexpected address: " + addresses, ip === addresses[0]).toBeTruthy();
@@ -45,7 +45,7 @@ describe('The dns module', function() {
     var ip = '10.0.0.1';
     waitsFor(helper.testComplete, "the dns resolve4 test to complete", 100);
     prepareDns(DnsServer.testResolveA(ip), function() {
-      dns.resolve4("vertx.io", function(err, addresses) {
+      dns.resolve4("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", addresses !== null).toBeTruthy();
         expect("Unexpected address: " + addresses, ip === addresses[0]).toBeTruthy();
@@ -58,7 +58,7 @@ describe('The dns module', function() {
     var ip = '::1';
     waitsFor(helper.testComplete, "the dns resolve6 test to complete", 100);
     prepareDns(DnsServer.testResolveAAAA(ip), function() {
-      dns.resolve6("vertx.io", function(err, addresses) {
+      dns.resolve6("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", addresses !== null).toBeTruthy();
         expect("Unexpected address: " + addresses, '0:0:0:0:0:0:0:1' === addresses[0]).toBeTruthy();
@@ -69,10 +69,10 @@ describe('The dns module', function() {
 
   it('should pass testResolveMx', function() {
     var prio = 10,
-        name = "mail.vertx.io";
+        name = "mail.nodyn.io";
     waitsFor(helper.testComplete, "the dns resolveMX test to complete", 100);
     prepareDns(DnsServer.testResolveMX(prio, name), function() {
-      dns.resolveMx("vertx.io", function(err, records) {
+      dns.resolveMx("nodyn.io", function(err, records) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Unexpected priority: " + records[0], prio == records[0].priority).toBeTruthy();
         expect("Unexpected exchange: " + records[0], name === records[0].exchange).toBeTruthy();
@@ -85,8 +85,8 @@ describe('The dns module', function() {
     var txt = "vert.x is awesome";
     waitsFor(helper.testComplete, "the dns resolveTxt test to complete", 100);
     prepareDns(DnsServer.testResolveTXT(txt), function() {
-      dns.resolveTxt("vertx.io", function(err, records) {
-        expect("Unexpected number of response records: " + records.length, 
+      dns.resolveTxt("nodyn.io", function(err, records) {
+        expect("Unexpected number of response records: " + records.length,
           1 === records.length).toBeTruthy();
         expect("Unexpected result: " + records[0], txt === records[0]).toBeTruthy();
         helper.testComplete(true);
@@ -98,10 +98,10 @@ describe('The dns module', function() {
     var prio = 10,
         weight = 1,
         port = 80,
-        target = 'vertx.io';
+        target = 'nodyn.io';
     waitsFor(helper.testComplete, "the dns resolveSrv test to complete", 100);
     prepareDns(DnsServer.testResolveSRV(prio, weight, port, target), function() {
-      dns.resolveSrv("vertx.io", function(err, records) {
+      dns.resolveSrv("nodyn.io", function(err, records) {
         expect(records).toBeTruthy();
         record = records[0];
         expect("Unexpected value: " + record.priority, prio == record.priority).toBeTruthy();
@@ -114,11 +114,11 @@ describe('The dns module', function() {
   });
 
   it('should pass testResolveNs', function() {
-    var ns = 'ns.vertx.io';
+    var ns = 'ns.nodyn.io';
     waitsFor(helper.testComplete, "the dns resolveNs test to complete", 100);
     prepareDns(DnsServer.testResolveNS(ns), function() {
-      dns.resolveNs("vertx.io", function(err, records) {
-        expect("Unexpected number of response records: " + records.length, 
+      dns.resolveNs("nodyn.io", function(err, records) {
+        expect("Unexpected number of response records: " + records.length,
           1 === records.length).toBeTruthy();
         expect("Unexpected result: " + records[0], ns === records[0]).toBeTruthy();
         helper.testComplete(true);
@@ -127,10 +127,10 @@ describe('The dns module', function() {
   });
 
   it('should pass testResolveCname', function() {
-    var cname = "cname.vertx.io";
+    var cname = "cname.nodyn.io";
     waitsFor(helper.testComplete, "the dns resolveCname test to complete", 100);
     prepareDns(DnsServer.testResolveCNAME(cname), function() {
-      dns.resolveCname("vertx.io", function(err, records) {
+      dns.resolveCname("nodyn.io", function(err, records) {
         expect(records).toBeTruthy();
         expect("Unexpected address: " + records, cname === records[0]).toBeTruthy();
         helper.testComplete(true);
@@ -139,7 +139,7 @@ describe('The dns module', function() {
   });
 
   it('should pass testReverseLookupIPv4', function() {
-    var ptr = 'ptr.vertx.io';
+    var ptr = 'ptr.nodyn.io';
     waitsFor(helper.testComplete, "the dns reverse lookup IPv4 test to complete", 100);
     prepareDns(DnsServer.testReverseLookup(ptr), function() {
       dns.reverse('10.0.0.1', function(err, records) {
@@ -151,7 +151,7 @@ describe('The dns module', function() {
   });
 
   it('should pass testReverseLookupIPv6', function() {
-    var ptr = 'ptr.vertx.io';
+    var ptr = 'ptr.nodyn.io';
     waitsFor(helper.testComplete, "the dns reverse lookup IPv6 test to complete", 100);
     prepareDns(DnsServer.testReverseLookup(ptr), function() {
       dns.reverse('::1', function(err, records) {
@@ -166,7 +166,7 @@ describe('The dns module', function() {
     var ip = '10.0.0.1';
     waitsFor(helper.testComplete, "the dns resolve A test to complete", 100);
     prepareDns(DnsServer.testResolveA(ip), function() {
-      dns.resolve("vertx.io", 'A', function(err, addresses) {
+      dns.resolve("nodyn.io", 'A', function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", addresses !== null).toBeTruthy();
         expect("Unexpected address: " + addresses, ip === addresses[0]).toBeTruthy();
@@ -179,7 +179,7 @@ describe('The dns module', function() {
     var ip = '::1';
     waitsFor(helper.testComplete, "the dns resolve AAAA test to complete", 100);
     prepareDns(DnsServer.testResolveAAAA(ip), function() {
-      dns.resolve("vertx.io", 'AAAA', function(err, addresses) {
+      dns.resolve("nodyn.io", 'AAAA', function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Address should not be null", addresses !== null).toBeTruthy();
         expect("Unexpected address: " + addresses, '0:0:0:0:0:0:0:1' === addresses[0]).toBeTruthy();
@@ -190,10 +190,10 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeMx', function() {
     var prio = 10,
-        name = "mail.vertx.io";
+        name = "mail.nodyn.io";
     waitsFor(helper.testComplete, "the dns resolve mx test to complete", 100);
     prepareDns(DnsServer.testResolveMX(prio, name), function() {
-      dns.resolve("vertx.io", 'MX', function(err, records) {
+      dns.resolve("nodyn.io", 'MX', function(err, records) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
         expect("Unexpected priority: " + records[0], prio == records[0].priority).toBeTruthy();
         expect("Unexpected exchange: " + records[0], name === records[0].exchange).toBeTruthy();
@@ -206,7 +206,7 @@ describe('The dns module', function() {
     var txt = "vert.x is awesome";
     waitsFor(helper.testComplete, "the dns resolve txt test to complete", 100);
     prepareDns(DnsServer.testResolveTXT(txt), function() {
-      dns.resolve("vertx.io", 'TXT', function(err, records) {
+      dns.resolve("nodyn.io", 'TXT', function(err, records) {
         expect("Unexpected number of response records: " + records.length,
           1 === records.length).toBeTruthy() ;
         expect("Unexpected result: " + records[0], txt === records[0]).toBeTruthy();
@@ -219,10 +219,10 @@ describe('The dns module', function() {
     var prio = 10,
         weight = 1,
         port = 80,
-        target = 'vertx.io';
+        target = 'nodyn.io';
     waitsFor(helper.testComplete, "the dns resolve srv test to complete", 100);
     prepareDns(DnsServer.testResolveSRV(prio, weight, port, target), function() {
-      dns.resolve("vertx.io", 'SRV', function(err, records) {
+      dns.resolve("nodyn.io", 'SRV', function(err, records) {
         expect(records).toBeTruthy();
         record = records[0];
         expect("Unexpected value: " + record.priority, prio == record.priority).toBeTruthy();
@@ -235,11 +235,11 @@ describe('The dns module', function() {
   });
 
   it('should pass testResolveRrtypeNs', function() {
-    var ns = 'ns.vertx.io';
+    var ns = 'ns.nodyn.io';
     waitsFor(helper.testComplete, "the dns resolve ns test to complete", 100);
     prepareDns(DnsServer.testResolveNS(ns), function() {
-      dns.resolve("vertx.io", 'NS', function(err, records) {
-        expect("Unexpected number of response records: " + records.length, 
+      dns.resolve("nodyn.io", 'NS', function(err, records) {
+        expect("Unexpected number of response records: " + records.length,
           1 === records.length).toBeTruthy();
         expect("Unexpected result: " + records[0], ns === records[0]).toBeTruthy();
         helper.testComplete(true);
@@ -248,10 +248,10 @@ describe('The dns module', function() {
   });
 
   it('should pass testResolveRrtypeCname', function() {
-    var cname = "cname.vertx.io";
+    var cname = "cname.nodyn.io";
     waitsFor(helper.testComplete, "the dns resolve cname test to complete", 100);
     prepareDns(DnsServer.testResolveCNAME(cname), function() {
-      dns.resolve("vertx.io", 'CNAME', function(err, records) {
+      dns.resolve("nodyn.io", 'CNAME', function(err, records) {
         expect(records).toBeTruthy();
         expect("Unexpected address: " + records, cname === records[0]).toBeTruthy();
         helper.testComplete(true);
@@ -283,5 +283,3 @@ describe('The dns module', function() {
     testFunc.apply(testFunc);
   }
 });
-
-
