@@ -77,7 +77,7 @@ describe('process', function() {
   });
 
   it('should pass testProcessConfig', function() {
-    // somewhat pointless 
+    // somewhat pointless
     // In node.js process.config returns the compile-time options of node.js
     expect(process.config).not.toBeNull();
   });
@@ -88,7 +88,7 @@ describe('process', function() {
     var functionCalled = false;
 
     // set an event listener on 'foo'
-    process.on('foo', function() { functionCalled = true; }); 
+    process.on('foo', function() { functionCalled = true; });
     expect(process.listeners('foo').length).toBe(1);
     process.emit('foo');
     expect(functionCalled).toBe(true);
@@ -127,4 +127,3 @@ describe('process', function() {
     expect(process.traceDeprecation).toBe(false);
   });
 });
-

@@ -73,12 +73,10 @@ var Process = function() {
   this.env = getEnv();
   this.pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
   this.execPath = System.getProperty("user.dir"); // TODO: This doesn't make much sense
-  this.moduleLoadList = [];
   this.argv = null;
   this.execArgv = null;
   this.features = null;
   this.debugPort = null;
-  this.abort = null;
   this.chdir = null;
   this.umask = null;
   this.getuid = null;
@@ -111,5 +109,13 @@ Process.prototype.nextTick = function(callback, args) {
 Process.prototype.cwd = function() {
   return System.getProperty("user.dir");
 };
+
+Process.prototype.exit = function() {
+  this.context.stop();
+  this.emit('exit');
+};
+
+// for now
+Process.prototype.abort = Process.prototype.exit;
 
 module.exports = Process;
