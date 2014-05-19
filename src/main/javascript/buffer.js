@@ -1,6 +1,7 @@
 "use strict";
 
 var Helper = org.projectodd.nodyn.buffer.Helper;
+var Codec = require('nodyn/codec');
 
 function Buffer() {
   if (!(this instanceof Buffer)) return new Buffer(arguments);
@@ -83,14 +84,23 @@ var bufferToString = function(enc,start,end) {
   if (arguments.length == 0 ) {
     return this.delegate.toString('utf-8');
   }
+
+  var codec = Codec.get( enc );
+
+  if ( ! codec ) {
+    throw new TypeError( "Unknown encoding: " + enc );
+  }
+
   if ( arguments.length == 1 ) {
-    return this.delegate.toString(encodingToJava(enc));
+    return codec.encode( this );
   }
+
   if ( arguments.length == 2 ) {
-    return this.delegate.toString(encodingToJava(enc)).substring(start);
+    return codec.encode( this.slice(start) );
   }
+
   if ( arguments.length == 3 ) {
-    return this.delegate.toString(encodingToJava(enc)).substring(start,end);
+    return codec.encode( this.slice(start,end) );
   }
 };
 

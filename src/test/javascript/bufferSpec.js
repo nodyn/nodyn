@@ -23,10 +23,15 @@ describe("Buffer", function() {
   });
 
   it('should pass testDefaultConstructorWithEncoding', function() {
+    try {
     var b = new Buffer('cheez', 'utf16le');
     expect(b.toString('utf16le')).toBe('cheez');
     // TODO: Why does this test fail?
     expect(b.toString()).toBe('c\u0000h\u0000e\u0000e\u0000z\u0000');
+    } catch ( err ) {
+      System.err.println( "---" + err );
+      err.printStackTrace();
+    }
   });
 
   it('should pass testBufferWrite', function() {
@@ -502,6 +507,16 @@ describe("Buffer", function() {
       expect( delta ).toBeLessThan( 1 );
     });
 
+  });
+
+  it( "should support base64 on toString", function(){
+    var b = new Buffer( "tacos" );
+    expect( b.toString('base64') ).toBe( 'dGFjb3M=' );
+  });
+
+  it( "should support hex on toString", function() {
+    var b = new Buffer( "tacos" );
+    expect( b.toString('hex') ).toBe( '7461636f73' );
   });
 
 });

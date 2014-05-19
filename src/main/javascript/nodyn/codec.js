@@ -6,6 +6,10 @@ var Base64 = {};
 
 Base64.table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
+Base64.toString = function() {
+  return "base64";
+}
+
 Base64.encode = function(bytes) {
   if ( typeof bytes == 'string' ) {
     var strBytes = [];
@@ -49,6 +53,10 @@ Base64.encode = function(bytes) {
 
 var Hex = {};
 
+Hex.toString = function() {
+  return "hex";
+}
+
 Hex.encode = function(bytes) {
   var s = '';
   for ( var i = 0 ; i < bytes.length ; ++i ) {
@@ -62,9 +70,67 @@ Hex.encode = function(bytes) {
   return s;
 }
 
+var UTF8 = {};
+
+UTF8.toString = function() {
+  return "utf8";
+}
+
+UTF8.encode = function(bytes) {
+  return bytes.delegate.toString('utf-8');
+}
+
+var USASCII = {};
+
+USASCII.toString = function() {
+  return "us-ascii";
+}
+
+USASCII.encode = function(bytes) {
+  return bytes.delegate.toString( 'us-ascii' );
+}
+
+var UTF16LE = {};
+
+UTF16LE.toString = function() {
+  return "utf16-le";
+}
+
+UTF16LE.encode = function(bytes) {
+  return bytes.delegate.toString( 'utf-16le');
+}
+
+function get(enc) {
+  enc = enc.toLowerCase();
+  if ( enc == 'ascii' || enc == 'us-ascii') {
+    return USASCII;
+  }
+
+  if ( enc == 'utf8' || enc == 'utf-8') {
+    return UTF8;
+  }
+
+  if ( enc == 'ucs2' || enc == 'utf16le' || enc == 'utf-16le' ) {
+    return UTF16LE;
+  }
+
+  if ( enc == 'hex' ) {
+    return Hex;
+  }
+
+  if ( enc == 'base64' ) {
+    return Base64;
+  }
+}
+
+
 var Codec = {
+  get: get,
   Base64: Base64,
   Hex: Hex,
+  UTF8: UTF8,
+  UTF16LE: UTF16LE,
+  USASCII: USASCII,
 }
 
 module.exports = Codec;
