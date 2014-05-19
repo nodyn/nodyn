@@ -1,5 +1,5 @@
 
-var vertxCallback = function(callback, mutator) {
+var nativeCallback = function(callback, mutator) {
   return function(err, result) {
     if (err) {
       callback.apply(callback, [convertError(err), null]);
@@ -11,10 +11,10 @@ var vertxCallback = function(callback, mutator) {
   };
 };
 
-var convertError = function(vertxError) {
-  if (vertxError) {
+var convertError = function(nativeError) {
+  if (nativeError) {
     var err = new Error();
-    err.code = vertxError.code().name();
+    err.code = nativeError.code().name();
     // TODO: Convert other errors to node.js names
     if(err.code === 'NXDOMAIN') {
       err.code = 'ENOTFOUND';
@@ -53,16 +53,16 @@ var DNS = function() {
   this.lookup = function(domain, family, callback) {
     var client = dns.createDnsClient(addr());
     if (typeof family === 'function') {
-      client.lookup(domain, vertxCallback(family, function(err, result) { 
-        return [err, result, 4]; 
+      client.lookup(domain, nativeCallback(family, function(err, result) {
+        return [err, result, 4];
       }));
     } else if (family === 4) {
-      client.lookup4(domain, vertxCallback(callback, function(err, result) { 
-        return [err, result, family]; 
+      client.lookup4(domain, nativeCallback(callback, function(err, result) {
+        return [err, result, family];
       }));
     } else if (family === 6) {
-      client.lookup6(domain, vertxCallback(callback, function(err, result) { 
-        return [err, result, family]; 
+      client.lookup6(domain, nativeCallback(callback, function(err, result) {
+        return [err, result, family];
       }));
     }
   };
@@ -75,19 +75,19 @@ var DNS = function() {
     }
     switch(rrtype) {
       case 'A': {
-        client.resolveA(domain, vertxCallback(callback));
+        client.resolveA(domain, nativeCallback(callback));
         break;
       }
       case 'AAAA': {
-        client.resolveAAAA(domain, vertxCallback(callback));
+        client.resolveAAAA(domain, nativeCallback(callback));
         break;
       }
       case 'CNAME': {
-        client.resolveCNAME(domain, vertxCallback(callback));
+        client.resolveCNAME(domain, nativeCallback(callback));
         break;
       }
       case 'MX': {
-        client.resolveMX(domain, vertxCallback(callback, function(err, result) {
+        client.resolveMX(domain, nativeCallback(callback, function(err, result) {
           return [err, result.map(function(o) {
             return {'exchange': o.name, 'priority': o.priority};
           })];
@@ -95,19 +95,19 @@ var DNS = function() {
         break;
       }
       case 'NS': {
-        client.resolveNS(domain, vertxCallback(callback));
+        client.resolveNS(domain, nativeCallback(callback));
         break;
       }
       case 'PTR': {
-        client.resolvePTR(domain, vertxCallback(callback));
+        client.resolvePTR(domain, nativeCallback(callback));
         break;
       }
       case 'SRV': {
-        client.resolveSRV(domain, vertxCallback(callback));
+        client.resolveSRV(domain, nativeCallback(callback));
         break;
       }
       case 'TXT': {
-        client.resolveTXT(domain, vertxCallback(callback));
+        client.resolveTXT(domain, nativeCallback(callback));
         break;
       }
       default: {
@@ -118,17 +118,17 @@ var DNS = function() {
 
   this.resolve4 = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveA(domain, vertxCallback(callback));
+    client.resolveA(domain, nativeCallback(callback));
   };
 
   this.resolve6 = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveAAAA(domain, vertxCallback(callback));
+    client.resolveAAAA(domain, nativeCallback(callback));
   };
 
   this.resolveMx = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveMX(domain, vertxCallback(callback, function(err, result) {
+    client.resolveMX(domain, nativeCallback(callback, function(err, result) {
       return [err, result.map(function(o) {
         return {'exchange': o.name, 'priority': o.priority};
       })];
@@ -137,27 +137,27 @@ var DNS = function() {
 
   this.resolveTxt = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveTXT(domain, vertxCallback(callback));
+    client.resolveTXT(domain, nativeCallback(callback));
   };
 
   this.resolveSrv = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveSRV(domain, vertxCallback(callback));
+    client.resolveSRV(domain, nativeCallback(callback));
   };
 
   this.resolveNs = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveNS(domain, vertxCallback(callback));
+    client.resolveNS(domain, nativeCallback(callback));
   };
 
   this.resolveCname = function(domain, callback) {
     var client = dns.createDnsClient(addr());
-    client.resolveCNAME(domain, vertxCallback(callback));
+    client.resolveCNAME(domain, nativeCallback(callback));
   };
 
   this.reverse = function(ip, callback) {
     var client = dns.createDnsClient(addr());
-    client.reverseLookup(ip, vertxCallback(callback, function(err, result) {
+    client.reverseLookup(ip, nativeCallback(callback, function(err, result) {
       return [err, [result]];
     }));
   };
