@@ -163,4 +163,19 @@ describe("crypto module", function() {
       hmac.update('Now we all did what we could do');
       expect(hmac.digest('base64')).toBe('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==');
   });
+
+  it('should treat hashes as streams', function() {
+      var hash = crypto.createHash('sha512');
+      hash.write('Now is the winter of our discontent ' );
+      hash.write('made glorious summer');
+      expect(hash.digest('base64')).toBe('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==');
+  } );
+
+  it('should treat HMacs as streams', function() {
+      var key = 'Sweet home Alabama';
+      var hmac = crypto.createHmac('sha512', key);
+      hmac.write('Where the skies are so blue ');
+      hmac.write('Now we all did what we could do');
+      expect(hmac.digest('base64')).toBe('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==');
+  });
 });

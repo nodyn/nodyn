@@ -123,23 +123,18 @@ crypto.DEFAULT_ENCODING = 'buffer';
 var Hash = function(algorithm) {
   if (!(this instanceof Hash)) return new Hash(arguments);
 
+  Stream.Writable.call( this, {} );
+
   this.algorithm = algorithm;
   this._digest = MessageDigest.getInstance( hashAlgorithmToJava( algorithm ) );
 
   return this;
 };
 
-util.inherits(Hash, Stream);
+util.inherits(Hash, Stream.Writable);
 
 Hash.prototype.update = function(data, enc) {
-  if ( ! enc ) {
-    enc = 'utf8';
-  }
-  if ( data instanceof Buffer ) {
-    this._digest.update( data.delegate.bytes );
-  } else {
-    this._digest.update(Helper.bytes( data, Buffer.encodingToJava( enc ) ) );
-  }
+  this.write(data,enc);
 };
 
 Hash.prototype.digest = function(enc) {
@@ -154,6 +149,15 @@ Hash.prototype.digest = function(enc) {
   }
 };
 
+Hash.prototype._write = function(chunk, enc, callback) {
+  if ( chunk instanceof Buffer ) {
+    this._digest.update( chunk.delegate.getBytes() );
+  } else {
+    this._digest.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
+  }
+  callback();
+}
+
 crypto.Hash = Hash;
 
 // ----------------------------------------
@@ -162,6 +166,8 @@ crypto.Hash = Hash;
 
 var Hmac = function(algorithm,key) {
   if (!(this instanceof Hmac)) return new Hmac(arguments);
+
+  Stream.Writable.call( this, {} );
 
   this.algorithm = algorithm;
   this._hmac = Mac.getInstance( macAlgorithmToJava( algorithm ) );
@@ -172,14 +178,10 @@ var Hmac = function(algorithm,key) {
   return this;
 };
 
-util.inherits(Hmac, Stream);
+util.inherits(Hmac, Stream.Writable);
 
 Hmac.prototype.update = function(data) {
-  if ( data instanceof Buffer ) {
-    this._hmac.update( data.delegate.bytes );
-  } else {
-    this._hmac.update(Helper.bytes( data, 'utf-8' ) );
-  }
+  this.write(data);
 };
 
 Hmac.prototype.digest = function(enc) {
@@ -193,6 +195,15 @@ Hmac.prototype.digest = function(enc) {
     return d;
   }
 };
+
+Hmac.prototype._write = function(chunk, enc, callback) {
+  if ( chunk instanceof Buffer ) {
+    this._hmac.update( chunk.delegate.bytes );
+  } else {
+    this._hmac.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
+  }
+  callback();
+}
 
 crypto.Hmac = Hmac;
 
