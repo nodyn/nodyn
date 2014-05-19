@@ -77,12 +77,7 @@ var Process = function() {
   this.argv = null;
   this.execArgv = null;
   this.features = null;
-  this._eval = null;
-  this._print_eval = null;
-  this._forceRepl = null;
   this.debugPort = null;
-  this._needTickCallback = null;
-  this.reallyExit = null;
   this.abort = null;
   this.chdir = null;
   this.umask = null;
@@ -90,17 +85,9 @@ var Process = function() {
   this.setuid = null;
   this.getgid = null;
   this.setgid = null;
-  this._kill = null;
-  this._debugProcess = null;
-  this._debugPause = null;
-  this._debugEnd = null;
   this.hrtime = null;
   this.dlopen = null;
   this.uptime = null;
-
-  this.cwd = function() {
-    return System.getProperty("user.dir");
-  };
 };
 
 var util = require('util');
@@ -121,5 +108,8 @@ Process.prototype.nextTick = function(callback, args) {
   });
 };
 
+Process.prototype.cwd = function() {
+  return System.getProperty("user.dir");
+};
 
 module.exports = Process;
