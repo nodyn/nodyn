@@ -1,6 +1,3 @@
-var System = java.lang.System;
-var vertx  = NativeRequire.require('vertx');
-
 var getEnv = function() {
   env = {};
   tmpDir = System.getProperty("java.io.tmpdir");
@@ -19,20 +16,22 @@ var getEnv = function() {
 };
 
 var Process = function() {
-  var Mode         = java.nio.file.AccessMode;
-  var Open         = java.nio.file.StandardOpenOption;
-  var Node         = org.projectodd.nodyn.Node;
-  var javaProcess  = new org.projectodd.nodyn.process.Process();
-  var EventEmitter = NativeRequire.require('events').EventEmitter;
+  var Mode         = java.nio.file.AccessMode,
+      Open         = java.nio.file.StandardOpenOption,
+      Node         = org.projectodd.nodyn.Node,
+      javaProcess  = new org.projectodd.nodyn.process.Process(),
+      EventEmitter = NativeRequire.require('events').EventEmitter;
 
-  this.title = "Nodyn";
-  this.version = Node.VERSION;
-  this.versions = {
+  this.context     = org.vertx.java.core.VertxFactory.newVertx();
+  this.title       = "Nodyn";
+  this.version     = Node.VERSION;
+
+  this.versions    = {
       node: Node.VERSION,
       java: System.getProperty("java.version")
   };
 
-  this.binding = {
+  this.binding     = {
     constants: {
       O_RDONLY: Mode.READ.toString(),
       O_WRONLY: Mode.WRITE.toString(),
@@ -67,7 +66,7 @@ var Process = function() {
   this.platform = javaProcess.platform();
   this.noDeprecation = false;
   this.traceDeprecation = false;
-  
+
   this.EventEmitter       = EventEmitter;
   this.on                 = EventEmitter.prototype.on;
   this.addListener        = EventEmitter.prototype.addListener;
@@ -77,7 +76,7 @@ var Process = function() {
   this.setMaxListeners    = EventEmitter.prototype.setMaxListeners;
   this.listeners          = EventEmitter.prototype.listeners;
   this.emit               = EventEmitter.prototype.emit;
-  
+
   this.memoryUsage = function() {
     os = NativeRequire.require('os');
     var obj = {};
@@ -85,13 +84,13 @@ var Process = function() {
     obj.heapUsed  = os.totalmem() - os.freemem();
     return obj;
   };
-  
+
   this.nextTick = function(callback, args) {
-    vertx.runOnContext(function() {
+    this.context.runOnContext(function() {
       callback(args);
     });
   };
-  
+
   // TODO: this.config
   // Node.js puts the configure options that were used to compile the current
   // node executable in this.config
@@ -129,4 +128,4 @@ var Process = function() {
   };
 };
 
-module.exports = new Process();
+module.exports = Process;

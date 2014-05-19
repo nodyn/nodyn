@@ -71,14 +71,6 @@ public class Main extends org.dynjs.cli.Main {
         GlobalObject globalObject = runtime.getExecutionContext().getGlobalObject();
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
         globalObject.defineGlobalProperty("__filename", "repl"); // TODO: This should be a file name sometimes
-        globalObject.defineGlobalProperty("__jvertx", vertx);
-        globalObject.defineGlobalProperty("global", globalObject);
-
-        DynObject node = new DynObject(globalObject);
-        node.put("QueryString", new QueryString(globalObject));
-        globalObject.defineGlobalProperty("nodyn", node);
-
-        initScript(runtime.getExecutionContext(), "npm_modules.js", runtime);
         initScript(runtime.getExecutionContext(), "node.js", runtime);
         return runtime;
     }

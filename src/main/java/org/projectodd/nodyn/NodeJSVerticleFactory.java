@@ -47,7 +47,6 @@ public class NodeJSVerticleFactory extends DynJSVerticleFactory {
             return ExecutionContext.createGlobalExecutionContext(runtime, new InitializationListener() {
                 @Override
                 public void initialize(ExecutionContext context) {
-                    initScript(context, "npm_modules.js", runtime);
                     initScript(context, "node.js", runtime);
                     context.getGlobalObject().defineGlobalProperty("__dirname", new File(filename).getParent());
                     context.getGlobalObject().defineGlobalProperty("__filename", filename);
