@@ -19,8 +19,7 @@ var Process = function() {
   var Mode         = java.nio.file.AccessMode,
       Open         = java.nio.file.StandardOpenOption,
       Node         = org.projectodd.nodyn.Node,
-      javaProcess  = new org.projectodd.nodyn.process.Process(),
-      EventEmitter = NativeRequire.require('events').EventEmitter;
+      javaProcess  = new org.projectodd.nodyn.process.Process();
 
   this.context     = org.vertx.java.core.VertxFactory.newVertx();
   this.title       = "Nodyn";
@@ -67,30 +66,6 @@ var Process = function() {
   this.noDeprecation = false;
   this.traceDeprecation = false;
 
-  this.EventEmitter       = EventEmitter;
-  this.on                 = EventEmitter.prototype.on;
-  this.addListener        = EventEmitter.prototype.addListener;
-  this.once               = EventEmitter.prototype.once;
-  this.removeListener     = EventEmitter.prototype.removeListener;
-  this.removeAllListeners = EventEmitter.prototype.removeAllListeners;
-  this.setMaxListeners    = EventEmitter.prototype.setMaxListeners;
-  this.listeners          = EventEmitter.prototype.listeners;
-  this.emit               = EventEmitter.prototype.emit;
-
-  this.memoryUsage = function() {
-    os = NativeRequire.require('os');
-    var obj = {};
-    obj.heapTotal = os.totalmem();
-    obj.heapUsed  = os.totalmem() - os.freemem();
-    return obj;
-  };
-
-  this.nextTick = function(callback, args) {
-    this.context.runOnContext(function() {
-      callback(args);
-    });
-  };
-
   // TODO: this.config
   // Node.js puts the configure options that were used to compile the current
   // node executable in this.config
@@ -127,5 +102,24 @@ var Process = function() {
     return System.getProperty("user.dir");
   };
 };
+
+var util = require('util');
+var EE   = require('events').EventEmitter;
+util.inherits(Process, EE);
+
+Process.prototype.memoryUsage = function() {
+  os = NativeRequire.require('os');
+  var obj = {};
+  obj.heapTotal = os.totalmem();
+  obj.heapUsed  = os.totalmem() - os.freemem();
+  return obj;
+};
+
+Process.prototype.nextTick = function(callback, args) {
+  this.context.runOnContext(function() {
+    callback(args);
+  });
+};
+
 
 module.exports = Process;
