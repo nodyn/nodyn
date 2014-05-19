@@ -1,23 +1,21 @@
+load('./npm_modules.js');
+
+__jvertx = org.vertx.java.core.VertxFactory.newVertx();
+
 Nodyn = org.projectodd.nodyn;
 
 nodyn     = {
   QueryString: Nodyn.util.QueryString.newQueryString(this)
 };
 
-__filename = (typeof __filename === 'undefined') ? 
+__filename = (typeof __filename === 'undefined') ?
               'node.js' : __filename;
-__dirname  = (typeof __dirname === 'undefined') ? 
+__dirname  = (typeof __dirname === 'undefined') ?
               java.lang.System.getProperty('user.dir') : __dirname;
 
-vertx     = NativeRequire.require('vertx');
-process   = NativeRequire.require('process');
-console   = NativeRequire.require('node_console');
-
-Timer     = vertx.timer;
-container = vertx.container;
-require   = require;
-
-Buffer = require('buffer').Buffer;
+process    = NativeRequire.require('process');
+console    = NativeRequire.require('node_console');
+Buffer     = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 
 require.loadJSON = function(file) {
@@ -44,7 +42,7 @@ setTimeout = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return Timer.setTimer(milliseconds, function() {
+  return __jvertx.setTimer(milliseconds, function() {
     callback.apply(callback, args);
   });
 };
@@ -64,18 +62,17 @@ setInterval = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return Timer.setPeriodic(milliseconds, function() {
+  return __jvertx.setPeriodic(milliseconds, function() {
     callback.apply(callback, args);
   });
 };
 
 clearTimeout = function(id) {
-  Timer.cancelTimer(id);
+  __jvertx.cancelTimer(id);
 };
 
 clearInterval = clearTimeout;
 
 
-//console.log("Node.js ContextClassLoader:  " 
+//console.log("Node.js ContextClassLoader:  "
 //    + java.lang.System.identityHashCode(java.lang.Thread.currentThread().getContextClassLoader()));
-

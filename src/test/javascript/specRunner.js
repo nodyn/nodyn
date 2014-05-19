@@ -1,7 +1,5 @@
 // We need to prime vertx since jasmine tests don't run in the vert.x container.
-if ((typeof NativeRequire) !== 'object') {
-  __jvertx = org.vertx.java.core.VertxFactory.newVertx();
-  load('./npm_modules.js');
+if ((typeof nodyn) !== 'object') {
   load('./node.js');
 }
 

@@ -1,6 +1,4 @@
-if ((typeof NativeRequire) !== 'object') {
-  __jvertx = org.vertx.java.core.VertxFactory.newVertx();
-  load('./npm_modules.js');
+if ((typeof nodyn) !== 'object') {
   load('./node.js');
   jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
