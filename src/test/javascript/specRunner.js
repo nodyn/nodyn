@@ -15,8 +15,7 @@ var origCallback = jasmineEnv.currentRunner_.finishCallback;
 
 jasmineEnv.currentRunner_.finishCallback = function() {
   origCallback.call(this);
-  process.emit('exit', '__jvertx.stop()');
-  __jvertx.stop();
+  process.exit();
 };
 
 describe('Nodyn', function() {
