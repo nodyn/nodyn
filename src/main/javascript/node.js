@@ -21,10 +21,6 @@ console    = NativeRequire.require('node_console');
 Buffer     = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 
-require.loadJSON = function(file) {
-  return JSON.parse(vertx.fileSystem.readFileSync(file).toString());
-};
-
 // Stdout and Stderr
 stderr = java.lang.System.err;
 stdout = java.lang.System.out;
@@ -75,7 +71,3 @@ clearTimeout = function(id) {
 };
 
 clearInterval = clearTimeout;
-
-
-//console.log("Node.js ContextClassLoader:  "
-//    + java.lang.System.identityHashCode(java.lang.Thread.currentThread().getContextClassLoader()));
