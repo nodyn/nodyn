@@ -1,10 +1,6 @@
 package org.projectodd.nodyn.buffer;
 
-import org.vertx.java.core.buffer.*;
-import org.vertx.java.core.buffer.Buffer;
-
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 
 /**
  * @author Bob McWhirter

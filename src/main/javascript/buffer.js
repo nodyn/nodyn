@@ -34,7 +34,7 @@ function Buffer() {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first );
     } else if ( ( typeof first ) == 'string' ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.toString() );
-    } else if ( ( typeof first ) == 'object' && first.length ) {
+    } else if ( first.length ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.length );
       for ( var i = 0 ; i < first.length ; ++i ) {
         self[i] = first[i];
@@ -70,6 +70,8 @@ function encodingToJava(enc) {
 
   return enc;
 }
+
+Buffer.encodingToJava = encodingToJava;
 
 Object.defineProperty( Buffer.prototype, "length", {
   get: function() {
