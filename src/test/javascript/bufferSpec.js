@@ -223,7 +223,7 @@ describe("Buffer", function() {
 
     expect(b.utf8Write(TEST_STRING, 0, 10)).toBe(10);
     expect(b.toString()).toBe(TEST_STRING.substring(0, 10));
-    
+
     idx = 0;
     for (var _byte in UTF8_BYTES) {
       if (idx == 10) { break; }
@@ -517,6 +517,12 @@ describe("Buffer", function() {
   it( "should support hex on toString", function() {
     var b = new Buffer( "tacos" );
     expect( b.toString('hex') ).toBe( '7461636f73' );
+  });
+
+  it( "should accept a vertx Buffer instance in the ctor function", function() {
+    var b1 = new Buffer('Now is the winter of our discontent');
+    var b2 = new Buffer( b1.delegate );
+    expect( b1.toString() ).toBe( b2.toString() );
   });
 
 });

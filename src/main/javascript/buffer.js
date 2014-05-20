@@ -31,7 +31,9 @@ function Buffer() {
 
   if ( arguments.length == 1 ) {
     var first = arguments[0];
-    if ( ( typeof first ) == 'number' ) {
+    if ( first instanceof org.vertx.java.core.buffer.Buffer ) {
+      self.delegate = first;
+    } else if ( ( typeof first ) == 'number' ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first );
     } else if ( ( typeof first ) == 'string' ) {
       self.delegate = new org.vertx.java.core.buffer.Buffer( first.toString() );
@@ -430,4 +432,3 @@ module.exports.Buffer = Buffer;
 module.exports.buffer = {
   INSPECT_MAX_BYTES: 50
 }
-
