@@ -2,7 +2,6 @@ var helper = require('specHelper');
 var crypto = require('crypto');
 
 describe("crypto module", function() {
-/*
 
   it('should pass testCreateHash', function() {
     expect(typeof crypto.createHash).toBe('function');
@@ -171,7 +170,6 @@ describe("crypto module", function() {
       hash.write('made glorious summer');
       expect(hash.digest('base64')).toBe('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==');
   } );
-  */
 
   it('should treat HMacs as streams', function() {
       var key = 'Sweet home Alabama';
@@ -182,6 +180,7 @@ describe("crypto module", function() {
   });
 
   describe( "cipher", function() {
+    it( "should produce the same bytes as node.js", function() {
       var cipher = crypto.createCipher( 'des', 'tacos' );
       cipher.write( "bob" );
       var f = cipher.final();

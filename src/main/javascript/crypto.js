@@ -281,7 +281,7 @@ function kdf(data, keyLen, ivLen) {
 }
 
 function kdf_d(data, prev, iter) {
-  var d = new Buffer(32);
+  var d = new Buffer(prev.length + data.length );
   prev.copy( d );
   data.copy( d, prev.length );
 
@@ -290,7 +290,7 @@ function kdf_d(data, prev, iter) {
     digest.update( d );
     d = digest.digest();
   }
-  return d;
+  return d.slice(0,16);
 }
 
 Cipher.prototype._createKeyIV = function(cipherType, password) {
