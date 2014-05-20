@@ -2,6 +2,7 @@ var helper = require('specHelper');
 var crypto = require('crypto');
 
 describe("crypto module", function() {
+/*
 
   it('should pass testCreateHash', function() {
     expect(typeof crypto.createHash).toBe('function');
@@ -170,6 +171,7 @@ describe("crypto module", function() {
       hash.write('made glorious summer');
       expect(hash.digest('base64')).toBe('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==');
   } );
+  */
 
   it('should treat HMacs as streams', function() {
       var key = 'Sweet home Alabama';
@@ -177,5 +179,22 @@ describe("crypto module", function() {
       hmac.write('Where the skies are so blue ');
       hmac.write('Now we all did what we could do');
       expect(hmac.digest('base64')).toBe('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==');
+  });
+
+  describe( "cipher", function() {
+      var cipher = crypto.createCipher( 'des', 'tacos' );
+      cipher.write( "bob" );
+      var f = cipher.final();
+      // <2f a4 16 67 41 e0 37 8e>
+
+      expect( f[0] ).toBe( 0x2F );
+      expect( f[1] ).toBe( 0xA4 );
+      expect( f[2] ).toBe( 0x16 );
+      expect( f[3] ).toBe( 0x67 );
+      expect( f[4] ).toBe( 0x41 );
+      expect( f[5] ).toBe( 0xE0 );
+      expect( f[6] ).toBe( 0x37 );
+      expect( f[7] ).toBe( 0x8e );
+    });
   });
 });

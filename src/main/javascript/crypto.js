@@ -5,12 +5,18 @@ var Stream = require('stream');
 var Codec = require('nodyn/codec' );
 
 var Helper = org.projectodd.nodyn.buffer.Helper;
+var CryptoHelper = org.projectodd.nodyn.crypto.CryptoHelper;
 var Buffer = require('buffer').Buffer;
 
 var MessageDigest = java.security.MessageDigest;
 
 var Mac = javax.crypto.Mac;
 var SecretKeySpec = javax.crypto.spec.SecretKeySpec;
+var IvParameterSpec = javax.crypto.spec.IvParameterSpec;
+
+var SecretKeyFactory = javax.crypto.SecretKeyFactory;
+
+var jCipher = javax.crypto.Cipher;
 
 var crypto = {};
 
@@ -57,6 +63,8 @@ function macAlgorithmToJava(algo) {
 }
 
 
+
+
 // ----------------------------------------
 // crypto
 // ----------------------------------------
@@ -79,6 +87,7 @@ crypto.createHmac = function(algorithm,key) {
 };
 
 crypto.createCipher = function(algorithm,password) {
+  return new Cipher(algorithm,password);
 };
 
 crypto.createCipheriv = function(algorithm,password,iv) {
@@ -207,27 +216,127 @@ Hmac.prototype._write = function(chunk, enc, callback) {
 
 crypto.Hmac = Hmac;
 
-/*
+
 // ----------------------------------------
 // Cipher
 // ----------------------------------------
 
-var Cipher = function() {
+var CipherTypes = {};
+
+CipherTypes.get = function(algo) {
+  algo = algo.toLowerCase();
+
+  if ( algo == 'des' ) {
+    return CipherTypes.DES;
+  }
+}
+
+CipherTypes.DES = {
+  key_len: 8,
+  iv_len: 8,
+  cipher: 'DES/CBC/PKCS5Padding',
+  algorithm: 'DES',
+}
+
+var Cipher = function(algorithm, password) {
+  if (!(this instanceof Cipher)) return new Cipher(arguments);
+
+  Stream.Duplex.call( this, {} );
+
+  this.algorithm = algorithm;
+
+  var cipherType = CipherTypes.get( algorithm );
+  this._cipher = jCipher.getInstance( cipherType.cipher );
+
+  var kiv = this._createKeyIV( cipherType, password);
+  this._cipher.init( jCipher.ENCRYPT_MODE, kiv.key, kiv.iv );
+
+  return this;
 };
 
-Cipher.prototype.update(data, input_enc, output_enc) {
+util.inherits(Cipher, Stream.Duplex);
+
+function kdf(data, keyLen, ivLen) {
+  var totalLen = keyLen + ivLen;
+  var curLen = 0;
+  var prev = new Buffer('');
+  var iter = 1;
+
+  var kiv = new Buffer(totalLen);
+
+  while ( curLen < totalLen ) {
+    prev = kdf_d(data, prev, iter );
+    prev.copy( kiv, curLen );
+    ++iter;
+    curLen += 16;
+  }
+
+  var k = kiv.slice( 0, keyLen );
+  var i = kiv.slice( keyLen );
+
+  return {
+    key: kiv.slice( 0, keyLen ),
+    iv:  kiv.slice( keyLen )
+  };
+}
+
+function kdf_d(data, prev, iter) {
+  var d = new Buffer(32);
+  prev.copy( d );
+  data.copy( d, prev.length );
+
+  for ( var i = 0 ; i < iter ; ++i ) {
+    var digest = new Hash('md5');
+    digest.update( d );
+    d = digest.digest();
+  }
+  return d;
+}
+
+Cipher.prototype._createKeyIV = function(cipherType, password) {
+  var kiv
+
+  if ( password instanceof Buffer ) {
+    kiv = kdf( password, 8, 8 );
+  } else {
+    var bytes = Helper.bytes(password, 'utf-8');
+    kiv = kdf( new Buffer( bytes ), cipherType.key_len, cipherType.iv_len );
+  }
+
+  var key = new SecretKeySpec( kiv.key.delegate.bytes, cipherType.algorithm );
+  var iv = new IvParameterSpec( kiv.iv.delegate.bytes );
+  return {
+    key: key,
+    iv: iv,
+  }
+}
+
+Cipher.prototype.update = function(data, input_enc, output_enc) {
 };
 
-Cipher.prototype.final(output_enc) {
+Cipher.prototype.final = function(output_enc) {
+  var bytes = this._cipher.doFinal();
+  var buf = new Buffer( bytes );
+  return buf;
 };
 
-Cipher.prototype.setAutoPadding(auto_padding) {
+Cipher.prototype.setAutoPadding = function(auto_padding) {
   if ( ! auto_padding ) {
     auto_padding = true;
   }
 
   this.auto_padding = auto_padding;
 }
+
+Cipher.prototype._write = function(chunk, enc, callback) {
+  if ( chunk instanceof Buffer ) {
+    this._cipher.update( chunk.delegate.bytes );
+  } else {
+    this._cipher.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
+  }
+  callback();
+}
+/*
 
 // ----------------------------------------
 // Decipher

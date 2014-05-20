@@ -183,7 +183,7 @@ Buffer.prototype.slice = function(start,end) {
   if ( ! end ) {
     end = this.length;
   }
-  b.delegate = new org.vertx.java.core.buffer.Buffer( this.delegate.byteBuf.slice( start, end ) );
+  b.delegate = new org.vertx.java.core.buffer.Buffer( this.delegate.byteBuf.slice( start, (end - start ) ) );
   return b;
 };
 
