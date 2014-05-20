@@ -5,7 +5,6 @@ var Stream = require('stream');
 var Codec = require('nodyn/codec' );
 
 var Helper = org.projectodd.nodyn.buffer.Helper;
-var CryptoHelper = org.projectodd.nodyn.crypto.CryptoHelper;
 var Buffer = require('buffer').Buffer;
 
 var MessageDigest = java.security.MessageDigest;
@@ -229,6 +228,10 @@ CipherTypes.get = function(algo) {
   if ( algo == 'des' ) {
     return CipherTypes.DES;
   }
+
+  if ( algo == 'aes-128-cbc' ) {
+    return CipherTypes.AES_128_CBC;
+  }
 }
 
 CipherTypes.DES = {
@@ -236,7 +239,14 @@ CipherTypes.DES = {
   iv_len: 8,
   cipher: 'DES/CBC/PKCS5Padding',
   algorithm: 'DES',
-}
+};
+
+CipherTypes.AES_128_CBC = {
+  key_len: 16,
+  iv_len: 16,
+  cipher: 'AES/CBC/PKCS5Padding',
+  algorithm: 'AES'
+};
 
 var Cipher = function(algorithm, password) {
   if (!(this instanceof Cipher)) return new Cipher(arguments);
@@ -263,9 +273,10 @@ function kdf(data, keyLen, ivLen) {
   var iter = 1;
 
   var kiv = new Buffer(totalLen);
+  kiv.fill(0);
 
   while ( curLen < totalLen ) {
-    prev = kdf_d(data, prev, iter );
+    prev = kdf_d(data, prev, 1 );
     prev.copy( kiv, curLen );
     ++iter;
     curLen += 16;
@@ -297,7 +308,7 @@ Cipher.prototype._createKeyIV = function(cipherType, password) {
   var kiv
 
   if ( password instanceof Buffer ) {
-    kiv = kdf( password, 8, 8 );
+    kiv = kdf( password, cipherType.key_len, cipherType.iv_len );
   } else {
     var bytes = Helper.bytes(password, 'utf-8');
     kiv = kdf( new Buffer( bytes ), cipherType.key_len, cipherType.iv_len );
