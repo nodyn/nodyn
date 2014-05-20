@@ -1,7 +1,17 @@
+// Should only happen when running with a test-patter
+// for a single spec. Otherwise, specRunner.js handles this.
 if ((typeof nodyn) !== 'object') {
   load('./node.js');
-  jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
+  (function() {
+    jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
+    jasmineEnv = jasmine.getEnv();
+    origCallback = jasmineEnv.currentRunner_.finishCallback;
+    jasmineEnv.currentRunner_.finishCallback = function() {
+      origCallback.call(this);
+      process.exit();
+    };
+  })();
 }
 
 var fs = require('fs');
