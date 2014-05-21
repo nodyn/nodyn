@@ -93,6 +93,7 @@ crypto.createCipheriv = function(algorithm,password,iv) {
 };
 
 crypto.createDecipher = function(algorithm,password) {
+  return new Decipher(algorithm,password);
 };
 
 crypto.createDecipheriv = function(algorithm,password,iv) {
@@ -248,24 +249,16 @@ CipherTypes.AES_128_CBC = {
   algorithm: 'AES'
 };
 
-var Cipher = function(algorithm, password) {
-  if (!(this instanceof Cipher)) return new Cipher(arguments);
 
-  Stream.Duplex.call( this, {} );
 
-  this.algorithm = algorithm;
-
-  var cipherType = CipherTypes.get( algorithm );
-  this._cipher = jCipher.getInstance( cipherType.cipher );
-
-  var kiv = this._createKeyIV( cipherType, password);
-  this._cipher.init( jCipher.ENCRYPT_MODE, kiv.key, kiv.iv );
-
-  return this;
-};
-
-util.inherits(Cipher, Stream.Duplex);
-
+/*
+ * Note: this is *not* necessarily the recommended way to
+ * generate key material and initialization-vectors, but
+ * it follows the OpenSSL method, as used by Node.js proper,
+ * which is slightly weird and non-standard for longer key-lengths,
+ * but does end up being compatible with produced cipher-texts from
+ * Node.js.
+ */
 function kdf(data, keyLen, ivLen) {
   var totalLen = keyLen + ivLen;
   var curLen = 0;
@@ -304,7 +297,7 @@ function kdf_d(data, prev, iter) {
   return d.slice(0,16);
 }
 
-Cipher.prototype._createKeyIV = function(cipherType, password) {
+function createKeyAndIv(cipherType, password) {
   var kiv
 
   if ( password instanceof Buffer ) {
@@ -322,7 +315,26 @@ Cipher.prototype._createKeyIV = function(cipherType, password) {
   }
 }
 
+var Cipher = function(algorithm, password) {
+  if (!(this instanceof Cipher)) return new Cipher(arguments);
+
+  Stream.Duplex.call( this, {} );
+
+  this.algorithm = algorithm;
+
+  var cipherType = CipherTypes.get( algorithm );
+  this._cipher = jCipher.getInstance( cipherType.cipher );
+
+  var kiv = createKeyAndIv( cipherType, password);
+  this._cipher.init( jCipher.ENCRYPT_MODE, kiv.key, kiv.iv );
+
+  return this;
+};
+
+util.inherits(Cipher, Stream.Duplex);
+
 Cipher.prototype.update = function(data, input_enc, output_enc) {
+  this.write( data, input_enc );
 };
 
 Cipher.prototype.final = function(output_enc) {
@@ -347,22 +359,40 @@ Cipher.prototype._write = function(chunk, enc, callback) {
   }
   callback();
 }
-/*
 
 // ----------------------------------------
 // Decipher
 // ----------------------------------------
 
-var Decipher = function() {
+var Decipher = function(algorithm, password) {
+  if (!(this instanceof Decipher)) return new Decipher(arguments);
+
+  Stream.Duplex.call( this, {} );
+
+  this.algorithm = algorithm;
+
+  var cipherType = CipherTypes.get( algorithm );
+  this._cipher = jCipher.getInstance( cipherType.cipher );
+
+  var kiv = createKeyAndIv( cipherType, password);
+  this._cipher.init( jCipher.DECRYPT_MODE, kiv.key, kiv.iv );
+
+  return this;
 };
 
-Decipher.prototype.update(data, input_enc, output_enc) {
+util.inherits(Decipher, Stream.Duplex);
+
+Decipher.prototype.update = function(data, input_enc, output_enc) {
+  this.write(data, input_enc);
 };
 
-Decipher.prototype.final(output_enc) {
+Decipher.prototype.final = function(output_enc) {
+  var bytes = this._cipher.doFinal();
+  var buf = new Buffer( bytes );
+  return buf;
 };
 
-Decipher.prototype.setAutoPadding(auto_padding) {
+Decipher.prototype.setAutoPadding = function(auto_padding) {
   if ( ! auto_padding ) {
     auto_padding = true;
   }
@@ -370,6 +400,16 @@ Decipher.prototype.setAutoPadding(auto_padding) {
   this.auto_padding = auto_padding;
 }
 
+Decipher.prototype._write = function(chunk, enc, callback) {
+  if ( chunk instanceof Buffer ) {
+    this._cipher.update( chunk.delegate.bytes );
+  } else {
+    this._cipher.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
+  }
+  callback();
+}
+
+/*
 // ----------------------------------------
 // Sign
 // ----------------------------------------

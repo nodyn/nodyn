@@ -179,7 +179,7 @@ describe("crypto module", function() {
       expect(hmac.digest('base64')).toBe('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==');
   });
 
-  describe( "cipher", function() {
+  describe( "cipher & decipher with generated IV", function() {
     it( "should produce the same bytes as node.js for DES", function() {
       var cipher = crypto.createCipher( 'des', 'tacos' );
       cipher.write( "bob" );
@@ -194,6 +194,11 @@ describe("crypto module", function() {
       expect( f[5] ).toBe( 0xE0 );
       expect( f[6] ).toBe( 0x37 );
       expect( f[7] ).toBe( 0x8e );
+
+      var decipher = crypto.createDecipher( 'des', 'tacos' );
+      decipher.write( f );
+      f = decipher.final();
+      expect( f.toString() ).toBe( 'bob' );
     });
 
     it( "should produce the same bytes as node.js for AES-128-CBC", function() {
@@ -218,6 +223,12 @@ describe("crypto module", function() {
       expect( f[13] ).toBe( 0x68 );
       expect( f[14] ).toBe( 0x8a );
       expect( f[15] ).toBe( 0x99 );
+
+
+      var decipher = crypto.createDecipher( 'aes-128-cbc', 'tacos' );
+      decipher.write( f );
+      f = decipher.final();
+      expect( f.toString() ).toBe( 'bob' );
     });
 
 
