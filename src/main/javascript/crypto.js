@@ -20,27 +20,13 @@ var Signature = java.security.Signature;
 
 
 var crypto = {};
+crypto.Hash = require('crypto/hash');
 
 // ----------------------------------------
 // utils
 // ----------------------------------------
 
-function hashAlgorithmToJava(algo) {
-  algo = algo.toLowerCase();
-  if ( algo == 'sha1' || algo == 'sha-1' ) {
-    return 'sha-1';
-  }
 
-  if ( algo == 'sha256' || algo == 'sha-256' ) {
-    return 'sha-256';
-  }
-
-  if ( algo == 'sha512' || algo == 'sha-512' ) {
-    return 'sha-512';
-  }
-
-  return algo;
-}
 
 function macAlgorithmToJava(algo) {
   algo = algo.toLowerCase();
@@ -63,9 +49,6 @@ function macAlgorithmToJava(algo) {
   return algo;
 }
 
-
-
-
 // ----------------------------------------
 // crypto
 // ----------------------------------------
@@ -80,7 +63,7 @@ crypto.createCredentials = function(details) {
 };
 
 crypto.createHash = function(algorithm) {
-  return new Hash(algorithm);
+  return new crypto.Hash(algorithm);
 };
 
 crypto.createHmac = function(algorithm,key) {
@@ -127,50 +110,6 @@ crypto.pseudoRandomBytes = function(size, callback) {
 };
 
 crypto.DEFAULT_ENCODING = 'buffer';
-
-// ----------------------------------------
-// Hash
-// ----------------------------------------
-
-var Hash = function(algorithm) {
-  if (!(this instanceof Hash)) return new Hash(algorithm);
-
-  Stream.Writable.call( this, {} );
-
-  this.algorithm = algorithm;
-  this._digest = MessageDigest.getInstance( hashAlgorithmToJava( algorithm ) );
-
-  return this;
-};
-
-util.inherits(Hash, Stream.Writable);
-
-Hash.prototype.update = function(data, enc) {
-  this.write(data,enc);
-};
-
-Hash.prototype.digest = function(enc) {
-  var d = new Buffer( this._digest.digest() );
-  if ( enc == 'binary' ) {
-  } else if ( enc == 'base64' ) {
-    return Codec.Base64.encode(d);
-  } else if ( enc == 'hex' ) {
-    return Codec.Hex.encode(d);
-  } else {
-    return d;
-  }
-};
-
-Hash.prototype._write = function(chunk, enc, callback) {
-  if ( chunk instanceof Buffer ) {
-    this._digest.update( chunk.delegate.getBytes() );
-  } else {
-    this._digest.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
-  }
-  callback();
-}
-
-crypto.Hash = Hash;
 
 // ----------------------------------------
 // Hmac
@@ -293,7 +232,7 @@ function kdf_d(data, prev, iter) {
   data.copy( d, prev.length );
 
   for ( var i = 0 ; i < iter ; ++i ) {
-    var digest = new Hash('md5');
+    var digest = new crypto.Hash('md5');
     digest.update( d );
     d = digest.digest();
   }
