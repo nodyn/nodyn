@@ -5,16 +5,14 @@ var Stream = require('stream');
 
 var CipherCommon = require('crypto/cipher_common');
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
-var Buffer = require('buffer').Buffer;
 
-var Signature = java.security.Signature;
 
 var crypto = {};
 crypto.Hash     = require('crypto/hash');
 crypto.Hmac     = require('crypto/hmac');
 crypto.Cipher   = require('crypto/cipher');
 crypto.Decipher = require('crypto/decipher');
+crypto.Sign     = require('crypto/sign');
 
 // ----------------------------------------
 // crypto
@@ -52,7 +50,7 @@ crypto.createDecipheriv = function(algorithm,password,iv) {
 };
 
 crypto.createSign = function(algorithm) {
-  return new Sign(algorithm);
+  return new crypto.Sign(algorithm);
 };
 
 crypto.createVerify = function(algorithm) {
@@ -77,61 +75,6 @@ crypto.pseudoRandomBytes = function(size, callback) {
 };
 
 crypto.DEFAULT_ENCODING = 'buffer';
-
-// ----------------------------------------
-// Sign
-// ----------------------------------------
-
-var SignatureTypes = {};
-
-SignatureTypes.get = function(algo) {
-  algo = algo.toLowerCase();
-
-  if ( algo == 'rsa-sha256' ) {
-    return SignatureTypes.SHA256withRSA;
-  }
-}
-
-SignatureTypes.SHA256withRSA = {
-  algorithm: 'SHA256withRSA',
-};
-
-var Sign = function(algorithm) {
-  if (!(this instanceof Sign)) return new Sign(algorithm);
-
-  Stream.Writable.call( this, {} );
-
-  this.algorithm = algorithm;
-  this._algorithm = SignatureTypes.get( algorithm );
-  this._buffer= new org.vertx.java.core.buffer.Buffer();
-
-  return this;
-};
-
-util.inherits(Sign, Stream.Writable);
-
-Sign.prototype.update = function(data) {
-  this.write( data );
-};
-
-Sign.prototype.sign = function(private_key, output_format) {
-  var signature = Signature.getInstance( this._algorithm.algorithm );
-  var keySpec;
-  KeyFactory.getInstance( this._algorithm.algorithm ).generatePrivate( keySpec );
-  signature.initSign( )
-  signature.update( this._buffer.bytes );
-  var bytes = signature.sign( );
-  return new Buffer(bytes);
-};
-
-Sign.prototype._write = function(chunk, enc, callback) {
-  if ( chunk instanceof Buffer ) {
-    this._buffer.appendBuffer( chunk.delegate)
-  } else {
-    this._buffer.appendBytes(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
-  }
-  callback();
-}
 
 // ----------------------------------------
 // Verify
