@@ -92,7 +92,6 @@ describe("fs.ReadStream", function() {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
 
-    // TODO: Is this a race condition? Enquiring minds want to know
       readStream.on('open', function() {
         f.delete();
         helper.testComplete(true);

@@ -1,70 +1,86 @@
-var fs     = NativeRequire.require('vertx/file_system');
+var system = process.context.fileSystem();
+var nodyn  = require('nodyn');
 var util   = require('util');
 var Stream = require('stream');
 
-var delegate = function(delegateFunc) {
-  return function() {
-    var last = Array.prototype.pop.call(arguments);
-    var args = Array.prototype.slice.call(arguments);
-    if (typeof last === 'function') {
-      args.push(wrapHandler(last));
-    } else if (last !== undefined) {
-      args.push(last);
-    }
-    delegateFunc.apply(delegateFunc, args);
-  };
-};
-
-var notImplemented = function(name, throws) {
-  return function() {
-    var msg = ["Error:", name, "not implemented"].join(' ');
-    if (throws) {
-      throw new Error(msg);
-    }
-    print(msg);
-  };
-};
-
 var FS = {};
-FS.readdir       = fs.readDir;
-FS.readdirSync   = fs.readDirSync;
-FS.rename        = fs.move;
-FS.renameSync    = fs.moveSync;
-FS.truncate      = fs.truncate;
-FS.truncateSync  = fs.truncateSync;
-FS.ftruncate     = fs.truncate;
-FS.ftruncateSync = fs.truncateSync;
-FS.exists        = delegate(fs.exists);
-FS.existsSync    = fs.existsSync;
-FS.chown         = fs.chown;
-FS.fchown        = fs.chown;
-FS.lchown        = fs.chown;
-FS.chownSync     = fs.chownSync;
-FS.fchownSync    = fs.chownSync;
-FS.lchownSync    = fs.chownSync;
-FS.readlink      = fs.readSymlink;
-FS.readlinkSync  = fs.readSymlinkSync;
-FS.unlink        = fs.unlink;
-FS.unlinkSync    = fs.unlinkSync;
-FS.rmdir         = fs.delete;
-FS.rmdirSync     = fs.deleteSync;
 
 // TODO: implement these functions
-FS.realpath      = notImplemented("realpath", true);
-FS.realpathSync  = notImplemented("realpathSync", true);
-FS.utimes        = notImplemented("utimes");
-FS.utimesSync    = notImplemented("utimesSync");
-FS.futimes       = notImplemented("futimes");
-FS.futimesSync   = notImplemented("futimesSync");
-FS.write         = notImplemented("write");
-FS.writeSync     = notImplemented("writeSync");
-FS.read          = notImplemented("read");
-FS.readSync      = notImplemented("readSync");
-FS.appendFile    = notImplemented("appendFile");
-FS.appendFileSync= notImplemented("appendFileSync");
-FS.watchFile     = notImplemented("watchFile");
-FS.unwatchFile   = notImplemented("unwatchFile");
-FS.watch         = notImplemented("watch");
+FS.realpath      = nodyn.notImplemented("realpath", true);
+FS.realpathSync  = nodyn.notImplemented("realpathSync", true);
+FS.utimes        = nodyn.notImplemented("utimes");
+FS.utimesSync    = nodyn.notImplemented("utimesSync");
+FS.futimes       = nodyn.notImplemented("futimes");
+FS.futimesSync   = nodyn.notImplemented("futimesSync");
+FS.write         = nodyn.notImplemented("write");
+FS.writeSync     = nodyn.notImplemented("writeSync");
+FS.readSync      = nodyn.notImplemented("readSync");
+FS.appendFile    = nodyn.notImplemented("appendFile");
+FS.appendFileSync= nodyn.notImplemented("appendFileSync");
+FS.watchFile     = nodyn.notImplemented("watchFile");
+FS.unwatchFile   = nodyn.notImplemented("unwatchFile");
+FS.watch         = nodyn.notImplemented("watch");
+
+// When vertx file system functions mirror node file system
+// functions, we can use this high-order function to
+// delegate. It passes args unmolested into the vertx
+// API, and provides a possibly converted return value
+// (or callback arg). If the type/order of function
+// arguments don't match up between vertx and node, then
+// don't use this function.
+function delegateFunction(f, converter) {
+  return function() {
+    if (!converter) { converter = function(result) { return result; }; }
+    var args = Array.prototype.slice.call(arguments);
+    var last = args[args.length - 1];
+    if (typeof last === 'function') {
+        args[args.length - 1] = nodyn.vertxHandler(last, converter);
+    }
+    return converter(f.apply(system, args));
+  };
+}
+
+FS.truncate      = delegateFunction(system.truncate);
+FS.truncateSync  = delegateFunction(system.truncateSync);
+FS.ftruncate     = delegateFunction(system.truncate);
+FS.ftruncateSync = delegateFunction(system.truncateSync);
+FS.rename        = delegateFunction(system.move);
+FS.renameSync    = delegateFunction(system.moveSync);
+FS.readdir       = delegateFunction(system.readDir, nodyn.arrayConverter);
+FS.readdirSync   = delegateFunction(system.readDirSync, nodyn.arrayConverter);
+FS.chown         = delegateFunction(system.chown);
+FS.fchown        = delegateFunction(system.chown);
+FS.lchown        = delegateFunction(system.chown);
+FS.chownSync     = delegateFunction(system.chownSync);
+FS.fchownSync    = delegateFunction(system.chownSync);
+FS.lchownSync    = delegateFunction(system.chownSync);
+FS.readlink      = delegateFunction(system.readSymlink);
+FS.readlinkSync  = delegateFunction(system.readSymlinkSync);
+FS.unlink        = delegateFunction(system.unlink);
+FS.unlinkSync    = delegateFunction(system.unlinkSync);
+FS.rmdir         = delegateFunction(system.delete);
+FS.rmdirSync     = delegateFunction(system.deleteSync);
+FS.stat          = delegateFunction(system.props,      function(result) { return new Stat(result); } );
+FS.statSync      = delegateFunction(system.propsSync,  function(result) { return new Stat(result); } );
+FS.lstat         = delegateFunction(system.lprops,     function(result) { return new Stat(result); } );
+FS.lstatSync     = delegateFunction(system.lpropsSync, function(result) { return new Stat(result); } );
+
+FS.exists = function(path, callback) {
+  system.exists(path, function(future) {
+    callback(future.result());
+  });
+};
+
+FS.existsSync = function(path) {
+  return system.existsSync(path);
+};
+
+FS.read = function(fd, buffer, offset, length, position, callback) {
+  // fd is a vertx AsyncFile
+  fd.read(buffer.delegate, offset, position, length, nodyn.vertxHandler(function(err, buf) {
+    callback(err, length, buf);
+  }));
+};
 
 FS.readFile = function(path) { // [options], callback
   var args = Array.prototype.slice.call(arguments, 1);
@@ -73,28 +89,28 @@ FS.readFile = function(path) { // [options], callback
   if ((typeof opts) === 'string') {
     opts = { encoding: opts };
   }
-  fs.readFile(path, function(err, buff) {
+  system.readFile(path, nodyn.vertxHandler(function(err, buff) {
     if (opts && opts.encoding) {
       func(err, buff.toString(opts.encoding));
     } else {
-      func(err, new Buffer(buff.toString()));
+      func(err, new Buffer(buff));
     }
-  });
+  }));
 };
 
 FS.readFileSync = function(path, options) {
-  var jBuffer = fs.readFileSync(path);
+  var jBuffer = system.readFileSync(path);
   if ((typeof options) === 'string') {
     options = { encoding: options };
   }
   if (options && options.encoding) {
     return jBuffer.toString(options.encoding);
   }
-  return new Buffer(jBuffer.toString());
+  return new Buffer(jBuffer);
 };
 
 FS.fsync = function(fd, callback) {
-  fd.flush(callback);
+  fd.flush(nodyn.vertxHandler(callback));
 };
 
 FS.fsyncSync = function(fd) {
@@ -102,72 +118,60 @@ FS.fsyncSync = function(fd) {
 };
 
 FS.close = function(fd, callback) {
-  if (!(fd instanceof fs.AsyncFile)) {
-    callback(Error("Don't know how to close " + fd));
-  } else {
-    fd.close(callback);
-  }
+  if (!fd) return callback(new Error("Don't know how to close " + fd));
+  fd.close(nodyn.vertxHandler(callback));
 };
 
 FS.closeSync = function(fd) {
-  if ((fd instanceof fs.AsyncFile)) {
-    fd.close();
-  }
+  if (!fd) return new Error("Don't know how to close " + fd);
+  fd.close();
 };
 
 FS.open = function(path, flags) {
   var args = Array.prototype.slice.call(arguments, 2);
   var func = args.pop();
   var mode = args.pop();
-  var modeString = convertModeToString(mode);
   var flag = mapOpenFlags(flags);
-
-  fs.open(path, flag, false, modeString, function(e, f) {
-    if (e) {
-      e = new Error(e.toString());
-    }
-    func.apply(func, [e, f]);
-  });
+  system.open(path, convertModeToString(mode), flag.read, flag.write, flag.create, nodyn.vertxHandler(func));
 };
 
 FS.openSync = function(path, flags, mode) {
   var modeString = convertModeToString(mode);
   var flag = mapOpenFlags(flags);
   try {
-    return fs.openSync(path, flag, true, modeString);
+    return system.openSync(path, modeString, flag.read, flag.write, flag.create);
   } catch(e) {
     throw new Error(e.toString());
   }
 };
 
-FS.writeFile = function() {
-  var filename = arguments[0];
-  var data     = arguments[1];
-  var callback = arguments[2];
-
-  options  = {
-    // default values
-    'encoding': 'utf8',
-    'mode': 0666,
-    'flag': 'w'
-  };
-
-  if (typeof arguments[2] == 'object') {
-    options  = arguments[2];
-    callback = arguments[3];
+FS.writeFile = function(filename, data, options, callback) {
+  var buffer;
+  if (typeof options === 'function') {
+    callback = options;
+    options = {
+      // default values
+      'encoding': 'utf8',
+      'mode': 0666,
+      'flag': 'w'
+    };
   }
-
-  fs.writeFile(filename, data, callback);
+  if (data instanceof Buffer) {
+    buffer = data.delegate;
+  } else {
+    buffer = new org.vertx.java.core.buffer.Buffer( data.toString() );
+  }
+  system.writeFile(filename, buffer, nodyn.vertxHandler(callback));
 };
 
 FS.chmod = function(path, mode, callback) {
-  fs.chmod(path, convertModeToString(mode), callback);
+  system.chmod(path, convertModeToString(mode), nodyn.vertxHandler(callback));
 };
 FS.fchmod = FS.chmod;
 FS.lchmod = FS.chmod;
 
 FS.chmodSync = function(path, mode) {
-  fs.chmodSync(path, convertModeToString(mode));
+  system.chmodSync(path, convertModeToString(mode));
 };
 FS.fchmodSync = FS.chmodSync;
 FS.lchmodSync = FS.chmodSync;
@@ -175,40 +179,22 @@ FS.lchmodSync = FS.chmodSync;
 
 FS.mkdir = function(path, mode, callback) {
   // CreateParent boolean will always be false as NodeJS
-  // do not support this option
-  fs.mkDir(path, false, convertModeToString(mode), callback);
+  // does not support this option
+  mode = mode || 0777;
+  system.mkdir(path, convertModeToString(mode), false, nodyn.vertxHandler(callback));
 };
 
 FS.mkdirSync = function(path, mode) {
-  fs.mkDirSync(path, false, convertModeToString(mode));
-};
-
-FS.stat = function(path, callback) {
-  fs.props(path, function(err, result){
-    callback(err, new Stat(result));
-  });
-};
-
-FS.statSync = function(path) {
-  return new Stat(fs.propsSync(path));
-};
-
-FS.lstat = function(path, callback) {
-  fs.lprops(path, function(err, result){
-    callback(err, new Stat(result));
-  });
-};
-
-FS.lstatSync = function(path) {
-  return new Stat(fs.lpropsSync(path));
+  system.mkdirSync(path, convertModeToString(mode), false);
+  return this;
 };
 
 FS.link = function(src, dest, callback) {
-  fs.symlink(dest, src, callback);
+  system.symlink(dest, src, nodyn.vertxHandler(callback));
 };
 
 FS.linkSync = function(src, dest) {
-  fs.symlinkSync(dest, src);
+  system.symlinkSync(dest, src);
 };
 
 FS.symlink = FS.link;
@@ -248,12 +234,10 @@ FS.ReadStream = function(path, options) {
     if (this.start > this.end) {
       throw new Error('start must be <= end');
     }
-
     this.pos = this.start;
   }
 
-  if (!util.isNumber(this.fd))
-    this.open();
+  if (!this.fd) this.open();
 
   this.on('end', function() {
     if (this.autoClose) {
@@ -265,7 +249,7 @@ FS.ReadStream = function(path, options) {
 util.inherits(FS.ReadStream, Stream.Readable);
 
 FS.ReadStream.prototype.open = function() {
-  fs.open(this.path, fs.OPEN_READ, openReadable(this));
+  FS.open(this.path, 'r', openReadable(this));
 };
 
 FS.ReadStream.prototype._read = function(size) {
@@ -276,22 +260,19 @@ FS.ReadStream.prototype.destroy = function() {
   if (this.destroyed)
     return;
   this.destroyed = true;
-
-  if (this.fd instanceof fs.AsyncFile) {
-    this.close();
-  }
+  this.close();
 };
 
 FS.ReadStream.prototype.close = function(cb) {
   var self = this;
   if (cb) this.once('close', cb);
 
-  if (this.closed || !(this.fd instanceof fs.AsyncFile)) {
-    if (!(this.fd instanceof fs.AsyncFile)) {
+  if (this.closed || !this.fd) {
+    if (!this.fd) {
       this.once('open', close);
       return;
     }
-    return process.nextTick(this.emit.bind(this.fd, 'close'));
+    return process.nextTick(this.emit.bind(this, 'close'));
   }
   this.closed = true;
   close();
@@ -320,8 +301,7 @@ function openReadable(readable) {
     });
 
     asyncFile.dataHandler(function(buffer) {
-      var str = buffer.toString(); // hmm
-      if (!readable.push(str)) {
+      if (!readable.push(new Buffer(buffer))) {
         readable.pause();
       }
     });
@@ -361,7 +341,7 @@ var Stat = function(delegate) {
   this.blocks  = undefined;
 };
 
-var invertAndConvert = function(x) {
+function invertAndConvert(x) {
   var e = parseInt(x).toString(2);
   var bitArray = e.split("");
   var convertedString = "";
@@ -386,7 +366,7 @@ var invertAndConvert = function(x) {
     convertedString = convertedString.concat("x");
   }
   return convertedString;
-};
+}
 
 var modeCache = {};
 var convertModeToString = function(mode) {
@@ -406,42 +386,41 @@ var convertModeToString = function(mode) {
   return result;
 };
 
-var mapOpenFlags = function(flags) {
-  var flag = 0;
+function mapOpenFlags(flags) {
+  var map = {
+    read:   false,
+    write:  false,
+    create: false
+  };
 
   switch(flags) {
     case 'r':
     case 'rs':
-      flag = fs.OPEN_READ;
+      map.read = true;
       break;
     case 'r+':
     case 'rs+':
-      flag = fs.OPEN_READ | fs.OPEN_WRITE;
+      map.write = true;
       break;
     case 'w':
-      flag = fs.OPEN_WRITE;
+      map.write = true;
+      map.create = true;
       break;
     case 'wx':
-      flag = fs.OPEN_WRITE | fs.CREATE_NEW;
+      map.write = true;
       break;
     case 'w+':
-      flag = fs.OPEN_READ | fs.OPEN_WRITE;
+      map.read = true;
+      map.write = true;
+      map.create = true;
       break;
     case 'wx+':
-      flag = fs.OPEN_READ | fs.OPEN_WRITE | fs.CREATE_NEW;
+      map.read = true;
+      map.write = true;
       break;
     // todo: deal with append modes
   }
-  return flag;
-};
-
-var wrapHandler = function(func) {
-  return function(err, result) {
-    if (err) {
-      return func(err);
-    }
-    return func(result);
-  };
-};
+  return map;
+}
 
 module.exports = FS;

@@ -29,6 +29,10 @@ function Buffer() {
 
   if ( arguments.length == 1 ) {
     var first = arguments[0];
+    // WARNING: Using a Vert.x buffer in the ctor function
+    // for a Nodyn Buffer will work, but will not copy or
+    // clone the Vert.x buffer, so changes made to it on
+    // either side will be reflected in both.
     if ( first instanceof org.vertx.java.core.buffer.Buffer ) {
       self.delegate = first;
     } else if ( ( typeof first ) == 'number' ) {
