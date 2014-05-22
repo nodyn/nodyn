@@ -16,6 +16,8 @@ var IvParameterSpec = javax.crypto.spec.IvParameterSpec;
 var SecretKeyFactory = javax.crypto.SecretKeyFactory;
 
 var jCipher = javax.crypto.Cipher;
+var Signature = java.security.Signature;
+
 
 var crypto = {};
 
@@ -100,6 +102,7 @@ crypto.createDecipheriv = function(algorithm,password,iv) {
 };
 
 crypto.createSign = function(algorithm) {
+  return new Sign(algorithm);
 };
 
 crypto.createVerify = function(algorithm) {
@@ -130,7 +133,7 @@ crypto.DEFAULT_ENCODING = 'buffer';
 // ----------------------------------------
 
 var Hash = function(algorithm) {
-  if (!(this instanceof Hash)) return new Hash(arguments);
+  if (!(this instanceof Hash)) return new Hash(algorithm);
 
   Stream.Writable.call( this, {} );
 
@@ -174,7 +177,7 @@ crypto.Hash = Hash;
 // ----------------------------------------
 
 var Hmac = function(algorithm,key) {
-  if (!(this instanceof Hmac)) return new Hmac(arguments);
+  if (!(this instanceof Hmac)) return new Hmac(algorithm,key);
 
   Stream.Writable.call( this, {} );
 
@@ -316,7 +319,7 @@ function createKeyAndIv(cipherType, password) {
 }
 
 var Cipher = function(algorithm, password) {
-  if (!(this instanceof Cipher)) return new Cipher(arguments);
+  if (!(this instanceof Cipher)) return new Cipher(algorithm, password);
 
   Stream.Duplex.call( this, {} );
 
@@ -365,7 +368,7 @@ Cipher.prototype._write = function(chunk, enc, callback) {
 // ----------------------------------------
 
 var Decipher = function(algorithm, password) {
-  if (!(this instanceof Decipher)) return new Decipher(arguments);
+  if (!(this instanceof Decipher)) return new Decipher(algorithm, password);
 
   Stream.Duplex.call( this, {} );
 
@@ -409,24 +412,66 @@ Decipher.prototype._write = function(chunk, enc, callback) {
   callback();
 }
 
-/*
 // ----------------------------------------
 // Sign
 // ----------------------------------------
 
-var Sign = function() {
+var SignatureTypes = {};
+
+SignatureTypes.get = function(algo) {
+  algo = algo.toLowerCase();
+
+  if ( algo == 'rsa-sha256' ) {
+    return SignatureTypes.SHA256withRSA;
+  }
+}
+
+SignatureTypes.SHA256withRSA = {
+  algorithm: 'SHA256withRSA',
 };
 
+var Sign = function(algorithm) {
+  if (!(this instanceof Sign)) return new Sign(algorithm);
+
+  Stream.Writable.call( this, {} );
+
+  this.algorithm = algorithm;
+  this._algorithm = SignatureTypes.get( algorithm );
+  this._buffer= new org.vertx.java.core.buffer.Buffer();
+
+  return this;
+};
+
+util.inherits(Sign, Stream.Writable);
+
 Sign.prototype.update = function(data) {
+  this.write( data );
 };
 
 Sign.prototype.sign = function(private_key, output_format) {
+  var signature = Signature.getInstance( this._algorithm.algorithm );
+  var keySpec;
+  KeyFactory.getInstance( this._algorithm.algorithm ).generatePrivate( keySpec );
+  signature.initSign( )
+  signature.update( this._buffer.bytes );
+  var bytes = signature.sign( );
+  return new Buffer(bytes);
 };
+
+Sign.prototype._write = function(chunk, enc, callback) {
+  if ( chunk instanceof Buffer ) {
+    this._buffer.appendBuffer( chunk.delegate)
+  } else {
+    this._buffer.appendBytes(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
+  }
+  callback();
+}
 
 // ----------------------------------------
 // Verify
 // ----------------------------------------
 
+/*
 var Verify = function() {
 };
 
