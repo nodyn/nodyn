@@ -1,7 +1,5 @@
 "use strict";
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
-var Codec = require('nodyn/codec');
 
 function Buffer() {
   if (!(this instanceof Buffer)) return new Buffer(arguments);
@@ -432,3 +430,6 @@ module.exports.Buffer = Buffer;
 module.exports.buffer = {
   INSPECT_MAX_BYTES: 50
 }
+
+var Helper = org.projectodd.nodyn.buffer.Helper;
+var Codec = require('nodyn/codec');

@@ -69,6 +69,7 @@
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
+    <version.bouncycastle>1.50</version.bouncycastle>
 
     <test.pattern>**/specRunner.js</test.pattern>
   </properties>
@@ -113,6 +114,11 @@
   </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>${version.bouncycastle}</version>
+    </dependency>
     <dependency>
       <!-- TODO - remove this -->
       <groupId>io.netty</groupId>

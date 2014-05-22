@@ -52,7 +52,11 @@ Base64.encode = function(bytes) {
 
 Base64.decode = function(input) {
   if ( typeof input == 'string' ) {
-    return Base64.decode( new Buffer( Helper.bytes( input, 'utf8' ) ) );
+    input = new Buffer(input);
+    //var bytes = Helper.bytes( input, 'utf-8' );
+    //System.err.println( "bytes: " + bytes );
+    //var input = new Buffer(bytes);
+    //return Base64.decode( new Buffer( bytes ) );
   }
 
   var bytes = [];
