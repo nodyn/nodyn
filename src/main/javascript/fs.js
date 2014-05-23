@@ -1,7 +1,8 @@
-var system = process.context.fileSystem();
-var nodyn  = require('nodyn');
-var util   = require('util');
-var Stream = require('stream');
+var system = process.context.fileSystem(),
+    nodyn     = require('nodyn'),
+    util      = require('util'),
+    Stream    = require('stream'),
+    AsyncFile = org.vertx.java.core.file.AsyncFile;
 
 var FS = {};
 
@@ -118,12 +119,12 @@ FS.fsyncSync = function(fd) {
 };
 
 FS.close = function(fd, callback) {
-  if (!fd) return callback(new Error("Don't know how to close " + fd));
+  if (!(fd instanceof AsyncFile)) return callback(new Error("Don't know how to close " + fd));
   fd.close(nodyn.vertxHandler(callback));
 };
 
 FS.closeSync = function(fd) {
-  if (!fd) return new Error("Don't know how to close " + fd);
+  if (!(fd instanceof AsyncFile)) return new Error("Don't know how to close " + fd);
   fd.close();
 };
 
@@ -260,15 +261,15 @@ FS.ReadStream.prototype.destroy = function() {
   if (this.destroyed)
     return;
   this.destroyed = true;
-  this.close();
+  if (this.fd instanceof AsyncFile) this.close();
 };
 
 FS.ReadStream.prototype.close = function(cb) {
   var self = this;
   if (cb) this.once('close', cb);
 
-  if (this.closed || !this.fd) {
-    if (!this.fd) {
+  if (this.closed || !(this.fd instanceof AsyncFile)) {
+    if (!(this.fd instanceof AsyncFile)) {
       this.once('open', close);
       return;
     }
@@ -312,21 +313,21 @@ function openReadable(readable) {
 }
 
 var Stat = function(delegate) {
-  this.size  = delegate.size;
+  this.size  = delegate.size();
   this.atime = new Date(delegate.lastAccessTime);
   this.mtime = new Date(delegate.lastModifiedTime);
   this.ctime = new Date(delegate.creationTime);
 
   this.isFile  = function() {
-    return delegate.isRegularFile;
+    return delegate.isRegularFile();
   };
 
   this.isDirectory  = function() {
-    return delegate.isDirectory;
+    return delegate.isDirectory();
   };
 
   this.isSymbolicLink  = function() {
-    return delegate.isSymbolicLink;
+    return delegate.isSymbolicLink();
   };
 
   // Bunch of stuff not yet implemented
