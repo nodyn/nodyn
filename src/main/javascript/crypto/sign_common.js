@@ -5,6 +5,11 @@ var Base64 = require('nodyn/codec/base64');
 var KeySpec = java.security.spec.X509EncodedKeySpec;
 var KeyFactory = java.security.KeyFactory;
 
+var StringReader = java.io.StringReader;
+var PEMParser = org.bouncycastle.openssl.PEMParser;
+var Converter = org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+
+
 var SignatureTypes = {};
 
 
@@ -25,25 +30,20 @@ function createKeyFromFile(file) {
 }
 
 function createKeyFromString(pem) {
-  pem = pem.toString();
-  var lines = pem.split("\n");
-  var body = '';
-  for ( var i = 0 ; i < lines.length ; ++i ) {
-    var line = lines[i];
-    if ( ! ( ( line.indexOf( "---" ) == 0 )|| line == '' ) ) {
-      body += line;
-    }
-  }
-  var buffer = Base64.decode( body );
-
-  for ( var i = 0 ; i < buffer.length ; ++i ) {
-    System.err.println( i + ": " + buffer[i] );
+  var reader = new StringReader(pem.toString());
+  var parser = new PEMParser( reader );
+  var object = parser.readObject();
+  var converter = new Converter();
+  var pair = {};
+  if ( object instanceof org.bouncycastle.asn1.x509.SubjectPublicKeyInfo ) {
+    pair.public = converter.getPublicKey( object );
+  } else if ( object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo ) {
+    pair.private = converter.getPrivateKey( object );
+  } else {
+    pair = converter.getKeyPair( object );
   }
 
-  var keySpec = new KeySpec(buffer.delegate.bytes);
-
-  return KeyFactory.getInstance('RSA').generatePrivate( keySpec );
-
+  return pair;
 }
 
 module.exports.SignatureTypes = SignatureTypes;

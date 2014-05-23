@@ -5,14 +5,13 @@ var Stream = require('stream');
 
 var CipherCommon = require('crypto/cipher_common');
 
-
-
 var crypto = {};
 crypto.Hash     = require('crypto/hash');
 crypto.Hmac     = require('crypto/hmac');
 crypto.Cipher   = require('crypto/cipher');
 crypto.Decipher = require('crypto/decipher');
 crypto.Sign     = require('crypto/sign');
+crypto.Verify   = require('crypto/verify');
 
 // ----------------------------------------
 // crypto
@@ -54,6 +53,7 @@ crypto.createSign = function(algorithm) {
 };
 
 crypto.createVerify = function(algorithm) {
+  return new crypto.Verify(algorithm);
 };
 
 crypto.createDiffieHellman = function(/* (prime_length) or (prime,enc) */) {
@@ -77,23 +77,10 @@ crypto.pseudoRandomBytes = function(size, callback) {
 crypto.DEFAULT_ENCODING = 'buffer';
 
 // ----------------------------------------
-// Verify
-// ----------------------------------------
-
-/*
-var Verify = function() {
-};
-
-Verify.prototype.update = function(data) {
-};
-
-Verify.prototype.verify = function(object, signature, signature_format) {
-};
-
-// ----------------------------------------
 // DiffieHellman
 // ----------------------------------------
 
+/*
 var DiffieHellman = function() {
 };
 
