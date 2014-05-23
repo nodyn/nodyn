@@ -1,8 +1,16 @@
 
 var Codec = {};
 
+
+Codec.Base64  = require('nodyn/codec/base64');
+Codec.Hex     = require('nodyn/codec/hex');
+Codec.UTF8    = require('nodyn/codec/utf8');
+Codec.UTF16LE = require('nodyn/codec/utf16le');
+Codec.USASCII = require('nodyn/codec/us_ascii');
+
 Codec.get = function(enc) {
   enc = enc.toLowerCase();
+
   if ( enc == 'ascii' || enc == 'us-ascii') {
     return Codec.USASCII;
   }
@@ -24,10 +32,5 @@ Codec.get = function(enc) {
   }
 }
 
-Codec.Base64  = require('nodyn/codec/base64');
-Codec.Hex     = require('nodyn/codec/hex');
-Codec.UTF8    = require('nodyn/codec/utf8');
-Codec.UTF16LE = require('nodyn/codec/utf16le');
-Codec.USASCII = require('nodyn/codec/us_ascii');
 
 module.exports = Codec;

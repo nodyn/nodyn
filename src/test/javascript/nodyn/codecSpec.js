@@ -3,9 +3,14 @@ var Buffer = require('buffer').Buffer;
 
 describe("codec functions", function() {
   describe( "base64", function() {
+    it ( "should produce the same as node", function() {
+      var b = new Buffer( 'tacos' );
+      expect( b.toString('base64' )).toBe( 'dGFjb3M=')
+    });
+
     it ( 'should encode 3 bytes correctly', function() {
       expect( Codec.Base64.encode( 't' ) ).toBe( 'dA==' );
-    })
+    });
 
     it ( 'should encode 3 bytes correctly', function() {
       expect( Codec.Base64.encode( 'Man' ) ).toBe( 'TWFu' );

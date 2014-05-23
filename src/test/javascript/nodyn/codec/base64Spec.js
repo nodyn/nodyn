@@ -1,3 +1,4 @@
+require('../../specHelper.js' )
 var Base64 = require('nodyn/codec/base64');
 var Buffer = require('buffer').Buffer;
 
