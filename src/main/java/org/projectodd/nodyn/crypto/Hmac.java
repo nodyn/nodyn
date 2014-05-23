@@ -1,7 +1,6 @@
 package org.projectodd.nodyn.crypto;
 
 import org.projectodd.nodyn.crypto.encoders.Encoder;
-import static org.projectodd.nodyn.crypto.Util.Type;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,7 +14,6 @@ public class Hmac {
 
     public Hmac(String algorithm, String key) {
         try {
-            algorithm = Util.formatter(algorithm, Type.HMAC);
             this.hmac = Mac.getInstance(algorithm);
             computeKey(algorithm, key);
         } catch (NoSuchAlgorithmException e) {
