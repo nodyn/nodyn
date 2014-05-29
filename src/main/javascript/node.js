@@ -1,4 +1,4 @@
-load('npm_modules.js');
+load('jvm-npm.js');
 System = java.lang.System;
 Nodyn  = org.projectodd.nodyn;
 nodyn  = {

@@ -66,6 +66,7 @@
     <version.lang-js.verticle>1.1.0</version.lang-js.verticle>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
+    <version.jvm-npm>1.x.incremental.3</version.jvm-npm>
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
@@ -79,6 +80,18 @@
       <id>projectodd-upstream</id>
       <name>project:odd Upstream Builds</name>
       <url>https://repository-projectodd.forge.cloudbees.com/upstream</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>projectodd-incremental</id>
+      <name>project:odd Incremental Builds</name>
+      <url>https://repository-projectodd.forge.cloudbees.com/incremental</url>
       <layout>default</layout>
       <releases>
         <enabled>true</enabled>
@@ -166,6 +179,12 @@
       <groupId>org.dynjs</groupId>
       <artifactId>dynjs</artifactId>
       <version>${version.dynjs}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.nodyn</groupId>
+      <artifactId>jvm-npm</artifactId>
+      <version>${version.jvm-npm}</version>
+      <type>js</type>
     </dependency>
     <dependency>
       <groupId>com.github.akiellor.jasmine</groupId>
@@ -317,6 +336,23 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <artifact>io.nodyn:jvm-npm:${version.jvm-npm}:js</artifact>
+              <outputDirectory>target/classes</outputDirectory>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
@@ -336,6 +372,11 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <artifactSet>
+                <excludes>
+                  <exclude>io.nodyn:jvm-npm</exclude>
+                </excludes>
+              </artifactSet>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedArtifactId>nodyn-standalone</shadedArtifactId>
               <finalName>nodyn-standalone</finalName>
