@@ -66,7 +66,7 @@
     <version.lang-js.verticle>1.1.0</version.lang-js.verticle>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
-    <version.jvm-npm>1.x.incremental.5</version.jvm-npm>
+    <version.jvm-npm>1.x.incremental.6</version.jvm-npm>
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
