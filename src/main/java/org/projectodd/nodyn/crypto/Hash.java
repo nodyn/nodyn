@@ -1,11 +1,10 @@
 package org.projectodd.nodyn.crypto;
 
+import org.projectodd.nodyn.crypto.encoders.Encoder;
+
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import static org.projectodd.nodyn.crypto.Util.Type;
-import org.projectodd.nodyn.crypto.encoders.Encoder;
 
 public class Hash {
 
@@ -13,7 +12,6 @@ public class Hash {
 
     public Hash(String algorithm) {
         try {
-            algorithm = Util.formatter(algorithm, Type.HASH);
             this.digest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Hash algorithm not found: " + algorithm);
