@@ -3,6 +3,15 @@ var fs = require('fs');
 
 describe("fs.Stat", function() {
 
+  it("should generate an error if the file is not found", function() {
+    waitsFor(helper.testComplete, "Stat file", 5);
+    fs.stat('invalidpath', function(err, stat) {
+      expect(err instanceof Error).toBeTruthy();
+      expect(stat).toBeFalsy();
+      helper.testComplete();
+    });
+  });
+
   it("should support isFile()", function() {
     waitsFor(helper.testComplete, "Stat isFile", 5);
     helper.writeFixture(function(sut) {

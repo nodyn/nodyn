@@ -2,7 +2,8 @@ var system = process.context.fileSystem(),
     nodyn     = require('nodyn'),
     util      = require('util'),
     Stream    = require('stream'),
-    AsyncFile = org.vertx.java.core.file.AsyncFile;
+    AsyncFile = org.vertx.java.core.file.AsyncFile,
+    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX();
 
 var FS = {};
 
@@ -61,10 +62,32 @@ FS.unlink        = delegateFunction(system.unlink);
 FS.unlinkSync    = delegateFunction(system.unlinkSync);
 FS.rmdir         = delegateFunction(system.delete);
 FS.rmdirSync     = delegateFunction(system.deleteSync);
-FS.stat          = delegateFunction(system.props,      function(result) { return new Stat(result); } );
-FS.statSync      = delegateFunction(system.propsSync,  function(result) { return new Stat(result); } );
 FS.lstat         = delegateFunction(system.lprops,     function(result) { return new Stat(result); } );
 FS.lstatSync     = delegateFunction(system.lpropsSync, function(result) { return new Stat(result); } );
+
+FS.stat = function(path, callback) {
+  process.context.runOnContext(function() {
+    var stat = posix.allocateStat(),
+        fd   = posix.stat(path, stat),
+        fs   = null;
+        err  = null;
+    if (!stat || fd < 0) {
+      // TODO: Use real error codes
+      err = new Error("Cannot stat file " + path);
+    } else {
+      fs = new Stat(stat);
+    }
+    callback(err, fs);
+  });
+  return this;
+};
+
+FS.statSync = function(path) {
+  var stat = posix.allocateStat();
+  posix.stat(path, stat);
+  // TODO: Check for errors
+  return new Stat(stat);
+};
 
 FS.exists = function(path, callback) {
   system.exists(path, function(future) {
@@ -332,13 +355,13 @@ function openReadable(readable) {
 }
 
 var Stat = function(delegate) {
-  this.size  = delegate.size();
-  this.atime = new Date(delegate.lastAccessTime);
-  this.mtime = new Date(delegate.lastModifiedTime);
-  this.ctime = new Date(delegate.creationTime);
+  this.size  = delegate.st_size();
+  this.atime = new Date(delegate.atime());
+  this.mtime = new Date(delegate.mtime());
+  this.ctime = new Date(delegate.ctime());
 
   this.isFile  = function() {
-    return delegate.isRegularFile();
+    return delegate.isFile();
   };
 
   this.isDirectory  = function() {
@@ -346,19 +369,34 @@ var Stat = function(delegate) {
   };
 
   this.isSymbolicLink  = function() {
-    return delegate.isSymbolicLink();
+    return delegate.isSymLink();
   };
 
-  // Bunch of stuff not yet implemented
-  this.dev   = undefined;
-  this.ino   = undefined;
-  this.mode  = undefined;
-  this.nlink = undefined;
-  this.uid   = undefined;
-  this.gid   = undefined;
-  this.rdev  = undefined;
-  this.blksize = undefined;
-  this.blocks  = undefined;
+  this.isBlockDevice = function() {
+    return delegate.isBlockDev();
+  };
+
+  this.isCharacterDevice = function() {
+    return delegate.isCharDev();
+  };
+
+  this.isCharacterDevice = function() {
+    return delegate.isFIFO();
+  };
+
+  this.isCharacterDevice = function() {
+    return delegate.isSocket();
+  };
+
+  this.dev   = delegate.dev();
+  this.ino   = delegate.ino();
+  this.mode  = delegate.mode();
+  this.nlink = delegate.nlink();
+  this.uid   = delegate.uid();
+  this.gid   = delegate.gid();
+  this.rdev  = delegate.rdev();
+  this.blksize = delegate.blockSize();
+  this.blocks  = delegate.blocks();
 };
 
 function invertAndConvert(x) {
