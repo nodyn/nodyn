@@ -201,6 +201,25 @@ FS.linkSync = function(src, dest) {
 FS.symlink = FS.link;
 FS.symlinkSync = FS.linkSync;
 
+/**
+ * From: http://nodejs.org/api/fs.html#fs_fs_write_fd_buffer_offset_length_position_callback
+ * Write buffer to the file specified by fd.
+ *
+ * offset and length determine the part of the buffer to be written.
+ *
+ * position refers to the offset from the beginning of the file where this
+ * data should be written. If position is null, the data will be written at
+ * the current position. See pwrite(2).
+ *
+ * The callback will be given three arguments (err, written, buffer) where
+ * written specifies how many bytes were written from buffer.
+ *
+ * TODO: Positional writes do not currently work.
+ */
+FS.write = function(fd, buffer, offset, length, position, callback) {
+  fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
+};
+
 FS.createReadStream = function(path, opts) {
   return new FS.ReadStream(path, opts);
 };

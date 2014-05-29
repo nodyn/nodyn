@@ -39,6 +39,32 @@ describe("fs module", function() {
     });
   });
 
+  it("should have an rmdir function", function() {
+    var dirname = basedir + "/waffle-recipes";
+    var newDirectory = new java.io.File(dirname);
+    waitsFor(helper.testComplete, "the rmdir operation to complete", 5);
+    fs.mkdir(dirname, 0755, function() {
+      expect(newDirectory.exists()).toBe(true);
+      fs.rmdir(basedir + "/waffle-recipes", function() {
+        expect(newDirectory.exists()).toBe(false);
+        helper.testComplete(true);
+      });
+    });
+  });
+
+  it("should have a rmdirSync function", function() {
+    var dirname = basedir + "/waffle-recipes";
+    var newDirectory = new java.io.File(dirname);
+    waitsFor(helper.testComplete, 5);
+    fs.mkdir(dirname, 0755, function() {
+      expect(newDirectory.exists()).toBe(true);
+      fs.rmdirSync(dirname);
+      expect(newDirectory.exists()).toBe(false);
+      newDirectory.delete();
+      helper.testComplete(true);
+    });
+  });
+
   it("should have a rename function", function() {
     var newFile = new java.io.File(basedir + "/granola.txt");
     waitsFor(helper.testComplete, "the rename operation to complete", 5);
