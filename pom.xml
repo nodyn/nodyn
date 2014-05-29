@@ -61,7 +61,7 @@
     <version.junit>4.7</version.junit>
     <!-- TODO: Update the netty dependency (QueryString) -->
     <version.netty>3.6.1.Final</version.netty>
-    <version.vertx>2.1RC4-SNAPSHOT</version.vertx>
+    <version.vertx>2.1</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.lang-js.verticle>1.1.0</version.lang-js.verticle>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
@@ -71,6 +71,7 @@
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
     <version.bouncycastle>1.50</version.bouncycastle>
+    <version.jnr-posix>3.0.2-SNAPSHOT</version.jnr-posix>
 
     <test.pattern>**/specRunner.js</test.pattern>
   </properties>
@@ -136,6 +137,11 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>${version.bouncycastle}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-posix</artifactId>
+      <version>${version.jnr-posix}</version>
     </dependency>
     <dependency>
       <!-- TODO - remove this -->
