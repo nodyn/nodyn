@@ -66,14 +66,10 @@ crypto.createDiffieHellman = function(/* (prime_length) or (prime,enc) */) {
 crypto.getDiffieHellman = function(group_name) {
 };
 
-//crypto.pbkdf2 = function(password, salt, iterations, keylen, callback) {
-//};
-//crypto.pbkdf2;
-
+crypto.pbkdf2     = PBKDF2.pbkdf2;
 crypto.pbkdf2Sync = PBKDF2.pbkdf2Sync;
 
-crypto.randomBytes = Random.randomBytes;
-
+crypto.randomBytes       = Random.randomBytes;
 crypto.pseudoRandomBytes = Random.pseudoRandomBytes;
 
 crypto.DEFAULT_ENCODING = 'buffer';

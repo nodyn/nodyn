@@ -1,13 +1,19 @@
+"use strict";
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
-var Random = java.util.Random;
+var nodyn        = require('nodyn');
+var Helper       = org.projectodd.nodyn.buffer.Helper;
+var Random       = java.util.Random;
 var SecureRandom = java.security.SecureRandom;
 
-function randomBytes(sourceClass, size, callback ) {
-  var source = new sourceClass();
-  var b = Helper.newByteArray(size);
-  source.nextBytes( b );
-  return new Buffer( b );
+function randomBytes(sourceClass, size, callback) {
+  if ( callback ) {
+    nodyn.asyncAction( function() { return randomBytes( sourceClass, size ) }, callback );
+  } else {
+    var source = new sourceClass();
+    var b = Helper.newByteArray(size);
+    source.nextBytes( b );
+    return new Buffer( b );
+  }
 }
 
 module.exports = {

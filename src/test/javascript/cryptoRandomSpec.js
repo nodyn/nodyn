@@ -13,5 +13,23 @@ describe("crypto random functions", function() {
     expect( bytes.length ).toBe( 15 );
   })
 
+  it ( "should return random bytes through a callback", function() {
+    helper.testComplete(false);
+    waitsFor(helper.testComplete, "the callback should receive bytes" );
+    crypto.randomBytes( 15, function(err,bytes){
+      expect( bytes.length ).toBe( 15 );
+      helper.testComplete(true);
+    });
+  })
+
+  it ( "should return pseudo-random bytes through a callback", function() {
+    helper.testComplete(false);
+    waitsFor(helper.testComplete, "the callback should receive bytes" );
+    crypto.pseudoRandomBytes( 15, function(err,bytes){
+      expect( bytes.length ).toBe( 15 );
+      helper.testComplete(true);
+    });
+  })
+
 });
 
