@@ -3,7 +3,7 @@ var system = process.context.fileSystem(),
     util      = require('util'),
     Stream    = require('stream'),
     AsyncFile = org.vertx.java.core.file.AsyncFile,
-    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX();
+    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true);
 
 var FS = {};
 
