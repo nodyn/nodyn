@@ -18,6 +18,7 @@ describe("fs.Stat", function() {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBe(null);
         expect(stats).not.toBe(null);
+        expect(stats).not.toBe(undefined);
         expect(stats.isFile()).toBeTruthy();
         sut.delete();
         helper.testComplete(true);
@@ -31,6 +32,7 @@ describe("fs.Stat", function() {
       fs.stat(sut.getParent(), function(err, stats) {
         expect(err).toBe(null);
         expect(stats).not.toBe(null);
+        expect(stats).not.toBe(undefined);
         expect(stats.isDirectory()).toBeTruthy();
         sut.delete();
         helper.testComplete(true);
