@@ -1,11 +1,17 @@
 var util          = NativeRequire.require('util');
 var EventEmitter  = NativeRequire.require('events').EventEmitter;
 
-module.exports.makeEventEmitter = function(ctor) {
+function makeEventEmitter(ctor) {
   util._extend(ctor.prototype, EventEmitter.prototype);
-};
+}
+module.exports.makeEventEmitter = makeEventEmitter;
 
-module.exports.vertxHandler = function(handler, resultConverter) {
+function asyncAction(blockingAction, callback) {
+  process.context.executeBlocking(blockingAction, vertxHandler(callback));
+}
+module.exports.asyncAction = asyncAction;
+
+function vertxHandler(handler, resultConverter) {
   return function(future) {
     var result = null;
     if (handler) {
@@ -20,18 +26,19 @@ module.exports.vertxHandler = function(handler, resultConverter) {
       }
     }
   };
-};
+}
+module.exports.vertxHandler = vertxHandler;
 
-module.exports.arrayConverter = function(javaArray) {
+function arrayConverter(javaArray) {
   var arry = [];
   for (var i = 0; i < javaArray.length; i++) {
     arry.push(javaArray[i]);
   }
   return arry;
-};
+}
+module.exports.arrayConverter = arrayConverter;
 
-
-module.exports.notImplemented = function(name, throws) {
+function notImplemented(name, throws) {
   return function() {
     var msg = ["Error:", name, "not implemented"].join(' ');
     print(msg);
@@ -39,4 +46,5 @@ module.exports.notImplemented = function(name, throws) {
       throw new Error(msg);
     }
   };
-};
+}
+module.exports.notImplemented = notImplemented;

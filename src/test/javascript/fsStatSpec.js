@@ -8,7 +8,7 @@ describe("fs.Stat", function() {
     fs.stat('invalidpath', function(err, stat) {
       expect(err instanceof Error).toBeTruthy();
       expect(stat).toBeFalsy();
-      helper.testComplete();
+      helper.testComplete(true);
     });
   });
 

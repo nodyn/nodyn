@@ -66,19 +66,15 @@ FS.lstat         = delegateFunction(system.lprops,     function(result) { return
 FS.lstatSync     = delegateFunction(system.lpropsSync, function(result) { return new Stat(result); } );
 
 FS.stat = function(path, callback) {
-  process.context.runOnContext(function() {
+  nodyn.asyncAction(function() {
     var stat = posix.allocateStat(),
-        fd   = posix.stat(path, stat),
-        fs   = null;
-        err  = null;
+        fd   = posix.stat(path, stat);
     if (!stat || fd < 0) {
       // TODO: Use real error codes
-      err = new Error("Cannot stat file " + path);
-    } else {
-      fs = new Stat(stat);
+      throw new Error("Cannot stat file " + path);
     }
-    callback(err, fs);
-  });
+    return new Stat(stat);
+  }, callback);
   return this;
 };
 
