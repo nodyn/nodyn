@@ -7,6 +7,10 @@ import java.io.UnsupportedEncodingException;
  */
 public class Helper {
 
+    public static byte[] newByteArray(int len) {
+        return new byte[len];
+    }
+
     public static byte[] bytes(String string, String enc) throws UnsupportedEncodingException {
         byte[] bytes = string.getBytes(enc);
         return bytes;

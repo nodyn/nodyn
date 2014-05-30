@@ -14,6 +14,7 @@ crypto.Sign     = require('crypto/sign');
 crypto.Verify   = require('crypto/verify');
 
 var PBKDF2 = require('crypto/pbkdf2');
+var Random = require('crypto/random');
 
 
 // ----------------------------------------
@@ -71,11 +72,9 @@ crypto.getDiffieHellman = function(group_name) {
 
 crypto.pbkdf2Sync = PBKDF2.pbkdf2Sync;
 
-crypto.randomBytes = function(size, callback) {
-};
+crypto.randomBytes = Random.randomBytes;
 
-crypto.pseudoRandomBytes = function(size, callback) {
-};
+crypto.pseudoRandomBytes = Random.pseudoRandomBytes;
 
 crypto.DEFAULT_ENCODING = 'buffer';
 
