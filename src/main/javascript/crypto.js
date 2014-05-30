@@ -22,6 +22,7 @@ var Random = require('crypto/random');
 // ----------------------------------------
 
 crypto.getCiphers = function() {
+  return CipherCommon.CipherTypes.types();
 };
 
 crypto.getHashes = function() {

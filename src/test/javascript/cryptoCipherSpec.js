@@ -69,5 +69,12 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f.toString() ).toBe( 'bob' );
   });
 
+  it( "should enumerate supported cipher types", function() {
+    var types = crypto.getCiphers();
+
+    expect( types ).toContain( "des" );
+    expect( types ).toContain( "aes-128-cbc" );
+  })
+
 });
 

@@ -9,31 +9,40 @@ var IvParameterSpec = javax.crypto.spec.IvParameterSpec;
 
 var CipherTypes = {};
 
+CipherTypes._map = {};
+CipherTypes._types = [];
+
 CipherTypes.get = function(algo) {
   algo = algo.toLowerCase();
+  return CipherTypes._map[ algo ];
+}
 
-  if ( algo == 'des' ) {
-    return CipherTypes.DES;
-  }
+CipherTypes.types = function() {
+  return [].concat( CipherTypes._types );
+}
 
-  if ( algo == 'aes-128-cbc' ) {
-    return CipherTypes.AES_128_CBC;
+CipherTypes.register = function() {
+  var type = arguments[0];
+  var canonicalName = arguments[1];
+  CipherTypes._types.push( canonicalName );
+  for (var i = 1 ; i < arguments.length ; ++i ) {
+    CipherTypes._map[ arguments[i] ] = type;
   }
 }
 
-CipherTypes.DES = {
+CipherTypes.register( {
   key_len: 8,
   iv_len: 8,
   cipher: 'DES/CBC/PKCS5Padding',
   algorithm: 'DES',
-};
+}, "des" );
 
-CipherTypes.AES_128_CBC = {
+CipherTypes.register( {
   key_len: 16,
   iv_len: 16,
   cipher: 'AES/CBC/PKCS5Padding',
   algorithm: 'AES'
-};
+}, "aes-128-cbc" );
 
 /*
  * Note: this is *not* necessarily the recommended way to
