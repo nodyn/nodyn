@@ -12,7 +12,7 @@ var Helper = org.projectodd.nodyn.buffer.Helper;
 var jCipher = javax.crypto.Cipher;
 
 var Cipher = function(algorithm, key, iv) {
-  if (!(this instanceof Cipher)) return new Cipher(algorithm, password);
+  if (!(this instanceof Cipher)) return new Cipher(algorithm, key, iv);
 
   Stream.Duplex.call( this, {} );
 
