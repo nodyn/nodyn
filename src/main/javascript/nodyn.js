@@ -9,7 +9,18 @@ module.exports.makeEventEmitter = makeEventEmitter;
 function asyncAction(blockingAction, callback) {
   process.context.executeBlocking(blockingAction, vertxHandler(callback));
 }
-module.exports.asyncAction = asyncAction;
+
+function asyncActionOnEventLoop(action, callback) {
+  process.context.runOnContext(function() {
+    try {
+      var result = action();
+      callback(null, result);
+    } catch(ex) {
+      callback(ex, null);
+    }
+  });
+}
+module.exports.asyncAction = asyncActionOnEventLoop;
 
 function vertxHandler(handler, resultConverter) {
   return function(future) {

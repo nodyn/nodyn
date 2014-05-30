@@ -356,32 +356,36 @@ var Stat = function(delegate) {
   this.mtime = new Date(delegate.mtime());
   this.ctime = new Date(delegate.ctime());
 
+  function check() {
+    return (delegate !== null && delegate !== undefined);
+  }
+
   this.isFile  = function() {
-    return delegate.isFile();
+    return check() && delegate.isFile();
   };
 
   this.isDirectory  = function() {
-    return delegate.isDirectory();
+    return check() && delegate.isDirectory();
   };
 
   this.isSymbolicLink  = function() {
-    return delegate.isSymLink();
+    return check() && delegate.isSymLink();
   };
 
   this.isBlockDevice = function() {
-    return delegate.isBlockDev();
+    return check() && delegate.isBlockDev();
   };
 
   this.isCharacterDevice = function() {
-    return delegate.isCharDev();
+    return check() && delegate.isCharDev();
   };
 
   this.isCharacterDevice = function() {
-    return delegate.isFIFO();
+    return check() && delegate.isFIFO();
   };
 
   this.isCharacterDevice = function() {
-    return delegate.isSocket();
+    return check() && delegate.isSocket();
   };
 
   this.dev   = delegate.dev();
