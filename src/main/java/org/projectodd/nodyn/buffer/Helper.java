@@ -12,4 +12,8 @@ public class Helper {
         return bytes;
     }
 
+    public static char[] characters(String string) throws UnsupportedEncodingException {
+        return string.toCharArray();
+    }
+
 }

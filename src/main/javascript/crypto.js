@@ -13,6 +13,9 @@ crypto.Decipher = require('crypto/decipher');
 crypto.Sign     = require('crypto/sign');
 crypto.Verify   = require('crypto/verify');
 
+var PBKDF2 = require('crypto/pbkdf2');
+
+
 // ----------------------------------------
 // crypto
 // ----------------------------------------
@@ -62,11 +65,11 @@ crypto.createDiffieHellman = function(/* (prime_length) or (prime,enc) */) {
 crypto.getDiffieHellman = function(group_name) {
 };
 
-crypto.pbkdf2 = function(password, salt, iterations, keylen, callback) {
-};
+//crypto.pbkdf2 = function(password, salt, iterations, keylen, callback) {
+//};
+//crypto.pbkdf2;
 
-crypto.pbkdf2Sync = function(password, salt, iterations, keylen){
-};
+crypto.pbkdf2Sync = PBKDF2.pbkdf2Sync;
 
 crypto.randomBytes = function(size, callback) {
 };
