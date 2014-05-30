@@ -24,6 +24,21 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f.toString() ).toBe( 'bob' );
   });
 
+  it ("should produce the same bytes as node.js for DES and iv", function() {
+    var cipher = crypto.createCipheriv( 'des', 'tacotaco', 'dogsdogs' );
+    cipher.write("howdy");
+    var f = cipher.final();
+    //<60 b7 d3 bc 8c ec d3 41>
+    expect( f[0] ).toBe( 0x60 );
+    expect( f[1] ).toBe( 0xB7 );
+    expect( f[2] ).toBe( 0xD3 );
+    expect( f[3] ).toBe( 0xBC );
+    expect( f[4] ).toBe( 0x8C );
+    expect( f[5] ).toBe( 0xEC );
+    expect( f[6] ).toBe( 0xD3 );
+    expect( f[7] ).toBe( 0x41 );
+  })
+
   it( "should produce the same bytes as node.js for AES-128-CBC", function() {
     var cipher = crypto.createCipher( 'aes-128-cbc', 'tacos' );
     cipher.write( "bob" );

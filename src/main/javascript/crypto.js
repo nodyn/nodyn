@@ -38,12 +38,8 @@ crypto.createHmac = function(algorithm,key) {
   return new crypto.Hmac(algorithm,key);
 };
 
-crypto.createCipher = function(algorithm,password) {
-  return new crypto.Cipher(algorithm,password);
-};
-
-crypto.createCipheriv = function(algorithm,password,iv) {
-};
+crypto.createCipher = crypto.Cipher.createCipher;
+crypto.createCipheriv = crypto.Cipher.createCipheriv;
 
 crypto.createDecipher = function(algorithm,password) {
   return crypto.Decipher(algorithm,password);
