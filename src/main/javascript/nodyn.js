@@ -20,7 +20,7 @@ function asyncActionOnEventLoop(action, callback) {
     }
   });
 }
-module.exports.asyncAction = asyncActionOnEventLoop;
+module.exports.asyncAction = asyncAction;
 
 function vertxHandler(handler, resultConverter) {
   return function(future) {

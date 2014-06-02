@@ -380,11 +380,11 @@ var Stat = function(delegate) {
     return check() && delegate.isCharDev();
   };
 
-  this.isCharacterDevice = function() {
-    return check() && delegate.isFIFO();
+  this.isFIFO = function() {
+    return check() && delegate.isFifo();
   };
 
-  this.isCharacterDevice = function() {
+  this.isSocket = function() {
     return check() && delegate.isSocket();
   };
 

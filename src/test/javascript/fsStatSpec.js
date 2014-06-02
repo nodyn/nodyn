@@ -16,9 +16,8 @@ describe("fs.Stat", function() {
     waitsFor(helper.testComplete, "Stat isFile", 5);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
-        expect(err).toBe(null);
-        expect(stats).not.toBe(null);
-        expect(stats).not.toBe(undefined);
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
         expect(stats.isFile()).toBeTruthy();
         sut.delete();
         helper.testComplete(true);
@@ -27,12 +26,11 @@ describe("fs.Stat", function() {
   });
 
   it("should support isDirectory()", function() {
-    waitsFor(helper.testComplete, "Stat isFile", 5);
+    waitsFor(helper.testComplete, "Stat isDirectory", 5);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getParent(), function(err, stats) {
-        expect(err).toBe(null);
-        expect(stats).not.toBe(null);
-        expect(stats).not.toBe(undefined);
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
         expect(stats.isDirectory()).toBeTruthy();
         sut.delete();
         helper.testComplete(true);
@@ -40,17 +38,57 @@ describe("fs.Stat", function() {
     });
   });
 
-  // TODO
-  xit("should support isCharacterDevice()", function() {});
+  it("should support isCharacterDevice()", function() {
+    waitsFor(helper.testComplete, "Stat isCharacterDevice", 5);
+    helper.writeFixture(function(sut) {
+      fs.stat(sut.getAbsolutePath(), function(err, stats) {
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
+        expect(typeof stats.isCharacterDevice).toBe('function');
+        sut.delete();
+        helper.testComplete(true);
+      });
+    });
+  });
 
-  // TODO
-  xit("should support isBlockDevice()", function() {});
+  it("should support isBlockDevice()", function() {
+    waitsFor(helper.testComplete, "Stat isBlockDevice", 5);
+    helper.writeFixture(function(sut) {
+      fs.stat(sut.getAbsolutePath(), function(err, stats) {
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
+        expect(typeof stats.isBlockDevice).toBe('function');
+        sut.delete();
+        helper.testComplete(true);
+      });
+    });
+  });
 
-  // TODO
-  xit("should support isFIFO()", function() {});
+  it("should support isFIFO()", function() {
+    waitsFor(helper.testComplete, "Stat isFIFO", 5);
+    helper.writeFixture(function(sut) {
+      fs.stat(sut.getAbsolutePath(), function(err, stats) {
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
+        expect(typeof stats.isFIFO).toBe('function');
+        sut.delete();
+        helper.testComplete(true);
+      });
+    });
+  });
 
-  // TODO
-  xit("should support isSocket()", function() {});
+  it("should support isSocket()", function() {
+    waitsFor(helper.testComplete, "Stat isSocket", 5);
+    helper.writeFixture(function(sut) {
+      fs.stat(sut.getAbsolutePath(), function(err, stats) {
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
+        expect(typeof stats.isSocket).toBe('function');
+        sut.delete();
+        helper.testComplete(true);
+      });
+    });
+  });
 });
 
 
@@ -78,15 +116,47 @@ describe("fs.StatSync", function() {
     });
   });
 
-  // TODO
-  xit("should support isCharacterDevice()", function() {});
+  it("should support isCharacterDevice()", function() {
+    waitsFor(helper.testComplete, "Stat isCharDev", 5);
+    helper.writeFixture(function(sut) {
+      var stats = fs.statSync(sut.getAbsolutePath());
+      expect(stats).toBeTruthy();
+      expect(typeof stats.isCharacterDevice).toBe('function');
+      sut.delete();
+      helper.testComplete(true);
+    });
+  });
 
-  // TODO
-  xit("should support isBlockDevice()", function() {});
+  it("should support isBlockDevice()", function() {
+    waitsFor(helper.testComplete, "Stat isCharDev", 5);
+    helper.writeFixture(function(sut) {
+      var stats = fs.statSync(sut.getAbsolutePath());
+      expect(stats).toBeTruthy();
+      expect(typeof stats.isBlockDevice).toBe('function');
+      sut.delete();
+      helper.testComplete(true);
+    });
+  });
 
-  // TODO
-  xit("should support isFIFO()", function() {});
+  it("should support isFIFO()", function() {
+    waitsFor(helper.testComplete, "Stat isFifo", 5);
+    helper.writeFixture(function(sut) {
+      var stats = fs.statSync(sut.getAbsolutePath());
+      expect(stats).toBeTruthy();
+      expect(typeof stats.isFIFO).toBe('function');
+      sut.delete();
+      helper.testComplete(true);
+    });
+  });
 
-  // TODO
-  xit("should support isSocket()", function() {});
+  it("should support isSocket()", function() {
+    waitsFor(helper.testComplete, "Stat isSocket", 5);
+    helper.writeFixture(function(sut) {
+      var stats = fs.statSync(sut.getAbsolutePath());
+      expect(stats).toBeTruthy();
+      expect(typeof stats.isSocket).toBe('function');
+      sut.delete();
+      helper.testComplete(true);
+    });
+  });
 });
