@@ -80,8 +80,10 @@ FS.stat = function(path, callback) {
 
 FS.statSync = function(path) {
   var stat = posix.allocateStat();
-  posix.stat(path, stat);
-  // TODO: Check for errors
+  var fd = posix.stat(path, stat);
+  if (!stat || fd < 0) {
+    throw new Error("Cannot stat file " + path);
+  }
   return new Stat(stat);
 };
 
