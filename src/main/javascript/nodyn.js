@@ -6,17 +6,19 @@ function makeEventEmitter(ctor) {
 }
 module.exports.makeEventEmitter = makeEventEmitter;
 
+/**
+ * Executes blockingAction asynchronously on a worker thread. To indicate
+ * failure, blockingAction should return an instance of Error. Any other
+ * value will be considered success. The callback function will be called
+ * with the Error returned as the first parameter in the case of failure.
+ * Otherwise, it will be called with (null, <blockingAction's return value>).
+ */
 function asyncAction(blockingAction, callback) {
-  process.context.executeBlocking(blockingAction, vertxHandler(callback));
-}
-
-function asyncActionOnEventLoop(action, callback) {
-  process.context.runOnContext(function() {
-    try {
-      var result = action();
-      callback(null, result);
-    } catch(ex) {
-      callback(ex, null);
+  process.context.executeBlocking(blockingAction, function(future) {
+    if (future.result() instanceof Error) {
+      callback(future.result(), null);
+    } else {
+      callback(null, future.result());
     }
   });
 }

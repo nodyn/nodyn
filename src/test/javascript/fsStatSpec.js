@@ -1,5 +1,6 @@
-var helper = require('specHelper');
-var fs = require('fs');
+var helper = require('specHelper'),
+    util   = require('util'),
+    fs     = require('fs');
 
 describe("fs.Stat", function() {
 
@@ -7,6 +8,9 @@ describe("fs.Stat", function() {
     waitsFor(helper.testComplete, "Stat file", 5);
     fs.stat('invalidpath', function(err, stat) {
       expect(err instanceof Error).toBeTruthy();
+      expect(err.code).toBe('ENOENT');
+      expect(err.path).toBe('invalidpath');
+      expect(err.syscall).toBe('stat');
       expect(stat).toBeFalsy();
       helper.testComplete(true);
     });
@@ -93,6 +97,17 @@ describe("fs.Stat", function() {
 
 
 describe("fs.StatSync", function() {
+
+  it("should generate an error if the file is not found", function() {
+    try {
+      fs.statSync('invalidpath');
+    } catch(err) {
+      expect(err instanceof Error).toBeTruthy();
+      expect(err.code).toBe('ENOENT');
+      expect(err.path).toBe('invalidpath');
+      expect(err.syscall).toBe('stat');
+    }
+  });
 
   it("should support isFile()", function() {
     waitsFor(helper.testComplete, "Stat isFile", 5);

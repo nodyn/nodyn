@@ -1,6 +1,7 @@
-var helper = require('specHelper');
-var stream = require('stream');
-var fs = require('fs');
+var helper = require('specHelper'),
+    stream = require('stream'),
+    util   = require('util'),
+    fs     = require('fs');
 
 describe("fs.createReadStream", function() {
 

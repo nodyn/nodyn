@@ -3,7 +3,8 @@ var system = process.context.fileSystem(),
     util      = require('util'),
     Stream    = require('stream'),
     AsyncFile = org.vertx.java.core.file.AsyncFile,
-    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true);
+    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true),
+    Errno     = Packages.jnr.constants.platform.Errno;
 
 var FS = {};
 
@@ -65,13 +66,23 @@ FS.rmdirSync     = delegateFunction(system.deleteSync);
 FS.lstat         = delegateFunction(system.lprops,     function(result) { return new Stat(result); } );
 FS.lstatSync     = delegateFunction(system.lpropsSync, function(result) { return new Stat(result); } );
 
+function posixError(n, path, syscall) {
+  var errno = Errno.valueOf(n),
+      e = new Error(errno.description());
+
+  e.errno   = n;
+  e.path    = path;
+  e.syscall = syscall;
+  e.code    = errno.name();
+  return e;
+}
+
 FS.stat = function(path, callback) {
   nodyn.asyncAction(function() {
     var stat = posix.allocateStat(),
         fd   = posix.stat(path, stat);
     if (!stat || fd < 0) {
-      // TODO: Use real error codes
-      throw new Error("Cannot stat file " + path);
+      return posixError(posix.errno(), path, 'stat');
     }
     return new Stat(stat);
   }, callback);
@@ -82,7 +93,7 @@ FS.statSync = function(path) {
   var stat = posix.allocateStat();
   var fd = posix.stat(path, stat);
   if (!stat || fd < 0) {
-    throw new Error("Cannot stat file " + path);
+    throw posixError(posix.errno(), path, 'stat');
   }
   return new Stat(stat);
 };
