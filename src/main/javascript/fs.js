@@ -15,9 +15,6 @@ FS.utimes        = nodyn.notImplemented("utimes");
 FS.utimesSync    = nodyn.notImplemented("utimesSync");
 FS.futimes       = nodyn.notImplemented("futimes");
 FS.futimesSync   = nodyn.notImplemented("futimesSync");
-FS.write         = nodyn.notImplemented("write");
-FS.writeSync     = nodyn.notImplemented("writeSync");
-FS.readSync      = nodyn.notImplemented("readSync");
 FS.appendFile    = nodyn.notImplemented("appendFile");
 FS.appendFileSync= nodyn.notImplemented("appendFileSync");
 FS.watchFile     = nodyn.notImplemented("watchFile");
@@ -113,6 +110,10 @@ FS.read = function(fd, buffer, offset, length, position, callback) {
   fd.read(buffer.delegate, offset, position, length, nodyn.vertxHandler(function(err, buf) {
     callback(err, length, buf);
   }));
+};
+
+FS.readSync = function(fd, buffer, offset, length, position) {
+  fd.read(buffer.delegate, offset, position, length);
 };
 
 FS.readFile = function(path) { // [options], callback
@@ -249,6 +250,10 @@ FS.symlinkSync = FS.linkSync;
  * TODO: Positional writes do not currently work.
  */
 FS.write = function(fd, buffer, offset, length, position, callback) {
+  fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
+};
+
+FS.writeSync = function(fd, buffer, offset, length, position) {
   fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
 };
 
