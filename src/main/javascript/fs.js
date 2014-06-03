@@ -417,6 +417,7 @@ var Stat = function(delegate) {
   this.ctime = new Date(delegate.ctime());
 
   function check() {
+    print("Checking delegate: " + delegate);
     return (delegate !== null && delegate !== undefined);
   }
 
