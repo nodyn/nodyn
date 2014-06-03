@@ -230,6 +230,74 @@ describe("fs module", function() {
     }, data);
   });
 
+  describe('realpath', function() {
+    it('should resolve existing files', function() {
+      var filename = 'realpath-spec-tmp.txt';
+      waitsFor(helper.testComplete, 'the realpath test to complete', 5);
+      fs.writeFileSync(filename, 'To be or not to be, that is the question');
+      fs.realpath(filename, function(e, p) {
+        expect(e).toBeFalsy();
+        expect(p).toBeTruthy();
+        var f = new java.io.File(filename);
+        expect(p).toBe(f.getCanonicalPath());
+        fs.unlinkSync(filename);
+        helper.testComplete(true);
+      });
+    });
+
+    it('should provide the callback function with an Error if path does not exist', function() {
+      var filename = 'some-file-that-does-not-exist.txt';
+      waitsFor(helper.testComplete, 'the realpath test to complete', 5);
+      fs.realpath(filename, function(e, p) {
+        expect(e).toBeTruthy();
+        expect(e.syscall).toBe('realpath');
+        var util = require('util');
+        expect(p).toBeFalsy();
+        helper.testComplete(true);
+      });
+    });
+
+    it('should resolve cached paths when provided with a cache', function() {
+      var cache = {'/flavors/cherry-lime':'/beverages/soda/flavors/cherry-lime'};
+      waitsFor(helper.testComplete, 'the realpath test to complete');
+      fs.realpath('/flavors/cherry-lime', cache, function(e,p) {
+        expect(e).toBeFalsy();
+        expect(p).toBeTruthy();
+        expect(p).toBe('/beverages/soda/flavors/cherry-lime');
+        helper.testComplete(true);
+      });
+    });
+
+    it('should have an analogous sync function', function() {
+      var filename = 'realpath-spec-tmp.txt';
+      fs.writeFileSync(filename, 'To be or not to be, that is the question');
+      var p = fs.realpathSync(filename);
+      expect(p).toBeTruthy();
+      var f = new java.io.File(filename);
+      expect(p).toBe(f.getCanonicalPath());
+      fs.unlinkSync(filename);
+    });
+
+    it('should throw when the path is not found synchronously', function() {
+      var filename = 'some-file-that-does-not-exist.txt';
+      try {
+        fs.realpathSync(filename);
+        this.fail('fs.realpathSync should have thrown');
+      } catch (e) {
+        expect(e).toBeTruthy();
+        expect(e.syscall).toBe('realpath');
+      }
+    });
+
+    it('should resolve cached paths synchronously, too', function() {
+      var cache = {'/flavors/cherry-lime':'/beverages/soda/flavors/cherry-lime'};
+      var p = fs.realpathSync('/flavors/cherry-lime', cache);
+      expect(p).toBeTruthy();
+      expect(p).toBe('/beverages/soda/flavors/cherry-lime');
+    });
+
+  });
+
   describe("when opening files", function() {
 
     it("should error on open read if the file doesn't exist", function() {

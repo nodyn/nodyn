@@ -17,6 +17,8 @@ function asyncAction(blockingAction, callback) {
   process.context.executeBlocking(blockingAction, function(future) {
     if (future.result() instanceof Error) {
       callback(future.result(), null);
+    } else if (future.failed()) {
+      callback(future.cause().getValue(), null);
     } else {
       callback(null, future.result());
     }

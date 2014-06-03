@@ -1,6 +1,7 @@
 var system = process.context.fileSystem(),
     nodyn     = require('nodyn'),
     util      = require('util'),
+    Path      = require('path'),
     Stream    = require('stream'),
     AsyncFile = org.vertx.java.core.file.AsyncFile,
     posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true),
@@ -9,8 +10,6 @@ var system = process.context.fileSystem(),
 var FS = {};
 
 // TODO: implement these functions
-FS.realpath      = nodyn.notImplemented("realpath", true);
-FS.realpathSync  = nodyn.notImplemented("realpathSync", true);
 FS.utimes        = nodyn.notImplemented("utimes");
 FS.utimesSync    = nodyn.notImplemented("utimesSync");
 FS.futimes       = nodyn.notImplemented("futimes");
@@ -74,26 +73,48 @@ function posixError(n, path, syscall) {
   return e;
 }
 
+function stat(path) {
+  var st = posix.allocateStat();
+  var fd = posix.stat(path, st);
+  if (!st || fd < 0) {
+    throw posixError(posix.errno(), path, 'stat');
+  }
+  return new Stat(st);
+}
+
 FS.stat = function(path, callback) {
   nodyn.asyncAction(function() {
-    var stat = posix.allocateStat(),
-        fd   = posix.stat(path, stat);
-    if (!stat || fd < 0) {
-      return posixError(posix.errno(), path, 'stat');
-    }
-    return new Stat(stat);
+    return stat(path);
   }, callback);
   return this;
 };
 
-FS.statSync = function(path) {
-  var stat = posix.allocateStat();
-  var fd = posix.stat(path, stat);
-  if (!stat || fd < 0) {
-    throw posixError(posix.errno(), path, 'stat');
+FS.statSync = stat;
+
+function realpath(path, cache) {
+  cache = cache || {};
+  path = Path.resolve(path);
+  if (Object.prototype.hasOwnProperty.call(cache, path)) {
+    return cache[path];
   }
-  return new Stat(stat);
+  var file = new java.io.File(path);
+  if (file.exists())
+    return file.getCanonicalPath();
+
+  throw posixError(Errno.valueOf('ENOENT').intValue(), file.getCanonicalPath(), 'realpath');
+}
+
+FS.realpath = function(path) {
+  var args     = Array.prototype.slice.call(arguments, 1),
+      callback = args.pop(),
+      cache    = args.pop() || {};
+
+  nodyn.asyncAction(function() {
+    return realpath(path, cache);
+  }, callback);
 };
+
+FS.realpathSync = realpath;
 
 FS.exists = function(path, callback) {
   system.exists(path, function(future) {
@@ -196,6 +217,25 @@ FS.writeFile = function(filename, data, options, callback) {
     buffer = new org.vertx.java.core.buffer.Buffer( data.toString() );
   }
   system.writeFile(filename, buffer, nodyn.vertxHandler(callback));
+};
+
+FS.writeFileSync = function(filename, data, options) {
+  var buffer;
+  if (typeof options === 'function') {
+    callback = options;
+    options = {
+      // default values
+      'encoding': 'utf8',
+      'mode': 0666,
+      'flag': 'w'
+    };
+  }
+  if (data instanceof Buffer) {
+    buffer = data.delegate;
+  } else {
+    buffer = new org.vertx.java.core.buffer.Buffer( data.toString() );
+  }
+  system.writeFileSync(filename, buffer);
 };
 
 FS.chmod = function(path, mode, callback) {
