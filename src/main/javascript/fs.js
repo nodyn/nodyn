@@ -75,7 +75,9 @@ function posixError(n, path, syscall) {
 
 function stat(path) {
   var st = posix.allocateStat();
+  print("Stat allocated: " + st);
   var fd = posix.stat(path, st);
+  print(["FD for", path, fd].join(' '));
   if (!st || fd < 0) {
     throw posixError(posix.errno(), path, 'stat');
   }
@@ -456,6 +458,8 @@ var Stat = function(delegate) {
   this.blksize = delegate.blockSize();
   this.blocks  = delegate.blocks();
 };
+
+FS.Stat = Stat;
 
 function invertAndConvert(x) {
   var e = parseInt(x).toString(2);
