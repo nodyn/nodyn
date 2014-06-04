@@ -26,11 +26,10 @@ describe("Nodyn globals", function() {
 
   it('should pass test__filename', function() {
     expect(typeof __filename).toBe('string');
-    expect(__filename).toMatch(/.*node.js/);
+    expect(__filename).toMatch(/.*globalSpec.js/);
   });
 
   it('should pass test__dirname', function() {
     expect(typeof __dirname).toBe('string');
   });
 });
-
