@@ -3,6 +3,9 @@ var helper = require('specHelper'),
     fs     = require('fs');
 
 describe("fs.Stat", function() {
+  beforeEach(function() {
+    helper.testComplete(false);
+  });
 
   it("should generate an error if the file is not found", function() {
     waitsFor(helper.testComplete, "Stat file", 5);
