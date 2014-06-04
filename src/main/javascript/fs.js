@@ -85,17 +85,9 @@ function stat(path) {
 }
 
 FS.stat = function(path, callback) {
-  // nodyn.asyncAction(function() {
-  //   return stat(path);
-  // }, callback);
-  var st, err;
-
-  try {
-    st = stat(path);
-  } catch(e) {
-    err = e;
-  }
-  callback(err, st);
+  nodyn.asyncAction(function() {
+    return stat(path);
+  }, callback);
   return this;
 };
 
