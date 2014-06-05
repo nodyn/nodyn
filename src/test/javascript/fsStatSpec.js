@@ -10,6 +10,8 @@ describe("fs.Stat", function() {
   it("should generate an error if the file is not found", function() {
     waitsFor(helper.testComplete, "Stat file", 5);
     fs.stat('invalidpath', function(err, stat) {
+      print("ERR: " + err);
+      print("ST: " + stat);
       expect(err instanceof Error).toBeTruthy();
       expect(err.code).toBe('ENOENT');
       expect(err.path).toBe('invalidpath');
@@ -22,10 +24,14 @@ describe("fs.Stat", function() {
   it("should support isFile()", function() {
     waitsFor(helper.testComplete, "Stat isFile", 5);
     helper.writeFixture(function(sut) {
+      print("TESTING " + sut.getAbsolutePath());
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
+        print("HEY STATS: " + stats);
         expect(stats).toBeTruthy();
+        print("HEY STATS: " + stats);
         expect(stats.isFile()).toBeTruthy();
+        print("HEY STATS: " + stats);
         sut.delete();
         helper.testComplete(true);
       });

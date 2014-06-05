@@ -73,15 +73,12 @@ function posixError(n, path, syscall) {
   return e;
 }
 
+function throwENOENT(path, syscall) {
+  throw posixError(Errno.valueOf('ENOENT').intValue(), path, syscall);
+}
+
 function stat(path) {
-  var st = posix.allocateStat();
-  print("Stat allocated: " + st);
-  var fd = posix.stat(path, st);
-  print(["FD for", path, fd].join(' '));
-  if (!st || fd < 0) {
-    throw posixError(posix.errno(), path, 'stat');
-  }
-  return new Stat(st);
+  return new FS.Stat(path);
 }
 
 FS.stat = function(path, callback) {
@@ -103,7 +100,7 @@ function realpath(path, cache) {
   if (file.exists())
     return file.getCanonicalPath();
 
-  throw posixError(Errno.valueOf('ENOENT').intValue(), file.getCanonicalPath(), 'realpath');
+  throwENOENT(file.getCanonicalPath(), 'realpath');
 }
 
 FS.realpath = function(path) {
@@ -410,57 +407,52 @@ function openReadable(readable) {
   };
 }
 
-var Stat = function(delegate) {
-  this.size  = delegate.st_size();
-  this.atime = new Date(delegate.atime());
-  this.mtime = new Date(delegate.mtime());
-  this.ctime = new Date(delegate.ctime());
-
-  function check() {
-    print("Checking delegate: " + delegate);
-    return (delegate !== null && delegate !== undefined);
-  }
-
-  this.isFile  = function() {
-    return check() && delegate.isFile();
-  };
-
-  this.isDirectory  = function() {
-    return check() && delegate.isDirectory();
-  };
-
-  this.isSymbolicLink  = function() {
-    return check() && delegate.isSymLink();
-  };
-
-  this.isBlockDevice = function() {
-    return check() && delegate.isBlockDev();
-  };
-
-  this.isCharacterDevice = function() {
-    return check() && delegate.isCharDev();
-  };
-
-  this.isFIFO = function() {
-    return check() && delegate.isFifo();
-  };
-
-  this.isSocket = function() {
-    return check() && delegate.isSocket();
-  };
-
-  this.dev   = delegate.dev();
-  this.ino   = delegate.ino();
-  this.mode  = delegate.mode();
-  this.nlink = delegate.nlink();
-  this.uid   = delegate.uid();
-  this.gid   = delegate.gid();
-  this.rdev  = delegate.rdev();
-  this.blksize = delegate.blockSize();
-  this.blocks  = delegate.blocks();
+Stat = FS.Stat = function(path) {
+  var file = new java.io.File(path);
+  if (!file.exists()) throwENOENT(path, 'stat');
+  this.delegate = posix.stat(path);
+  this.size  = this.delegate.st_size();
+  this.atime = new Date(this.delegate.atime());
+  this.mtime = new Date(this.delegate.mtime());
+  this.ctime = new Date(this.delegate.ctime());
+  this.dev   = this.delegate.dev();
+  this.ino   = this.delegate.ino();
+  this.mode  = this.delegate.mode();
+  this.nlink = this.delegate.nlink();
+  this.uid   = this.delegate.uid();
+  this.gid   = this.delegate.gid();
+  this.rdev  = this.delegate.rdev();
+  this.blksize = this.delegate.blockSize();
+  this.blocks  = this.delegate.blocks();
 };
 
-FS.Stat = Stat;
+Stat.prototype.isFile = function() {
+  return this.delegate.isFile();
+};
+
+Stat.prototype.isDirectory  = function() {
+  return this.delegate.isDirectory();
+};
+
+Stat.prototype.isSymbolicLink  = function() {
+  return this.delegate.isSymLink();
+};
+
+Stat.prototype.isBlockDevice = function() {
+  return this.delegate.isBlockDev();
+};
+
+Stat.prototype.isCharacterDevice = function() {
+  return this.delegate.isCharDev();
+};
+
+Stat.prototype.isFIFO = function() {
+  return this.delegate.isFifo();
+};
+
+Stat.prototype.isSocket = function() {
+  return this.delegate.isSocket();
+};
 
 function invertAndConvert(x) {
   var e = parseInt(x).toString(2);
