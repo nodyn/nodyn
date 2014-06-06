@@ -73,7 +73,7 @@
     <version.bouncycastle>1.50</version.bouncycastle>
     <version.jnr-posix>3.0.2-SNAPSHOT</version.jnr-posix>
 
-    <test.pattern>**/*Spec.js</test.pattern>
+    <test.pattern>src/test/**/*Spec.js</test.pattern>
   </properties>
 
   <repositories>
