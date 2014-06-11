@@ -1,4 +1,3 @@
-var net           = NativeRequire.require('vertx/net');
 var util          = NativeRequire.require('util');
 var Stream        = NativeRequire.require('stream');
 var nodyn         = NativeRequire.require('nodyn');
@@ -9,7 +8,7 @@ var nodyn         = NativeRequire.require('nodyn');
 
 function Server( connectionListener ) {
   if (!(this instanceof Server)) return new Server(connectionListener);
-  this.proxy = net.createNetServer();
+  this.proxy = process.context.createNetServer();
 
   this.addr = {
     port: 0,
@@ -17,19 +16,16 @@ function Server( connectionListener ) {
     address: '127.0.0.1'
   };
 
-  if (connectionListener) {
-    this.on('connection', connectionListener);
-  }
+  this.on('connection', nodyn.vertxHandler(connectionListener));
 
   // setup a connection handler in vert.x
   this.proxy.connectHandler( function(sock) {
-    // TODO: This is a hack, methinks
-    this.addr.family = sock.localAddress().ipaddress.length < 20 ? 'IPv4' : 'IPv6';
+    this.addr.family = sock.localAddress().getAddress().getHostAddress().length < 20 ? 'IPv4' : 'IPv6';
 
     var nodeSocket = new Socket();
     nodeSocket.setProxy(sock);
 
-    nodeSocket.on('error', function(e) { 
+    nodeSocket.on('error', function(e) {
       this.emit('error', e);
     }.bind(this));
 
@@ -113,26 +109,26 @@ function Socket(options) {
 
 Socket.prototype.setProxy = function(proxy) {
   this.proxy = proxy;
-  if (this.proxy.remoteAddress) {
-    var inetAddress = this.proxy.remoteAddress();
-    this.remoteAddress = inetAddress.ipaddress;
-    this.remotePort = inetAddress.port;
-  }
-  if (this.proxy.dataHandler) {
-    this.proxy.dataHandler( function(buffer) {
-      this.emit('data', new Buffer(buffer.toString()));
-    }.bind(this));
-  }
-  if (this.proxy.endHandler) {
-    this.proxy.endHandler( function() {
-      this.emit('end', this);
-    }.bind(this));
-  }
-  if (this.proxy.exceptionHandler) {
-    this.proxy.exceptionHandler( function(err) {
-      this.emit('error', err);
-    }.bind(this));
-  }
+  var inetAddress = this.proxy.remoteAddress();
+  this.remoteAddress = inetAddress.getAddress().getHostAddress();
+  this.remotePort = inetAddress.getPort();
+
+  this.proxy.dataHandler( function(buffer) {
+    this.emit('data', new Buffer(buffer));
+  }.bind(this));
+
+  this.proxy.endHandler( function() {
+    this.emit('end', this);
+  }.bind(this));
+
+  this.proxy.exceptionHandler( function(err) {
+    this.emit('error', err);
+  }.bind(this));
+
+  this.proxy.closeHandler( function(err) {
+    this.emit('close');
+  }.bind(this));
+
   return this;
 };
 
@@ -146,10 +142,10 @@ Socket.prototype.connect = function(port, host, callback) {
     this.on('connect', callback);
   }
 
-  net.createNetClient().connect( port, host, function(err, sock) {
+  process.context.createNetClient().connect( port, host, nodyn.vertxHandler(function(err, sock) {
     this.setProxy( sock );
     this.emit('connect', this);
-  }.bind(this));
+  }.bind(this)));
   return this;
 };
 
@@ -179,9 +175,7 @@ Socket.prototype.write = function() {
 };
 
 Socket.prototype.destroy = function() {
-  this.proxy.close(function() {
-    this.emit('close');
-  }.bind(this));
+  this.proxy.close();
 };
 
 Socket.prototype.end = function(data, encoding) {
@@ -248,17 +242,17 @@ module.exports.createConnection = function() {
   if (typeof(args[0]) == 'object') {
     options.port = args[0].port;
 
-    if (args[0].host) { 
-      options.host = args[0].host; 
+    if (args[0].host) {
+      options.host = args[0].host;
     }
-    if (args[0].localAddress) { 
-      options.localAddr = args[0].localAddress; 
+    if (args[0].localAddress) {
+      options.localAddr = args[0].localAddress;
     }
-  } 
+  }
   else if (typeof(args[0]) == 'number') {
     options.port = args[0];
-    if (typeof(args[1]) == 'string') { 
-      options.host = args[1]; 
+    if (typeof(args[1]) == 'string') {
+      options.host = args[1];
     }
   }
   lastArg = args[args.length - 1];
@@ -272,4 +266,3 @@ module.exports.createConnection = function() {
 };
 
 module.exports.connect = module.exports.createConnection;
-
