@@ -16,7 +16,7 @@ function Server( connectionListener ) {
     address: '127.0.0.1'
   };
 
-  this.on('connection', connectionListener);
+  if ((typeof connectionListener) === 'function') this.on('connection', connectionListener);
 
   // setup a connection handler in vert.x
   this.proxy.connectHandler( function(sock) {
