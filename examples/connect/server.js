@@ -1,9 +1,13 @@
-var http = require('http'), 
-    app  = require('app'),
-    port = 3000;
+print = console.log;
+var http    = require('http'),
+    connect = require('connect'),
+    port    = 3000;
 
-var server = http.createServer(app).listen(port, function() {
-  console.log('Listening on port ' + port);
-});
+var app = connect()
+  .use(connect.logger('dev'))
+  .use(connect.static('public'))
+  .use(function(req, res){
+    res.end('hello world\n');
+  });
 
-module.exports = server;
+http.createServer(app).listen(port);

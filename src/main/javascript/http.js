@@ -2,12 +2,12 @@ var url   = NativeRequire.require('url');
 var net   = NativeRequire.require('net');
 var util  = NativeRequire.require('util');
 var nodyn = NativeRequire.require('nodyn');
-var http  = NativeRequire.require('vertx/http');
-
+var Stream = NativeRequire.require('stream');
+var MultiMap = NativeRequire.require('nodyn/multiMap');
 var EventEmitter = require('events').EventEmitter;
 
 function WebServer(requestListener) {
-  this.proxy = http.createHttpServer();
+  this.proxy = process.context.createHttpServer();
 
   // default limit for incoming headers
   // TODO: Actually implement limits
@@ -40,7 +40,6 @@ WebServer.prototype.setTimeout = function(msec, callback) {
 
 WebServer.prototype.close = function(callback) {
   if (callback) this.once('close', callback);
-
   this.proxy.close(function() {
     process.nextTick(this.emit.bind(this, 'close'));
   }.bind(this));
@@ -64,16 +63,18 @@ WebServer.prototype.listen = function(port /*, hostname, callback */) {
 
   // setup a connection handler in vert.x
   this.proxy.requestHandler( function(request) {
+    // request is a vert.x HttpServerRequest
     if (request.method() !== 'HEAD') {
-      request.response.chunked(true);
+      request.response().setChunked(true);
     }
     var incomingMessage = new IncomingMessage(request);
-    var serverResponse  = new ServerResponse(request.response);
+    var serverResponse  = new ServerResponse(request.response());
+    var headers = new MultiMap(request.headers());
 
-    if (request.headers().get('Connection') === 'Upgrade') {
+    if (headers.get('Connection') === 'Upgrade') {
       handleUpgrade(this, incomingMessage);
     }
-    else if (request.headers().get('Expect') == '100-Continue') {
+    else if (headers.get('Expect') == '100-Continue') {
       if (this.listeners('checkContinue').length > 0) {
         this.emit('checkContinue', incomingMessage, serverResponse);
       }
@@ -95,13 +96,12 @@ WebServer.prototype.listen = function(port /*, hostname, callback */) {
   }.bind(this));
 
   // listen for incoming connections
-  this.proxy._to_java_server().listen(port, host, function(future) {
+  this.proxy.listen(port, host, function(future) {
     if (future.succeeded()) this.emit('listening');
     else {
       this.emit('error', new Error(future.cause().message()));
       this.close();
     }
-
   }.bind(this));
 };
 
@@ -136,6 +136,11 @@ function handleConnect(server, incomingMessage, serverResponse) {
 
 
 function IncomingMessage(proxy) {
+  if (!(this instanceof IncomingMessage)) {
+    return new IncomingMessage(proxy);
+  }
+
+  Stream.Readable.call(this);
   this.encoding    = 'UTF-8';
   this.headers     = {};
   this.trailers    = {};
@@ -144,7 +149,7 @@ function IncomingMessage(proxy) {
   this.__socket    = new net.Socket();
   this.__hasSocket = false;
 
-  // Defer getting the socket from proxy until it's first requested. 
+  // Defer getting the socket from proxy until it's first requested.
   Object.defineProperty(this, "socket", {
     get: function() {
            if (!this.__hasSocket) {
@@ -152,12 +157,13 @@ function IncomingMessage(proxy) {
            }
            return this.__socket;
          }.bind(this),
-    set: function() {}, // can't set it 
+    set: function() {}, // can't set it
     configurable: true,
     enumerable: true });
 
   // set the headers based on what's in the proxy
-  proxy.headers().forEach(function (name, value) {
+  var map = new MultiMap(proxy.headers());
+  map.forEach(function (name, value) {
     if (this.headers[name]) {
       this.headers[name] = this.headers[name] + "; " + value;
     } else {
@@ -167,7 +173,7 @@ function IncomingMessage(proxy) {
 
   // when data arrives, emit an event
   proxy.dataHandler(function(buffer) {
-    this.emit('data', buffer.toString(this.encoding));
+    this.emit('data', new Buffer(buffer));
   }.bind(this));
 
   // when the request/response ends make sure we deal with any
@@ -175,7 +181,8 @@ function IncomingMessage(proxy) {
   proxy.endHandler(function() {
     if (proxy.trailers) {
       // make sure we have all the trailers from the response object
-      proxy.trailers().forEach(function (name, value) {
+      var map = new MultiMap(proxy.trailers());
+      map.forEach(function (name, value) {
         if (this.trailers[name]) {
           this.trailers[name] = this.trailers[name] + "; " + value;
         } else {
@@ -198,17 +205,17 @@ function IncomingMessage(proxy) {
     // vert.x HttpServerRequest
     this.url = proxy.uri();
     this.method = proxy.method();
-    if (proxy.version && proxy.version() === "HTTP_1_1") {
-      this.httpMajorVersion = 1;
-      this.httpMinorVersion = 1;
+    this.httpVersionMajor = 1;
+    if (proxy.version().toString() === "HTTP_1_1") {
+      this.httpVersionMinor = 1;
       this.httpVersion = "1.1";
     } else {
-      this.httpMajorVersion = 1;
-      this.httpMinorVersion = 0;
+      this.httpVersionMinor = 0;
       this.httpVersion = "1.0";
     }
   }
 }
+util.inherits(IncomingMessage, Stream.Readable);
 
 IncomingMessage.prototype.setEncoding = function(enc) {
   try {
@@ -228,14 +235,19 @@ function ServerResponse(proxy) {
   this.headersSent = false;
 }
 
-ServerResponse.prototype.end = function( /* data, encoding */ ) {
+ServerResponse.prototype.end = function( data, encoding ) {
   if (!this.headersSent) {
     this.writeHead();
   }
-  this.proxy.end.apply(this.proxy, arguments);
+  if (data) {
+    encoding = encoding || 'UTF-8';
+    this.proxy.end(data, encoding);
+  } else {
+    this.proxy.end();
+  }
 };
 
-ServerResponse.prototype.writeHead = 
+ServerResponse.prototype.writeHead =
 function( statusCode /*, reasonPhrase, headers */) {
   var args = Array.prototype.slice.call(arguments, 1),
       reasonPhrase = null,
@@ -253,19 +265,19 @@ function( statusCode /*, reasonPhrase, headers */) {
   }
 
   if (!this.headersSent) {
-    this.proxy.statusCode(statusCode);
+    if (statusCode) this.proxy.setStatusCode(statusCode);
     for( var header in headers ) {
       this.setHeader(header, headers[header]);
     }
     if (reasonPhrase) {
-      this.proxy.statusMessage(reasonPhrase);
+      this.proxy.setStatusMessage(reasonPhrase);
     }
     // default HTTP date header
     if (!this.proxy.headers().get('Date')) {
       this.setHeader('Date', new Date().toUTCString());
     }
     if (this.getHeader('Content-Length')) {
-      this.proxy.chunked(false);
+      this.proxy.setChunked(false);
     }
     this.headersSent = true;
   }
@@ -274,7 +286,7 @@ function( statusCode /*, reasonPhrase, headers */) {
 ServerResponse.prototype.write = function(chunk, encoding) {
   var length = 0,
       encode = encoding || "UTF-8";
-  if (!this.headersSent) this.writeHead(); 
+  if (!this.headersSent) this.writeHead();
   this.proxy.write(chunk, encode);
 };
 
@@ -313,8 +325,9 @@ function ClientRequest(proxy) {
   this.setSocketKeepAlive = function() {};
 }
 
-ClientRequest.prototype.write = function() {
-  this.proxy.write.apply(this.proxy, arguments);
+ClientRequest.prototype.write = function(chunk, encoding) {
+  encoding = encoding || 'UTF-8';
+  this.proxy.write(chunk, encoding);
 };
 
 ClientRequest.prototype.end = function(b) {
@@ -334,8 +347,8 @@ ClientRequest.prototype.setTimeout = function(msec, timeout) {
     if (timeout) {
       this.on('timeout', timeout);
     }
-    this.timeoutId = setTimeout(function() { 
-      this.emit('timeout'); 
+    this.timeoutId = setTimeout(function() {
+      this.emit('timeout');
     }.bind(this), msec);
   }
 };
@@ -378,9 +391,9 @@ var httpRequest = module.exports.request = function(options, callback) {
   options.method   = options.method   || DefaultRequestOptions.method;
   options.path     = options.path     || DefaultRequestOptions.path;
 
-  var proxy = http.createHttpClient()
-                    .port(options.port)
-                    .host(options.hostname);
+  var proxy = process.context.createHttpClient()
+                    .setPort(options.port)
+                    .setHost(options.hostname);
 
   var clientRequest = null; // The node.js representation
 
@@ -391,7 +404,7 @@ var httpRequest = module.exports.request = function(options, callback) {
     if (resp.headers().get('Connection') === "Upgrade") {
       if (clientRequest.listeners('upgrade').length > 0) {
         clientRequest.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
-        clientRequest.emit('socket', incomingMessage.socket); 
+        clientRequest.emit('socket', incomingMessage.socket);
       } else {
         // close the connection
         proxy.close();
@@ -410,9 +423,9 @@ var httpRequest = module.exports.request = function(options, callback) {
   clientRequest = new ClientRequest(request);
 
   if (options.method === 'HEAD' || options.method === 'CONNECT') {
-    request.chunked(false);
+    request.setChunked(false);
   } else {
-    request.chunked(true);
+    request.setChunked(true);
   }
   if (options.headers) {
     for (var header in options.headers) {
@@ -485,5 +498,3 @@ var STATUS_CODES = exports.STATUS_CODES = {
   510 : 'Not Extended',               // RFC 2774
   511 : 'Network Authentication Required' // RFC 6585
 };
-
-

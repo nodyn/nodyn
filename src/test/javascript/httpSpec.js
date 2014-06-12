@@ -68,7 +68,7 @@ describe('http', function(){
     server.listen(test_options.port, function() {
       var request = http.request(test_options, function(response) {
         response.on('data', function(message) {
-          expect('crunchy bacon').toBe(message);
+          expect(message.toString()).toBe('crunchy bacon');
           server.close(function() { helper.testComplete(true); });
         });
       });
@@ -86,7 +86,7 @@ describe('http', function(){
     server.listen(test_options.port, function() {
       var request = http.request(test_options, function(response) {
         response.on('data', function(message) {
-          expect('crunchy bacon').toBe(message);
+          expect(message.toString()).toBe('crunchy bacon');
           server.close(function() { helper.testComplete(true); });
         });
       });
@@ -111,7 +111,7 @@ describe('http request and response', function() {
   it('should have message headers', function() {
     waitsFor(helper.testComplete, "waiting for message headers test", 5);
     var server = http.createServer(function(request, response) {
-      expect(test_headers['x-custom-header']).toBe(request.headers['x-custom-header']);
+      expect(request.headers['x-custom-header']).toBe(test_headers['x-custom-header']);
       var body = 'crunchy bacon';
 
       response.writeHead(201, { 'Content-Length': body.length });
@@ -265,8 +265,8 @@ describe('http request and response', function() {
     waitsFor(helper.testComplete, "waiting for http version test", 5);
     var server = http.createServer(function(request, response) {
       expect(request.httpVersion).toBe('1.1');
-      expect(request.httpMajorVersion).toEqual(1);
-      expect(request.httpMinorVersion).toEqual(1);
+      expect(request.httpVersionMajor).toEqual(1);
+      expect(request.httpVersionMinor).toEqual(1);
       response.end();
     });
     server.listen(test_options.port, function() {
