@@ -1,6 +1,5 @@
-var helper = require('specHelper');
-var timer = require('vertx/timer');
-var javaProcess = new org.projectodd.nodyn.process.Process();
+var helper = require('specHelper'),
+    javaProcess = new org.projectodd.nodyn.process.Process();
 
 describe('process', function() {
 

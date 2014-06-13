@@ -179,5 +179,3 @@ describe('The dgram module', function() {
 });
 
 function unexpectedError() { this.fail("Unexpected error"); }
-
-
