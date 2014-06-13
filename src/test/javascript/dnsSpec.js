@@ -1,17 +1,28 @@
-var helper     = require('specHelper');
-var dns        = require('dns');
+var helper     = require('specHelper'),
+    dns        = require('dns');
+
 describe('The dns module', function() {
 
-  var server     = null; // server instance set in prepareDns
-  var DnsServer  = org.projectodd.nodyn.dns.TestDnsServer;
+  var server, // server instance set in prepareDns
+      DnsServer  = org.projectodd.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
     helper.testComplete(false);
   });
 
   afterEach(function() {
-    stop();
+    if (server) {
+      server.stop();
+    }
   });
+
+  dns.server({host: '127.0.0.1', port: 53530});
+
+  function prepareDns(srv, testFunc) {
+    server = srv;
+    server.start();
+    testFunc.apply(testFunc);
+  }
 
   it('should pass testLookup', function() {
     var ip = '10.0.0.1';
@@ -270,16 +281,4 @@ describe('The dns module', function() {
     });
   });
 
-  function stop() {
-    if (server) {
-      server.stop();
-    }
-  }
-
-  function prepareDns(srv, testFunc) {
-    server = srv;
-    server.start();
-    dns.server({host: '127.0.0.1', port: 53530});
-    testFunc.apply(testFunc);
-  }
 });

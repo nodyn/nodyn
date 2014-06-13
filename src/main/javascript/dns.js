@@ -1,191 +1,218 @@
+var nodyn = require('nodyn');
 
-var nativeCallback = function(callback, mutator) {
-  return function(err, result) {
-    if (err) {
-      callback.apply(callback, [convertError(err), null]);
-    } else if (typeof mutator === 'function') {
-      callback.apply(callback, mutator(convertError(err), result));
-    } else {
-      callback.apply(callback, [convertError(err), result]);
-    }
-  };
-};
-
-var convertError = function(nativeError) {
-  if (nativeError) {
-    var err = new Error();
-    err.code = nativeError.code().name();
+function errorConverter(err) {
+  if (err) {
+    err.code = err.cause.code().name();
     // TODO: Convert other errors to node.js names
     if(err.code === 'NXDOMAIN') {
-      err.code = 'ENOTFOUND';
+      err.code = DNS.NOTFOUND;
     }
     return err;
   }
   return null;
+}
+
+function stringMutator(list) {
+  if (!list) return null;
+  return list.toArray();
+}
+function stringHandler(callback) {
+  return nodyn.vertxHandler(function(e,r) {
+    callback(errorConverter(e), stringMutator(r));
+  });
+}
+
+function addressMutator(addresses) {
+  if (!addresses) return null;
+  var addrs = [];
+  for (var i = 0; i < addresses.size(); i++) {
+    addrs[i] = addresses.get(i).getHostAddress();
+  }
+  return addrs;
+}
+function addressHandler(callback) {
+  return nodyn.vertxHandler(function(e,r) {
+    callback(errorConverter(e), addressMutator(r));
+  });
+}
+
+function mxMutator(records) {
+  if (!records) return null;
+  var recs = [];
+  for (var i = 0; i < records.size(); i++) {
+    recs[i] = {
+      priority: records.get(i).priority(),
+      exchange: records.get(i).name()
+    };
+  }
+  return recs;
+}
+function mxHandler(callback) {
+  return nodyn.vertxHandler(function(e,r) {
+    callback(errorConverter(e), mxMutator(r));
+  });
+}
+
+function srvMutator(records) {
+  if (!records) return null;
+  var recs = [];
+  for (var i = 0; i < records.size(); i++) {
+    var record = records.get(i);
+    recs[i] = {
+      priority: record.priority(),
+      weight: record.weight(),
+      port: record.port(),
+      name: record.name(),
+      protocol: record.protocol(),
+      service: record.service(),
+      target: record.target()
+    };
+  }
+  return recs;
+}
+function srvHandler(callback) {
+  return nodyn.vertxHandler(function(e,r) {
+    callback(errorConverter(e), srvMutator(r));
+  });
+}
+
+function serverAddress(srv) {
+  return [new java.net.InetSocketAddress(java.net.InetAddress.getByName(srv.host), srv.port)];
+}
+
+var client = process.context.createDnsClient(serverAddress({host: '127.0.0.1', port: 53})),
+    DNS = {};
+
+DNS.NODATA = 'ENODATA';
+DNS.FORMERR = 'EFORMERR';
+DNS.SERVFAIL = 'ESERVFAIL';
+DNS.NOTFOUND = 'ENOTFOUND';
+DNS.NOTIMP = 'ENOTIMP';
+DNS.REFUSED = 'EREFUSED';
+DNS.BADQUERY = 'EBADQUERY';
+DNS.ADNAME = 'EADNAME';
+DNS.BADFAMILY = 'EBADFAMILY';
+DNS.BADRESP = 'EBADRESP';
+DNS.CONNREFUSED = 'ECONNREFUSED';
+DNS.TIMEOUT = 'ETIMEOUT';
+DNS.EOF = 'EOF';
+DNS.FILE = 'EFILE';
+DNS.NOMEM = 'ENOMEM';
+DNS.DESTRUCTION = 'EDESTRUCTION';
+DNS.BADSTR = 'EBADSTR';
+DNS.BADFLAGS = 'EBADFLAGS';
+DNS.NONAME = 'ENONAME';
+DNS.BADHINTS = 'EBADHINTS';
+DNS.NOTINITIALIZED = 'ENOTINITIALIZED';
+DNS.LOADIPHLPAPI = 'ELOADIPHLPAPI';
+DNS.ADDRGETNETWORKPARAMS = 'EADDRGETNETWORKPARAMS';
+DNS.CANCELLED = 'ECANCELLED';
+
+/**
+ * Sets the nameserver address and port
+ * {
+ *   host: '127.0.0.1',
+ *   port: 53530
+ * }
+ */
+DNS.server = function server(srv) {
+  if (srv) {
+    client = process.context.createDnsClient(serverAddress(srv));
+  }
 };
 
-var serverAddress = function(srv) {
-  addr = new java.net.InetSocketAddress(java.net.InetAddress.getByName(srv.host), srv.port);
-  return function() {
-    return addr;
-  };
+
+DNS.lookup = function lookup(domain, family, callback) {
+  if (typeof family === 'function') {
+    callback = family;
+    family = 4;
+  }
+  var handler = nodyn.vertxHandler(function(e,r) {
+    callback(errorConverter(e), (r ? r.toString() : null), family);
+  });
+
+  if (family === 4) {
+    client.lookup4(domain, handler);
+  } else if (family === 6) {
+    client.lookup6(domain, handler);
+  }
 };
 
-var DNS = function() {
-  var dns  = NativeRequire.require('vertx/dns');
-  var addr = serverAddress({host: '127.0.0.1', port: 53});
+DNS.resolve = function resolve(domain, rrtype, callback) {
+  if (typeof rrtype == 'function') {
+    callback = rrtype;
+    rrtype = 'A';
+  }
 
-  /**
-   * Sets or gets the nameserver address(es) and port
-   * {
-   *   host: '127.0.0.1',
-   *   port: 53530
-   * }
-   * @param {
-   */
-  this.server = function(srv) {
-    if (srv !== null && srv !== undefined) {
-      addr = serverAddress(srv);
+  switch(rrtype) {
+    case 'A': {
+      client.resolveA(domain, addressHandler(callback));
+      break;
     }
-    return addr();
-  };
-
-  this.lookup = function(domain, family, callback) {
-    var client = dns.createDnsClient(addr());
-    if (typeof family === 'function') {
-      client.lookup(domain, nativeCallback(family, function(err, result) {
-        return [err, result, 4];
-      }));
-    } else if (family === 4) {
-      client.lookup4(domain, nativeCallback(callback, function(err, result) {
-        return [err, result, family];
-      }));
-    } else if (family === 6) {
-      client.lookup6(domain, nativeCallback(callback, function(err, result) {
-        return [err, result, family];
-      }));
+    case 'AAAA': {
+      client.resolveAAAA(domain, addressHandler(callback));
+      break;
     }
-  };
-
-  this.resolve = function(domain, rrtype, callback) {
-    var client = dns.createDnsClient(addr());
-    if (typeof rrtype == 'function') {
-      callback = rrtype;
-      rrtype = 'A';
+    case 'CNAME': {
+      client.resolveCNAME(domain, stringHandler(callback));
+      break;
     }
-    switch(rrtype) {
-      case 'A': {
-        client.resolveA(domain, nativeCallback(callback));
-        break;
-      }
-      case 'AAAA': {
-        client.resolveAAAA(domain, nativeCallback(callback));
-        break;
-      }
-      case 'CNAME': {
-        client.resolveCNAME(domain, nativeCallback(callback));
-        break;
-      }
-      case 'MX': {
-        client.resolveMX(domain, nativeCallback(callback, function(err, result) {
-          return [err, result.map(function(o) {
-            return {'exchange': o.name, 'priority': o.priority};
-          })];
-        }));
-        break;
-      }
-      case 'NS': {
-        client.resolveNS(domain, nativeCallback(callback));
-        break;
-      }
-      case 'PTR': {
-        client.resolvePTR(domain, nativeCallback(callback));
-        break;
-      }
-      case 'SRV': {
-        client.resolveSRV(domain, nativeCallback(callback));
-        break;
-      }
-      case 'TXT': {
-        client.resolveTXT(domain, nativeCallback(callback));
-        break;
-      }
-      default: {
-        callback.apply(callback, [{code: this.BADQUERY}]);
-      }
+    case 'MX': {
+      client.resolveMX(domain, mxHandler(callback));
+      break;
     }
-  };
-
-  this.resolve4 = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveA(domain, nativeCallback(callback));
-  };
-
-  this.resolve6 = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveAAAA(domain, nativeCallback(callback));
-  };
-
-  this.resolveMx = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveMX(domain, nativeCallback(callback, function(err, result) {
-      return [err, result.map(function(o) {
-        return {'exchange': o.name, 'priority': o.priority};
-      })];
-    }));
-  };
-
-  this.resolveTxt = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveTXT(domain, nativeCallback(callback));
-  };
-
-  this.resolveSrv = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveSRV(domain, nativeCallback(callback));
-  };
-
-  this.resolveNs = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveNS(domain, nativeCallback(callback));
-  };
-
-  this.resolveCname = function(domain, callback) {
-    var client = dns.createDnsClient(addr());
-    client.resolveCNAME(domain, nativeCallback(callback));
-  };
-
-  this.reverse = function(ip, callback) {
-    var client = dns.createDnsClient(addr());
-    client.reverseLookup(ip, nativeCallback(callback, function(err, result) {
-      return [err, [result]];
-    }));
-  };
-
-  this.NODATA = 'ENODATA';
-  this.FORMERR = 'EFORMERR';
-  this.SERVFAIL = 'ESERVFAIL';
-  this.NOTFOUND = 'ENOTFOUND';
-  this.NOTIMP = 'ENOTIMP';
-  this.REFUSED = 'EREFUSED';
-  this.BADQUERY = 'EBADQUERY';
-  this.ADNAME = 'EADNAME';
-  this.BADFAMILY = 'EBADFAMILY';
-  this.BADRESP = 'EBADRESP';
-  this.CONNREFUSED = 'ECONNREFUSED';
-  this.TIMEOUT = 'ETIMEOUT';
-  this.EOF = 'EOF';
-  this.FILE = 'EFILE';
-  this.NOMEM = 'ENOMEM';
-  this.DESTRUCTION = 'EDESTRUCTION';
-  this.BADSTR = 'EBADSTR';
-  this.BADFLAGS = 'EBADFLAGS';
-  this.NONAME = 'ENONAME';
-  this.BADHINTS = 'EBADHINTS';
-  this.NOTINITIALIZED = 'ENOTINITIALIZED';
-  this.LOADIPHLPAPI = 'ELOADIPHLPAPI';
-  this.ADDRGETNETWORKPARAMS = 'EADDRGETNETWORKPARAMS';
-  this.CANCELLED = 'ECANCELLED';
+    case 'NS': {
+      client.resolveNS(domain, stringHandler(callback));
+      break;
+    }
+    case 'PTR': {
+      client.resolvePTR(domain, nodyn.vertxHandler(callback));
+      break;
+    }
+    case 'SRV': {
+      client.resolveSRV(domain, srvHandler(callback));
+      break;
+    }
+    case 'TXT': {
+      client.resolveTXT(domain, stringHandler(callback));
+      break;
+    }
+    default: {
+      callback({code: DNS.BADQUERY});
+    }
+  }
 };
 
-module.exports = new DNS();
+DNS.resolve4 = function resolve4(domain, callback) {
+  DNS.resolve(domain, 'A', callback);
+};
+
+DNS.resolve6 = function resolve6(domain, callback) {
+  DNS.resolve(domain, 'AAAA', callback);
+};
+
+DNS.resolveMx = function resolveMx(domain, callback) {
+  DNS.resolve(domain, 'MX', callback);
+};
+
+DNS.resolveTxt = function(domain, callback) {
+  DNS.resolve(domain, 'TXT', callback);
+};
+
+DNS.resolveSrv = function(domain, callback) {
+  DNS.resolve(domain, 'SRV', callback);
+};
+
+DNS.resolveNs = function(domain, callback) {
+  DNS.resolve(domain, 'NS', callback);
+};
+
+DNS.resolveCname = function(domain, callback) {
+  DNS.resolve(domain, 'CNAME', callback);
+};
+
+DNS.reverse = function(ip, callback) {
+  DNS.resolve(ip, 'PTR', callback);
+};
+
+module.exports = DNS;

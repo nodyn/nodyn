@@ -26,17 +26,16 @@ function asyncAction(blockingAction, callback) {
 }
 module.exports.asyncAction = asyncAction;
 
-function vertxHandler(handler, resultConverter) {
+function vertxHandler(handler, resultConverter, errorConverter) {
   return function(future) {
-    var result = null;
     if (handler) {
       if (future.failed()) {
-        handler(new Error(future.cause()), result);
+        var cause = future.cause();
+        var error = errorConverter ? errorConverter(cause) : new Error(cause);
+        error.cause = cause;
+        handler(error, null);
       } else {
-        result = future.result();
-        if (resultConverter) {
-          result = resultConverter(result);
-        }
+        var result = resultConverter ? resultConverter(future.result()) : future.result();
         handler(null, result);
       }
     }
