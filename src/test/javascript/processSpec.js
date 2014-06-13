@@ -110,9 +110,9 @@ describe('process', function() {
     var x = 0;
     var f = function(y) { x += y; };
     process.nextTick(f, 10);
-    timer.setTimer(100, function() {
+    setTimeout(function() {
       expect(x).toBe(10);
-    });
+    }, 100);
   });
 
   it('should pass testMemoryUsage', function() {
