@@ -289,9 +289,7 @@ describe('http request and response', function() {
       var request = http.request(test_options, function() {
       });
       request.write("cheese muffins");
-      request.end('bye'); // TODO: This should not be necessary
-                          // TODO: But if we don't write something
-                          // TODO: Vert.x inexplicably throws NPE
+      request.end();
     });
   });
 
