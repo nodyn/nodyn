@@ -1,8 +1,6 @@
-var helper = require('specHelper');
-var http      = require('http');
-var timer     = require('vertx/timer');
-
-var test_headers, test_options;
+var helper = require('specHelper'),
+    http   = require('http'),
+    test_headers, test_options;
 
 describe('http', function(){
   beforeEach(function() {
@@ -375,10 +373,10 @@ describe('http request and response', function() {
       timedOut = true;
       sock.close();
     });
-    timer.setTimer(100, function() {
+    setTimeout(function() {
       expect(timedOut).toEqual(true);
       helper.testComplete(true);
-    });
+    }, 100);
   });
 
   it('should have a close event', function() {
