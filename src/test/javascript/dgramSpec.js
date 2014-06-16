@@ -1,5 +1,4 @@
 var helper = require('specHelper');
-var Buffer = require('vertx/buffer');
 var util   = require('util');
 var dgram  = require('dgram');
 
@@ -68,18 +67,18 @@ describe('The dgram module', function() {
     var peer2 = dgram.createSocket();
     var buffer = new Buffer('turkey dinner');
 
-    peer1.on('error', unexpectedError);
-    peer2.on('error', unexpectedError);
+    peer1.on('error', unexpectedError.bind(this));
+    peer2.on('error', unexpectedError.bind(this));
 
     peer2.on('message', function(msg, rinfo) {
       expect(buffer.toString()).toBe(msg.toString());
-      peer1.on('close', peer2.close);
+      peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
       peer1.close();
     });
 
     peer2.bind(54321, function() {
-      peer1.send(buffer, 0, buffer.length(), 54321, '0.0.0.0');
+      peer1.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
     });
   });
 
@@ -89,24 +88,24 @@ describe('The dgram module', function() {
     var peer2 = dgram.createSocket();
     var buffer = new Buffer('turkey dinner');
 
-    peer1.on('error', unexpectedError);
-    peer2.on('error', unexpectedError);
+    peer1.on('error', unexpectedError.bind(this));
+    peer2.on('error', unexpectedError.bind(this));
 
     peer1.on('message', function(msg, rinfo) {
       expect(buffer.toString()).toBe(msg.toString());
-      peer1.send(msg, 0, msg.length(), rinfo.port, rinfo.address);
+      peer1.send(msg, 0, msg.length, rinfo.port, rinfo.address);
     });
 
     peer2.on('message', function(msg, rinfo) {
       expect(buffer.toString()).toBe(msg.toString());
-      peer1.on('close', peer2.close);
+      peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
       peer1.close();
     });
 
     peer2.bind(54321, function() {
-      peer1.bind(54321, function() {
-        peer2.send(buffer, 0, buffer.length(), 54321, '0.0.0.0');
+      peer1.bind(54322, function() {
+        peer2.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
       });
     });
   });
@@ -121,22 +120,23 @@ describe('The dgram module', function() {
 
     var buffer = new Buffer('turkey dinner');
 
-    peer1.on('error', unexpectedError);
-    peer2.on('error', unexpectedError);
+    peer1.on('error', unexpectedError.bind(this));
+    peer2.on('error', unexpectedError.bind(this));
 
     peer1.on('message', function(msg, rinfo) {
       expect(msg.toString()).toBe(buffer.toString());
-      peer1.on('close', peer2.close);
+      peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
       peer1.close();
     });
 
     peer1.bind(54321, function() {
-      peer2.send(buffer, 0, buffer.length(), 54321, '255.255.255.255');
+      peer2.send(buffer, 0, buffer.length, 54321, '255.255.255.255');
     });
   });
 
-  xit('should pass DEFERREDtestAddDropMembership', function() {
+  // TODO: Figure out WTF is going on here.
+  xit('should add and drop multicast group membership', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5);
     var buffer = new Buffer('steak frites');
     var groupAddress = '230.0.0.1';
@@ -145,31 +145,33 @@ describe('The dgram module', function() {
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
 
-    peer2.on('message', function(msg, rinfo) {
+    peer1.on('error', unexpectedError.bind(this));
+    peer2.on('error', unexpectedError.bind(this));
+
+    peer1.on('message', function(msg, rinfo) {
       expect(msg.toString()).toBe(buffer.toString());
 
-      // now drop peer2's membership in the group and fail if it gets any more
+      // now drop peer1's membership in the group and fail if it gets any more
       // messages
-      peer2.dropMembership(groupAddress);
+      peer1.dropMembership(groupAddress);
 
-      peer2.on('message', function(msg, rinfo) {
+      peer1.on('message', function(msg, rinfo) {
         this.fail("Should have dropped group membership");
-      });
+      }.bind(this));
 
       // send another message to the group and wait to see if
       // peer2 gets it - if not, end succesfully
-      peer1.send(buffer, 0, buffer.length(), 54321, groupAddress, function() {
+      peer2.send(buffer, 0, buffer.length, 54321, groupAddress, function() {
         setTimeout(function() {
           helper.testComplete(true);
         }, 1000);
       });
     });
 
-    peer2.bind(54321, '127.0.0.1', function() {
-      peer2.addMembership(groupAddress);
-
+    peer1.bind(54321, function() {
+      peer1.addMembership(groupAddress);
       // send a message to the multicast group
-      peer1.send(buffer, 0, buffer.length(), 54321, groupAddress);
+      peer2.send(buffer, 0, buffer.length, 54321, groupAddress);
     });
   });
 
@@ -178,4 +180,4 @@ describe('The dgram module', function() {
   });
 });
 
-function unexpectedError() { this.fail("Unexpected error"); }
+function unexpectedError(e) { print("ERROR: " + e); this.fail(e); }

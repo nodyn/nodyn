@@ -63,7 +63,6 @@
     <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.1.1-SNAPSHOT</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
-    <version.lang-js.verticle>1.1.0</version.lang-js.verticle>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
     <version.jvm-npm>1.x.incremental.6</version.jvm-npm>
@@ -158,11 +157,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-platform</artifactId>
       <version>${version.vertx}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>lang-js</artifactId>
-      <version>${version.lang-js.verticle}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
