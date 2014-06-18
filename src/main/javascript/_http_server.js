@@ -171,10 +171,10 @@ ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, head
       this.proxy.setStatusMessage(reasonPhrase);
     }
     // default HTTP date header
-    if (!this.proxy.headers().get('date')) {
-      this.setHeader('date', new Date().toUTCString());
+    if (!this.proxy.headers().get('Date')) {
+      this.setHeader('Date', new Date().toUTCString());
     }
-    if (this.getHeader('content-length')) {
+    if (this.getHeader('Content-Length')) {
       this.proxy.setChunked(false);
     } else {
       this.proxy.setChunked(true);
@@ -195,15 +195,15 @@ ServerResponse.prototype._write = function(chunk, encoding, callback) {
 };
 
 ServerResponse.prototype.getHeader = function(name) {
-  return this.proxy.headers().get(name.toLowerCase());
+  return this.proxy.headers().get(name);
 };
 
 ServerResponse.prototype.setHeader = function(name, value) {
-  this.proxy.putHeader(name.toLowerCase(), value.toString());
+  this.proxy.putHeader(name, value.toString());
 };
 
 ServerResponse.prototype.removeHeader = function(name) {
-  this.proxy.headers().remove(name.toLowerCase());
+  this.proxy.headers().remove(name);
 };
 
 ServerResponse.prototype.addTrailers = function(trailers) {
