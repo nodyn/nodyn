@@ -59,13 +59,11 @@ Server.prototype.listen = function(port /*, hostname, callback */) {
 
     if (headers.get('Connection') === 'Upgrade') {
       handleUpgrade(this, incomingMessage);
-    }
-    else if (headers.get('Expect') == '100-Continue') {
+    } else if (headers.get('Expect') == '100-Continue') {
       if (this.listeners('checkContinue').length > 0) {
         this.emit('checkContinue', incomingMessage, serverResponse);
       }
-    }
-    else if (request.method() === 'CONNECT') {
+    } else if (request.method() === 'CONNECT') {
       handleConnect(this, incomingMessage, serverResponse);
     } else {
       this.emit('request', incomingMessage, serverResponse);
@@ -120,23 +118,28 @@ function handleConnect(server, incomingMessage, serverResponse) {
 }
 
 function ServerResponse(proxy) {
-  this.proxy       = proxy;
+  // Defer getting the socket from proxy until it's first requested.
+  Stream.Writable.call(this);
+  Object.defineProperty(this, "proxy", {
+    value: proxy,
+    configurable: true,
+    enumerable: false });
   this.sendDate    = true;
   this.headersSent = false;
+  this.statusCode  = 200;
 }
 
 util.inherits(ServerResponse, Stream.Writable);
 
-ServerResponse.prototype.end = function( data, encoding ) {
+ServerResponse.prototype.end = function( data, encoding, callback ) {
+  if ( data ) {
+    Stream.Writable.prototype.write.call( this, data, encoding, callback );
+  }
   if (!this.headersSent) {
     this.writeHead();
   }
-  if (data) {
-    encoding = encoding || 'UTF-8';
-    this.proxy.end(data, encoding);
-  } else {
-    this.proxy.end();
-  }
+  this.proxy.end();
+  Stream.Writable.prototype.end.call( this );
 };
 
 ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, headers */) {
@@ -156,7 +159,11 @@ ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, head
   }
 
   if (!this.headersSent) {
-    if (statusCode) this.proxy.setStatusCode(statusCode);
+    if (statusCode) {
+      this.proxy.setStatusCode(statusCode);
+    } else {
+      this.proxy.setStatusCode(this.statusCode);
+    }
     for( var header in headers ) {
       this.setHeader(header, headers[header]);
     }
@@ -164,35 +171,39 @@ ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, head
       this.proxy.setStatusMessage(reasonPhrase);
     }
     // default HTTP date header
-    if (!this.proxy.headers().get('Date')) {
-      this.setHeader('Date', new Date().toUTCString());
+    if (!this.proxy.headers().get('date')) {
+      this.setHeader('date', new Date().toUTCString());
     }
-    if (this.getHeader('Content-Length')) {
+    if (this.getHeader('content-length')) {
       this.proxy.setChunked(false);
+    } else {
+      this.proxy.setChunked(true);
     }
     this.headersSent = true;
   }
+  this.proxy.setChunked(true);
 };
 
-ServerResponse.prototype.write = function(chunk, encoding) {
+ServerResponse.prototype._write = function(chunk, encoding, callback) {
   var length = 0;
   var encode = encoding || "UTF-8";
   if (!this.headersSent) {
     this.writeHead();
   }
-  this.proxy.write(chunk, encode);
+  this.proxy.write(chunk.delegate);
+  callback();
 };
 
 ServerResponse.prototype.getHeader = function(name) {
-  return this.proxy.headers().get(name);
+  return this.proxy.headers().get(name.toLowerCase());
 };
 
 ServerResponse.prototype.setHeader = function(name, value) {
-  this.proxy.putHeader(name, value.toString());
+  this.proxy.putHeader(name.toLowerCase(), value.toString());
 };
 
 ServerResponse.prototype.removeHeader = function(name) {
-  this.proxy.headers().remove(name);
+  this.proxy.headers().remove(name.toLowerCase());
 };
 
 ServerResponse.prototype.addTrailers = function(trailers) {

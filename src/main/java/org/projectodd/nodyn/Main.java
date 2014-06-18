@@ -48,6 +48,13 @@ public class Main extends org.dynjs.cli.Main {
 
     public static void main(String[] args) throws IOException {
         new Main(System.out, args).run();
+        while ( true ) {
+            try {
+                Thread.sleep( 1000 );
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
     }
 
     @Override
@@ -104,7 +111,7 @@ public class Main extends org.dynjs.cli.Main {
         InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            runtime.newRunner().withContext(context).withSource(reader).evaluate();
+            runtime.newRunner().withFileName(name).withContext(context).withSource(reader).evaluate();
             try {
                 is.close();
             } catch (IOException e) {
