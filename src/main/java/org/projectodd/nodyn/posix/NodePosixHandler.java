@@ -38,7 +38,7 @@ public class NodePosixHandler implements POSIXHandler {
 
     @Override
     public File getCurrentWorkingDirectory() {
-        return null;
+        return new File(System.getProperty("user.dir"));
     }
 
     @Override

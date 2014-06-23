@@ -59,8 +59,6 @@
 
     <!-- dependency versions -->
     <version.junit>4.7</version.junit>
-    <!-- TODO: Update the netty dependency (QueryString) -->
-    <version.netty>3.6.1.Final</version.netty>
     <version.vertx>2.1.1-SNAPSHOT</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
@@ -144,12 +142,6 @@
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-posix</artifactId>
       <version>${version.jnr-posix}</version>
-    </dependency>
-    <dependency>
-      <!-- TODO - remove this -->
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-      <version>${version.netty}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

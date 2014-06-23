@@ -35,4 +35,3 @@ describe('The querystring module', function() {
     expect(obj.corge).toBe("");
   });
 });
-

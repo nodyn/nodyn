@@ -2,7 +2,7 @@ load('jvm-npm.js');
 System = java.lang.System;
 Nodyn  = org.projectodd.nodyn;
 nodyn  = {
-  QueryString: Nodyn.util.QueryString.newQueryString(this)
+  QueryString: Nodyn.util.QueryString
 };
 global = this;
 

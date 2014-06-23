@@ -2,15 +2,6 @@ var util         = NativeRequire.require('util');
 var EventEmitter = NativeRequire.require('events').EventEmitter;
 var vertx        = org.vertx.java.core.datagram;
 
-function convertAddress(javaInetAddr) {
-  var addr = javaInetAddr.getAddress();
-  return {
-    address: addr.getHostAddress(),
-    port: javaInetAddr.getPort(),
-    family: (addr instanceof java.net.Inet4Address) ? 'IPv4' : 'IPv6'
-  };
-}
-
 var Socket = function(type, callback) {
   var family = vertx.InternetProtocolFamily.IPv4;
   if (type === 'udp6') { family = vertx.InternetProtocolFamily.IPv6; }
@@ -120,3 +111,12 @@ module.exports.createSocket = createSocket = function(type, callback) {
 };
 
 module.exports.Socket = Socket;
+
+function convertAddress(javaInetAddr) {
+  var addr = javaInetAddr.getAddress();
+  return {
+    address: addr.getHostAddress(),
+    port: javaInetAddr.getPort(),
+    family: (addr instanceof java.net.Inet4Address) ? 'IPv4' : 'IPv6'
+  };
+}

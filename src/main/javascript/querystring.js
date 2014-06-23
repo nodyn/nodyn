@@ -1,21 +1,24 @@
-var QueryString = function() {
-  this._qs = nodyn.QueryString;
+var QueryString = {};
 
-  this.escape = function(str) {
-    return this._qs.escape(str)
-  }
+QueryString.escape = function(str) {
+  return nodyn.QueryString.escape(str);
+};
 
-  this.unescape = function(str) {
-    return this._qs.unescape(str)
-  }
+QueryString.unescape = function(str) {
+  return nodyn.QueryString.unescape(str);
+};
 
-  this.stringify = function(obj, sep, eq) {
-    return this._qs.stringify(obj, sep, eq)
-  }
+QueryString.stringify = function(obj, sep, eq) {
+  obj = obj || {};
+  sep = sep || '&';
+  eq  = eq  || '=';
+  return nodyn.QueryString.stringify(obj, sep, eq);
+};
 
-  this.parse = function(str, sep, eq, options) {
-    return this._qs.parse(str, sep, eq, options)
-  }
-}
+QueryString.parse = function(str, sep, eq, options) {
+  sep = sep || '&';
+  eq  = eq  || '=';
+  return nodyn.QueryString.parse(str, sep, eq);
+};
 
-module.exports = new QueryString()
+module.exports = QueryString;
