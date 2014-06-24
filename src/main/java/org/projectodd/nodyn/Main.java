@@ -17,12 +17,10 @@ package org.projectodd.nodyn;
 
 import org.dynjs.cli.Arguments;
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.projectodd.nodyn.util.QueryString;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
