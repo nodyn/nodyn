@@ -59,7 +59,7 @@
 
     <!-- dependency versions -->
     <version.junit>4.7</version.junit>
-    <version.vertx>2.1.1-SNAPSHOT</version.vertx>
+    <version.vertx>2.1.1</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
