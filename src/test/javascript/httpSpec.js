@@ -287,8 +287,7 @@ describe('http request and response', function() {
       });
     });
     server.listen(test_options.port, function() {
-      var request = http.request(test_options, function() {
-      });
+      var request = http.request(test_options, function() {});
       request.write("cheese muffins");
       request.end();
     });
@@ -299,12 +298,12 @@ describe('http request and response', function() {
     var server = http.createServer(function(request, response) {
       expect(request.method).toBe('HEAD');
       response.end();
+      server.close(function() { helper.testComplete(true); });
     });
     server.listen(test_options.port, function() {
       test_options.method = 'HEAD';
-      http.request(test_options, function() {
-        server.close(function() { helper.testComplete(true); });
-      }).end();
+      var request = http.request(test_options, function() {});
+      request.end();
     });
   });
 

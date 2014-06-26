@@ -105,7 +105,8 @@ var httpRequest = module.exports.request = function(options, callback) {
     }
     else if (resp.headers().get('Status') === '100 (Continue)') {
       clientRequest.emit('continue');
-    } else if (callback) {
+    }
+    if (callback) {
       clientRequest.on('response', callback);
       clientRequest.emit('response', incomingMessage);
     }
@@ -132,4 +133,3 @@ module.exports.createClient = function() {
   // This is deprecated. Use http.request instead
   console.log("http.createClient is deprecated. Please use http.request instead");
 };
-

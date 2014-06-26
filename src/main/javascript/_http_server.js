@@ -176,12 +176,9 @@ ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, head
     }
     if (this.getHeader('Content-Length')) {
       this.proxy.setChunked(false);
-    } else {
-      this.proxy.setChunked(true);
     }
     this.headersSent = true;
   }
-  this.proxy.setChunked(true);
 };
 
 ServerResponse.prototype._write = function(chunk, encoding, callback) {
