@@ -26,7 +26,6 @@ describe("Buffer", function() {
     try {
     var b = new Buffer('cheez', 'utf16le');
     expect(b.toString('utf16le')).toBe('cheez');
-    // TODO: Why does this test fail?
     expect(b.toString()).toBe('c\u0000h\u0000e\u0000e\u0000z\u0000');
     } catch ( err ) {
       System.err.println( "---" + err );
@@ -86,9 +85,6 @@ describe("Buffer", function() {
     expect(b.toString()).toBe("hhhh");
   });
 
-  // TODO: Do we want to throw here? Node.js does, but not sure
-  // if it's ideal, since vertx doesn't care about overfilling the
-  // buffer. Do/should programs depend on this behavior?
   it('should pass testBufferOverfull', function() {
     var b = new Buffer(4);
     try {
@@ -288,7 +284,7 @@ describe("Buffer", function() {
 
   it('should pass testBufferIsBuffer', function() {
     expect(Buffer.isBuffer(new Buffer())).toBe(true);
-    expect(Buffer.isBuffer(new Array())).toBe(false);
+    expect(Buffer.isBuffer([])).toBe(false);
   });
 
 
@@ -449,18 +445,18 @@ describe("Buffer", function() {
       buf.writeUInt32BE( 3221225472, 0 );
 
       expect(buf.readInt32BE(0)).toBe( -1073741824);
-      expect(buf.readInt32LE(0)).toBe( 192 )
+      expect(buf.readInt32LE(0)).toBe( 192 );
 
       buf = new Buffer(4);
       buf.writeInt32BE( -1073741824, 0 );
       expect(buf.readInt32BE(0)).toBe( -1073741824);
-      expect(buf.readInt32LE(0)).toBe( 192 )
+      expect(buf.readInt32LE(0)).toBe( 192 );
       expect(buf.readUInt32BE(0)).toBe( 3221225472 );
 
       buf = new Buffer(4);
       buf.writeInt32LE( -1073741824, 0 );
       expect(buf.readInt32LE(0)).toBe( -1073741824);
-      expect(buf.readInt32BE(0)).toBe( 192 )
+      expect(buf.readInt32BE(0)).toBe( 192 );
       expect(buf.readUInt32LE(0)).toBe( 3221225472 );
     });
 

@@ -18,10 +18,9 @@ describe("Nodyn globals", function() {
   it('should pass testRequire', function() {
     expect(typeof global.require).toBe('function');
     expect(typeof require).toBe('function');
-    // TODO
-    //expect(typeof require.resolve).toBe('function');
-    //expect(typeof require.cache).toBe('object');
-    //expect(typeof require.extensions).toBe('object');
+    expect(typeof require.resolve).toBe('function');
+    expect(typeof require.cache).toBe('object');
+    expect(typeof require.extensions).toBe('object');
   });
 
   it('should pass test__filename', function() {

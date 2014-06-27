@@ -27,6 +27,7 @@ var Process = function() {
 
   this.versions    = {
       node: Node.VERSION,
+      dynjs: org.dynjs.runtime.DynJS.VERSION,
       java: System.getProperty("java.version")
   };
 

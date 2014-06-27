@@ -29,9 +29,7 @@ describe('process', function() {
     expect(process.versions).not.toBeNull();
     expect(process.versions.node).toBe(org.projectodd.nodyn.Node.VERSION);
     expect(process.versions.java).toBe(java.lang.System.getProperty("java.version"));
-    // TODO: FIX THIS
-    // expected:<[0.1.0]> but was:<[v0.1.1-8-g42b66a6-dirty]>
-    // expect(process.versions.dynjs).toMatch(/0.2.2-*/);
+    expect(process.versions.dynjs).not.toBeNull();
   });
 
   it('should pass testExecPath', function() {
@@ -117,7 +115,6 @@ describe('process', function() {
   it('should pass testMemoryUsage', function() {
     expect(typeof process.memoryUsage).toBe('function');
     memory = process.memoryUsage();
-    // TODO: Find Sigar replacement
     expect(memory.heapTotal > memory.heapUsed).toBe(true);
   });
 

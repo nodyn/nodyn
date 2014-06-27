@@ -94,7 +94,6 @@ Socket.prototype.dropMembership = function(mcastAddr, mcastIface) {
 };
 
 Socket.prototype.send = function(buf, offset, length, port, address, callback) {
-  // todo - deal with offset and length ffs
   if (!(buf instanceof Buffer)) {
     buf = new Buffer(buf.toString());
   }
