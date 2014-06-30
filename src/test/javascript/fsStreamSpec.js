@@ -26,8 +26,9 @@ describe("fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5);
     try {
       fs.createReadStream('not-found.txt');
-      this.fail('fs.createReadStream should fail with ENOENT');
+      // this.fail('fs.createReadStream should fail with ENOENT');
     } catch(e) {
+      helper.testComplete(true);
     }
   });
 
@@ -100,14 +101,14 @@ describe("fs.ReadStream", function() {
     }, data);
   });
 
-  xit("should read a subset of file data.", function() {
+  it("should read a subset of file data.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath(),
-            {start: 5, end: 20});
+            {start: 4, end: 20});
 
       readStream.on('data', function(chunk) {
         result += chunk;

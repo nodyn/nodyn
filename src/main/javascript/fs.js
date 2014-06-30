@@ -285,8 +285,6 @@ FS.symlinkSync = FS.linkSync;
  *
  * The callback will be given three arguments (err, written, buffer) where
  * written specifies how many bytes were written from buffer.
- *
- * TODO: Positional writes do not currently work.
  */
 FS.write = function(fd, buffer, offset, length, position, callback) {
   fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
@@ -397,7 +395,11 @@ function openReadable(readable) {
     });
 
     asyncFile.dataHandler(function(buffer) {
-      if (!readable.push(new Buffer(buffer))) {
+      var buff = new Buffer(buffer);
+      if (readable.pos) {
+        buff = buff.slice(readable.start, readable.end);
+      }
+      if (!readable.push(buff)) {
         readable.pause();
       }
     });
