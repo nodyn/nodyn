@@ -1,5 +1,9 @@
 load('jvm-npm.js');
 System = java.lang.System;
+System.setProperty("java.net.preferIPv4Stack", "true");
+System.setProperty("java.net.preferIPv6Addresses", "false");
+EVENT_LOOP = new org.projectodd.nodyn.netty.ManagedEventLoopGroup(4);
+
 Nodyn  = org.projectodd.nodyn;
 nodyn  = {};
 global = this;
@@ -9,6 +13,7 @@ process = (function() {
   return new Process();
 })();
 global.__jvertx = process.context;
+
 
 __filename = (typeof __filename === 'undefined') ?
               'node.js' : __filename;
