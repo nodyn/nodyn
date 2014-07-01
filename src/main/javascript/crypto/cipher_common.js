@@ -1,5 +1,5 @@
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 var Buffer = require('buffer').Buffer;
 
 var Hash = require('crypto/hash');

@@ -7,7 +7,7 @@ var CipherCommon = require('crypto/cipher_common');
 var SecretKeySpec = javax.crypto.spec.SecretKeySpec;
 var IvParameterSpec = javax.crypto.spec.IvParameterSpec;
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 
 var jCipher = javax.crypto.Cipher;
 

@@ -1,7 +1,7 @@
 "use strict";
 
 var nodyn        = require('nodyn');
-var Helper       = org.projectodd.nodyn.buffer.Helper;
+var Helper       = io.nodyn.buffer.Helper;
 var Random       = java.util.Random;
 var SecureRandom = java.security.SecureRandom;
 

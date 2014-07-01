@@ -4,7 +4,7 @@ var system = process.context.fileSystem(),
     Path      = require('path'),
     Stream    = require('stream'),
     AsyncFile = org.vertx.java.core.file.AsyncFile,
-    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true),
+    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new io.nodyn.posix.NodePosixHandler(), true),
     Errno     = Packages.jnr.constants.platform.Errno;
 
 var FS = {};

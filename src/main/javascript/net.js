@@ -8,7 +8,7 @@ var nodyn         = NativeRequire.require('nodyn');
 
 function Server(connectionListener) {
   if (!(this instanceof Server)) return new Server(connectionListener);
-  this._server = new org.projectodd.nodyn.net.NetServerWrap(EVENT_LOOP);
+  this._server = new io.nodyn.net.NetServerWrap(EVENT_LOOP);
 
   if ((typeof connectionListener) === 'function') {
     this.on('connection', connectionListener);
@@ -97,7 +97,7 @@ function Socket(options) {
   if ( options && options.socket ) {
     this._socket = options.socket;
   } else {
-    this._socket = new org.projectodd.nodyn.net.SocketWrap(EVENT_LOOP);
+    this._socket = new io.nodyn.net.SocketWrap(EVENT_LOOP);
   }
 
   this._socket.on( 'connect', function(result) {

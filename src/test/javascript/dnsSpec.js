@@ -4,7 +4,7 @@ var helper     = require('specHelper'),
 describe('The dns module', function() {
 
   var server, // server instance set in prepareDns
-      DnsServer  = org.projectodd.nodyn.dns.TestDnsServer;
+      DnsServer  = io.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
     helper.testComplete(false);
