@@ -2,7 +2,8 @@ load('jvm-npm.js');
 System = java.lang.System;
 System.setProperty("java.net.preferIPv4Stack", "true");
 System.setProperty("java.net.preferIPv6Addresses", "false");
-EVENT_LOOP = new io.nodyn.netty.ManagedEventLoopGroup(4);
+Nodyn  = io.nodyn;
+nodyn  = {};
 global = this;
 
 process = (function() {

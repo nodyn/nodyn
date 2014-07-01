@@ -21,6 +21,7 @@ var Process = function() {
       Node         = io.nodyn.Node,
       javaProcess  = new io.nodyn.process.Process();
 
+  this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(4);
   this.context     = org.vertx.java.core.VertxFactory.newVertx();
   this.title       = "Nodyn";
   this.version     = Node.VERSION;
@@ -58,9 +59,6 @@ var Process = function() {
     read: function() {
     }
   };
-
-  // QueryString initialized in NodeJSVerticleFactory
-  this.binding.QueryString = nodyn.QueryString;
 
   this.arch = javaProcess.arch();
   this.platform = javaProcess.platform();
