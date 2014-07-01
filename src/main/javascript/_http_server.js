@@ -1,34 +1,44 @@
 var util  = NativeRequire.require('util');
 var nodyn = NativeRequire.require('nodyn');
 var Stream = NativeRequire.require('stream');
-var MultiMap = NativeRequire.require('nodyn/multiMap');
 var EventEmitter = require('events').EventEmitter;
 var IncomingMessage = require('_http_incoming').IncomingMessage;
 var Buffer = require("buffer").Buffer;
 
 function Server(requestListener) {
-  this.proxy = process.context.createHttpServer();
+  this._server = new org.projectodd.nodyn.http.ServerWrap();
+  this._server.maxHeadersCount = 1000;
 
-  // default limit for incoming headers
-  // TODO: Actually implement limits
-  this.maxHeadersCount = 1000;
-  // default socket timeout value (2 minutes)
-  this.timeout   = 120000;
-  this.timeoutId = null;
+  this._server.on('connection', function(result) {
+    this.emit( 'connection', result.result );
+  }.bind(this))
+
+  this._server.on('request', function(result) {
+    var request  = result.result[0];
+    var response = result.result[1];
+    var incomingMessage = new IncomingMessage(request);
+    var serverResponse  = new ServerResponse(response);
+    this.emit( 'request', incomingMessage, serverResponse );
+  }.bind(this));
+
+  this._server.on('close', function(result) {
+    this.emit('close');
+  }.bind(this));
+
+  this._server.on( 'listen', function(result){
+    this.emit('listen');
+  }.bind(this));
 
   if (requestListener) {
     this.on('request', requestListener);
   }
-
 }
 
 Server.prototype.close = function(callback) {
   if (callback) {
     this.once('close', callback);
   }
-  this.proxy.close(function() {
-    process.nextTick(this.emit.bind(this, 'close'));
-  }.bind(this));
+  this._server.close();
 };
 
 Server.prototype.listen = function(port /*, hostname, callback */) {
@@ -49,13 +59,12 @@ Server.prototype.listen = function(port /*, hostname, callback */) {
 
   // setup a connection handler in vert.x
   this.proxy.requestHandler( function(request) {
-    // request is a vert.x HttpServerRequest
-    if (request.method() !== 'HEAD') {
-      request.response().setChunked(true);
-    }
-    var incomingMessage = new IncomingMessage(request);
-    var serverResponse  = new ServerResponse(request.response());
     var headers = new MultiMap(request.headers());
+
+    request.response().exceptionHandler(function(err) {
+      System.err.println( "EXCEPTION: " + err );
+      err.printStackTrace();
+    });
 
     if (headers.get('Connection') === 'Upgrade') {
       handleUpgrade(this, incomingMessage);
@@ -68,17 +77,6 @@ Server.prototype.listen = function(port /*, hostname, callback */) {
     } else {
       this.emit('request', incomingMessage, serverResponse);
     }
-
-    // handle incoming data
-    request.dataHandler( function(buffer) {
-      incomingMessage.push( new Buffer( buffer ) );
-    })
-
-    request.endHandler(function() {
-      incomingMessage.push(null);
-    });
-
-    // TODO setup timeout
   }.bind(this));
 
   // listen for incoming connections
@@ -98,6 +96,7 @@ module.exports.Server = Server;
 function handleUpgrade(server, incomingMessage) {
   // Bypass vert.x's builtin websocket handler and let the poor node.js
   // developers do all the hard work on their own.
+  System.err.println( "****** SOCKET" );
   if (server.listeners('upgrade').length > 0) {
     server.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
   } else {
@@ -109,6 +108,7 @@ function handleUpgrade(server, incomingMessage) {
 
 function handleConnect(server, incomingMessage, serverResponse) {
   if (server.listeners('connect').length > 0) {
+    System.err.println( "****** SOCKET" );
     server.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
   } else {
     // close the connection per the node.js api
@@ -117,16 +117,13 @@ function handleConnect(server, incomingMessage, serverResponse) {
   }
 }
 
-function ServerResponse(proxy) {
+function ServerResponse(response) {
   // Defer getting the socket from proxy until it's first requested.
   Stream.Writable.call(this);
-  Object.defineProperty(this, "proxy", {
-    value: proxy,
+  Object.defineProperty(this, "_response", {
+    value: response,
     configurable: true,
     enumerable: false });
-  this.sendDate    = true;
-  this.headersSent = false;
-  this.statusCode  = 200;
 }
 
 util.inherits(ServerResponse, Stream.Writable);
