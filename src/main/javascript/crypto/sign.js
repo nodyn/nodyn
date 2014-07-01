@@ -6,7 +6,7 @@ var util = require('util');
 var Stream = require('stream');
 var Buffer = require('buffer').Buffer;
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 var Signature = java.security.Signature;
 
 var SignerBuilder                   = org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;

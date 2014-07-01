@@ -2,7 +2,7 @@
 
 var nodyn            = require('nodyn');
 var Buffer           = require('buffer').Buffer;
-var Helper           = org.projectodd.nodyn.buffer.Helper;
+var Helper           = io.nodyn.buffer.Helper;
 var SecretKeyFactory = javax.crypto.SecretKeyFactory;
 var PBEKeySpec       = javax.crypto.spec.PBEKeySpec;
 var SecretKeySpec    = javax.crypto.spec.SecretKeySpec;
@@ -31,5 +31,3 @@ module.exports = {
   pbkdf2Sync: pbkdf2Sync,
   pbkdf2: pbkdf2,
 }
-
-

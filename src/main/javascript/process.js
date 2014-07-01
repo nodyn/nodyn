@@ -18,8 +18,8 @@ var getEnv = function() {
 var Process = function() {
   var Mode         = java.nio.file.AccessMode,
       Open         = java.nio.file.StandardOpenOption,
-      Node         = org.projectodd.nodyn.Node,
-      javaProcess  = new org.projectodd.nodyn.process.Process();
+      Node         = io.nodyn.Node,
+      javaProcess  = new io.nodyn.process.Process();
 
   this.context     = org.vertx.java.core.VertxFactory.newVertx();
   this.title       = "Nodyn";

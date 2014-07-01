@@ -2,9 +2,9 @@ load('jvm-npm.js');
 System = java.lang.System;
 System.setProperty("java.net.preferIPv4Stack", "true");
 System.setProperty("java.net.preferIPv6Addresses", "false");
-EVENT_LOOP = new org.projectodd.nodyn.netty.ManagedEventLoopGroup(4);
+EVENT_LOOP = new io.nodyn.netty.ManagedEventLoopGroup(4);
 
-Nodyn  = org.projectodd.nodyn;
+Nodyn  = io.nodyn;
 nodyn  = {
   QueryString: Nodyn.util.QueryString.newQueryString(this)
 };

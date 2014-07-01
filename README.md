@@ -57,7 +57,7 @@ runtime.  But this is configurable in vert.x. You can configure your
 application to use Nodyn by creating a `langs.properties` file at the root of
 your project that looks like this.
 
-    nodyn=org.projectodd~nodyn-verticle~0.1.1-SNAPSHOT:org.projectodd.nodyn.NodeJSVerticleFactory
+    nodyn=io.nodyn~nodyn-verticle~0.1.1-SNAPSHOT:io.nodyn.NodeJSVerticleFactory
     .js=nodyn
 
 Make sure that you have Vert.x 2.x or better installed, and start your application.

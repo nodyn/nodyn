@@ -1,5 +1,5 @@
 var helper = require('specHelper'),
-    javaProcess = new org.projectodd.nodyn.process.Process();
+    javaProcess = new io.nodyn.process.Process();
 
 describe('process', function() {
 
@@ -25,9 +25,9 @@ describe('process', function() {
   });
 
   it('should pass testVersion', function() {
-    expect(process.version).toBe(org.projectodd.nodyn.Node.VERSION);
+    expect(process.version).toBe(io.nodyn.Node.VERSION);
     expect(process.versions).not.toBeNull();
-    expect(process.versions.node).toBe(org.projectodd.nodyn.Node.VERSION);
+    expect(process.versions.node).toBe(io.nodyn.Node.VERSION);
     expect(process.versions.java).toBe(java.lang.System.getProperty("java.version"));
     // TODO: FIX THIS
     // expected:<[0.1.0]> but was:<[v0.1.1-8-g42b66a6-dirty]>

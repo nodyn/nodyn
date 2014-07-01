@@ -1,6 +1,6 @@
 
 var Buffer = require('buffer').Buffer;
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 
 var jBase64 = org.bouncycastle.util.encoders.Base64
 

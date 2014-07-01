@@ -6,7 +6,7 @@ var IncomingMessage = require('_http_incoming').IncomingMessage;
 var Buffer = require("buffer").Buffer;
 
 function Server(requestListener) {
-  this._server = new org.projectodd.nodyn.http.ServerWrap();
+  this._server = new io.nodyn.http.ServerWrap();
   this._server.maxHeadersCount = 1000;
 
   this._server.on('connection', function(result) {
