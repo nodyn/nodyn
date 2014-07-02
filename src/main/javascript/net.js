@@ -30,16 +30,16 @@ function Server(connectionListener) {
 
   this._server.on('error', function(result) {
     this.emit('error', result.result );
-  }.bind(this))
+  }.bind(this));
 }
 
 Server.prototype.ref = function() {
   this._server.ref();
-}
+};
 
 Server.prototype.unref = function() {
   this._server.unref();
-}
+};
 
 // Usage server.listen(port, [host], [backlog], [callback])
 Server.prototype.listen = function() {
@@ -68,7 +68,7 @@ Server.prototype.address = function() {
     port:    this._server.localPort,
     address: this._server.localAddress,
     family:  this._server.localAddressFamily,
-  }
+  };
 };
 
 Server.prototype.close = function(callback) {
@@ -122,7 +122,7 @@ function Socket(options) {
 
   this._socket.on( 'timeout', function(result) {
     this.emit('timeout');
-  }.bind(this))
+  }.bind(this));
 }
 
 // Always do this BEFORE defining .prototype functions
@@ -130,11 +130,11 @@ util.inherits(Socket, Stream.Duplex);
 
 Socket.prototype.ref = function() {
   this._socket.ref();
-}
+};
 
 Socket.prototype.unref = function() {
   this._socket.unref();
-}
+};
 
 // Usage socket.connect(port, [host], [callback])
 Socket.prototype.connect = function(port, host, callback) {
@@ -154,11 +154,11 @@ Socket.prototype._write = function(chunk,encoding,callback) {
     this._socket.write( chunk.delegate.byteBuf );
   }
   callback();
-}
+};
 
 Socket.prototype._read = function(size) {
   this._socket.readStart();
-}
+};
 
 Socket.prototype.destroy = function() {
   this._socket.destroy();
@@ -173,7 +173,7 @@ Socket.prototype.setTimeout = function(msec, timeout) {
     this.on( "timeout", timeout );
   }
   this._socket.setTimeout( msec );
-}
+};
 
 Socket.prototype.setKeepAlive = function(enable, delay) {
   if ( enable ) {
@@ -181,7 +181,7 @@ Socket.prototype.setKeepAlive = function(enable, delay) {
   } else {
     this._socket.setKeepAlive(false);
   }
-}
+};
 
 Socket.prototype.setNoDelay = function(noDelay) {
   if ( !noDelay ) {
@@ -189,8 +189,7 @@ Socket.prototype.setNoDelay = function(noDelay) {
   } else {
     this._socket.setNoDelay(false);
   }
-
-}
+};
 
 Object.defineProperty( Socket.prototype, "remoteAddress", {
   get: function() {
