@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
@@ -22,15 +23,25 @@ public class NetServerWrap extends EventSource {
 
 
     private final ManagedEventLoopGroup managedLoop;
-    private RefCountedEventLoopGroup eventLoopGroup;
+    protected RefCountedEventLoopGroup eventLoopGroup;
     private ChannelFuture channelFuture;
 
     private AtomicInteger connectionCounter = new AtomicInteger();
 
-    private boolean allowHalfOpen = false;
+    protected boolean allowHalfOpen = false;
 
     public NetServerWrap(ManagedEventLoopGroup managedLoop) {
         this.managedLoop = managedLoop;
+    }
+
+    protected Channel channel() {
+        try {
+            return this.channelFuture.sync().channel();
+        } catch (InterruptedException e) {
+            emit("error", CallbackResult.EMPTY_SUCCESS);
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void setAllowHalfOpen(boolean allow) {
@@ -38,36 +49,57 @@ public class NetServerWrap extends EventSource {
     }
 
     public void ref() {
-        this.channelFuture.channel().pipeline().fireUserEventTriggered(RefEvents.REF);
+        channel().pipeline().fireUserEventTriggered(RefEvents.REF);
     }
 
     public void unref() {
-        this.channelFuture.channel().pipeline().fireUserEventTriggered(RefEvents.UNREF);
+        channel().pipeline().fireUserEventTriggered(RefEvents.UNREF);
     }
 
-    protected ChannelInitializer<Channel> initializer() {
+    private ChannelInitializer<Channel> initializer() {
         return new ChannelInitializer<Channel>() {
             @Override
-            protected void initChannel(Channel ch) throws Exception {
-                //ch.pipeline().addLast("debug", new DebugHandler("server"));
-                ch.pipeline().addLast(new NetServerHandler(NetServerWrap.this));
-                ch.pipeline().addLast("ref.handler", new RefHandleHandler(NetServerWrap.this.eventLoopGroup.refHandle()));
+            protected void initChannel(Channel channel) throws Exception {
+                initializeServerChannel(channel);
             }
         };
     }
 
-    protected ChannelInitializer<Channel> childInitializer() {
+    protected void initializeServerChannel(Channel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+        //pipeline.addLast("debug", new DebugHandler("server"));
+        pipeline.addLast(new ServerHandler(NetServerWrap.this));
+        pipeline.addLast("ref.handler", new RefHandleHandler(NetServerWrap.this.eventLoopGroup.refHandle()));
+    }
+
+    private ChannelInitializer<Channel> childInitializer() {
         return new ChannelInitializer<Channel>() {
             @Override
-            protected void initChannel(Channel ch) throws Exception {
-                ch.config().setAutoRead(false);
-                //ch.pipeline().addLast("debug", new DebugHandler("server-connection"));
-                ch.pipeline().addLast(new NetServerConnectionHandler(NetServerWrap.this));
-                ch.pipeline().addLast("ref.handler", new RefHandleHandler(NetServerWrap.this.eventLoopGroup.refHandle()));
-                ch.pipeline().addLast("half.open", new HalfOpenHandler( NetServerWrap.this.allowHalfOpen ));
-                ch.read();
+            protected void initChannel(Channel channel) throws Exception {
+                initializeConnectionChannel(channel);
             }
         };
+    }
+
+    protected void initializeConnectionChannel(Channel channel) {
+        initializeConnectionChannelHead(channel);
+        initializeConnectionChannelTail(channel);
+    }
+
+    protected void initializeConnectionChannelHead(Channel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+        channel.config().setAutoRead(false);
+        //pipeline.addLast( "connection-debug", new DebugHandler( "server-connection" ) );
+    }
+
+    protected void initializeConnectionChannelTail(Channel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+        pipeline.addLast("socket.wrap", new SocketWrappingHandler());
+        pipeline.addLast("emit.connection", new ConnectionEventHandler(NetServerWrap.this));
+        pipeline.addLast("half.open", new HalfOpenHandler(NetServerWrap.this.allowHalfOpen));
+        pipeline.addLast("ref.handler", new RefHandleHandler(NetServerWrap.this.eventLoopGroup.refHandle().create()));
+        pipeline.addLast("error", new ErrorHandler());
+        channel.read();
     }
 
     public void listen(int port, String hostname) {
@@ -97,21 +129,21 @@ public class NetServerWrap extends EventSource {
     }
 
     public String getLocalAddress() {
-        return ((InetSocketAddress) this.channelFuture.channel().localAddress()).getAddress().getHostAddress().toString();
+        return ((InetSocketAddress) channel().localAddress()).getAddress().getHostAddress().toString();
     }
 
     public int getLocalPort() {
-        return ((InetSocketAddress) this.channelFuture.channel().localAddress()).getPort();
+        return ((InetSocketAddress) channel().localAddress()).getPort();
     }
 
     public String getLocalAddressFamily() {
-        if (((InetSocketAddress) this.channelFuture.channel().localAddress()).getAddress() instanceof Inet4Address) {
+        if (((InetSocketAddress) channel().localAddress()).getAddress() instanceof Inet4Address) {
             return "IPv4";
         }
         return "IPv6;";
     }
 
     public void close() {
-        this.channelFuture.channel().close();
+        channel().close();
     }
 }

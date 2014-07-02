@@ -1,6 +1,7 @@
 package io.nodyn.netty;
 
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoop;
 import io.netty.channel.nio.NioEventLoopGroup;
 
 import java.util.concurrent.TimeUnit;
@@ -37,12 +38,12 @@ public class ManagedEventLoopGroup implements RefCounted {
 
     public synchronized void incrCount() {
         ++this.counter;
-        //System.err.println( "++ now: " + this.counter );
+        //System.err.println( "++ incr now: " + this.counter );
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        //System.err.println( "-- now: " + this.counter );
+        //System.err.println( "-- decr now: " + this.counter );
         if (this.counter == 0 && this.delegate != null ) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;

@@ -1,15 +1,16 @@
-package io.nodyn.http;
+package io.nodyn.http.server;
 
-import io.netty.channel.ChannelInboundHandler;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.nodyn.EventSource;
+import io.nodyn.http.IncomingMessageEventsHandler;
+import io.nodyn.http.IncomingMessage;
 import io.nodyn.net.SocketWrap;
 
 /**
  * @author Bob McWhirter
  */
-public class ServerIncomingMessageWrap extends EventSource {
+public class ServerIncomingMessageWrap extends EventSource implements IncomingMessage {
 
     private final SocketWrap socket;
     private final HttpRequest request;
@@ -22,7 +23,7 @@ public class ServerIncomingMessageWrap extends EventSource {
     }
 
     public String getHttpVersion() {
-        return this.request.getProtocolVersion().toString();
+        return getHttpVersionMajor() + "." + getHttpVersionMinor();
     }
 
     public int getHttpVersionMajor() {
@@ -41,23 +42,21 @@ public class ServerIncomingMessageWrap extends EventSource {
         return this.request.getUri();
     }
 
+    public HttpHeaders getHeaders() {
+        return this.request.headers();
+    }
+
     public SocketWrap getSocket() {
         return this.socket;
     }
 
-
-    public void _readStart() {
+    public void readStart() {
         this.socket.readStart();
     }
 
-    public void _readStop() {
+    public void readStop() {
         this.socket.readStop();
     }
-
-    public ChannelInboundHandler handler() {
-        return this.socket.handler();
-    }
-
 
     public void setTrailers(HttpHeaders trailers) {
         this.trailers = trailers;
@@ -65,5 +64,13 @@ public class ServerIncomingMessageWrap extends EventSource {
 
     public HttpHeaders getTrailers() {
         return trailers;
+    }
+
+    public IncomingMessageEventsHandler handler() {
+        return new IncomingMessageEventsHandler(this);
+    }
+
+    public String toString() {
+        return "[ServerIncomingMessage: request=" + this.request + "; socket=" + this.socket + "]";
     }
 }

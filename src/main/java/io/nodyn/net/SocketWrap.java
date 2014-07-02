@@ -5,8 +5,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.handler.timeout.WriteTimeoutHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.nodyn.EventSource;
 import io.nodyn.netty.ManagedEventLoopGroup;
 import io.nodyn.netty.RefCountedEventLoopGroup;
@@ -34,6 +33,15 @@ public class SocketWrap extends EventSource {
         this.managedLoop = null;
     }
 
+    public Channel channel() {
+        try {
+            return this.future.sync().channel();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void setAllowHalfOpen(boolean allow) {
         this.allowHalfOpen = allow;
     }
@@ -55,24 +63,20 @@ public class SocketWrap extends EventSource {
     }
 
     public ChannelInboundHandler handler() {
-        return new SocketHandler(this);
+        return new SocketEventsHandler(this);
     }
 
     public void write(ByteBuf chunk) {
-        this.future.channel().writeAndFlush(chunk);
+        channel().writeAndFlush(chunk);
     }
 
     public void setTimeout(int timeoutMs) {
         ChannelPipeline pipeline = this.future.channel().pipeline();
-        if (pipeline.get("read.timeout") != null) {
-            pipeline.remove("read.timeout");
-        }
-        if (pipeline.get("write.timeout") != null) {
-            pipeline.remove("write.timeout");
+        if (pipeline.get("emit.timeout") != null) {
+            pipeline.remove("emit.timeout");
         }
         if (timeoutMs != 0) {
-            pipeline.addFirst("read.timeout", new ReadTimeoutHandler(timeoutMs, TimeUnit.MILLISECONDS));
-            pipeline.addFirst("write.timeout", new WriteTimeoutHandler(timeoutMs, TimeUnit.MILLISECONDS));
+            pipeline.addFirst("emit.timeout", new IdleStateHandler(0, 0, timeoutMs, TimeUnit.MILLISECONDS));
         }
     }
 
@@ -85,7 +89,6 @@ public class SocketWrap extends EventSource {
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
-                        //ch.pipeline().addLast(new DebugHandler("socket"));
                         ch.pipeline().addLast(SocketWrap.this.handler());
                         ch.pipeline().addLast("half.open", new HalfOpenHandler(SocketWrap.this.allowHalfOpen));
                         ch.pipeline().addLast("ref.handler", new RefHandleHandler(SocketWrap.this.eventLoopGroup.refHandle()));
@@ -107,6 +110,7 @@ public class SocketWrap extends EventSource {
     }
 
     public void destroy() {
+        this.future.channel().close();
         this.future.channel().disconnect();
     }
 

@@ -8,9 +8,9 @@ import io.netty.handler.codec.http.LastHttpContent;
  * @author Bob McWhirter
  */
 public class TrailerHandler extends ChannelInboundHandlerAdapter {
-    private final ServerIncomingMessageWrap incoming;
+    private final IncomingMessage incoming;
 
-    public TrailerHandler(ServerIncomingMessageWrap incoming) {
+    public TrailerHandler(IncomingMessage incoming) {
         this.incoming = incoming;
     }
 

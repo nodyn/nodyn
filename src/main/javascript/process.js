@@ -21,7 +21,7 @@ var Process = function() {
       Node         = io.nodyn.Node,
       javaProcess  = new io.nodyn.process.Process();
 
-  this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(4);
+  this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(1);
   this.context     = org.vertx.java.core.VertxFactory.newVertx();
   this.title       = "Nodyn";
   this.version     = Node.VERSION;

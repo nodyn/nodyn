@@ -1,14 +1,15 @@
 var util          = NativeRequire.require('util');
 var Stream        = NativeRequire.require('stream');
 var nodyn         = NativeRequire.require('nodyn');
+var EventEmitter = require('events').EventEmitter;
 
 // ------------------------------------------------------------------------
 // Server
 // ------------------------------------------------------------------------
 
 function Server(connectionListener) {
-  if (!(this instanceof Server)) return new Server(connectionListener);
-  this._server = new io.nodyn.net.NetServerWrap(process.EVENT_LOOP);
+  EventEmitter.call( this );
+  this._server = this._createServer();
 
   if ((typeof connectionListener) === 'function') {
     this.on('connection', connectionListener);
@@ -31,6 +32,10 @@ function Server(connectionListener) {
   this._server.on('error', function(result) {
     this.emit('error', result.result );
   }.bind(this));
+}
+
+Server.prototype._createServer = function() {
+  return new io.nodyn.net.NetServerWrap(process.EVENT_LOOP);
 }
 
 Server.prototype.ref = function() {
@@ -90,6 +95,7 @@ module.exports.createServer = function(connectionListener) {
 // Socket
 // ------------------------------------------------------------------------
 
+nodyn.makeEventEmitter(Socket);
 function Socket(options) {
   if (!(this instanceof Socket)) return new Socket(options);
   Stream.Duplex.call(this);
@@ -153,6 +159,7 @@ Socket.prototype._write = function(chunk,encoding,callback) {
   if ( chunk instanceof Buffer ) {
     this._socket.write( chunk.delegate.byteBuf );
   }
+
   callback();
 };
 

@@ -13,6 +13,11 @@ public class RefHandle {
         ref();
     }
 
+    public RefHandle create() {
+        return new RefHandle( this.refCounted );
+    }
+
+
     public synchronized void ref() {
         if ( this.counted ) {
             return;

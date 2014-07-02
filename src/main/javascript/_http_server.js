@@ -4,99 +4,101 @@ var Stream = NativeRequire.require('stream');
 var EventEmitter = require('events').EventEmitter;
 var IncomingMessage = require('_http_incoming').IncomingMessage;
 var Buffer = require("buffer").Buffer;
+var net           = require('net');
 
 function Server(requestListener) {
-  this._server = new io.nodyn.http.ServerWrap();
-  this._server.maxHeadersCount = 1000;
+  net.Server.call( this );
+  //this._server.maxHeadersCount = 1000;
 
-  this._server.on('connection', function(result) {
-    this.emit( 'connection', result.result );
-  }.bind(this))
-
-  this._server.on('request', function(result) {
-    var request  = result.result[0];
-    var response = result.result[1];
-    var incomingMessage = new IncomingMessage(request);
-    var serverResponse  = new ServerResponse(response);
-    this.emit( 'request', incomingMessage, serverResponse );
-  }.bind(this));
-
-  this._server.on('close', function(result) {
-    this.emit('close');
-  }.bind(this));
-
-  this._server.on( 'listen', function(result){
-    this.emit('listen');
-  }.bind(this));
+  this._server.on('request',       this._onRequest.bind(this));
+  this._server.on('checkContinue', this._onCheckContinue.bind(this));
+  this._server.on('connect',       this._onConnect.bind(this));
+  this._server.on('upgrade',       this._onUpgrade.bind(this));
 
   if (requestListener) {
     this.on('request', requestListener);
   }
 }
 
-Server.prototype.close = function(callback) {
-  if (callback) {
-    this.once('close', callback);
+util.inherits(Server, net.Server);
+
+Object.defineProperty( Server.prototype, "timeout", {
+  get: function() {
+    return this._server.timeout;
+  },
+  set: function(v) {
+    this._server.timeout = v;
+  },
+  enumerable: true,
+});
+
+Object.defineProperty( Server.prototype, "maxHeadersCount", {
+  get: function() {
+    return this._server.maxHeadersCount;
+  },
+  set: function(v) {
+    this._server.maxHeadersCount = v;
+  },
+  enumerable: true,
+});
+
+Server.prototype._createServer = function() {
+  return new io.nodyn.http.server.HttpServerWrap(process.EVENT_LOOP);
+}
+
+Server.prototype._onRequest = function(result) {
+  var request  = result.result[0];
+  var response = result.result[1];
+  var incomingMessage = new IncomingMessage(request);
+  var serverResponse  = new ServerResponse(response);
+  this.emit( 'request', incomingMessage, serverResponse );
+}
+
+Server.prototype._onCheckContinue = function(result) {
+  var request  = result.result[0];
+  var response = result.result[1];
+  var incomingMessage = new IncomingMessage(request);
+  var serverResponse  = new ServerResponse(response);
+
+  if ( this.listeners('checkContinue').length == 0 ) {
+    serverResponse.writeContinue();
+    return;
   }
-  this._server.close();
-};
+  this.emit( 'checkContinue', incomingMessage, serverResponse );
+}
 
-Server.prototype.listen = function(port /*, hostname, callback */) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  var last = args.pop();
-  var host = '0.0.0.0';
+Server.prototype._onConnect = function(result) {
+  var request  = result.result;
 
-  switch(typeof last) {
-    case 'function':
-      // activate the 'listening' callback
-      this.on('listening', last);
-      host = args.pop() || host;
-      break;
-    case 'string':
-      host = last;
-      break;
+  if ( this.listeners('connect').length == 0 ) {
+    request.socket.destroy();
+    return;
   }
+  var incomingMessage = new IncomingMessage(request);
+  this.emit( 'connect', incomingMessage, incomingMessage.socket );
+}
 
-  // setup a connection handler in vert.x
-  this.proxy.requestHandler( function(request) {
-    var headers = new MultiMap(request.headers());
+Server.prototype._onUpgrade = function(result) {
+  var request  = result.result;
 
-    request.response().exceptionHandler(function(err) {
-      System.err.println( "EXCEPTION: " + err );
-      err.printStackTrace();
-    });
+  if ( this.listeners('upgrade').length == 0 ) {
+    request.socket.destroy();
+    return;
+  }
+  var incomingMessage = new IncomingMessage(request);
+  this.emit( 'upgrade', incomingMessage, incomingMessage.socket );
+}
 
-    if (headers.get('Connection') === 'Upgrade') {
-      handleUpgrade(this, incomingMessage);
-    } else if (headers.get('Expect') == '100-Continue') {
-      if (this.listeners('checkContinue').length > 0) {
-        this.emit('checkContinue', incomingMessage, serverResponse);
-      }
-    } else if (request.method() === 'CONNECT') {
-      handleConnect(this, incomingMessage, serverResponse);
-    } else {
-      this.emit('request', incomingMessage, serverResponse);
-    }
-  }.bind(this));
-
-  // listen for incoming connections
-  this.proxy.listen(port, host, function(future) {
-    if (future.succeeded()) {
-      this.emit('listening');
-    } else {
-      this.emit('error', new Error(future.cause().message()));
-      this.close();
-    }
-  }.bind(this));
-};
-
-nodyn.makeEventEmitter(Server);
+//nodyn.makeEventEmitter(Server);
 module.exports.Server = Server;
+
+module.exports.createServer = function(connectionListener) {
+  return new Server(requestListener);
+};
 
 function handleUpgrade(server, incomingMessage) {
   // Bypass vert.x's builtin websocket handler and let the poor node.js
   // developers do all the hard work on their own.
-  System.err.println( "****** SOCKET" );
   if (server.listeners('upgrade').length > 0) {
     server.emit('upgrade', incomingMessage, incomingMessage.socket, new Buffer());
   } else {
@@ -108,7 +110,6 @@ function handleUpgrade(server, incomingMessage) {
 
 function handleConnect(server, incomingMessage, serverResponse) {
   if (server.listeners('connect').length > 0) {
-    System.err.println( "****** SOCKET" );
     server.emit('connect', incomingMessage, incomingMessage.socket, new Buffer());
   } else {
     // close the connection per the node.js api
@@ -118,7 +119,6 @@ function handleConnect(server, incomingMessage, serverResponse) {
 }
 
 function ServerResponse(response) {
-  // Defer getting the socket from proxy until it's first requested.
   Stream.Writable.call(this);
   Object.defineProperty(this, "_response", {
     value: response,
@@ -132,10 +132,7 @@ ServerResponse.prototype.end = function( data, encoding, callback ) {
   if ( data ) {
     Stream.Writable.prototype.write.call( this, data, encoding, callback );
   }
-  if (!this.headersSent) {
-    this.writeHead();
-  }
-  this.proxy.end();
+  this._response.end();
   Stream.Writable.prototype.end.call( this );
 };
 
@@ -155,60 +152,69 @@ ServerResponse.prototype.writeHead = function( statusCode /*, reasonPhrase, head
       break;
   }
 
-  if (!this.headersSent) {
-    if (statusCode) {
-      this.proxy.setStatusCode(statusCode);
-    } else {
-      this.proxy.setStatusCode(this.statusCode);
+  if ( headers ) {
+    for ( h in headers ) {
+      this.setHeader(h, headers[h] );
     }
-    for( var header in headers ) {
-      this.setHeader(header, headers[header]);
-    }
-    if (reasonPhrase) {
-      this.proxy.setStatusMessage(reasonPhrase);
-    }
-    // default HTTP date header
-    if (!this.proxy.headers().get('Date')) {
-      this.setHeader('Date', new Date().toUTCString());
-    }
-    if (this.getHeader('Content-Length')) {
-      this.proxy.setChunked(false);
-    }
-    this.headersSent = true;
   }
+
+  this._response.writeHead( statusCode, reasonPhrase );
 };
 
+Object.defineProperty(ServerResponse.prototype, 'sendDate', {
+  get: function(){
+    return this._response.sendDate;
+  },
+  set: function(v) {
+    this._response.sendDate = v;
+  },
+  enumerable: true,
+});
+
+Object.defineProperty(ServerResponse.prototype, 'headersSent', {
+  get: function(){
+    return this._response.headersSent;
+  },
+  enumerable: true,
+});
+
+Object.defineProperty(ServerResponse.prototype, 'statusCode', {
+  set: function(v) {
+    this._response.statusCode = v;
+  },
+  get: function() {
+    return this._response.statusCode;
+  },
+  enumerable: true,
+});
+
 ServerResponse.prototype._write = function(chunk, encoding, callback) {
-  var length = 0;
-  var encode = encoding || "UTF-8";
-  if (!this.headersSent) {
-    this.writeHead();
+  if ( chunk instanceof Buffer ) {
+    this._response.write(chunk.delegate.byteBuf);
   }
-  this.proxy.write(chunk.delegate);
   callback();
 };
 
 ServerResponse.prototype.getHeader = function(name) {
-  return this.proxy.headers().get(name);
+  return this._response.headers.get(name);
 };
 
 ServerResponse.prototype.setHeader = function(name, value) {
-  this.proxy.putHeader(name, value.toString());
+  this._response.headers.set(name, value.toString());
 };
 
 ServerResponse.prototype.removeHeader = function(name) {
-  this.proxy.headers().remove(name);
+  this._response.headers.remove(name);
 };
 
 ServerResponse.prototype.addTrailers = function(trailers) {
-  for( var header in trailers ) {
-    this.proxy.putTrailer(header, trailers[header]);
+  for( var t in trailers ) {
+    this._response.trailers.set(t, trailers[t]);
   }
 };
 
 ServerResponse.prototype.writeContinue = function() {
-  this.setHeader('Status', '100 (Continue)');
-  this.writeHead();
+  this._response.writeContinue();
 };
 
 nodyn.makeEventEmitter(ServerResponse);

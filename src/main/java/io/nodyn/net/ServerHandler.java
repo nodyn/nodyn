@@ -9,11 +9,11 @@ import java.net.SocketAddress;
 /**
  * @author Bob McWhirter
  */
-public class NetServerHandler extends ChannelDuplexHandler {
+public class ServerHandler extends ChannelDuplexHandler {
 
     protected final NetServerWrap server;
 
-    public NetServerHandler(NetServerWrap server) {
+    public ServerHandler(NetServerWrap server) {
         this.server = server;
     }
 
@@ -22,7 +22,7 @@ public class NetServerHandler extends ChannelDuplexHandler {
         future.addListener( new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                NetServerHandler.this.server.emit( "listening", CallbackResult.EMPTY_SUCCESS );
+                ServerHandler.this.server.emit( "listening", CallbackResult.EMPTY_SUCCESS );
             }
         });
         super.bind( ctx, localAddress, future );
@@ -33,7 +33,7 @@ public class NetServerHandler extends ChannelDuplexHandler {
         future.addListener( new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                NetServerHandler.this.server.checkClose();
+                ServerHandler.this.server.checkClose();
             }
         });
         super.close(ctx, future);
