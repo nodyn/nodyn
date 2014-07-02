@@ -97,11 +97,7 @@ function Socket(options) {
   if ( options && options.socket ) {
     this._socket = options.socket;
   } else {
-<<<<<<< HEAD
     this._socket = new io.nodyn.net.SocketWrap(process.EVENT_LOOP);
-=======
-    this._socket = new io.nodyn.net.SocketWrap(EVENT_LOOP);
->>>>>>> ff2ef2f2ca202b5356adc39da593661bcb2e3315
   }
 
   this._socket.on( 'connect', function(result) {
