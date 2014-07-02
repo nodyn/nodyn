@@ -7,4 +7,7 @@ jdk:
   - openjdk7
 notifications:
   irc: "irc.freenode.org#nodyn"
+branches:
+  only:
+    - master
 
