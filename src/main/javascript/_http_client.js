@@ -56,7 +56,6 @@ module.exports.ClientRequest = ClientRequest;
 
 var DefaultRequestOptions = {
   host:     'localhost',
-  hostname: 'localhost',
   method:   'GET',
   path:     '/',
   port:     80
@@ -76,14 +75,13 @@ var httpRequest = module.exports.request = function(options, callback) {
   }
 
   options.host     = options.host     || DefaultRequestOptions.host;
-  options.hostname = options.hostname || DefaultRequestOptions.hostname;
   options.port     = options.port     || DefaultRequestOptions.port;
   options.method   = options.method   || DefaultRequestOptions.method;
   options.path     = options.path     || DefaultRequestOptions.path;
 
   var proxy = process.context.createHttpClient()
                     .setPort(options.port)
-                    .setHost(options.hostname);
+                    .setHost(options.hostname || options.host); // Favor hostname as per Node doc, but fallback on host
 
   var clientRequest = null; // The node.js representation
 
