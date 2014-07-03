@@ -129,7 +129,6 @@ module.exports.ClientRequest = ClientRequest;
 
 var DefaultRequestOptions = {
   host:     'localhost',
-  hostname: 'localhost',
   method:   'GET',
   path:     '/',
   port:     80,
@@ -150,7 +149,6 @@ module.exports.request = function(options, callback) {
   }
 
   options.host     = options.host     || DefaultRequestOptions.host;
-  options.hostname = options.hostname || DefaultRequestOptions.hostname;
   options.port     = options.port     || DefaultRequestOptions.port;
   options.method   = options.method   || DefaultRequestOptions.method;
   options.path     = options.path     || DefaultRequestOptions.path;
