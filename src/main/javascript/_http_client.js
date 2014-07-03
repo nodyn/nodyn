@@ -13,6 +13,7 @@ function ClientRequest(proxy) {
   this.timeoutId       = undefined;
   this.timeoutMsec     = undefined;
   this.timeoutCallback = undefined;
+  this.ended           = false;
   // TODO: These methods are not available on a
   // vert.x HttpClientRequest...
   this.setNoDelay = function() {};
@@ -25,6 +26,9 @@ ClientRequest.prototype.write = function(chunk, encoding) {
 };
 
 ClientRequest.prototype.end = function(b) {
+  if (this.ended) return;
+  this.ended = true;
+
   if (b) {
     this.proxy.end(b);
   } else {
@@ -33,7 +37,7 @@ ClientRequest.prototype.end = function(b) {
 };
 
 ClientRequest.prototype.abort = function(b) {
-  this.proxy.end();
+  this.end();
 };
 
 ClientRequest.prototype.setTimeout = function(msec, callback) {
