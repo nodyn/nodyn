@@ -85,7 +85,7 @@ Object.defineProperty( Buffer.prototype, "length", {
 } );
 
 var bufferToString = function(enc,start,end) {
-  if (arguments.length == 0 ) {
+  if (arguments.length <= 1 && enc == null) {
     return this.delegate.toString('utf-8');
   }
 
