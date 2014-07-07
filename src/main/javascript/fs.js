@@ -294,6 +294,15 @@ FS.writeSync = function(fd, buffer, offset, length, position) {
   fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
 };
 
+FS.createWriteStream = function(path, opts) {
+  return new FS.WriteStream(path, opts);
+};
+
+FS.WriteStream = function(path, opts) {
+  Stream.Writable.call(this);
+};
+util.inherits(FS.WriteStream, Stream.Writable);
+
 FS.createReadStream = function(path, opts) {
   return new FS.ReadStream(path, opts);
 };

@@ -3,13 +3,37 @@ var helper = require('specHelper'),
     util   = require('util'),
     fs     = require('fs');
 
-describe("fs.createReadStream", function() {
+describe("fs.WriteStream", function() {
 
   beforeEach(function() {
     helper.testComplete(false);
   });
 
-  it("should return an fs.ReadStream", function() {
+  it("should be returned from a call to fs.createWriteStream", function() {
+    expect(fs.createWriteStream() instanceof fs.WriteStream).toBeTruthy();
+  });
+
+  it("should be a Stream.Writable", function() {
+    expect(fs.createWriteStream() instanceof stream.Writable).toBeTruthy();
+  });
+
+  xit("should emit an 'open' event when the file is opened", function() {
+    waitsFor(helper.testComplete, 5);
+    helper.writeFixture(function(sut) {
+      var writeStream = fs.createWriteStream(sut.getAbsolutePath());
+      // TODO: this is a race condition, I think
+    });
+  });
+
+});
+
+describe("fs.ReadStream", function() {
+
+  beforeEach(function() {
+    helper.testComplete(false);
+  });
+
+  it("should be returned from a call to fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -22,7 +46,7 @@ describe("fs.createReadStream", function() {
   });
 
   // TODO: Node.js throws an uncatchable error?
-  xit("should throw ENOENT when a file can't be found", function() {
+  xit("should throw ENOENT on a call to fs.createReadStream when a file can't be found", function() {
     waitsFor(helper.testComplete, 5);
     try {
       fs.createReadStream('not-found.txt');
@@ -30,14 +54,6 @@ describe("fs.createReadStream", function() {
     } catch(e) {
       helper.testComplete(true);
     }
-  });
-
-});
-
-describe("fs.ReadStream", function() {
-
-  beforeEach(function() {
-    helper.testComplete(false);
   });
 
   it("should read files.", function() {
@@ -94,6 +110,7 @@ describe("fs.ReadStream", function() {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
 
+      // how is this not a race condition?
       readStream.on('open', function() {
         f.delete();
         helper.testComplete(true);
