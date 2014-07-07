@@ -48,13 +48,6 @@ public class Main extends org.dynjs.cli.Main {
 
     public static void main(String[] args) throws IOException {
         new Main(System.out, args).run();
-        while ( true ) {
-            try {
-                Thread.sleep( 1000 );
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
     }
 
     @Override
