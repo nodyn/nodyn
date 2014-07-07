@@ -19,8 +19,10 @@ import org.dynjs.cli.Arguments;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
@@ -53,6 +55,16 @@ public class Main extends org.dynjs.cli.Main {
                 break;
             }
         }
+    }
+
+    @Override
+    protected void executeRunner(final Runner runner) {
+        vertx.runOnContext(new Handler<Void>() {
+            @Override
+            public void handle(Void event) {
+                runner.execute();
+            }
+        });
     }
 
     @Override
