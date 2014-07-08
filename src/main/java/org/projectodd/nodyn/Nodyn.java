@@ -2,6 +2,7 @@ package org.projectodd.nodyn;
 
 
 
+import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
@@ -20,11 +21,11 @@ public class Nodyn extends DynJS {
 
     private final Vertx vertx;
 
-    public Nodyn(NodynConfig config) {
+    public Nodyn(Config config) {
         super(config);
 
-        if (config.isClustered()) {
-            vertx = VertxFactory.newVertx(config.getHost());
+        if ((config instanceof NodynConfig) && ((NodynConfig)config).isClustered()) {
+            vertx = VertxFactory.newVertx(((NodynConfig)config).getHost());
         } else {
             vertx = VertxFactory.newVertx();
         }

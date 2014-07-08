@@ -21,7 +21,6 @@ import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.vertx.java.core.Handler;
 
 import java.io.*;
 
@@ -105,7 +104,7 @@ public class Main extends org.dynjs.cli.Main {
 
         @Override
         public Config getConfig() {
-            return super.getConfig(new NodynConfig());
+            return super.initConfig(new NodynConfig());
         }
 
     }
