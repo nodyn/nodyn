@@ -15,16 +15,13 @@
  */
 package org.projectodd.nodyn;
 
+import org.dynjs.Config;
 import org.dynjs.cli.Arguments;
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VertxFactory;
 
 import java.io.*;
 
@@ -35,14 +32,13 @@ public class Main extends org.dynjs.cli.Main {
             + "Type exit and press ENTER or ^D to leave."
             + System.lineSeparator();
 
-    private NodynArguments arguments;
+    private NodynArguments nodynArgs;
     private CmdLineParser parser;
-    private Vertx vertx;
 
     public Main(PrintStream stream, String[] args) {
         super(stream, args);
-        this.arguments = new NodynArguments();
-        this.parser = new CmdLineParser(arguments);
+        this.nodynArgs = new NodynArguments();
+        this.parser = new CmdLineParser(nodynArgs);
         this.parser.setUsageWidth(80);
     }
 
@@ -51,38 +47,25 @@ public class Main extends org.dynjs.cli.Main {
     }
 
     @Override
-    protected void executeRunner(final Runner runner) {
-        vertx.runOnContext(new Handler<Void>() {
-            @Override
-            public void handle(Void event) {
-                runner.execute();
-            }
-        });
-    }
-
-    @Override
     protected void showVersion() {
         super.showVersion();
-        getOutputStream().println("Nodyn: " + Node.VERSION);
+        getOutputStream().println("Nodyn: " + Nodyn.VERSION);
     }
 
     @Override
     protected DynJS initializeRuntime() {
-        DynJS runtime = super.initializeRuntime();
 
-        if (arguments.isClustered()) {
+        NodynConfig config = (NodynConfig) getArguments().getConfig();
+        config.setOutputStream(getOutputStream());
+
+        if (nodynArgs.isClustered()) {
             System.setProperty("vertx.clusterManagerFactory", "org.vertx.java.spi.cluster.impl.hazelcast.HazelcastClusterManagerFactory");
             // TODO: Make this more configurable
-            vertx = VertxFactory.newVertx("localhost");
-        } else {
-            vertx = VertxFactory.newVertx();
+            config.setClustered(true);
+            config.setHost("localhost");
         }
 
-        GlobalObject globalObject = runtime.getExecutionContext().getGlobalObject();
-        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-        globalObject.defineGlobalProperty("__filename", "repl"); // TODO: This should be a file name sometimes
-        initScript(runtime.getExecutionContext(), "node.js", runtime);
-        return runtime;
+        return new Nodyn(config);
     }
 
     @Override
@@ -97,7 +80,7 @@ public class Main extends org.dynjs.cli.Main {
 
     @Override
     protected Arguments getArguments() {
-        return this.arguments;
+        return this.nodynArgs;
     }
 
     @Override
@@ -110,21 +93,6 @@ public class Main extends org.dynjs.cli.Main {
         return "nodyn> ";
     }
 
-    private static void initScript(ExecutionContext context, String name, DynJS runtime) {
-        InputStream is = runtime.getConfig().getClassLoader().getResourceAsStream(name);
-        if (is != null) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            runtime.newRunner().withFileName(name).withContext(context).withSource(reader).evaluate();
-            try {
-                is.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        } else {
-            System.err.println("[ERROR] Cannot initialize Nodyn.");
-        }
-    }
-
     class NodynArguments extends Arguments {
         static final String CLUSTERED = "--clustered";
 
@@ -134,5 +102,11 @@ public class Main extends org.dynjs.cli.Main {
         public boolean isClustered() {
             return isClustered;
         }
+
+        @Override
+        public Config getConfig() {
+            return super.getConfig(new NodynConfig());
+        }
+
     }
 }
