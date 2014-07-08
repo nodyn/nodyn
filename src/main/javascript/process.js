@@ -18,7 +18,7 @@ var getEnv = function() {
 var Process = function() {
   var Mode         = java.nio.file.AccessMode,
       Open         = java.nio.file.StandardOpenOption,
-      Node         = io.nodyn.Node,
+      Node         = io.nodyn.Nodyn,
       javaProcess  = new io.nodyn.process.Process();
 
   this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(1);
