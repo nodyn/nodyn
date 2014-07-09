@@ -15,10 +15,12 @@ public class NodynRunner extends Runner {
     NodynRunner(ExecutionContext context, Context loopContext) {
         super(context);
         this.loopContext = loopContext;
+        System.err.println("GOT CONTEXT " + loopContext);
     }
 
     @Override
     public Object execute() {
+        System.err.println("EXEC CONTEXT " + loopContext);
         loopContext.runOnContext(new Handler<Void>() {
             @Override
             public void handle(Void aVoid) {
@@ -30,6 +32,7 @@ public class NodynRunner extends Runner {
 
     @Override
     public Object evaluate() {
+        System.err.println("EVAL CONTEXT " + loopContext);
         loopContext.runOnContext(new Handler<Void>() {
             @Override
             public void handle(Void aVoid) {

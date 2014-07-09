@@ -105,7 +105,7 @@ public class Main extends org.dynjs.cli.Main {
 
         @Override
         public Config getConfig() {
-            return super.getConfig(new NodynConfig());
+            return super.initConfig(new NodynConfig());
         }
 
     }
