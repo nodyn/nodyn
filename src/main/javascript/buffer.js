@@ -85,9 +85,16 @@ Object.defineProperty( Buffer.prototype, "length", {
 } );
 
 var bufferToString = function(enc,start,end) {
+  System.err.println( "1-bufferToString(" + enc + ", " + start + ", " + end + ") " + this.delegate.byteBuf );
   if (arguments.length == 0 ) {
     return this.delegate.toString('utf-8');
   }
+
+  if ( end > this.delegate.length() ) {
+    end = this.delegate.length();
+  }
+
+  System.err.println( "2-bufferToString(" + enc + ", " + start + ", " + end + ") " + this.delegate.byteBuf );
 
   var codec = Codec.get( enc );
 
