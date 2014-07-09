@@ -25,6 +25,7 @@ import org.kohsuke.args4j.Option;
 import org.vertx.java.core.Handler;
 
 import java.io.*;
+import java.util.concurrent.CountDownLatch;
 
 public class Main extends org.dynjs.cli.Main {
 
@@ -66,15 +67,15 @@ public class Main extends org.dynjs.cli.Main {
             config.setHost("localhost");
         }
 
-        return new Nodyn(config);
+        CountDownLatch initComplete = new CountDownLatch(1);
+        Nodyn nodyn = new Nodyn(config, initComplete);
+        try {
+            initComplete.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return nodyn;
     }
-
-    @Override
-    protected void startRepl() {
-        Repl repl = new Repl(initializeRuntime(), System.in, getOutputStream(), getWelcomeMessage(), getPrompt());
-        repl.run();
-    }
-
 
     @Override
     protected String getBinaryName() {

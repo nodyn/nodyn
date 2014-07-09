@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.CountDownLatch;
 
 public class Nodyn extends DynJS {
 
@@ -20,9 +21,12 @@ public class Nodyn extends DynJS {
     private static final String NODE_JS = "node.js";
 
     private final Vertx vertx;
+    private final NodynConfig config;
 
-    public Nodyn(final NodynConfig config) {
+    public Nodyn(final NodynConfig config, final CountDownLatch initComplete) {
         super(config);
+
+        this.config = config;
 
         if (config.isClustered()) {
             vertx = VertxFactory.newVertx(config.getHost());
@@ -37,19 +41,24 @@ public class Nodyn extends DynJS {
         vertx.runOnContext(new Handler<Void>() {
             @Override
             public void handle(Void aVoid) {
-                InputStream is = config.getClassLoader().getResourceAsStream(NODE_JS);
-                if (is != null) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                    newRunner().withFileName(NODE_JS).withSource(reader).evaluate();
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        // ignore
-                    }
-                } else {
-                    config.getErrorStream().println("[ERROR] Cannot initialize Nodyn");
-                }
+                loadFromClasspath(NODE_JS);
+                initComplete.countDown();
             }
         });
+    }
+
+    private void loadFromClasspath(String resource) {
+        InputStream is = this.config.getClassLoader().getResourceAsStream(resource);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            new Runner(getExecutionContext()).withFileName(resource).withSource(reader).evaluate();
+            try {
+                is.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        } else {
+            config.getErrorStream().println("[ERROR] Cannot initialize Nodyn");
+        }
     }
 }
