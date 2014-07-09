@@ -10,7 +10,6 @@ process = (function() {
   var Process = NativeRequire.require('process');
   return new Process();
 })();
-global.__jvertx = process.context;
 
 
 __filename = (typeof __filename === 'undefined') ?

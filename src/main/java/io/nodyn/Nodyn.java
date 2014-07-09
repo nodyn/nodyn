@@ -52,9 +52,4 @@ public class Nodyn extends DynJS {
             }
         });
     }
-
-    @Override
-    public Runner newRunner() {
-        return new NodynRunner(this.getExecutionContext(), vertx.currentContext());
-    }
 }

@@ -17,6 +17,7 @@ package io.nodyn;
 
 import org.dynjs.Config;
 import org.dynjs.cli.Arguments;
+import org.dynjs.cli.Repl;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineParser;
@@ -67,6 +68,13 @@ public class Main extends org.dynjs.cli.Main {
 
         return new Nodyn(config);
     }
+
+    @Override
+    protected void startRepl() {
+        Repl repl = new Repl(initializeRuntime(), System.in, getOutputStream(), getWelcomeMessage(), getPrompt());
+        repl.run();
+    }
+
 
     @Override
     protected String getBinaryName() {
