@@ -113,9 +113,11 @@ Process.prototype.memoryUsage = function() {
 };
 
 Process.prototype.nextTick = function(callback, args) {
+  this.EVENT_LOOP.incrCount();
   this.context.runOnContext(function() {
     callback(args);
-  });
+    this.EVENT_LOOP.decrCount();
+  }.bind(this));
 };
 
 Process.prototype.cwd = function() {
@@ -123,6 +125,7 @@ Process.prototype.cwd = function() {
 };
 
 Process.prototype.exit = function() {
+  print("EXITING PROCESS");
   this.context.stop();
   this.emit('exit');
 };

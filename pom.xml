@@ -378,7 +378,7 @@
               <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>io.nodyn.Main</mainClass>
+                  <mainClass>io.nodyn.cli.Main</mainClass>
                 </transformer>
               </transformers>
               <filters>

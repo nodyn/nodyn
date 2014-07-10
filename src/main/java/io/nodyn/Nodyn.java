@@ -1,6 +1,7 @@
 package io.nodyn;
 
 
+import io.nodyn.netty.ManagedEventLoopGroup;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
@@ -8,10 +9,7 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.concurrent.CountDownLatch;
 
 public class Nodyn extends DynJS {
@@ -20,10 +18,13 @@ public class Nodyn extends DynJS {
     private static final String NODE_JS = "node.js";
 
     private final Vertx vertx;
+    private final CountDownLatch initComplete;
     private final NodynConfig config;
 
-    public Nodyn(final NodynConfig config, final CountDownLatch initComplete) {
+    public Nodyn(final NodynConfig config) {
         super(config);
+
+        initComplete = new CountDownLatch(1);
         this.config = config;
 
         System.setProperty("vertx.pool.eventloop.size", "1");
@@ -59,6 +60,15 @@ public class Nodyn extends DynJS {
             }
         } else {
             config.getErrorStream().println("[ERROR] Cannot initialize Nodyn");
+        }
+    }
+
+    public void start(Runner runner) {
+        try {
+            initComplete.await();
+            if (runner != null) runner.execute();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
