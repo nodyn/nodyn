@@ -20,6 +20,10 @@ public class ManagedEventLoopGroup implements RefCounted {
         System.err.println("GROUP " + group);
     }
 
+    public RefHandle newHandle() {
+        return new RefHandle( this );
+    }
+
     public synchronized RefCountedEventLoopGroup getEventLoopGroup() {
         if ( this.delegate == null ) {
             createEventLoopGroup();
@@ -38,12 +42,12 @@ public class ManagedEventLoopGroup implements RefCounted {
 
     public synchronized void incrCount() {
         ++this.counter;
-        //System.err.println( "++ incr now: " + this.counter );
+        System.err.println( "++ incr now: " + this.counter );
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        //System.err.println( "-- decr now: " + this.counter );
+        System.err.println( "-- decr now: " + this.counter );
         if (this.counter == 0 && this.delegate != null ) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;

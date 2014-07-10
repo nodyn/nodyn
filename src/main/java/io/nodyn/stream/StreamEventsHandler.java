@@ -1,4 +1,4 @@
-package io.nodyn.net;
+package io.nodyn.stream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -10,10 +10,10 @@ import io.nodyn.EventSource;
 /**
  * @author Bob McWhirter
  */
-public class SocketEventsHandler extends ChannelDuplexHandler {
+public class StreamEventsHandler extends ChannelDuplexHandler {
     protected EventSource source;
 
-    public SocketEventsHandler(EventSource source) {
+    public StreamEventsHandler(EventSource source) {
         this.source = source;
     }
 
@@ -31,25 +31,18 @@ public class SocketEventsHandler extends ChannelDuplexHandler {
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                SocketEventsHandler.this.source.emit("close", CallbackResult.EMPTY_SUCCESS);
+                StreamEventsHandler.this.source.emit("close", CallbackResult.EMPTY_SUCCESS);
             }
         });
         super.close(ctx, future);
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        this.source.emit("connect", CallbackResult.EMPTY_SUCCESS);
-        super.channelActive(ctx);
-    }
-
-    /*
-    @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         this.source.emit("end", CallbackResult.EMPTY_SUCCESS );
+        this.source.emit("close", CallbackResult.EMPTY_SUCCESS );
         super.channelInactive(ctx);
     }
-    */
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

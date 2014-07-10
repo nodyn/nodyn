@@ -19,6 +19,7 @@ public class DebugHandler extends ChannelDuplexHandler {
         this.name = name;
     }
 
+    /*
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.err.println(ctx.channel() + " | " + this.name + " >> READ >> " + msg.getClass() );
@@ -31,6 +32,7 @@ public class DebugHandler extends ChannelDuplexHandler {
         System.err.println("-->>" );
         super.channelRead(ctx, msg);
     }
+    */
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
