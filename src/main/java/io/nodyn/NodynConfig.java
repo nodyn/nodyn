@@ -8,6 +8,14 @@ public class NodynConfig extends org.dynjs.Config {
     private boolean isClustered;
     private String host;
 
+    public NodynConfig(ClassLoader parentClassLoader) {
+        super(parentClassLoader);
+    }
+
+    public NodynConfig() {
+        super();
+    }
+
     public void setClustered(boolean isClustered) {
         this.isClustered = isClustered;
     }

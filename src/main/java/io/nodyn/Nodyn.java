@@ -67,12 +67,16 @@ public class Nodyn extends DynJS {
     public void start(Runner runner) {
         try {
             this.initComplete.await();
+
+            ManagedEventLoopGroup melg = (ManagedEventLoopGroup) this.newRunner().withSource("process.EVENT_LOOP").execute();
+            RefHandle handle = melg.newHandle();
+
             if (runner != null) {
-                ManagedEventLoopGroup melg = (ManagedEventLoopGroup) this.newRunner().withSource("process.EVENT_LOOP").execute();
-                RefHandle handle = melg.newHandle();
                 runner.execute();
-                handle.unref();
             }
+
+            handle.unref();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

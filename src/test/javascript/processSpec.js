@@ -25,9 +25,9 @@ describe('process', function() {
   });
 
   it('should pass testVersion', function() {
-    expect(process.version).toBe(io.nodyn.Node.VERSION);
+    expect(process.version).toBe(io.nodyn.Nodyn.VERSION);
     expect(process.versions).not.toBeNull();
-    expect(process.versions.node).toBe(io.nodyn.Node.VERSION);
+    expect(process.versions.node).toBe(io.nodyn.Nodyn.VERSION);
     expect(process.versions.java).toBe(java.lang.System.getProperty("java.version"));
     expect(process.versions.dynjs).not.toBeNull();
   });

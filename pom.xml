@@ -218,7 +218,7 @@
                   <goal>java</goal>
                 </goals>
                 <configuration>
-                  <mainClass>org.jasmine.cli.Main</mainClass>
+                  <mainClass>io.nodyn.TestRunner</mainClass>
                   <classpathScope>test</classpathScope>
                   <cleanupDaemonThreads>false</cleanupDaemonThreads>
                   <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
