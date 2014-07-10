@@ -205,6 +205,9 @@ describe("fs module", function() {
       expect(r.length).toBeGreaterThan(0);
       // make sure this thing behaves like a JS array
       expect((typeof r.forEach)).toBe('function');
+      for ( i = 0 ; i < r.length ; ++i ) {
+        expect( r[i].indexOf( "/" ) ).toBe(-1);
+      }
       helper.testComplete(true);
     });
   });
