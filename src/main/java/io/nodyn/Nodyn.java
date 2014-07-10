@@ -2,6 +2,7 @@ package io.nodyn;
 
 
 import io.nodyn.netty.ManagedEventLoopGroup;
+import io.nodyn.netty.RefHandle;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
@@ -24,7 +25,7 @@ public class Nodyn extends DynJS {
     public Nodyn(final NodynConfig config) {
         super(config);
 
-        initComplete = new CountDownLatch(1);
+        this.initComplete = new CountDownLatch(1);
         this.config = config;
 
         System.setProperty("vertx.pool.eventloop.size", "1");
@@ -65,8 +66,13 @@ public class Nodyn extends DynJS {
 
     public void start(Runner runner) {
         try {
-            initComplete.await();
-            if (runner != null) runner.execute();
+            this.initComplete.await();
+            if (runner != null) {
+                ManagedEventLoopGroup melg = (ManagedEventLoopGroup) this.newRunner().withSource("process.EVENT_LOOP").execute();
+                RefHandle handle = melg.newHandle();
+                runner.execute();
+                handle.unref();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
