@@ -1,7 +1,6 @@
 package io.nodyn;
 
 
-
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
@@ -25,8 +24,9 @@ public class Nodyn extends DynJS {
 
     public Nodyn(final NodynConfig config, final CountDownLatch initComplete) {
         super(config);
-
         this.config = config;
+
+        System.setProperty("vertx.pool.eventloop.size", "1");
 
         if (config.isClustered()) {
             vertx = VertxFactory.newVertx(config.getHost());

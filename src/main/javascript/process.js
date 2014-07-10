@@ -21,8 +21,21 @@ var Process = function() {
       Node         = io.nodyn.Nodyn,
       javaProcess  = new io.nodyn.process.Process();
 
-  this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(1);
-  this.context     = org.vertx.java.core.VertxFactory.newVertx();
+  if (typeof __vertx === 'undefined') {
+    print("CREATING NEW __VERTX");
+    java.lang.System.setProperty("vertx.pool.eventloop.size", "1");
+    this.context = org.vertx.java.core.VertxFactory.newVertx();
+    var elg = null;
+    this.context.runOnContext(function() {
+      var elg = this.context.getEventLoopGroup();
+      print("SETTING ELG "+elg);
+      this.EVENT_LOOP = new io.nodyn.netty.ManagedEventLoopGroup(elg);
+      }.bind(this));
+  } else {
+    print("USING MAIN __VERTX");
+    this.context = __vertx;
+    this.EVENT_LOOP  = new io.nodyn.netty.ManagedEventLoopGroup(this.context.getEventLoopGroup());
+  }
   this.title       = "Nodyn";
   this.version     = Node.VERSION;
 

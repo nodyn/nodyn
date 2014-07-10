@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class ManagedEventLoopGroup implements RefCounted {
 
-    private final int numThreads;
     private EventLoopGroup delegate;
     private int counter;
 
-    public ManagedEventLoopGroup(int numThreads) {
-        this.numThreads = numThreads;
-        createEventLoopGroup();
+    public ManagedEventLoopGroup(EventLoopGroup group) {
+        this.delegate = group;
+        this.counter = 0;
+        System.err.println("GROUP " + group);
     }
 
     public synchronized RefCountedEventLoopGroup getEventLoopGroup() {
@@ -32,8 +32,8 @@ public class ManagedEventLoopGroup implements RefCounted {
     }
 
     protected void createEventLoopGroup() {
-        this.delegate = new NioEventLoopGroup( this.numThreads );
-        this.counter = 0;
+        System.err.println("WARNING: WTF");
+        this.delegate = new NioEventLoopGroup( 1 );
     }
 
     public synchronized void incrCount() {
