@@ -4,6 +4,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoop;
 import io.netty.channel.nio.NioEventLoopGroup;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -17,6 +18,22 @@ public class ManagedEventLoopGroup implements RefCounted {
     public ManagedEventLoopGroup(EventLoopGroup group) {
         this.delegate = group;
         this.counter = 0;
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        this.delegate.submit(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            this.delegate = null;
+        }
     }
 
     public RefHandle newHandle() {
@@ -40,12 +57,10 @@ public class ManagedEventLoopGroup implements RefCounted {
 
     public synchronized void incrCount() {
         ++this.counter;
-        //System.err.println(this + " ++ incr now: " + this.counter);
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        //System.err.println(this + " -- decr now: " + this.counter);
         if (this.counter == 0 && this.delegate != null) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;
