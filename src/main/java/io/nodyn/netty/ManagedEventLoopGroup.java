@@ -40,12 +40,12 @@ public class ManagedEventLoopGroup implements RefCounted {
 
     public synchronized void incrCount() {
         ++this.counter;
-        System.err.println(this + " ++ incr now: " + this.counter);
+        //System.err.println(this + " ++ incr now: " + this.counter);
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        System.err.println(this + " -- decr now: " + this.counter);
+        //System.err.println(this + " -- decr now: " + this.counter);
         if (this.counter == 0 && this.delegate != null) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;
