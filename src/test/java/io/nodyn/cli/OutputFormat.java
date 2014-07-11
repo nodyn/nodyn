@@ -1,8 +1,8 @@
 package io.nodyn.cli;
 
-import org.jasmine.cli.DocumentationFormatter;
 import org.jasmine.cli.Formatter;
 import org.jasmine.cli.ProgressFormatter;
+import org.jasmine.cli.DocumentationFormatter;
 
 /**
  * @author lanceball
