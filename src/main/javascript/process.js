@@ -100,11 +100,11 @@ Process.prototype.memoryUsage = function() {
 };
 
 Process.prototype.nextTick = function(callback, args) {
-  this.EVENT_LOOP.incrCount();
-  this.context.runOnContext(function() {
+  process.EVENT_LOOP.incrCount();
+  process.context.runOnContext(function() {
     callback(args);
-    this.EVENT_LOOP.decrCount();
-  }.bind(this));
+    process.EVENT_LOOP.decrCount();
+  });
 };
 
 Process.prototype.cwd = function() {

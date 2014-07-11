@@ -7,7 +7,6 @@ module.exports.submit = function(task) {
 
 module.exports.unblock = function(fn) {
   return function() {
-    System.err.println( "calling unblocked: " + arguments.length );
     var origArgs = arguments;
     blocking.unblock( function() {
       fn.apply( fn.this, origArgs );

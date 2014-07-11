@@ -2,6 +2,9 @@ var helper    = require('specHelper');
 
 describe("The timers module", function() {
 
+  beforeEach(function() {
+    helper.testComplete(false);
+  });
   it('should pass testSetTimeout', function() {
     var x = 0;
     waitsFor(helper.testComplete, "the setTimeout test to complete", 3000);
@@ -77,8 +80,5 @@ describe("The timers module", function() {
     }, 100);
   });
 
-  beforeEach(function() {
-    helper.testComplete(false);
-  });
 
 });

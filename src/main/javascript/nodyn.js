@@ -14,6 +14,7 @@ module.exports.makeEventEmitter = makeEventEmitter;
  * Otherwise, it will be called with (null, <blockingAction's return value>).
  */
 function asyncAction(blockingAction, callback) {
+  process.EVENT_LOOP.incrCount();
   process.context.executeBlocking(blockingAction, function(future) {
     if (future.result() instanceof Error) {
       callback(future.result(), null);
@@ -22,6 +23,7 @@ function asyncAction(blockingAction, callback) {
     } else {
       callback(null, future.result());
     }
+    process.EVENT_LOOP.decrCount();
   });
 }
 module.exports.asyncAction = asyncAction;

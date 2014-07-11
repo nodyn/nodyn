@@ -3,6 +3,7 @@ package io.nodyn.loop;
 import io.nodyn.Callback;
 import io.nodyn.netty.ManagedEventLoopGroup;
 import io.nodyn.netty.RefCountedEventLoopGroup;
+import io.nodyn.netty.RefHandle;
 
 
 /**
@@ -17,13 +18,20 @@ public class Blocking {
     }
 
 
-    public void submit(Runnable action) {
-        new Thread( action ).start();
+    public void submit(final Runnable action) {
+        final RefHandle handle = this.managedLoop.newHandle();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                action.run();
+                handle.unref();
+            }
+        }).start();
     }
 
     public void unblock(final Runnable action) {
         final RefCountedEventLoopGroup elg = managedLoop.getEventLoopGroup();
-        elg.submit( new Runnable() {
+        elg.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -35,7 +43,6 @@ public class Blocking {
             }
         });
     }
-
 
 
 }
