@@ -4,9 +4,6 @@ import com.google.common.collect.Lists;
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
 import org.dynjs.Config;
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.GlobalObjectFactory;
 import org.jasmine.Executor;
 import org.jasmine.Notifier;
 import org.jasmine.SpecScanner;
@@ -33,15 +30,6 @@ public class Runtime {
     public void execute(Notifier notifier) {
         NodynConfig config = new NodynConfig(parentClassLoader);
         config.setCompileMode(this.compileMode);
-
-        config.setGlobalObjectFactory(new GlobalObjectFactory() {
-            @Override
-            public GlobalObject newGlobalObject(DynJS runtime) {
-                GlobalObject global = new GlobalObject(runtime);
-                global.defineGlobalProperty("global", global);
-                return global;
-            }
-        });
         Nodyn nodyn = new Nodyn(config);
         Executor executor = (Executor) nodyn.newRunner().withSource("var executor = require('specRunner'); executor").evaluate();
         executor.execute(specs, notifier);
