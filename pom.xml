@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.projectodd</groupId>
+  <groupId>io.nodyn</groupId>
   <artifactId>nodyn</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -19,15 +19,21 @@
   </parent>
 
   <scm>
-    <connection>scm:git:git://github.com/projectodd/nodyn.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/projectodd/nodyn.git</developerConnection>
-    <url>http://github.com/projectodd/node</url>
+    <connection>scm:git:git://github.com/nodyn/nodyn.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/nodyn/nodyn.git</developerConnection>
+    <url>http://github.com/nodyn.io</url>
   </scm>
 
   <developers>
     <developer>
       <name>Lance Ball</name>
       <email>lball@redhat.com</email>
+      <organization>Project Odd</organization>
+      <organizationUrl>http://projectodd.org</organizationUrl>
+    </developer>
+    <developer>
+      <name>Bob McWhirter</name>
+      <email>bobmcw@redhat.com</email>
       <organization>Project Odd</organization>
       <organizationUrl>http://projectodd.org</organizationUrl>
     </developer>
@@ -61,7 +67,6 @@
     <version.junit>4.7</version.junit>
     <version.vertx>2.1.1</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
-    <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
 <!--
     <version.jvm-npm>0.1.0-SNAPSHOT</version.jvm-npm>
@@ -152,11 +157,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-platform</artifactId>
       <version>${version.vertx}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>lang-dynjs</artifactId>
-      <version>${version.lang-dynjs.verticle}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
