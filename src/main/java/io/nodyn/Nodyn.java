@@ -12,6 +12,8 @@ import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class Nodyn extends DynJS {
@@ -24,6 +26,7 @@ public class Nodyn extends DynJS {
     private final NodynConfig config;
 
     private final ManagedEventLoopGroup managedLoop;
+    private final List<Nodyn> children = new ArrayList<>();
 
     public Nodyn(final NodynConfig config) {
         super(config);
@@ -53,6 +56,10 @@ public class Nodyn extends DynJS {
                 initComplete.countDown();
             }
         });
+    }
+
+    public void addChild(Nodyn child) {
+        this.children.add( child );
     }
 
     public ManagedEventLoopGroup getManagedLoop() {
@@ -88,8 +95,17 @@ public class Nodyn extends DynJS {
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            finished();
         }
 
         return null;
+    }
+
+    public void finished() {
+        for( Nodyn child : this.children ) {
+            child.finished();
+        }
+        this.managedLoop.finished();
     }
 }

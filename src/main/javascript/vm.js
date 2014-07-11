@@ -41,6 +41,7 @@ function createContext(sandbox) {
       g[k] = sandbox[k];
     }
   }
+  __nodyn.addChild( runtime );
   return runtime;
 };
 module.exports.createContext = createContext;
@@ -66,7 +67,11 @@ Script.prototype.runInNewContext = function(sandbox) {
 
 Script.prototype._runInContext = function(context) {
   var runner = context.newRunner().withSource( this._code ).withFileName( this._filename );
-  return context.start( runner );
+  var result = context.start( runner );
+  if ( context != __nodyn ) {
+    context.finished();
+  }
+  return result;
 }
 
 
