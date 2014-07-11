@@ -26,20 +26,32 @@ public class Nodyn extends DynJS {
     private final NodynConfig config;
 
     private final ManagedEventLoopGroup managedLoop;
-    private final List<Nodyn> children = new ArrayList<>();
+
+    public Nodyn(Nodyn parent) {
+        this(parent, parent.config);
+    }
 
     public Nodyn(final NodynConfig config) {
+        this(null, config);
+    }
+
+    public Nodyn(final Nodyn parent, NodynConfig config) {
         super(config);
 
         this.config = config;
 
-        System.setProperty("vertx.pool.eventloop.size", "1");
 
-        if (config.isClustered()) {
-            this.vertx = VertxFactory.newVertx(config.getHost());
+        if (parent == null) {
+            System.setProperty("vertx.pool.eventloop.size", "1");
+            if (config.isClustered()) {
+                this.vertx = VertxFactory.newVertx(config.getHost());
+            } else {
+                this.vertx = VertxFactory.newVertx();
+            }
         } else {
-            this.vertx = VertxFactory.newVertx();
+            this.vertx = parent.vertx;
         }
+
         GlobalObject globalObject = getGlobalObject();
         globalObject.defineGlobalProperty("__vertx", vertx);
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
@@ -47,23 +59,19 @@ public class Nodyn extends DynJS {
         globalObject.defineGlobalProperty("__nodyn", this);
 
         EventLoopGroup elg = ((DefaultVertx) vertx).getEventLoopGroup();
-        this.managedLoop = new ManagedEventLoopGroup(elg);
-
-        elg.submit(new Runnable() {
-            @Override
-            public void run() {
-                loadFromClasspath(NODE_JS);
-                initComplete.countDown();
-            }
-        });
-    }
-
-    public void addChild(Nodyn child) {
-        this.children.add( child );
+        if (parent == null) {
+            this.managedLoop = new ManagedEventLoopGroup(elg);
+        } else {
+            this.managedLoop = parent.managedLoop;
+        }
     }
 
     public ManagedEventLoopGroup getManagedLoop() {
         return this.managedLoop;
+    }
+
+    public Vertx getVertx() {
+        return this.vertx;
     }
 
     private void loadFromClasspath(String resource) {
@@ -82,30 +90,22 @@ public class Nodyn extends DynJS {
     }
 
     public Object start(Runner runner) {
+        loadFromClasspath(NODE_JS);
+        RefHandle handle = this.managedLoop.newHandle();
         try {
-            this.initComplete.await();
-            RefHandle handle = this.managedLoop.newHandle();
-            try {
-                if (runner != null) {
-                    Object result = runner.execute();
-                    return result;
-                }
-            } finally {
-                handle.unref();
+            if (runner != null) {
+                Object result = runner.execute();
+                return result;
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } finally {
-            finished();
+            handle.unref();
         }
 
         return null;
     }
 
-    public void finished() {
-        for( Nodyn child : this.children ) {
-            child.finished();
-        }
-        this.managedLoop.finished();
+    public RefHandle start() {
+        loadFromClasspath(NODE_JS);
+        return this.managedLoop.newHandle();
     }
 }

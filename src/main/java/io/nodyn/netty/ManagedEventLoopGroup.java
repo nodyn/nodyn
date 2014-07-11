@@ -20,11 +20,11 @@ public class ManagedEventLoopGroup implements RefCounted {
     }
 
     public RefHandle newHandle() {
-        return new RefHandle( this );
+        return new RefHandle(this);
     }
 
     public synchronized RefCountedEventLoopGroup getEventLoopGroup() {
-        if ( this.delegate == null ) {
+        if (this.delegate == null) {
             createEventLoopGroup();
         }
         return new RefCountedEventLoopGroup(this);
@@ -35,22 +35,18 @@ public class ManagedEventLoopGroup implements RefCounted {
     }
 
     protected void createEventLoopGroup() {
-        this.delegate = new NioEventLoopGroup( 1 );
+        this.delegate = new NioEventLoopGroup(1);
     }
 
     public synchronized void incrCount() {
         ++this.counter;
-        //System.err.println( this + " ++ incr now: " + this.counter );
+        System.err.println(this + " ++ incr now: " + this.counter);
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        // System.err.println( this + " -- decr now: " + this.counter );
-        finished();
-    }
-
-    public synchronized void finished() {
-        if ( this.counter == 0 && this.delegate != null ) {
+        System.err.println(this + " -- decr now: " + this.counter);
+        if (this.counter == 0 && this.delegate != null) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;
         }

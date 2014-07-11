@@ -33,15 +33,13 @@ module.exports.runInContext = function(code,context,filename) {
 };
 
 function createContext(sandbox) {
-  var config = __nodyn.config;
-  var runtime = new io.nodyn.Nodyn(config);
+  var runtime = new io.nodyn.Nodyn(__nodyn);
   if ( sandbox ) {
     var g = runtime.globalObject;
     for ( k in sandbox ) {
       g[k] = sandbox[k];
     }
   }
-  __nodyn.addChild( runtime );
   return runtime;
 };
 module.exports.createContext = createContext;
@@ -67,11 +65,7 @@ Script.prototype.runInNewContext = function(sandbox) {
 
 Script.prototype._runInContext = function(context) {
   var runner = context.newRunner().withSource( this._code ).withFileName( this._filename );
-  var result = context.start( runner );
-  if ( context != __nodyn ) {
-    context.finished();
-  }
-  return result;
+  return context.start( runner );
 }
 
 

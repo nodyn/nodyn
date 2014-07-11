@@ -3,6 +3,7 @@ var helper = require('specHelper');
 var vm     = require('vm');
 
 describe('vm functions', function() {
+/*
   it('should allow creation of new contexts', function() {
     var context = vm.createContext();
     expect(context).not.toBe( undefined );
@@ -29,6 +30,7 @@ describe('vm functions', function() {
     var result = vm.runInThisContext( code );
     expect( result ).toBe( 4 );
   });
+  */
 
   it("should allow running code in a sandbox", function() {
     foo = 2;
@@ -38,6 +40,7 @@ describe('vm functions', function() {
     expect( foo ).toBe( 2 );
   })
 
+/*
   it('should produce an error if a new context references something unknown', function(){
     foo = 2;
     var code = "2+foo";
@@ -54,8 +57,10 @@ describe('vm functions', function() {
     var result = vm.runInNewContext( code );
     expect( result ).not.toBe( undefined );
   })
+  */
 });
 
+/*
 describe('Script objects', function() {
   it('should allow creating a Script and running in multiple new contexts', function() {
     var script = vm.createScript( '2+foo' );
@@ -77,3 +82,4 @@ describe('Script objects', function() {
   });
 
 })
+*/

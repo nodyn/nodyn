@@ -17,6 +17,7 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
+import io.nodyn.netty.RefHandle;
 import org.dynjs.cli.Options;
 import org.dynjs.cli.Repl;
 import org.dynjs.runtime.Runner;
@@ -126,8 +127,8 @@ public class Main {
     }
 
     private void startRepl() {
-        getRuntime().start(null); // No top level script for repl. Just start it up.
-        Repl repl = new Repl(getRuntime(), System.in, getOutputStream(), WELCOME_MESSAGE, PROMPT);
+        RefHandle handle = getRuntime().start(); // No top level script for repl. Just start it up.
+        NodynRepl repl = new NodynRepl(handle, getRuntime(), System.in, getOutputStream(), WELCOME_MESSAGE, PROMPT, System.getProperty("user.dir") + "/nodyn.log");
         repl.run();
     }
 
