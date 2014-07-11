@@ -1,6 +1,7 @@
 package io.nodyn;
 
 
+import io.netty.channel.EventLoopGroup;
 import io.nodyn.netty.ManagedEventLoopGroup;
 import io.nodyn.netty.RefHandle;
 import org.dynjs.runtime.DynJS;
@@ -9,6 +10,7 @@ import org.dynjs.runtime.Runner;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
+import org.vertx.java.core.impl.DefaultVertx;
 
 import java.io.*;
 import java.util.concurrent.CountDownLatch;
@@ -19,34 +21,43 @@ public class Nodyn extends DynJS {
     private static final String NODE_JS = "node.js";
 
     private final Vertx vertx;
-    private final CountDownLatch initComplete;
+    private final CountDownLatch initComplete = new CountDownLatch(1);
     private final NodynConfig config;
+
+    private final ManagedEventLoopGroup managedLoop;
 
     public Nodyn(final NodynConfig config) {
         super(config);
 
-        this.initComplete = new CountDownLatch(1);
         this.config = config;
 
         System.setProperty("vertx.pool.eventloop.size", "1");
 
         if (config.isClustered()) {
-            vertx = VertxFactory.newVertx(config.getHost());
+            this.vertx = VertxFactory.newVertx(config.getHost());
         } else {
-            vertx = VertxFactory.newVertx();
+            this.vertx = VertxFactory.newVertx();
         }
         GlobalObject globalObject = getGlobalObject();
         globalObject.defineGlobalProperty("__vertx", vertx);
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
         globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
+        globalObject.defineGlobalProperty("__nodyn", this);
 
-        vertx.runOnContext(new Handler<Void>() {
+        EventLoopGroup elg = ((DefaultVertx) vertx).getEventLoopGroup();
+        this.managedLoop = new ManagedEventLoopGroup(elg);
+
+        elg.submit(new Runnable() {
             @Override
-            public void handle(Void aVoid) {
+            public void run() {
                 loadFromClasspath(NODE_JS);
                 initComplete.countDown();
             }
         });
+    }
+
+    public ManagedEventLoopGroup getManagedLoop() {
+        return this.managedLoop;
     }
 
     private void loadFromClasspath(String resource) {
@@ -64,21 +75,22 @@ public class Nodyn extends DynJS {
         }
     }
 
-    public void start(Runner runner) {
+    public Object start(Runner runner) {
         try {
             this.initComplete.await();
-
-            ManagedEventLoopGroup melg = (ManagedEventLoopGroup) this.newRunner().withSource("process.EVENT_LOOP").execute();
-            RefHandle handle = melg.newHandle();
-
-            if (runner != null) {
-                runner.execute();
+            RefHandle handle = this.managedLoop.newHandle();
+            try {
+                if (runner != null) {
+                    Object result = runner.execute();
+                    return result;
+                }
+            } finally {
+                handle.unref();
             }
-
-            handle.unref();
-
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 }

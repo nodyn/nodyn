@@ -6,14 +6,10 @@ Nodyn  = io.nodyn;
 nodyn  = {};
 global = this;
 
-System.err.println( "setting process " + java.lang.Thread.currentThread() );
 process = (function() {
   var Process = NativeRequire.require('process');
   return new Process();
 })();
-
-System.err.println( "LOOP process " + process.EVENT_LOOP );
-
 
 __filename = (typeof __filename === 'undefined') ?
               'node.js' : __filename;

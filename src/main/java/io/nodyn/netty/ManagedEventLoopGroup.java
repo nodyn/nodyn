@@ -17,7 +17,6 @@ public class ManagedEventLoopGroup implements RefCounted {
     public ManagedEventLoopGroup(EventLoopGroup group) {
         this.delegate = group;
         this.counter = 0;
-        System.err.println("GROUP " + group);
     }
 
     public RefHandle newHandle() {
@@ -36,18 +35,17 @@ public class ManagedEventLoopGroup implements RefCounted {
     }
 
     protected void createEventLoopGroup() {
-        System.err.println("WARNING: WTF");
         this.delegate = new NioEventLoopGroup( 1 );
     }
 
     public synchronized void incrCount() {
         ++this.counter;
-        System.err.println( "++ incr now: " + this.counter );
+        //System.err.println( this + " ++ incr now: " + this.counter );
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        System.err.println( "-- decr now: " + this.counter );
+        // System.err.println( this + " -- decr now: " + this.counter );
         if (this.counter == 0 && this.delegate != null ) {
             this.delegate.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.delegate = null;

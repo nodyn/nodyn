@@ -35,14 +35,10 @@ public class Runtime {
         config.setCompileMode(this.compileMode);
 
         config.setGlobalObjectFactory(new GlobalObjectFactory() {
-            GlobalObject global;
-
             @Override
             public GlobalObject newGlobalObject(DynJS runtime) {
-                if(global == null){
-                    global = new GlobalObject(runtime);
-                    global.defineGlobalProperty("global", global);
-                }
+                GlobalObject global = new GlobalObject(runtime);
+                global.defineGlobalProperty("global", global);
                 return global;
             }
         });
@@ -52,32 +48,32 @@ public class Runtime {
         nodyn.start(nodyn.newRunner().withSource("executor.run()"));
     }
 
-    public static class Builder{
+    public static class Builder {
         private Iterable<String> specs = Lists.newArrayList();
         private Config.CompileMode compileMode = Config.CompileMode.JIT;
         private ClassLoader classLoader;
 
-        public Builder(){
+        public Builder() {
             this.specs = Lists.newArrayList();
             this.compileMode = Config.CompileMode.JIT;
             this.classLoader = Thread.currentThread().getContextClassLoader();
         }
 
-        public Builder scan(String pattern){
+        public Builder scan(String pattern) {
             this.specs = new SpecScanner().findSpecs(pattern);
             return this;
         }
 
-        public Builder specs(String... specs){
+        public Builder specs(String... specs) {
             return specs(Lists.newArrayList(specs));
         }
 
-        public Builder specs(Iterable<String> specs){
+        public Builder specs(Iterable<String> specs) {
             this.specs = Lists.newArrayList(specs);
             return this;
         }
 
-        public Builder noCompile(){
+        public Builder noCompile() {
             this.compileMode = Config.CompileMode.OFF;
             return this;
         }
@@ -92,12 +88,12 @@ public class Runtime {
             return this;
         }
 
-        public Builder classLoader(ClassLoader classLoader){
+        public Builder classLoader(ClassLoader classLoader) {
             this.classLoader = classLoader;
             return this;
         }
 
-        public Runtime build(){
+        public Runtime build() {
             return new Runtime(specs, compileMode, classLoader);
         }
     }

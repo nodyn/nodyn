@@ -33,7 +33,8 @@ module.exports.runInContext = function(code,context,filename) {
 };
 
 function createContext(sandbox) {
-  var runtime = new org.dynjs.runtime.DynJS();
+  var config = __nodyn.config;
+  var runtime = new io.nodyn.Nodyn(config);
   if ( sandbox ) {
     var g = runtime.globalObject;
     for ( k in sandbox ) {
@@ -55,7 +56,7 @@ function Script(code,filename) {
 }
 
 Script.prototype.runInThisContext = function() {
-  return this._runInContext();
+  return this._runInContext(__nodyn);
 };
 
 Script.prototype.runInNewContext = function(sandbox) {
@@ -64,10 +65,8 @@ Script.prototype.runInNewContext = function(sandbox) {
 };
 
 Script.prototype._runInContext = function(context) {
-  if ( ! context ) {
-    context = dynjs.runtime;
-  }
-  return context.newRunner().withSource( this._code ).withFileName( this._filename ).execute();
+  var runner = context.newRunner().withSource( this._code ).withFileName( this._filename );
+  return context.start( runner );
 }
 
 
