@@ -17,7 +17,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testSocketBind', function() {
-    waitsFor(helper.testComplete, "the dgram bind test", 5);
+    waitsFor(helper.testComplete, "the dgram bind test", 5000);
     var socket = dgram.createSocket();
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.bind).toBe('function');
@@ -28,7 +28,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testSocketClose', function() {
-    waitsFor(helper.testComplete, "the dgram socket close test", 5);
+    waitsFor(helper.testComplete, "the dgram socket close test", 5000);
     var socket = dgram.createSocket();
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.close).toBe('function');
@@ -37,7 +37,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testSocketAddress', function() {
-    waitsFor(helper.testComplete, "the dgram socket address test", 5);
+    waitsFor(helper.testComplete, "the dgram socket address test", 5000);
     var socket = dgram.createSocket();
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.address).toBe('function');
@@ -62,7 +62,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testSendReceive', function() {
-    waitsFor(helper.testComplete, "the dgram send / receive test", 5);
+    waitsFor(helper.testComplete, "the dgram send / receive test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
     var buffer = new Buffer('turkey dinner');
@@ -83,7 +83,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testEcho', function() {
-    waitsFor(helper.testComplete, "the dgram echo test", 5);
+    waitsFor(helper.testComplete, "the dgram echo test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
     var buffer = new Buffer('turkey dinner');
@@ -111,7 +111,7 @@ describe('The dgram module', function() {
   });
 
   it('should pass testBroadcast', function() {
-    waitsFor(helper.testComplete, "the dgram broadcast test", 5);
+    waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
 
@@ -137,7 +137,7 @@ describe('The dgram module', function() {
 
   // TODO: Figure out WTF is going on here.
   xit('should add and drop multicast group membership', function() {
-    waitsFor(helper.testComplete, "the dgram broadcast test", 5);
+    waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
     var buffer = new Buffer('steak frites');
     var groupAddress = '230.0.0.1';
     var received = false;

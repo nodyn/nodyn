@@ -4,7 +4,7 @@ describe("The timers module", function() {
 
   it('should pass testSetTimeout', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the setTimeout test to complete", 3);
+    waitsFor(helper.testComplete, "the setTimeout test to complete", 3000);
     setTimeout(function() {
       x = x+1;
     }, 1);
@@ -16,7 +16,7 @@ describe("The timers module", function() {
 
   it('should pass testSetTimeoutWaits', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the setTimeoutWaits test to complete", 3);
+    waitsFor(helper.testComplete, "the setTimeoutWaits test to complete", 3000);
     setTimeout(function() {
       x = x+1;
     }, 100);
@@ -28,7 +28,7 @@ describe("The timers module", function() {
 
   it('should pass testSetTimeoutPassesArgs', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the setTimeoutPassesArgs test to complete", 3);
+    waitsFor(helper.testComplete, "the setTimeoutPassesArgs test to complete", 3000);
     setTimeout(function(y, z) {
       x = z+y;
     }, 1, 5, 45);
@@ -40,7 +40,7 @@ describe("The timers module", function() {
 
   it('should pass testClearTimeout', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the clearTimeout test to complete", 3);
+    waitsFor(helper.testComplete, "the clearTimeout test to complete", 3000);
     var timerId = setTimeout(function(y) {
       x = x+y;
     }, 200, 5);
@@ -53,7 +53,7 @@ describe("The timers module", function() {
 
   it('should pass testSetInterval', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the setInterval test to complete", 3);
+    waitsFor(helper.testComplete, "the setInterval test to complete", 3000);
     var id = setInterval(function() {
       x = x+1;
     }, 10);
@@ -66,7 +66,7 @@ describe("The timers module", function() {
 
   it('should pass testClearInterval', function() {
     var x = 0;
-    waitsFor(helper.testComplete, "the clearInterval test to complete", 3);
+    waitsFor(helper.testComplete, "the clearInterval test to complete", 3000);
     var id = setInterval(function() {
       x = x+1;
     }, 500);

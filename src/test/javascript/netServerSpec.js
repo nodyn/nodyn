@@ -22,7 +22,7 @@ describe( "net.Server", function() {
       server.close();
       helper.testComplete(true);
     });
-    waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 3);
+    waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 3000);
   });
 
   it("should fire a 'close' event registered prior to close()", function() {
@@ -33,7 +33,7 @@ describe( "net.Server", function() {
     server.listen(8800, function() {
       server.close();
     });
-    waitsFor(helper.testComplete, "waiting for .on(close) to fire", 3);
+    waitsFor(helper.testComplete, "waiting for .on(close) to fire", 3000);
 
   });
 
@@ -44,7 +44,7 @@ describe( "net.Server", function() {
         helper.testComplete(true);
       });
     });
-    waitsFor(helper.testComplete, "waiting for close handler to fire", 3);
+    waitsFor(helper.testComplete, "waiting for close handler to fire", 3000);
   });
 
   it("should fire a 'connect' callback on client connection", function() {
@@ -60,7 +60,7 @@ describe( "net.Server", function() {
         socket.destroy();
       });
     });
-    waitsFor(helper.testComplete, "waiting for connection handler to fire", 10);
+    waitsFor(helper.testComplete, "waiting for connection handler to fire", 10000);
   });
 
 
@@ -85,7 +85,7 @@ describe( "net.Server", function() {
         socket.write("crunchy bacon");
       });
     });
-    waitsFor(helper.testComplete, "waiting for read/write to complete", 3);
+    waitsFor(helper.testComplete, "waiting for read/write to complete", 3000);
   });
 
   it("should support an idle socket timeout", function() {
@@ -100,7 +100,7 @@ describe( "net.Server", function() {
     server.listen(8800, function() {
       var client = net.connect(8800);
     });
-    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
+    waitsFor(helper.testComplete, "waiting for timeout to fire", 15000);
   });
   it("should allow cancellation of an idle socket timeout", function() {
     var server = net.createServer();
@@ -119,7 +119,7 @@ describe( "net.Server", function() {
         }, 500);
       });
      });
-    waitsFor(helper.testComplete, "waiting for timeout to fire", 15);
+    waitsFor(helper.testComplete, "waiting for timeout to fire", 15000);
   });
 
 
@@ -134,7 +134,7 @@ describe( "net.Server", function() {
         helper.testComplete(true);
       });
     });
-    waitsFor(helper.testComplete, "waiting for socket address to be checked", 3);
+    waitsFor(helper.testComplete, "waiting for socket address to be checked", 3000);
   });
 
   it( "should provide a server address", function() {
@@ -153,7 +153,7 @@ describe( "net.Server", function() {
         helper.testComplete(true);
       });
     });
-    waitsFor(helper.testComplete, "waiting for server address to be checked", 3);
+    waitsFor(helper.testComplete, "waiting for server address to be checked", 3000);
   });
 
 /*
