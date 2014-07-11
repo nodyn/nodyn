@@ -23,7 +23,10 @@ module.exports = new org.jasmine.Executor({
       require(this.specs.get(i));
     }
 
+    var start = java.lang.System.currentTimeMillis();
     process.nextTick(jasmineEnv.execute.bind(jasmineEnv));
     done.get();
+    var stop = java.lang.System.currentTimeMillis();
+    console.log(["Tests complete in", (stop-start)/1000, "seconds"].join(" "));
   }
 });

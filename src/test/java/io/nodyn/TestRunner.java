@@ -15,7 +15,6 @@ public class TestRunner {
         Runtime.Builder builder = new Runtime.Builder();
         arguments.compileMode().apply(builder);
         builder.specs(arguments.specs());
-
         builder.build().execute(new CliNotifier(System.out, new JVM(), arguments.formatter()));
     }
 }
