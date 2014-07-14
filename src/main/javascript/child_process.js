@@ -21,29 +21,29 @@ function ChildProcess(child) {
 
   this._stdout._start();
   this._stderr._start();
-};
+}
 
 util.inherits(ChildProcess, EventEmitter);
 
 ChildProcess.prototype._onExit = function(result) {
   this.exitVal = result.result;
-}
+};
 
 ChildProcess.prototype._onCloseStdout = function() {
   this._stdoutClosed = true;
   this._checkClosed();
-}
+};
 
 ChildProcess.prototype._onCloseStderr = function() {
   this._stderrClosed = true;
   this._checkClosed();
-}
+};
 
 ChildProcess.prototype._checkClosed = function() {
   if ( this._stdoutClosed && this._stderrClosed ) {
     this.emit( "close", this.exitVal );
   }
-}
+};
 
 Object.defineProperty( ChildProcess.prototype, "stdin", {
   get: function() {
@@ -84,7 +84,7 @@ ChildProcess.prototype.send = function(message,handler) {
 };
 
 ChildProcess.prototype.disconnect = function() {
-}
+};
 
 var DEFAULT_OPTIONS = {
   cwd: undefined,
@@ -116,21 +116,21 @@ function spawn() {
     pb.directory( new java.io.File( options.cwd ) );
   }
 
-  for ( e in options.env ) {
+  for ( var e in options.env ) {
     pb.environment()[e] = options.env[e];
   }
 
   return new ChildProcess( pb );
-};
+}
 
 function exec(command,options,callback) {
-};
+}
 
 function execFile(file,args,options,callback) {
-};
+}
 
 function fork(modulePath,args,options) {
-};
+}
 
 
 module.exports.ChildProcess = ChildProcess;
@@ -139,4 +139,3 @@ module.exports.spawn     = spawn;
 module.exports.exec      = exec;
 module.exports.execFile  = execFile;
 module.exports.fork      = fork;
-
