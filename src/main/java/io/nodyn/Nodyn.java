@@ -12,9 +12,6 @@ import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 public class Nodyn extends DynJS {
 
@@ -22,7 +19,6 @@ public class Nodyn extends DynJS {
     private static final String NODE_JS = "node.js";
 
     private final Vertx vertx;
-    private final CountDownLatch initComplete = new CountDownLatch(1);
     private final NodynConfig config;
 
     private final ManagedEventLoopGroup managedLoop;
