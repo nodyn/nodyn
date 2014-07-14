@@ -17,6 +17,9 @@ package io.nodyn.cli;
  *  limitations under the License.
  */
 
+import io.nodyn.cli.complete.FunctionCompleter;
+import io.nodyn.cli.complete.KeywordCompleter;
+import io.nodyn.cli.complete.PropertyCompleter;
 import io.nodyn.netty.RefHandle;
 import org.dynjs.exception.DynJSException;
 import org.dynjs.runtime.DynJS;
@@ -67,10 +70,10 @@ public class NodynRepl {
                 .inputStream(this.in)
                 .historySize(100)
                 .parseOperators(false)
-                .interruptHook( new InterruptHook() {
+                .interruptHook(new InterruptHook() {
                     @Override
                     public void handleInterrupt(Console console, Action action) {
-                        if ( action == Action.EOF || action == Action.INTERRUPT ) {
+                        if (action == Action.EOF || action == Action.INTERRUPT) {
                             console.stop();
                             handle.unref();
                         }
@@ -87,6 +90,9 @@ public class NodynRepl {
                 }).create();
 
         final org.jboss.aesh.console.Console console = new org.jboss.aesh.console.Console(consoleSettings);
+        console.addCompletion( new KeywordCompleter() );
+        console.addCompletion( new PropertyCompleter( this.runtime ) );
+        console.addCompletion( new FunctionCompleter( this.runtime ) );
         console.getShell().out().println(welcome);
         console.setPrompt(new Prompt(prompt));
         console.setConsoleCallback(new AeshConsoleCallback() {
