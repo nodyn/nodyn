@@ -47,7 +47,6 @@ FS.ftruncate     = delegateFunction(system.truncate);
 FS.ftruncateSync = delegateFunction(system.truncateSync);
 FS.rename        = delegateFunction(system.move);
 FS.renameSync    = delegateFunction(system.moveSync);
-//FS.readdir       = delegateFunction(system.readDir, nodyn.arrayConverter);
 FS.readdirSync   = delegateFunction(system.readDirSync, nodyn.arrayConverter);
 FS.chown         = delegateFunction(system.chown);
 FS.fchown        = delegateFunction(system.chown);
@@ -296,15 +295,6 @@ FS.writeSync = function(fd, buffer, offset, length, position) {
   fd.write(buffer.slice(offset, length), nodyn.vertxHandler(callback));
 };
 
-FS.createWriteStream = function(path, opts) {
-  return new FS.WriteStream(path, opts);
-};
-
-FS.WriteStream = function(path, opts) {
-  Stream.Writable.call(this);
-};
-util.inherits(FS.WriteStream, Stream.Writable);
-
 FS.createReadStream = function(path, opts) {
   return new FS.ReadStream(path, opts);
 };
@@ -419,6 +409,87 @@ function openReadable(readable) {
     process.nextTick(readable.emit.bind(readable, 'open'));
   };
 }
+
+FS.createWriteStream = function(path, opts) {
+  return new FS.WriteStream(path, opts);
+};
+
+FS.WriteStream = function(path, options) {
+  if (!(this instanceof FS.WriteStream))
+    return new FS.WriteStream(path, options);
+
+  options = options || {};
+
+  Stream.Writable.call(this, options);
+
+  this.path = path;
+  this.fd = null;
+
+  this.fd = options.hasOwnProperty('fd') ? options.fd : null;
+  this.flags = options.hasOwnProperty('flags') ? options.flags : 'w';
+  this.mode = options.hasOwnProperty('mode') ? options.mode : 438; /*=0666*/
+
+  this.start = options.hasOwnProperty('start') ? options.start : undefined;
+  this.pos = undefined;
+  this.bytesWritten = 0;
+
+  if (!util.isUndefined(this.start)) {
+    if (!util.isNumber(this.start)) {
+      throw TypeError('start must be a Number');
+    }
+    if (this.start < 0) {
+      throw new Error('start must be >= zero');
+    }
+
+    this.pos = this.start;
+  }
+  if (!this.fd) this.open();
+
+  // dispose on finish.
+  this.once('finish', this.close);
+};
+util.inherits(FS.WriteStream, Stream.Writable);
+FS.FileWriteStream = FS.WriteStream; // support the legacy name
+
+FS.WriteStream.prototype.open = function() {
+  FS.open(this.path, this.flags, this.mode, function(er, fd) {
+    if (er) {
+      this.destroy();
+      this.emit('error', er);
+      return;
+    }
+
+    this.fd = fd;
+    this.emit('open', fd);
+  }.bind(this));
+};
+
+FS.WriteStream.prototype._write = function(data, encoding, cb) {
+  if (!util.isBuffer(data))
+    return this.emit('error', new Error('Invalid data'));
+
+  if (!this.fd)
+    return this.once('open', function() {
+      this._write(data, encoding, cb);
+    });
+
+  var self = this;
+  FS.write(this.fd, data, 0, data.length, this.pos, function(er, bytes) {
+    if (er) {
+      self.destroy();
+      return cb(er);
+    }
+    self.bytesWritten += bytes;
+    cb();
+  });
+
+  if (!util.isUndefined(this.pos))
+    this.pos += data.length;
+};
+
+FS.WriteStream.prototype.destroy = FS.ReadStream.prototype.destroy;
+FS.WriteStream.prototype.close = FS.ReadStream.prototype.close;
+FS.WriteStream.prototype.destroySoon = FS.WriteStream.prototype.end;
 
 Stat = FS.Stat = function(path) {
   var file = new java.io.File(path);
@@ -549,9 +620,6 @@ function mapOpenFlags(flags) {
   return map;
 }
 
-
-
-
 FS.readdir = function(path,callback) {
   blocking.submit( function() {
     dir = new java.io.File( path );
@@ -565,7 +633,7 @@ FS.readdir = function(path,callback) {
     process.nextTick( function() {
       callback( new Error("not a directory: " + dir ) );
     });
-  })
-}
+  });
+};
 
 module.exports = FS;

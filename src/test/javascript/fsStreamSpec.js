@@ -10,19 +10,13 @@ describe("fs.WriteStream", function() {
   });
 
   it("should be returned from a call to fs.createWriteStream", function() {
-    expect(fs.createWriteStream() instanceof fs.WriteStream).toBeTruthy();
+    expect(fs.createWriteStream('write-stream-spec.txt') instanceof fs.WriteStream).toBeTruthy();
+    fs.unlinkSync('write-stream-spec.txt');
   });
 
   it("should be a Stream.Writable", function() {
-    expect(fs.createWriteStream() instanceof stream.Writable).toBeTruthy();
-  });
-
-  xit("should emit an 'open' event when the file is opened", function() {
-    waitsFor(helper.testComplete, 5000);
-    helper.writeFixture(function(sut) {
-      var writeStream = fs.createWriteStream(sut.getAbsolutePath());
-      // TODO: this is a race condition, I think
-    });
+    expect(fs.createWriteStream('write-stream-spec.txt') instanceof stream.Writable).toBeTruthy();
+    fs.unlinkSync('write-stream-spec.txt');
   });
 
 });
