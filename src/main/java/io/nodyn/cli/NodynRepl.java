@@ -20,12 +20,13 @@ package io.nodyn.cli;
 import io.nodyn.netty.RefHandle;
 import org.dynjs.exception.DynJSException;
 import org.dynjs.runtime.DynJS;
-import org.jboss.aesh.console.AeshConsoleCallback;
-import org.jboss.aesh.console.ConsoleOperation;
-import org.jboss.aesh.console.Prompt;
+import org.jboss.aesh.console.*;
+import org.jboss.aesh.console.Console;
+import org.jboss.aesh.console.helper.InterruptHook;
 import org.jboss.aesh.console.settings.QuitHandler;
 import org.jboss.aesh.console.settings.Settings;
 import org.jboss.aesh.console.settings.SettingsBuilder;
+import org.jboss.aesh.edit.actions.Action;
 
 import java.io.*;
 
@@ -60,11 +61,21 @@ public class NodynRepl {
     }
 
     public void run() {
+        System.err.println( "Running Nodyn REPL" );
         final Settings consoleSettings = new SettingsBuilder()
                 .outputStream(this.out)
                 .inputStream(this.in)
                 .historySize(100)
                 .parseOperators(false)
+                .interruptHook( new InterruptHook() {
+                    @Override
+                    public void handleInterrupt(Console console, Action action) {
+                        if ( action == Action.EOF || action == Action.INTERRUPT ) {
+                            console.stop();
+                            handle.unref();
+                        }
+                    }
+                })
                 .quitHandler(new QuitHandler() {
                     @Override
                     public void quit() {
@@ -85,6 +96,7 @@ public class NodynRepl {
                 log.write(statement + "\n");
                 if (statement.equalsIgnoreCase("exit")) {
                     console.stop();
+                    handle.unref();
                     return 0;
                 } else {
                     try {

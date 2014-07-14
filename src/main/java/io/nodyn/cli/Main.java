@@ -60,6 +60,9 @@ public class Main {
 
     public void run() throws IOException {
         try {
+            if ( arguments.length == 0 ) {
+                arguments = new String[]{ "--console" };
+            }
             getParser().parseArgument(arguments);
 
             // short circuit options
