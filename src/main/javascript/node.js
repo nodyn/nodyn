@@ -27,7 +27,9 @@ stdout = java.lang.System.out;
 (function() {
   var timers = require('timers');
   setTimeout = timers.setTimeout;
-  clearTimeout  = timers.clearTimeout;
-  setInterval   = timers.setInterval;
-  clearInterval = timers.clearTimeout;
+  clearTimeout   = timers.clearTimeout;
+  setInterval    = timers.setInterval;
+  clearInterval  = timers.clearTimeout;
+  setImmediate   = timers.setImmediate;
+  clearImmediate = timers.clearImmediate;
 })();

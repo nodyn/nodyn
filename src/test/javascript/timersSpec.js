@@ -93,4 +93,11 @@ describe("The timers module", function() {
     helper.testComplete(true);
   });
 
+  it('should have a setImmediate function', function() {
+    waitsFor(helper.testComplete, 'the test to complete', 3000);
+    setImmediate(function(x) {
+      expect(x.toString()).toBe('foo');
+      helper.testComplete(true);
+    }, 'foo');
+  });
 });

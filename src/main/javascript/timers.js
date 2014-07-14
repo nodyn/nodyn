@@ -51,6 +51,13 @@ function setInterval() {
   return createTimerHandle(id, handle);
 }
 
+function setImmediate(callback) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  return setTimeout(function() {
+    callback.apply(callback, args);
+  }, 0);
+}
+
 function createTimerHandle(id, handle) {
   return {
     id: id,
@@ -64,7 +71,9 @@ function createTimerHandle(id, handle) {
   };
 }
 
-module.exports.setTimeout    = setTimeout;
-module.exports.clearTimeout  = clearTimeout;
-module.exports.setInterval   = setInterval;
-module.exports.clearInterval = clearTimeout;
+module.exports.setTimeout     = setTimeout;
+module.exports.clearTimeout   = clearTimeout;
+module.exports.setInterval    = setInterval;
+module.exports.clearInterval  = clearTimeout;
+module.exports.setImmediate   = setImmediate;
+module.exports.clearImmediate = clearTimeout;
