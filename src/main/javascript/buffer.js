@@ -89,6 +89,11 @@ var bufferToString = function(enc,start,end) {
     return this.delegate.toString('utf-8');
   }
 
+  if ( end > this.delegate.length() ) {
+    end = this.delegate.length();
+  }
+
+
   var codec = Codec.get( enc );
 
   if ( ! codec ) {
@@ -111,7 +116,7 @@ var bufferToString = function(enc,start,end) {
 Buffer.prototype.write = function(/*str,offset,len,enc*/) {
 
   var str = arguments[0];
-  var offset = 0;;
+  var offset = 0;
   var len = this.length - offset;
   var enc = 'utf8';
 
@@ -435,5 +440,5 @@ module.exports.buffer = {
   INSPECT_MAX_BYTES: 50
 }
 
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 var Codec = require('nodyn/codec');

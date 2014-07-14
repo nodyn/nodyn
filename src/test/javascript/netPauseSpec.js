@@ -5,7 +5,7 @@ describe('The net module', function() {
   // TODO: This still appears to be racy on CI
   xit('should handle pause and resume on a socket', function() {
     helper.testComplete(false);
-    waitsFor(helper.testComplete, "The net pause/resume test", 10);
+    waitsFor(helper.testComplete, "The net pause/resume test", 10000);
     var N = 200;
     var recv = '', chars_recved = 0;
 

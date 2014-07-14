@@ -54,5 +54,3 @@ describe('The util module', function() {
     expect(util.isError({ name: 'Error', message: 'an error occurred' })).toBeFalsy();
   });
 });
-
-

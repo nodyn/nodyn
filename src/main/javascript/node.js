@@ -1,6 +1,8 @@
 load('jvm-npm.js');
 System = java.lang.System;
-Nodyn  = org.projectodd.nodyn;
+System.setProperty("java.net.preferIPv4Stack", "true");
+System.setProperty("java.net.preferIPv6Addresses", "false");
+Nodyn  = io.nodyn;
 nodyn  = {};
 global = this;
 
@@ -8,7 +10,6 @@ process = (function() {
   var Process = NativeRequire.require('process');
   return new Process();
 })();
-global.__jvertx = process.context;
 
 __filename = (typeof __filename === 'undefined') ?
               'node.js' : __filename;
@@ -24,6 +25,7 @@ stderr = java.lang.System.err;
 stdout = java.lang.System.out;
 
 setTimeout = function() {
+  var handle = process.EVENT_LOOP.newHandle();
   var args = Array.prototype.slice.call(arguments);
 
   if (typeof args[0] != 'function') {
@@ -39,12 +41,20 @@ setTimeout = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return process.context.setTimer(milliseconds, function() {
+
+  var id = process.context.setTimer(milliseconds, function() {
     callback.apply(callback, args);
+    process.EVENT_LOOP.decrCount();
   });
+
+  return {
+    id: id,
+    handle: handle,
+  }
 };
 
 setInterval = function() {
+  var handle = process.EVENT_LOOP.newHandle();
   var args = Array.prototype.slice.call(arguments);
 
   if (typeof args[0] != 'function') {
@@ -59,13 +69,18 @@ setInterval = function() {
   args.shift();  // shuffle off the func
   args.shift();  // shuffle off the timeout
 
-  return process.context.setPeriodic(milliseconds, function() {
+  var id = process.context.setPeriodic(milliseconds, function() {
     callback.apply(callback, args);
   });
+  return {
+    id: id,
+    handle: handle,
+  };
 };
 
-clearTimeout = function(id) {
-  process.context.cancelTimer(id);
+clearTimeout = function(handle) {
+  process.context.cancelTimer(handle.id);
+  handle.handle.unref();
 };
 
 clearInterval = clearTimeout;

@@ -18,7 +18,7 @@ describe("fs.WriteStream", function() {
   });
 
   xit("should emit an 'open' event when the file is opened", function() {
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(sut) {
       var writeStream = fs.createWriteStream(sut.getAbsolutePath());
       // TODO: this is a race condition, I think
@@ -34,7 +34,7 @@ describe("fs.ReadStream", function() {
   });
 
   it("should be returned from a call to fs.createReadStream", function() {
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
       expect(readStream).toBeTruthy();
@@ -47,7 +47,7 @@ describe("fs.ReadStream", function() {
 
   // TODO: Node.js throws an uncatchable error?
   xit("should throw ENOENT on a call to fs.createReadStream when a file can't be found", function() {
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     try {
       fs.createReadStream('not-found.txt');
       // this.fail('fs.createReadStream should fail with ENOENT');
@@ -59,7 +59,7 @@ describe("fs.ReadStream", function() {
   it("should read files.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
@@ -77,7 +77,7 @@ describe("fs.ReadStream", function() {
   });
 
   it("should emit 'close' when it has been closed", function() {
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
       readStream.on('data', function(chunk) {
@@ -90,7 +90,7 @@ describe("fs.ReadStream", function() {
   });
 
   it("should emit 'close' when it has been destroyed", function() {
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
       readStream.on('data', function(chunk) {
@@ -105,7 +105,7 @@ describe("fs.ReadStream", function() {
   it("should emit 'open' when the file has opened.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath());
@@ -121,7 +121,7 @@ describe("fs.ReadStream", function() {
   it("should read a subset of file data.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var result = '',
           readStream = fs.createReadStream(f.getAbsolutePath(),

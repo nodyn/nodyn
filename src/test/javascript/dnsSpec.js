@@ -4,7 +4,7 @@ var helper     = require('specHelper'),
 describe('The dns module', function() {
 
   var server, // server instance set in prepareDns
-      DnsServer  = org.projectodd.nodyn.dns.TestDnsServer;
+      DnsServer  = io.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
     helper.testComplete(false);
@@ -26,7 +26,7 @@ describe('The dns module', function() {
 
   it('should pass testLookup', function() {
     var ip = '10.0.0.1';
-    waitsFor(helper.testComplete, "the dns lookup test to complete", 100);
+    waitsFor(helper.testComplete, "the dns lookup test to complete", 10000);
     prepareDns(DnsServer.testResolveA(ip), function() {
       dns.lookup("nodyn.io", function(err, address, family) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -41,7 +41,7 @@ describe('The dns module', function() {
 
   it('should pass testResolve', function() {
     var ip = '10.0.0.1';
-    waitsFor(helper.testComplete, "the dns resolve test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve test to complete", 10000);
     prepareDns(DnsServer.testResolveA(ip), function() {
       dns.resolve("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -54,7 +54,7 @@ describe('The dns module', function() {
 
   it('should pass testResolve4', function() {
     var ip = '10.0.0.1';
-    waitsFor(helper.testComplete, "the dns resolve4 test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve4 test to complete", 10000);
     prepareDns(DnsServer.testResolveA(ip), function() {
       dns.resolve4("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -67,7 +67,7 @@ describe('The dns module', function() {
 
   it('should pass testResolve6', function() {
     var ip = '::1';
-    waitsFor(helper.testComplete, "the dns resolve6 test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve6 test to complete", 10000);
     prepareDns(DnsServer.testResolveAAAA(ip), function() {
       dns.resolve6("nodyn.io", function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -81,7 +81,7 @@ describe('The dns module', function() {
   it('should pass testResolveMx', function() {
     var prio = 10,
         name = "mail.nodyn.io";
-    waitsFor(helper.testComplete, "the dns resolveMX test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolveMX test to complete", 10000);
     prepareDns(DnsServer.testResolveMX(prio, name), function() {
       dns.resolveMx("nodyn.io", function(err, records) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -94,7 +94,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveTxt', function() {
     var txt = "vert.x is awesome";
-    waitsFor(helper.testComplete, "the dns resolveTxt test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolveTxt test to complete", 10000);
     prepareDns(DnsServer.testResolveTXT(txt), function() {
       dns.resolveTxt("nodyn.io", function(err, records) {
         expect("Unexpected number of response records: " + records.length,
@@ -110,7 +110,7 @@ describe('The dns module', function() {
         weight = 1,
         port = 80,
         target = 'nodyn.io';
-    waitsFor(helper.testComplete, "the dns resolveSrv test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolveSrv test to complete", 10000);
     prepareDns(DnsServer.testResolveSRV(prio, weight, port, target), function() {
       dns.resolveSrv("nodyn.io", function(err, records) {
         expect(records).toBeTruthy();
@@ -126,7 +126,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveNs', function() {
     var ns = 'ns.nodyn.io';
-    waitsFor(helper.testComplete, "the dns resolveNs test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolveNs test to complete", 10000);
     prepareDns(DnsServer.testResolveNS(ns), function() {
       dns.resolveNs("nodyn.io", function(err, records) {
         expect("Unexpected number of response records: " + records.length,
@@ -139,7 +139,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveCname', function() {
     var cname = "cname.nodyn.io";
-    waitsFor(helper.testComplete, "the dns resolveCname test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolveCname test to complete", 10000);
     prepareDns(DnsServer.testResolveCNAME(cname), function() {
       dns.resolveCname("nodyn.io", function(err, records) {
         expect(records).toBeTruthy();
@@ -151,7 +151,7 @@ describe('The dns module', function() {
 
   it('should pass testReverseLookupIPv4', function() {
     var ptr = 'ptr.nodyn.io';
-    waitsFor(helper.testComplete, "the dns reverse lookup IPv4 test to complete", 100);
+    waitsFor(helper.testComplete, "the dns reverse lookup IPv4 test to complete", 10000);
     prepareDns(DnsServer.testReverseLookup(ptr), function() {
       dns.reverse('10.0.0.1', function(err, records) {
         expect(records).toBeTruthy();
@@ -163,7 +163,7 @@ describe('The dns module', function() {
 
   it('should pass testReverseLookupIPv6', function() {
     var ptr = 'ptr.nodyn.io';
-    waitsFor(helper.testComplete, "the dns reverse lookup IPv6 test to complete", 100);
+    waitsFor(helper.testComplete, "the dns reverse lookup IPv6 test to complete", 10000);
     prepareDns(DnsServer.testReverseLookup(ptr), function() {
       dns.reverse('::1', function(err, records) {
         expect(records).toBeTruthy();
@@ -175,7 +175,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeA', function() {
     var ip = '10.0.0.1';
-    waitsFor(helper.testComplete, "the dns resolve A test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve A test to complete", 10000);
     prepareDns(DnsServer.testResolveA(ip), function() {
       dns.resolve("nodyn.io", 'A', function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -188,7 +188,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeAAAA', function() {
     var ip = '::1';
-    waitsFor(helper.testComplete, "the dns resolve AAAA test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve AAAA test to complete", 10000);
     prepareDns(DnsServer.testResolveAAAA(ip), function() {
       dns.resolve("nodyn.io", 'AAAA', function(err, addresses) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -202,7 +202,7 @@ describe('The dns module', function() {
   it('should pass testResolveRrtypeMx', function() {
     var prio = 10,
         name = "mail.nodyn.io";
-    waitsFor(helper.testComplete, "the dns resolve mx test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve mx test to complete", 10000);
     prepareDns(DnsServer.testResolveMX(prio, name), function() {
       dns.resolve("nodyn.io", 'MX', function(err, records) {
         expect("Unexpected error: " + err, err === null).toBeTruthy();
@@ -215,7 +215,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeTxt', function() {
     var txt = "vert.x is awesome";
-    waitsFor(helper.testComplete, "the dns resolve txt test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve txt test to complete", 10000);
     prepareDns(DnsServer.testResolveTXT(txt), function() {
       dns.resolve("nodyn.io", 'TXT', function(err, records) {
         expect("Unexpected number of response records: " + records.length,
@@ -231,7 +231,7 @@ describe('The dns module', function() {
         weight = 1,
         port = 80,
         target = 'nodyn.io';
-    waitsFor(helper.testComplete, "the dns resolve srv test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve srv test to complete", 10000);
     prepareDns(DnsServer.testResolveSRV(prio, weight, port, target), function() {
       dns.resolve("nodyn.io", 'SRV', function(err, records) {
         expect(records).toBeTruthy();
@@ -247,7 +247,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeNs', function() {
     var ns = 'ns.nodyn.io';
-    waitsFor(helper.testComplete, "the dns resolve ns test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve ns test to complete", 10000);
     prepareDns(DnsServer.testResolveNS(ns), function() {
       dns.resolve("nodyn.io", 'NS', function(err, records) {
         expect("Unexpected number of response records: " + records.length,
@@ -260,7 +260,7 @@ describe('The dns module', function() {
 
   it('should pass testResolveRrtypeCname', function() {
     var cname = "cname.nodyn.io";
-    waitsFor(helper.testComplete, "the dns resolve cname test to complete", 100);
+    waitsFor(helper.testComplete, "the dns resolve cname test to complete", 10000);
     prepareDns(DnsServer.testResolveCNAME(cname), function() {
       dns.resolve("nodyn.io", 'CNAME', function(err, records) {
         expect(records).toBeTruthy();
@@ -271,7 +271,7 @@ describe('The dns module', function() {
   });
 
   it('should pass testLookupNonexisting', function() {
-    waitsFor(helper.testComplete, "the dns lookup nonexisting domain test to complete", 100);
+    waitsFor(helper.testComplete, "the dns lookup nonexisting domain test to complete", 10000);
     prepareDns(DnsServer.testLookupNonExisting(), function() {
       dns.lookup("asdfadsf.com", function(err, address) {
         expect(err).toBeTruthy();

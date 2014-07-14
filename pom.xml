@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.projectodd</groupId>
+  <groupId>io.nodyn</groupId>
   <artifactId>nodyn</artifactId>
   <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -19,15 +19,21 @@
   </parent>
 
   <scm>
-    <connection>scm:git:git://github.com/projectodd/nodyn.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/projectodd/nodyn.git</developerConnection>
-    <url>http://github.com/projectodd/node</url>
+    <connection>scm:git:git://github.com/nodyn/nodyn.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/nodyn/nodyn.git</developerConnection>
+    <url>http://github.com/nodyn.io</url>
   </scm>
 
   <developers>
     <developer>
       <name>Lance Ball</name>
       <email>lball@redhat.com</email>
+      <organization>Project Odd</organization>
+      <organizationUrl>http://projectodd.org</organizationUrl>
+    </developer>
+    <developer>
+      <name>Bob McWhirter</name>
+      <email>bobmcw@redhat.com</email>
       <organization>Project Odd</organization>
       <organizationUrl>http://projectodd.org</organizationUrl>
     </developer>
@@ -61,12 +67,11 @@
     <version.junit>4.7</version.junit>
     <version.vertx>2.1.1</version.vertx>
     <version.hazelcast>2.6.6</version.hazelcast>
-    <version.lang-dynjs.verticle>1.0.1</version.lang-dynjs.verticle>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
 <!--
     <version.jvm-npm>0.1.0-SNAPSHOT</version.jvm-npm>
 -->
-    <version.jvm-npm>1.x.incremental.8</version.jvm-npm>
+    <version.jvm-npm>1.x.incremental.9</version.jvm-npm>
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
@@ -154,11 +159,6 @@
       <version>${version.vertx}</version>
     </dependency>
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>lang-dynjs</artifactId>
-      <version>${version.lang-dynjs.verticle}</version>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${version.junit}</version>
@@ -218,7 +218,7 @@
                   <goal>java</goal>
                 </goals>
                 <configuration>
-                  <mainClass>org.jasmine.cli.Main</mainClass>
+                  <mainClass>io.nodyn.TestRunner</mainClass>
                   <classpathScope>test</classpathScope>
                   <cleanupDaemonThreads>false</cleanupDaemonThreads>
                   <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
@@ -378,7 +378,7 @@
               <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>org.projectodd.nodyn.Main</mainClass>
+                  <mainClass>io.nodyn.cli.Main</mainClass>
                 </transformer>
               </transformers>
               <filters>

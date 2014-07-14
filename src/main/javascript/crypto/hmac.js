@@ -5,7 +5,7 @@ var Codec  = require('nodyn/codec');
 
 var Mac = javax.crypto.Mac;
 var SecretKeySpec = javax.crypto.spec.SecretKeySpec;
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 
 function macAlgorithmToJava(algo) {
   algo = algo.toLowerCase();

@@ -18,10 +18,11 @@ var getEnv = function() {
 var Process = function() {
   var Mode         = java.nio.file.AccessMode,
       Open         = java.nio.file.StandardOpenOption,
-      Node         = org.projectodd.nodyn.Nodyn,
-      javaProcess  = new org.projectodd.nodyn.process.Process();
+      Node         = io.nodyn.Nodyn,
+      javaProcess  = new io.nodyn.process.Process();
 
-  this.context     = org.vertx.java.core.VertxFactory.newVertx();
+  this.context     = __vertx;
+  this.EVENT_LOOP  = __nodyn.managedLoop;
   this.title       = "Nodyn";
   this.version     = Node.VERSION;
 
@@ -59,9 +60,6 @@ var Process = function() {
     }
   };
 
-  // QueryString initialized in NodeJSVerticleFactory
-  this.binding.QueryString = nodyn.QueryString;
-
   this.arch = javaProcess.arch();
   this.platform = javaProcess.platform();
   this.noDeprecation = false;
@@ -74,7 +72,12 @@ var Process = function() {
   this.env = getEnv();
   this.pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
   this.execPath = System.getProperty("user.dir"); // TODO: This doesn't make much sense
-  this.argv = null;
+  this.argv = [ 'nodyn' ];
+  if ( dynjs.argv ) {
+    for ( i = 0 ; i < dynjs.argv.length ; ++i ) {
+      this.argv.push( dynjs.argv[i] );
+    }
+  }
   this.execArgv = null;
   this.features = null;
   this.debugPort = null;
@@ -102,8 +105,10 @@ Process.prototype.memoryUsage = function() {
 };
 
 Process.prototype.nextTick = function(callback, args) {
-  this.context.runOnContext(function() {
+  process.EVENT_LOOP.incrCount();
+  process.context.runOnContext(function() {
     callback(args);
+    process.EVENT_LOOP.decrCount();
   });
 };
 
@@ -112,6 +117,7 @@ Process.prototype.cwd = function() {
 };
 
 Process.prototype.exit = function() {
+  print("EXITING PROCESS");
   this.context.stop();
   this.emit('exit');
 };

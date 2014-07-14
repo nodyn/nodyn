@@ -8,7 +8,7 @@ describe("fs.Stat", function() {
   });
 
   it("should generate an error if the file is not found", function() {
-    waitsFor(helper.testComplete, "Stat file", 5);
+    waitsFor(helper.testComplete, "Stat file", 5000);
     fs.stat('invalidpath', function(err, stat) {
       expect(err instanceof Error).toBeTruthy();
       expect(err.code).toBe('ENOENT');
@@ -20,7 +20,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isFile()", function() {
-    waitsFor(helper.testComplete, "Stat isFile", 5);
+    waitsFor(helper.testComplete, "Stat isFile", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -33,7 +33,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isDirectory()", function() {
-    waitsFor(helper.testComplete, "Stat isDirectory", 5);
+    waitsFor(helper.testComplete, "Stat isDirectory", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getParent(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -46,7 +46,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isCharacterDevice()", function() {
-    waitsFor(helper.testComplete, "Stat isCharacterDevice", 5);
+    waitsFor(helper.testComplete, "Stat isCharacterDevice", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -59,7 +59,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isBlockDevice()", function() {
-    waitsFor(helper.testComplete, "Stat isBlockDevice", 5);
+    waitsFor(helper.testComplete, "Stat isBlockDevice", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -72,7 +72,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isFIFO()", function() {
-    waitsFor(helper.testComplete, "Stat isFIFO", 5);
+    waitsFor(helper.testComplete, "Stat isFIFO", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -85,7 +85,7 @@ describe("fs.Stat", function() {
   });
 
   it("should support isSocket()", function() {
-    waitsFor(helper.testComplete, "Stat isSocket", 5);
+    waitsFor(helper.testComplete, "Stat isSocket", 5000);
     helper.writeFixture(function(sut) {
       fs.stat(sut.getAbsolutePath(), function(err, stats) {
         expect(err).toBeFalsy();
@@ -113,7 +113,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isFile()", function() {
-    waitsFor(helper.testComplete, "Stat isFile", 5);
+    waitsFor(helper.testComplete, "Stat isFile", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getAbsolutePath());
       expect(stats).toBeTruthy();
@@ -124,7 +124,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isDirectory()", function() {
-    waitsFor(helper.testComplete, "Stat isFile", 5);
+    waitsFor(helper.testComplete, "Stat isFile", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getParent());
       expect(stats).toBeTruthy();
@@ -135,7 +135,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isCharacterDevice()", function() {
-    waitsFor(helper.testComplete, "Stat isCharDev", 5);
+    waitsFor(helper.testComplete, "Stat isCharDev", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getAbsolutePath());
       expect(stats).toBeTruthy();
@@ -146,7 +146,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isBlockDevice()", function() {
-    waitsFor(helper.testComplete, "Stat isCharDev", 5);
+    waitsFor(helper.testComplete, "Stat isCharDev", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getAbsolutePath());
       expect(stats).toBeTruthy();
@@ -157,7 +157,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isFIFO()", function() {
-    waitsFor(helper.testComplete, "Stat isFifo", 5);
+    waitsFor(helper.testComplete, "Stat isFifo", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getAbsolutePath());
       expect(stats).toBeTruthy();
@@ -168,7 +168,7 @@ describe("fs.StatSync", function() {
   });
 
   it("should support isSocket()", function() {
-    waitsFor(helper.testComplete, "Stat isSocket", 5);
+    waitsFor(helper.testComplete, "Stat isSocket", 5000);
     helper.writeFixture(function(sut) {
       var stats = fs.statSync(sut.getAbsolutePath());
       expect(stats).toBeTruthy();

@@ -1,10 +1,12 @@
+var blocking = require('nodyn/blocking');
+
 var system = process.context.fileSystem(),
     nodyn     = require('nodyn'),
     util      = require('util'),
     Path      = require('path'),
     Stream    = require('stream'),
     AsyncFile = org.vertx.java.core.file.AsyncFile,
-    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new org.projectodd.nodyn.posix.NodePosixHandler(), true),
+    posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new io.nodyn.posix.NodePosixHandler(), true),
     Errno     = Packages.jnr.constants.platform.Errno;
 
 var FS = {};
@@ -45,7 +47,7 @@ FS.ftruncate     = delegateFunction(system.truncate);
 FS.ftruncateSync = delegateFunction(system.truncateSync);
 FS.rename        = delegateFunction(system.move);
 FS.renameSync    = delegateFunction(system.moveSync);
-FS.readdir       = delegateFunction(system.readDir, nodyn.arrayConverter);
+//FS.readdir       = delegateFunction(system.readDir, nodyn.arrayConverter);
 FS.readdirSync   = delegateFunction(system.readDirSync, nodyn.arrayConverter);
 FS.chown         = delegateFunction(system.chown);
 FS.fchown        = delegateFunction(system.chown);
@@ -545,6 +547,25 @@ function mapOpenFlags(flags) {
     // todo: deal with append modes
   }
   return map;
+}
+
+
+
+
+FS.readdir = function(path,callback) {
+  blocking.submit( function() {
+    dir = new java.io.File( path );
+    if ( dir.isDirectory() ) {
+      var files = dir.list();
+      process.nextTick( function() {
+        callback(undefined, nodyn.arrayConverter( files ) );
+      });
+      return;
+    }
+    process.nextTick( function() {
+      callback( new Error("not a directory: " + dir ) );
+    });
+  })
 }
 
 module.exports = FS;

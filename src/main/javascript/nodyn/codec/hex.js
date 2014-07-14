@@ -1,7 +1,7 @@
 "use strict";
 
 var Buffer = require('buffer').Buffer;
-var Helper = org.projectodd.nodyn.buffer.Helper;
+var Helper = io.nodyn.buffer.Helper;
 
 var jHex = org.bouncycastle.util.encoders.Hex;
 
@@ -28,4 +28,3 @@ Hex.decode = function(input) {
     return new Buffer( jHex.decode( input.delegate.bytes ) );
   }
 }
-

@@ -31,7 +31,7 @@ describe("fs module", function() {
     var newDirectory = new java.io.File(basedir + "/waffle-recipes");
     newDirectory.delete();
     expect(typeof fs.mkdir).toBe('function');
-    waitsFor(helper.testComplete, "the mkdir operation to complete", 5);
+    waitsFor(helper.testComplete, "the mkdir operation to complete", 5000);
     fs.mkdir(basedir + "/waffle-recipes", 0755, function() {
       expect(newDirectory.exists()).toBe(true);
       newDirectory.delete();
@@ -42,7 +42,7 @@ describe("fs module", function() {
   it("should have an rmdir function", function() {
     var dirname = basedir + "/waffle-recipes";
     var newDirectory = new java.io.File(dirname);
-    waitsFor(helper.testComplete, "the rmdir operation to complete", 5);
+    waitsFor(helper.testComplete, "the rmdir operation to complete", 5000);
     fs.mkdir(dirname, 0755, function() {
       expect(newDirectory.exists()).toBe(true);
       fs.rmdir(basedir + "/waffle-recipes", function() {
@@ -55,7 +55,7 @@ describe("fs module", function() {
   it("should have a rmdirSync function", function() {
     var dirname = basedir + "/waffle-recipes";
     var newDirectory = new java.io.File(dirname);
-    waitsFor(helper.testComplete, 5);
+    waitsFor(helper.testComplete, 5000);
     fs.mkdir(dirname, 0755, function() {
       expect(newDirectory.exists()).toBe(true);
       fs.rmdirSync(dirname);
@@ -67,7 +67,7 @@ describe("fs module", function() {
 
   it("should have a rename function", function() {
     var newFile = new java.io.File(basedir + "/granola.txt");
-    waitsFor(helper.testComplete, "the rename operation to complete", 5);
+    waitsFor(helper.testComplete, "the rename operation to complete", 5000);
     fs.rename(tmpFile.getAbsolutePath(), basedir + "/granola.txt", function(e) {
       expect(e === null).toBe(true);
       expect(newFile.exists()).toBe(true);
@@ -84,7 +84,7 @@ describe("fs module", function() {
   });
 
   it("should fail with an error when renaming a non-existent file", function() {
-    waitsFor(helper.testComplete, "the rename operation to complete", 5);
+    waitsFor(helper.testComplete, "the rename operation to complete", 5000);
     fs.rename("blarg", basedir + "/granola.txt", function(e) {
       expect(new java.io.File(basedir + "/granola.txt").exists()).toBe(false);
       expect(e !== null).toBe(true);
@@ -93,7 +93,7 @@ describe("fs module", function() {
   });
 
   it("should have a writeFile function", function() {
-    waitsFor(helper.testComplete, "the writeFile operation to complete", 5);
+    waitsFor(helper.testComplete, "the writeFile operation to complete", 5000);
     fs.writeFile(tmpFile.getAbsolutePath(),
       'Now is the winter of our discontent made glorious summer by this son of York',
       function (err) {
@@ -106,7 +106,7 @@ describe("fs module", function() {
   });
 
   it("should have an exists function", function() {
-    waitsFor(helper.testComplete, "the exists() operation to complete", 5);
+    waitsFor(helper.testComplete, "the exists() operation to complete", 5000);
     expect(fs.exists(tmpFile.getAbsolutePath(), function(exists) {
       expect(exists).toBe(true);
       expect(fs.exists('/some/invalid/path', function(exists) {
@@ -122,7 +122,7 @@ describe("fs module", function() {
   });
 
   it("should have a truncate function", function() {
-    waitsFor(helper.testComplete, "the truncate test to complete", 5);
+    waitsFor(helper.testComplete, "the truncate test to complete", 5000);
     helper.writeFixture(function(sut) {
       fs.exists(sut.getAbsolutePath(), function(exists) {
         expect(exists).toBe(true);
@@ -137,7 +137,7 @@ describe("fs module", function() {
   });
 
   it("should extend files with trunctate() as well as shorten them", function() {
-    waitsFor(helper.testComplete, "the truncate test to complete", 5);
+    waitsFor(helper.testComplete, "the truncate test to complete", 5000);
     helper.writeFixture(function(sut) {
       fs.truncate(sut.getAbsolutePath(), 1024, function(err, result) {
         expect(sut.exists()).toBe(true);
@@ -154,7 +154,7 @@ describe("fs module", function() {
   });
 
   it("should provide ftruncate", function() {
-    waitsFor(helper.testComplete, "the ftruncate test to complete", 5);
+    waitsFor(helper.testComplete, "the ftruncate test to complete", 5000);
     helper.writeFixture(function(sut) {
       expect(sut.length()).toBe(data.length);
       fs.ftruncate(sut.getAbsolutePath(), 6, function(err, result) {
@@ -166,7 +166,7 @@ describe("fs module", function() {
   });
 
   it("should extend files with ftrunctate() as well as shorten them", function() {
-    waitsFor(helper.testComplete, "the ftruncate test to complete", 5);
+    waitsFor(helper.testComplete, "the ftruncate test to complete", 5000);
     helper.writeFixture(function(sut) {
       fs.ftruncate(sut.getAbsolutePath(), 1024, function(err, result) {
         expect(sut.exists()).toBe(true);
@@ -183,7 +183,7 @@ describe("fs module", function() {
   });
 
   it("should provide a mkdir function", function() {
-    waitsFor(helper.testComplete, "the mkdir test to complete", 5);
+    waitsFor(helper.testComplete, "the mkdir test to complete", 5000);
     var newDirectory = new java.io.File(tempDir + "/waffle-recipes");
     fs.mkdir(newDirectory.getAbsolutePath(), 0755, function(e) {
       expect(newDirectory.exists()).toBe(true);
@@ -200,11 +200,14 @@ describe("fs module", function() {
   });
 
   it("should provide a readdir function", function() {
-    waitsFor(helper.testComplete, "the readdir test to complete", 5);
+    waitsFor(helper.testComplete, "the readdir test to complete", 5000);
     fs.readdir(tempDir, function(e,r) {
       expect(r.length).toBeGreaterThan(0);
       // make sure this thing behaves like a JS array
       expect((typeof r.forEach)).toBe('function');
+      for ( i = 0 ; i < r.length ; ++i ) {
+        expect( r[i].indexOf( "/" ) ).toBe(-1);
+      }
       helper.testComplete(true);
     });
   });
@@ -218,7 +221,7 @@ describe("fs module", function() {
 
   it('should provide a read function', function() {
     var data = "One shouldn't let intellectuals play with matches";
-    waitsFor(helper.testComplete, "the read test to complete", 5);
+    waitsFor(helper.testComplete, "the read test to complete", 5000);
     helper.writeFixture(function(sut) {
       fs.open(sut.getAbsolutePath(), 'r', function(e,f) {
         var b = new Buffer('');
@@ -233,7 +236,7 @@ describe("fs module", function() {
   describe('realpath', function() {
     it('should resolve existing files', function() {
       var filename = 'realpath-spec-tmp.txt';
-      waitsFor(helper.testComplete, 'the realpath test to complete', 5);
+      waitsFor(helper.testComplete, 'the realpath test to complete', 5000);
       fs.writeFileSync(filename, 'To be or not to be, that is the question');
       fs.realpath(filename, function(e, p) {
         expect(e).toBeFalsy();
@@ -247,7 +250,7 @@ describe("fs module", function() {
 
     it('should provide the callback function with an Error if path does not exist', function() {
       var filename = 'some-file-that-does-not-exist.txt';
-      waitsFor(helper.testComplete, 'the realpath test to complete', 5);
+      waitsFor(helper.testComplete, 'the realpath test to complete', 5000);
       fs.realpath(filename, function(e, p) {
         expect(e).toBeTruthy();
         expect(e.syscall).toBe('realpath');
@@ -301,7 +304,7 @@ describe("fs module", function() {
   describe("when opening files", function() {
 
     it("should error on open read if the file doesn't exist", function() {
-      waitsFor(helper.testComplete, "the open read fails test to complete", 5);
+      waitsFor(helper.testComplete, "the open read fails test to complete", 5000);
       fs.open('some-non-file.txt', 'r', function(e, f) {
         expect(e instanceof Error).toBeTruthy();
         helper.testComplete(true);
@@ -309,7 +312,7 @@ describe("fs module", function() {
     });
 
     it("should open files for reading", function() {
-      waitsFor(helper.testComplete, "the open files test to complete", 5);
+      waitsFor(helper.testComplete, "the open files test to complete", 5000);
       helper.writeFixture(function(sut) {
         fs.open(sut.getAbsolutePath(), 'r', function(e, f) {
           expect(e).toBeFalsy();
@@ -320,7 +323,7 @@ describe("fs module", function() {
     });
 
     it("should open files for writing", function() {
-      waitsFor(helper.testComplete, "the open files for writing test to complete", 5);
+      waitsFor(helper.testComplete, "the open files for writing test to complete", 5000);
       helper.writeFixture(function(sut) {
         fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
           expect(e).toBeFalsy();
@@ -331,7 +334,7 @@ describe("fs module", function() {
     });
 
     it("should provide an error if attempting to close null", function() {
-      waitsFor(helper.testComplete, "the close callback to return an error", 5);
+      waitsFor(helper.testComplete, "the close callback to return an error", 5000);
       fs.close(null, function(e) {
         expect(e.message).toBe("Don't know how to close null");
         helper.testComplete(true);
@@ -339,7 +342,7 @@ describe("fs module", function() {
     });
 
     it("should close", function() {
-      waitsFor(helper.testComplete, "the close callback to finish", 5);
+      waitsFor(helper.testComplete, "the close callback to finish", 5000);
       helper.writeFixture(function(sut) {
         fs.open(sut.getAbsolutePath(), 'r+', null, function(e, f) {
           expect(!e).toBe(true);
@@ -353,7 +356,7 @@ describe("fs module", function() {
     });
 
     it("should be able to read a file contents", function() {
-      waitsFor(helper.testComplete, "the readFile to complete", 5);
+      waitsFor(helper.testComplete, "the readFile to complete", 5000);
       var contents = "American Cheese";
       helper.writeFixture(function(sut) {
         fs.readFile(sut.getAbsolutePath(), function(err, file) {
@@ -367,7 +370,7 @@ describe("fs module", function() {
     });
 
     it("should be able to read a file using encoding", function() {
-      waitsFor(helper.testComplete, "the readFile to complete", 5);
+      waitsFor(helper.testComplete, "the readFile to complete", 5000);
       var contents = "American Cheese";
       helper.writeFixture(function(sut) {
         fs.readFile(sut.getAbsolutePath(), {encoding:'ascii'}, function(err, str) {
@@ -390,7 +393,7 @@ describe("fs module", function() {
       });
 
       it("should open files with openSync in write mode", function() {
-        waitsFor(helper.testComplete, "the openSync write test to complete", 5);
+        waitsFor(helper.testComplete, "the openSync write test to complete", 5000);
         helper.writeFixture(function(sut) {
           var f = fs.openSync(sut.getAbsolutePath(), 'r+', null);
           expect(f).toBeTruthy();
@@ -400,7 +403,7 @@ describe("fs module", function() {
       });
 
       it("should open files with openSync in read mode", function() {
-        waitsFor(helper.testComplete, "the openSync read test to complete", 5);
+        waitsFor(helper.testComplete, "the openSync read test to complete", 5000);
         helper.writeFixture(function(sut) {
           var f = fs.openSync(sut.getAbsolutePath(), 'r', null);
           expect(f).toBeTruthy();
@@ -427,7 +430,7 @@ describe("fs module", function() {
       });
 
       it("should be able to read a file", function() {
-        waitsFor(helper.testComplete, "the read to complete", 5);
+        waitsFor(helper.testComplete, "the read to complete", 5000);
         var contents = "American Cheese";
         helper.writeFixture(function(sut) {
           var result = fs.readFileSync(sut.getAbsolutePath());
@@ -439,7 +442,7 @@ describe("fs module", function() {
       });
 
       it("should be able to read a file with encoding", function() {
-        waitsFor(helper.testComplete, "the read to complete", 5);
+        waitsFor(helper.testComplete, "the read to complete", 5000);
         var contents = "American Cheese";
         helper.writeFixture(function(sut) {
           var result = fs.readFileSync(sut.getAbsolutePath(), {encoding: 'ascii'});
