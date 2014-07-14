@@ -53,10 +53,10 @@ public class Nodyn extends DynJS {
         }
 
         GlobalObject globalObject = getGlobalObject();
-        globalObject.defineGlobalProperty("__vertx", vertx);
+        globalObject.defineGlobalProperty("__vertx", vertx, false);
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
         globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
-        globalObject.defineGlobalProperty("__nodyn", this);
+        globalObject.defineGlobalProperty("__nodyn", this, false);
 
         EventLoopGroup elg = ((DefaultVertx) vertx).getEventLoopGroup();
         if (parent == null) {

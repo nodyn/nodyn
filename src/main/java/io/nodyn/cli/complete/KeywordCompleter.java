@@ -19,7 +19,7 @@ public class KeywordCompleter implements Completion {
     };
 
     public KeywordCompleter() {
-        
+
     }
 
     @Override
@@ -45,7 +45,7 @@ public class KeywordCompleter implements Completion {
             if ( each.startsWith( prefix ) ) {
                 completeOperation.addCompletionCandidate( each );
                 completeOperation.setSeparator( ' ' );
-                completeOperation.setOffset( completeOperation.getCursor() - prefix.length() );
+                completeOperation.setOffset(completeOperation.getCursor() - prefix.length());
             }
         }
     }
