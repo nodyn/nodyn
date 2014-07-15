@@ -1,9 +1,6 @@
 package io.nodyn.loop;
 
-import io.nodyn.Callback;
-import io.nodyn.netty.ManagedEventLoopGroup;
-import io.nodyn.netty.RefCountedEventLoopGroup;
-import io.nodyn.netty.RefHandle;
+import io.netty.channel.EventLoopGroup;
 
 
 /**
@@ -30,14 +27,15 @@ public class Blocking {
     }
 
     public void unblock(final Runnable action) {
-        final RefCountedEventLoopGroup elg = managedLoop.getEventLoopGroup();
+        final EventLoopGroup elg = managedLoop.getEventLoopGroup();
+        final RefHandle refHandle = managedLoop.newHandle();
         elg.submit(new Runnable() {
             @Override
             public void run() {
                 try {
                     action.run();
                 } finally {
-                    elg.refHandle().unref();
+                    refHandle.unref();
                 }
 
             }

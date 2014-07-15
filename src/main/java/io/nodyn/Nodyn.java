@@ -2,8 +2,9 @@ package io.nodyn;
 
 
 import io.netty.channel.EventLoopGroup;
-import io.nodyn.netty.ManagedEventLoopGroup;
-import io.nodyn.netty.RefHandle;
+import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.RefHandle;
+import io.nodyn.loop.RootManagedEventLoopGroup;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.Runner;
@@ -11,7 +12,10 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Nodyn extends DynJS {
 
@@ -36,7 +40,6 @@ public class Nodyn extends DynJS {
 
         this.config = config;
 
-
         if (parent == null) {
             System.setProperty("vertx.pool.eventloop.size", "1");
             if (config.isClustered()) {
@@ -56,9 +59,9 @@ public class Nodyn extends DynJS {
 
         EventLoopGroup elg = ((DefaultVertx) vertx).getEventLoopGroup();
         if (parent == null) {
-            this.managedLoop = new ManagedEventLoopGroup(elg);
+            this.managedLoop = new RootManagedEventLoopGroup(elg);
         } else {
-            this.managedLoop = parent.managedLoop;
+            this.managedLoop = parent.managedLoop.newChild();
         }
     }
 
@@ -86,8 +89,8 @@ public class Nodyn extends DynJS {
     }
 
     public Object start(Runner runner) {
-        loadFromClasspath(NODE_JS);
         RefHandle handle = this.managedLoop.newHandle();
+        loadFromClasspath(NODE_JS);
         try {
             if (runner != null) {
                 Object result = runner.execute();

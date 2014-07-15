@@ -11,12 +11,27 @@ process = (function() {
   return new Process();
 })();
 
+//process.stdin = new (require('nodyn/streams').InputStream)( System.in );
+//process.stdin._start();
+//process.stdin._stream.readStop();
+
+Object.defineProperty( process, 'stdin', {
+  get: function() {
+    if ( ! this._stdin ) {
+      this._stdin = new (require('nodyn/streams').InputStream)( System.in );
+      this._stdin._start();
+      this._stdin._stream.readStop();
+    }
+    return this._stdin;
+  }
+});
+
 __filename = (typeof __filename === 'undefined') ?
               'node.js' : __filename;
 __dirname  = (typeof __dirname === 'undefined') ?
               java.lang.System.getProperty('user.dir') : __dirname;
 
-console    = NativeRequire.require('node_console');
+console    = require('console');
 Buffer     = require('buffer').Buffer;
 SlowBuffer = Buffer.SlowBuffer;
 

@@ -4,15 +4,17 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import io.netty.handler.codec.http.HttpResponseDecoder;
-import io.nodyn.http.DebugHandler;
 import io.nodyn.http.HttpUnwrapper;
-import io.nodyn.http.client.*;
-import io.nodyn.net.*;
-import io.nodyn.netty.ManagedEventLoopGroup;
-import io.nodyn.netty.RefCountedEventLoopGroup;
+import io.nodyn.http.client.ClientRequestWrap;
+import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.RefHandleHandler;
+import io.nodyn.net.ErrorHandler;
+import io.nodyn.net.HalfOpenHandler;
+import io.nodyn.net.SocketWrappingHandler;
 
 /**
  * @author Bob McWhirter
@@ -35,7 +37,7 @@ public class AgentWrap {
     }
 
     public ChannelFuture enqueue(final ClientRequestWrap request) {
-        final RefCountedEventLoopGroup eventLoopGroup = managedLoop.getEventLoopGroup();
+        final EventLoopGroup eventLoopGroup = managedLoop.getEventLoopGroup();
 
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(eventLoopGroup);
@@ -54,7 +56,7 @@ public class AgentWrap {
                 ch.pipeline().addLast("http.unwrapper", new HttpUnwrapper());
                 ch.pipeline().addLast("socket.wrap", new SocketWrappingHandler());
                 ch.pipeline().addLast("half.open", new HalfOpenHandler(false));
-                ch.pipeline().addLast("ref.handler", new RefHandleHandler(eventLoopGroup.refHandle()));
+                ch.pipeline().addLast("ref.handler", AgentWrap.this.managedLoop.newHandle().handler() );
                 ch.pipeline().addLast("error", new ErrorHandler());
             }
         });

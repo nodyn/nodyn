@@ -1,4 +1,4 @@
-package io.nodyn.netty;
+package io.nodyn.loop;
 
 /**
  * @author Bob McWhirter

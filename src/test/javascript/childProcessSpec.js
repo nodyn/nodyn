@@ -10,6 +10,7 @@ describe( 'child_process', function() {
 
   it('should work', function() {
     waitsFor(helper.testComplete, "child process to read", 5000 );
+    try {
     var content = '';
     var proc = child_process.spawn('cat', [ 'pom.xml' ]);
     proc.stdout.on('data', function(d) {
@@ -20,5 +21,8 @@ describe( 'child_process', function() {
       expect( content.indexOf( '</project>' ) ).toBeGreaterThan(0);
       helper.testComplete(true);
     })
+    } catch (err) {
+      System.err.println( err );
+    }
   });
 });

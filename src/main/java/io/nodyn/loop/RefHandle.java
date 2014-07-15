@@ -1,4 +1,4 @@
-package io.nodyn.netty;
+package io.nodyn.loop;
 
 /**
  * @author Bob McWhirter
@@ -17,6 +17,9 @@ public class RefHandle {
         return new RefHandle( this.refCounted );
     }
 
+    public RefHandleHandler handler() {
+        return new RefHandleHandler( this );
+    }
 
     public synchronized void ref() {
         if ( this.counted ) {

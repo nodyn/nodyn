@@ -45,7 +45,13 @@
   InputStream.prototype._start = function() {
     this._stream.start();
   };
+  InputStream.prototype.ref = function() {
+    this._stream.ref();
+  }
 
+  InputStream.prototype.unref = function() {
+    this._stream.unref();
+  }
 
   module.exports.InputStream = InputStream;
 

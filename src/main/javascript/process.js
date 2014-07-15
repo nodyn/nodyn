@@ -1,3 +1,4 @@
+
 var getEnv = function() {
   env = {};
   tmpDir = System.getProperty("java.io.tmpdir");
@@ -54,11 +55,7 @@ var Process = function() {
     }
   };
 
-  // TODO: Fix this
-  this.stdin = {
-    read: function() {
-    }
-  };
+  //this.stdin = new streams.InputStream( new io.nodyn.stream.InputStreamWrap( this.EVENT_LOOP, System.in ) );
 
   this.arch = javaProcess.arch();
   this.platform = javaProcess.platform();
@@ -105,10 +102,10 @@ Process.prototype.memoryUsage = function() {
 };
 
 Process.prototype.nextTick = function(callback, args) {
-  process.EVENT_LOOP.incrCount();
+  var handle = process.EVENT_LOOP.newHandle();
   process.context.runOnContext(function() {
     callback(args);
-    process.EVENT_LOOP.decrCount();
+    handle.unref();
   });
 };
 
@@ -122,7 +119,12 @@ Process.prototype.exit = function() {
   this.emit('exit');
 };
 
+Process.prototype._setupDomainUse = function(domain,flags) {
+  print( "_setupDomainUse, whatever that means" );
+}
+
 // for now
 Process.prototype.abort = Process.prototype.exit;
 
 module.exports = Process;
+

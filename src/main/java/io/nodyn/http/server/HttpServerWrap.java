@@ -5,7 +5,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.nodyn.net.NetServerWrap;
-import io.nodyn.netty.ManagedEventLoopGroup;
+import io.nodyn.loop.ManagedEventLoopGroup;
 
 /**
  * @author Bob McWhirter

@@ -63,5 +63,5 @@ var Console = function() {
   };
 };
 
-module.exports = new Console();
+module.exports.Console = Console;
 

@@ -2,8 +2,8 @@ package io.nodyn.child_process;
 
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import io.nodyn.netty.ManagedEventLoopGroup;
-import io.nodyn.netty.RefHandle;
+import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.RefHandle;
 import io.nodyn.stream.InputStreamWrap;
 
 import java.io.IOException;

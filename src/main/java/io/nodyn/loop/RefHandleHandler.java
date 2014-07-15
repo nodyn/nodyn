@@ -1,9 +1,9 @@
-package io.nodyn.net;
+package io.nodyn.loop;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.nodyn.netty.RefEvents;
-import io.nodyn.netty.RefHandle;
+import io.nodyn.loop.RefEvents;
+import io.nodyn.loop.RefHandle;
 
 /**
  * @author Bob McWhirter

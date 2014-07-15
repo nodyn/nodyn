@@ -4,9 +4,13 @@ var vm     = require('vm');
 
 describe('vm functions', function() {
   it('should allow creation of new contexts', function() {
+    try {
     var context = vm.createContext();
     expect(context).not.toBe( undefined );
-    expect(context instanceof org.dynjs.runtime.DynJS).toBe(true);
+    expect(context.runtime instanceof org.dynjs.runtime.DynJS).toBe(true);
+    } catch ( err ) {
+      err.printStackTrace();
+    }
   });
 
   it('should allow initializing the sandbox', function() {
@@ -14,14 +18,20 @@ describe('vm functions', function() {
       tacos: 'crunch',
     });
     expect(context).not.toBe( undefined );
-    expect(context instanceof org.dynjs.runtime.DynJS).toBe(true);
-    expect(context.globalObject.tacos).toBe('crunch');
+    expect(context.runtime instanceof org.dynjs.runtime.DynJS).toBe(true);
+    expect(context.runtime.globalObject.tacos).toBe('crunch');
     try {
       tacos;
     } catch (err) {
       // expected and correct
     }
   });
+
+  it("should allow setting properties in the context using []", function() {
+    var context = vm.createContext();
+    context['undocumented'] = 'feature';
+    expect(context.runtime.globalObject.undocumented).toBe('feature');
+  })
 
   it("should allow running code in this context", function() {
     foo = 2;

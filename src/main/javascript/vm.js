@@ -1,7 +1,7 @@
 
 
-module.exports.runInThisContext = function(code,filename) {
-  var script  = createScript(code,filename);
+module.exports.runInThisContext = function(code,options) {
+  var script  = createScript(code,options);
   return script.runInThisContext();
 };
 
@@ -20,52 +20,66 @@ module.exports.runInNewContext = function() {
     sandbox  = arguments[1];
     filename = arguments[2];
   }
-  var script  = createScript(code,filename);
+  var script  = createScript(code, {filename: filename} );
   return script.runInNewContext( sandbox );
 };
 
-module.exports.runInContext = function(code,context,filename) {
-  if ( ! filename ) {
-    filename = '<script>';
-  }
-  var script = createScript(code,filename);
-  return script.runInContext
+module.exports.runInContext = function(code,context,options) {
+  var script = createScript(code,options);
+  return script.runInContext(context,options);
 };
 
 function createContext(sandbox) {
   var runtime = new io.nodyn.Nodyn(__nodyn);
+
   if ( sandbox ) {
     var g = runtime.globalObject;
     for ( k in sandbox ) {
       g[k] = sandbox[k];
     }
   }
-  return runtime;
+
+  var context = new JSAdapter(
+    {
+      runtime: runtime,
+    },
+    {
+      __get__: function(name) {
+        return runtime.globalObject[name];
+      },
+      __set__: function(name, value) {
+        runtime.globalObject[name] = value;
+      }
+    }
+  );
+
+  return context;
 };
+
 module.exports.createContext = createContext;
 
-function createScript(code,filename) {
-  return new Script(code,filename);
+function createScript(code,options) {
+  return new Script(code,options);
 };
 module.exports.createScript = createScript;
 
-function Script(code,filename) {
+function Script(code,options) {
   this._code = code;
-  this._filename = filename;
+  this._filename = ( options && options.filename ) || '<script>';
 }
 
 Script.prototype.runInThisContext = function() {
-  return this._runInContext(__nodyn);
+  return this.runInContext( { runtime: __nodyn } );
 };
 
 Script.prototype.runInNewContext = function(sandbox) {
   var context = createContext(sandbox);
-  return this._runInContext(context);
+  return this.runInContext(context);
 };
 
-Script.prototype._runInContext = function(context) {
-  var runner = context.newRunner().withSource( this._code ).withFileName( this._filename );
-  return context.start( runner );
+Script.prototype.runInContext = function(context,options) {
+  var runner = context.runtime.newRunner().withSource( this._code ).withFileName( this._filename );
+  return context.runtime.start( runner );
 }
 
 

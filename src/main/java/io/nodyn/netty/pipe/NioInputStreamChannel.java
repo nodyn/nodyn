@@ -1,16 +1,12 @@
 package io.nodyn.netty.pipe;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
-import io.netty.channel.nio.AbstractNioByteChannel;
-import io.netty.channel.nio.AbstractNioChannel;
+import io.netty.channel.FileRegion;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
-import java.nio.channels.SelectableChannel;
 
 /**
  * @author Bob McWhirter
@@ -18,6 +14,7 @@ import java.nio.channels.SelectableChannel;
 public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     private final InputStream in;
+    private Thread pump;
 
     public static NioInputStreamChannel create(InputStream in) throws IOException {
         Pipe pipe = Pipe.open();
@@ -36,7 +33,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
     }
 
     protected void startPump() {
-        new Thread() {
+        this.pump = new Thread() {
             @Override
             public void run() {
                 byte[] buf = new byte[1024];
@@ -47,6 +44,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
                     }
                     NioInputStreamChannel.this.pipe.sink().close();
                 } catch (IOException e) {
+                    e.printStackTrace();
                     try {
                         NioInputStreamChannel.this.pipe.sink().close();
                     } catch (IOException e1) {
@@ -54,7 +52,10 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
                     }
                 }
             }
-        }.start();
+        };
+
+        this.pump.setDaemon(true);
+        this.pump.start();
     }
 
     @Override
@@ -74,6 +75,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     @Override
     protected void doClose() throws Exception {
+        this.pump.interrupt();
         this.pipe.source().close();
     }
 

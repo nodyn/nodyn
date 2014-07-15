@@ -11,36 +11,21 @@ function ChildProcess(child) {
 
   this._exitVal = 0;
 
+  this._closesNeeded = 0;
+  this._closesGot    = 0;
+
   this._process.start();
-
-  this._stdout = new streams.InputStream( this._process.stdout );
-  this._stderr = new streams.InputStream( this._process.stderr );
-
-  this._stdout.on('close', this._onCloseStdout.bind(this) );
-  this._stderr.on('close', this._onCloseStderr.bind(this) );
-
-  this._stdout._start();
-  this._stderr._start();
-}
+};
 
 util.inherits(ChildProcess, EventEmitter);
 
 ChildProcess.prototype._onExit = function(result) {
   this.exitVal = result.result;
-};
+}
 
-ChildProcess.prototype._onCloseStdout = function() {
-  this._stdoutClosed = true;
-  this._checkClosed();
-};
-
-ChildProcess.prototype._onCloseStderr = function() {
-  this._stderrClosed = true;
-  this._checkClosed();
-};
-
-ChildProcess.prototype._checkClosed = function() {
-  if ( this._stdoutClosed && this._stderrClosed ) {
+ChildProcess.prototype._onClose = function() {
+  ++this._closesGot;
+  if ( this._closesGot === this._closesNeeded ) {
     this.emit( "close", this.exitVal );
   }
 };
@@ -53,6 +38,13 @@ Object.defineProperty( ChildProcess.prototype, "stdin", {
 
 Object.defineProperty( ChildProcess.prototype, "stdout", {
   get: function() {
+    if ( ! this._stdout ) {
+      this._stdout = new streams.InputStream( this._process.stdout );
+      this._stdout._start();
+      this._stdout._stream.readStop();
+      this._stdout.on('close', this._onClose.bind(this) );
+      ++this._closesNeeded;
+    }
     return this._stdout;
   },
   enumerable: true,
@@ -60,6 +52,13 @@ Object.defineProperty( ChildProcess.prototype, "stdout", {
 
 Object.defineProperty( ChildProcess.prototype, "stderr", {
   get: function() {
+    if ( ! this._stderr ) {
+      this._stderr = new streams.InputStream( this._process.stderr );
+      this._stderr._start();
+      this._stderr._stream.readStop();
+      this._stderr.on('close', this._onClose.bind(this) );
+      ++this._closesNeeded;
+    }
     return this._stderr;
   },
   enumerable: true,

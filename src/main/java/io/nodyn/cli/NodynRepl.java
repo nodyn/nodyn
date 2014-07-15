@@ -20,7 +20,7 @@ package io.nodyn.cli;
 import io.nodyn.cli.complete.FunctionCompleter;
 import io.nodyn.cli.complete.KeywordCompleter;
 import io.nodyn.cli.complete.PropertyCompleter;
-import io.nodyn.netty.RefHandle;
+import io.nodyn.loop.RefHandle;
 import org.dynjs.exception.DynJSException;
 import org.dynjs.runtime.DynJS;
 import org.jboss.aesh.console.*;

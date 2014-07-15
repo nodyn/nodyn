@@ -18,7 +18,7 @@ function setTimeout() {
 
   var id = process.context.setTimer(milliseconds, function() {
     callback.apply(callback, args);
-    process.EVENT_LOOP.decrCount();
+    handle.unref();
   });
 
   return createTimerHandle(id, handle);

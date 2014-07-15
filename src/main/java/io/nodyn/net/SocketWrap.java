@@ -7,9 +7,8 @@ import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.nodyn.EventSource;
-import io.nodyn.netty.ManagedEventLoopGroup;
-import io.nodyn.netty.RefCountedEventLoopGroup;
-import io.nodyn.netty.RefEvents;
+import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.RefEvents;
 
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 public class SocketWrap extends EventSource {
 
     private final ManagedEventLoopGroup managedLoop;
-    private RefCountedEventLoopGroup eventLoopGroup;
     private ChannelFuture future;
     private boolean allowHalfOpen = false;
 
@@ -81,17 +79,17 @@ public class SocketWrap extends EventSource {
     }
 
     public void connect(int port, String host) {
-        this.eventLoopGroup = this.managedLoop.getEventLoopGroup();
+        EventLoopGroup eventLoopGroup = this.managedLoop.getEventLoopGroup();
         this.future = new Bootstrap()
                 .remoteAddress(host, port)
                 .channel(NioSocketChannel.class)
-                .group(this.eventLoopGroup)
+                .group(eventLoopGroup)
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
                         ch.pipeline().addLast(SocketWrap.this.handler());
                         ch.pipeline().addLast("half.open", new HalfOpenHandler(SocketWrap.this.allowHalfOpen));
-                        ch.pipeline().addLast("ref.handler", new RefHandleHandler(SocketWrap.this.eventLoopGroup.refHandle()));
+                        ch.pipeline().addLast("ref.handler", SocketWrap.this.managedLoop.newHandle().handler() );
                     }
                 })
                 .connect();

@@ -17,10 +17,8 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
-import io.nodyn.netty.RefHandle;
+import io.nodyn.loop.RefHandle;
 import org.dynjs.cli.Options;
-import org.dynjs.cli.Repl;
-import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionHandlerFilter;
