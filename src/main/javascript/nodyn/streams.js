@@ -2,7 +2,7 @@
   "use strict";
   var Stream = require('stream');
   var util   = require('util');
-  var buffer = require('buffer').Buffer;
+  var Buffer = require('buffer').Buffer;
 
   function InputStream(stream) {
     Stream.Readable.call( this );
