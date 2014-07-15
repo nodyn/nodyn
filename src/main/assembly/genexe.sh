@@ -11,7 +11,7 @@ fi
 echo "Creating nodyn executable"
 ARGS='"$@"'
 (echo '#!/bin/sh
-exec java $NODYN_OPTS -jar "$0" "$@"
+exec java -Dnodyn.binary=$0 $NODYN_OPTS -jar "$0" "$@"
 '; cat target/nodyn-standalone.jar) > bin/nodyn && chmod +x bin/nodyn
 
 

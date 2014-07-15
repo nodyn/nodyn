@@ -69,7 +69,7 @@ var Process = function() {
   this.env = getEnv();
   this.pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
   this.execPath = System.getProperty("user.dir"); // TODO: This doesn't make much sense
-  this.argv = [ 'nodyn' ];
+  this.argv = [ System.getProperty('nodyn.binary') || 'nodyn' ]
   if ( dynjs.argv ) {
     for ( i = 0 ; i < dynjs.argv.length ; ++i ) {
       this.argv.push( dynjs.argv[i] );
