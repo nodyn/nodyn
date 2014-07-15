@@ -77,13 +77,13 @@
   util.inherits(OutputStream, Stream.Writable);
 
   OutputStream.prototype._write = function(chunk, encoding, callback) {
-    // todo - figure out why encoding ends up as 'buffer'
-    // var args = Array.prototype.slice.call(arguments);
-    // for (var a in args) {
-    //   print("ARG: " + args[a]);
-    // }
-    encoding = encoding || 'utf8';
-    this._stream.write(chunk.toString());
+    if (chunk instanceof Buffer) {
+      this._stream.write(chunk.toString());
+    } else if (chunk instanceof String) {
+      encoding = encoding || 'utf8';
+      this._stream.write(chunk.getBytes(encoding));
+    }
+    callback();
   };
 
   OutputStream.prototype._onDrain = function() {

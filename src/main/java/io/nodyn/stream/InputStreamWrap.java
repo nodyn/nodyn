@@ -36,12 +36,6 @@ public class InputStreamWrap extends StreamWrapper {
         channel.read();
     }
 
-    @Override
-    public FileDescriptor getFD() throws IOException {
-        if (this.in instanceof FileInputStream) return ((FileInputStream)this.in).getFD();
-        return null;
-    }
-
     public void readStart() {
         ref();
         getChannel().config().setAutoRead(true);

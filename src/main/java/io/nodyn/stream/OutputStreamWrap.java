@@ -31,12 +31,6 @@ public class OutputStreamWrap extends StreamWrapper {
         channel.read();
     }
 
-    @Override
-    public FileDescriptor getFD() throws IOException {
-        if (this.out instanceof FileOutputStream) return ((FileOutputStream)this.out).getFD();
-        return null;
-    }
-
     public void write(String chunk) throws IOException {
         out.write(chunk.getBytes());
     }

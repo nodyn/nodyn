@@ -23,8 +23,6 @@ public abstract class StreamWrapper extends EventSource implements Closeable {
 
     public abstract void start() throws IOException;
 
-    public abstract FileDescriptor getFD() throws IOException;
-
     public void ref() {
         this.getChannel().pipeline().fireUserEventTriggered(RefEvents.REF);
     }
@@ -38,13 +36,7 @@ public abstract class StreamWrapper extends EventSource implements Closeable {
     }
 
     public boolean isTTY() throws IOException {
-        FileDescriptor fd = this.getFD();
-        if (fd != null) {
-            return (fd == FileDescriptor.in
-                    || fd == FileDescriptor.out
-                    || fd == FileDescriptor.err);
-        }
-        return false;
+        return System.console() != null;
     }
 
     @Override
