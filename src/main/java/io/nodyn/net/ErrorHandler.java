@@ -11,6 +11,6 @@ public class ErrorHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         System.err.println( "ERROR!");
         cause.printStackTrace();
-        super.exceptionCaught(ctx, cause);
+        //super.exceptionCaught(ctx, cause);
     }
 }

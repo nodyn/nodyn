@@ -38,6 +38,10 @@ public abstract class AbstractManagedEventLoopGroup implements ManagedEventLoopG
         }
     }
 
+    public void shutdown() {
+        doShutdown();
+    }
+
     protected void doShutdown() {
         //System.err.println( getClass().getSimpleName() + " XX doShutdown()" );
         for ( ChildManagedEventLoopGroup each : this.children ) {

@@ -38,10 +38,16 @@ public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
         return this.eventLoopGroup;
     }
 
+    public void shutdown() {
+        doShutdown();
+    }
+
     protected void doShutdown() {
         super.doShutdown();
-        this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
-        this.eventLoopGroup = null;
+        if (this.eventLoopGroup != null) {
+            this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
+            this.eventLoopGroup = null;
+        }
     }
 
 }

@@ -374,6 +374,7 @@ function chunkInvalid(state, chunk) {
       !util.isString(chunk) &&
       !util.isNullOrUndefined(chunk) &&
       !state.objectMode) {
+      System.err.println( "invalid: " + chunk + " // " + System.identityHashCode( chunk ) );
     er = new TypeError('Invalid non-string/buffer chunk');
   }
   return er;

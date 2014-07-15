@@ -114,13 +114,14 @@ Process.prototype.cwd = function() {
 };
 
 Process.prototype.exit = function() {
-  print("EXITING PROCESS");
-  this.context.stop();
+  //print("EXITING PROCESS");
+  //this.context.stop();
+  process.EVENT_LOOP.shutdown();
   this.emit('exit');
 };
 
 Process.prototype._setupDomainUse = function(domain,flags) {
-  print( "_setupDomainUse, whatever that means" );
+  //print( "_setupDomainUse, whatever that means" );
 }
 
 // for now

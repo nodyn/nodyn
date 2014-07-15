@@ -6,6 +6,7 @@ import io.nodyn.EventSource;
 import io.nodyn.http.DebugHandler;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefEvents;
+import io.nodyn.net.ErrorHandler;
 import io.nodyn.netty.pipe.NioInputStreamChannel;
 
 import java.io.Closeable;
@@ -32,6 +33,7 @@ public class InputStreamWrap extends EventSource implements Closeable {
         //channel.pipeline().addLast(new DebugHandler("pipe"));
         channel.pipeline().addLast(new StreamEventsHandler(this));
         channel.pipeline().addLast( managedLoop.newHandle().handler() );
+        channel.pipeline().addLast( new ErrorHandler() );
         channel.config().setAutoRead(false);
         eventLoopGroup.register(channel);
         channel.read();

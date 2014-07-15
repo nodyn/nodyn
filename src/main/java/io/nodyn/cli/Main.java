@@ -19,14 +19,12 @@ import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
 import io.nodyn.loop.RefHandle;
 import org.dynjs.cli.Options;
+import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionHandlerFilter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 
 public class Main {
 
@@ -58,8 +56,8 @@ public class Main {
 
     public void run() throws IOException {
         try {
-            if ( arguments.length == 0 ) {
-                arguments = new String[]{ "--console" };
+            if (arguments.length == 0) {
+                arguments = new String[]{"--console"};
             }
             getParser().parseArgument(arguments);
 
@@ -128,9 +126,14 @@ public class Main {
     }
 
     private void startRepl() {
-        RefHandle handle = getRuntime().start(); // No top level script for repl. Just start it up.
-        NodynRepl repl = new NodynRepl(handle, getRuntime(), System.in, getOutputStream(), WELCOME_MESSAGE, PROMPT, System.getProperty("user.dir") + "/nodyn.log");
-        repl.run();
+        //RefHandle handle = getRuntime().start(); // No top level script for repl. Just start it up.
+        //NodynRepl repl = new NodynRepl(handle, getRuntime(), System.in, getOutputStream(), WELCOME_MESSAGE, PROMPT, System.getProperty("user.dir") + "/nodyn.log");
+        //repl.run();
+        Runner runner = getRuntime().newRunner();
+        InputStream repl = getRuntime().getConfig().getClassLoader().getResourceAsStream("node_repl.js");
+        BufferedReader in = new BufferedReader(new InputStreamReader(repl));
+        runner.withSource( in );
+        getRuntime().start( runner );
     }
 
     private PrintStream getOutputStream() {
@@ -157,7 +160,9 @@ public class Main {
         return nodyn;
     }
 
-    private CmdLineParser getParser() { return this.parser; }
+    private CmdLineParser getParser() {
+        return this.parser;
+    }
 
     private NodynArguments getArguments() {
         return this.nodynArgs;

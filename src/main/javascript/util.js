@@ -233,6 +233,11 @@ function formatValue(ctx, value, recurseTimes) {
     return primitive;
   }
 
+  // FIXME: make DynJS expose Object.keys and such for non-JS objects
+  if ( ! org.dynjs.runtime.JSObject.isInstance( value ) ) {
+    return value.toString() ;
+  }
+
   // Look up the keys of the object.
   var keys = Object.keys(value);
   var visibleKeys = arrayToHash(keys);

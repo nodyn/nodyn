@@ -12,4 +12,6 @@ public interface ManagedEventLoopGroup {
     EventLoopGroup getEventLoopGroup();
 
     ChildManagedEventLoopGroup newChild();
+
+    void shutdown();
 }

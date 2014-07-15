@@ -31,29 +31,15 @@ module.exports.runInContext = function(code,context,options) {
 
 function createContext(sandbox) {
   var runtime = new io.nodyn.Nodyn(__nodyn);
+  var g = runtime.globalObject;
 
   if ( sandbox ) {
-    var g = runtime.globalObject;
     for ( k in sandbox ) {
       g[k] = sandbox[k];
     }
   }
 
-  var context = new JSAdapter(
-    {
-      runtime: runtime,
-    },
-    {
-      __get__: function(name) {
-        return runtime.globalObject[name];
-      },
-      __set__: function(name, value) {
-        runtime.globalObject[name] = value;
-      }
-    }
-  );
-
-  return context;
+  return g;
 };
 
 module.exports.createContext = createContext;
@@ -69,7 +55,7 @@ function Script(code,options) {
 }
 
 Script.prototype.runInThisContext = function() {
-  return this.runInContext( { runtime: __nodyn } );
+  return this.runInContext( global );
 };
 
 Script.prototype.runInNewContext = function(sandbox) {
@@ -78,8 +64,8 @@ Script.prototype.runInNewContext = function(sandbox) {
 };
 
 Script.prototype.runInContext = function(context,options) {
-  var runner = context.runtime.newRunner().withSource( this._code ).withFileName( this._filename );
-  return context.runtime.start( runner );
+  var runner = context.__nodyn.newRunner().withSource( this._code ).withFileName( this._filename );
+  return context.__nodyn.start( runner );
 }
 
 
