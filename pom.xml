@@ -69,9 +69,9 @@
     <version.hazelcast>2.6.6</version.hazelcast>
     <version.dynjs>0.3.0-SNAPSHOT</version.dynjs>
 <!--
-    <version.jvm-npm>1.x.incremental.9</version.jvm-npm>
--->
     <version.jvm-npm>0.1.0-SNAPSHOT</version.jvm-npm>
+-->
+    <version.jvm-npm>1.x.incremental.9</version.jvm-npm>
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
