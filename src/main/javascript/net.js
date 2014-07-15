@@ -1,12 +1,13 @@
-var util          = NativeRequire.require('util');
-var Stream        = NativeRequire.require('stream');
-var nodyn         = NativeRequire.require('nodyn');
+var util          = require('util');
+var Stream        = require('stream');
+var nodyn         = require('nodyn');
 var EventEmitter = require('events').EventEmitter;
 
 // ------------------------------------------------------------------------
 // Server
 // ------------------------------------------------------------------------
 
+util.inherits(Server, EventEmitter)
 function Server(connectionListener) {
   EventEmitter.call( this );
   this._server = this._createServer();
@@ -84,7 +85,6 @@ Server.prototype.close = function(callback) {
   this._server.close();
 };
 
-nodyn.makeEventEmitter(Server);
 module.exports.Server = Server;
 
 module.exports.createServer = function(connectionListener) {
@@ -96,9 +96,9 @@ module.exports.createServer = function(connectionListener) {
 // ------------------------------------------------------------------------
 
 
+util.inherits(Socket, Stream.Duplex);
 function Socket(options) {
   if (!(this instanceof Socket)) return new Socket(options);
-  EventEmitter.call(this);
   Stream.Duplex.call(this);
 
   if ( options && options.socket ) {
@@ -133,9 +133,6 @@ function Socket(options) {
 }
 
 // Always do this BEFORE defining .prototype functions
-util.inherits(Socket, Stream.Duplex);
-
-nodyn.makeEventEmitter(Socket);
 
 Socket.prototype.ref = function() {
   this._socket.ref();
