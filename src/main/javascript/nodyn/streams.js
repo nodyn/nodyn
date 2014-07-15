@@ -62,15 +62,14 @@
     Stream.Writable.call( this );
     this._stream = new io.nodyn.stream.OutputStreamWrap( process.EVENT_LOOP, stream );
 
-    this._stream.on( 'drain',  this._onDrain.bind(this) );
-    this._stream.on( 'finish', this._onFinish.bind(this) );
-    this._stream.on( 'pipe',   this._onPipe.bind(this) );
-    this._stream.on( 'unpipe', this._onUnpipe.bind(this) );
-    this._stream.on( 'error',  this._onError.bind(this) );
-
     this.on('end', function() {
       this.emit('close');
     });
+    this.on('drain', OutputStream.prototype._onDrain.bind(this));
+    this.on('finish', OutputStream.prototype._onFinish.bind(this));
+    this.on('pipe', OutputStream.prototype._onPipe.bind(this));
+    this.on('unpipe', OutputStream.prototype._onUnpipe.bind(this));
+    this.on('error', OutputStream.prototype._onError.bind(this));
 
     this.isTTY = this._stream.isTTY();
   }
@@ -79,26 +78,42 @@
   OutputStream.prototype._write = function(chunk, encoding, callback) {
     if (chunk instanceof Buffer) {
       this._stream.write(chunk.toString());
-    } else if (chunk instanceof String) {
+    } else if (typeof chunk === 'string') {
       encoding = encoding || 'utf8';
       this._stream.write(chunk.getBytes(encoding));
+    } else {
+      // Not sure why we're getting here
+      this._stream.write(chunk.toString());
     }
     callback();
   };
 
   OutputStream.prototype._onDrain = function() {
+    print("DRAINING")
   };
 
   OutputStream.prototype._onFinish = function() {
+    print("FINISHING")
   };
 
   OutputStream.prototype._onPipe = function() {
+    print("PIPING")
   };
 
   OutputStream.prototype._onUnpipe = function() {
+    print("UNPIPING")
   };
 
   OutputStream.prototype._onError = function() {
+    print("ERRORING")
+  };
+
+  OutputStream.prototype.ref = function() {
+    this._stream.ref();
+  };
+
+  OutputStream.prototype.unref = function() {
+    this._stream.unref();
   };
 
   module.exports.OutputStream = OutputStream;
