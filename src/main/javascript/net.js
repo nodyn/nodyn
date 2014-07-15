@@ -95,9 +95,10 @@ module.exports.createServer = function(connectionListener) {
 // Socket
 // ------------------------------------------------------------------------
 
-nodyn.makeEventEmitter(Socket);
+
 function Socket(options) {
   if (!(this instanceof Socket)) return new Socket(options);
+  EventEmitter.call(this);
   Stream.Duplex.call(this);
 
   if ( options && options.socket ) {
@@ -133,6 +134,8 @@ function Socket(options) {
 
 // Always do this BEFORE defining .prototype functions
 util.inherits(Socket, Stream.Duplex);
+
+nodyn.makeEventEmitter(Socket);
 
 Socket.prototype.ref = function() {
   this._socket.ref();

@@ -5,8 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
+import io.nodyn.http.DebugHandler;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefEvents;
+import io.nodyn.loop.RefHandle;
 
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
@@ -51,20 +53,21 @@ public class NetServerWrap extends EventSource {
         channel().pipeline().fireUserEventTriggered(RefEvents.UNREF);
     }
 
-    private ChannelInitializer<Channel> initializer() {
+    private ChannelInitializer<Channel> initializer(final RefHandle handle) {
         return new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel channel) throws Exception {
-                initializeServerChannel(channel);
+                initializeServerChannel(channel, handle);
             }
         };
     }
 
-    protected void initializeServerChannel(Channel channel) {
+    protected void initializeServerChannel(Channel channel, RefHandle handle) {
         ChannelPipeline pipeline = channel.pipeline();
         //pipeline.addLast("debug", new DebugHandler("server"));
         pipeline.addLast(new ServerHandler(NetServerWrap.this));
-        pipeline.addLast("ref.handler", this.managedLoop.newHandle().handler());
+        pipeline.addLast("ref.handler", handle.handler());
+        pipeline.addLast("error", new ErrorHandler());
     }
 
     private ChannelInitializer<Channel> childInitializer() {
@@ -98,11 +101,12 @@ public class NetServerWrap extends EventSource {
     }
 
     public void listen(int port, String hostname) {
+        RefHandle handle = this.managedLoop.newHandle();
         EventLoopGroup eventLoopGroup = this.managedLoop.getEventLoopGroup();
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(eventLoopGroup);
         bootstrap.channel(NioServerSocketChannel.class);
-        bootstrap.handler(initializer());
+        bootstrap.handler(initializer(handle));
         bootstrap.childHandler(childInitializer());
 
         this.channelFuture = bootstrap.bind(hostname, port);
