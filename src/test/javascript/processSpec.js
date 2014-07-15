@@ -1,17 +1,23 @@
 var helper = require('specHelper'),
+    Stream = require('stream'),
     javaProcess = new io.nodyn.process.Process();
 
 describe('process', function() {
 
+  describe('.stdout', function() {
+    it('should be a Stream.Writable', function() {
+      expect(process.stdout instanceof Stream.Writable).toBeTruthy();
+    });
+
+    it('should have a write function', function() {
+      expect(typeof process.stdout.write).toBe('function');
+      process.stdout.write("A message to stdout");
+    });
+  });
+
   it('should pass testProcessObject', function() {
     expect(process).not.toBe(null);
     expect(typeof process).toBe('object');
-  });
-
-  it('should pass testStdOut', function() {
-    expect(process.stdout).not.toBe(null);
-    expect(typeof process.stdout.write).toBe('function');
-    process.stdout.write("A message to stdout");
   });
 
   it('should pass testStdErr', function() {
