@@ -43,19 +43,11 @@ var Process = function() {
     }
   };
 
-  this.stdout = {
-    write: function(message) {
-      java.lang.System.out.print(message);
-    }
-  };
-
   this.stderr = {
     write: function(message) {
       java.lang.System.err.print(message);
     }
   };
-
-  //this.stdin = new streams.InputStream( new io.nodyn.stream.InputStreamWrap( this.EVENT_LOOP, System.in ) );
 
   this.arch = javaProcess.arch();
   this.platform = javaProcess.platform();
@@ -128,4 +120,3 @@ Process.prototype._setupDomainUse = function(domain,flags) {
 Process.prototype.abort = Process.prototype.exit;
 
 module.exports = Process;
-
