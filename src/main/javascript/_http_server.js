@@ -124,6 +124,20 @@ function ServerResponse(response) {
     value: response,
     configurable: true,
     enumerable: false });
+
+  // HACK: because some modules like `fresh` expect to access _headers
+
+  Object.defineProperty(this, "_headers", {
+    get: function() {
+      var h = {};
+      var iter = this._response.headers.iterator();
+      while ( iter.hasNext() ) {
+        var each = iter.next();
+        h[ each.key ] = each.value;
+      }
+      return h;
+    }
+  });
 }
 
 util.inherits(ServerResponse, Stream.Writable);
