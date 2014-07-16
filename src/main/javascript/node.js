@@ -22,12 +22,6 @@ stdout = java.lang.System.out;
 (function() {
   var Process = require('process');
   process = new Process();
-  if (process.argv[1]) {
-    var Module = require('module');
-    var path = require('path');
-    Module.runMain(path.resolve(process.argv[1]));
-  }
-
   var streams = require('nodyn/streams');
   Object.defineProperty( process, 'stdin', {
     get: function() {
@@ -56,4 +50,16 @@ stdout = java.lang.System.out;
   clearInterval  = timers.clearTimeout;
   setImmediate   = timers.setImmediate;
   clearImmediate = timers.clearImmediate;
+
+  if (process.argv[1]) {
+    var Module = require('module');
+    var path = require('path');
+    var main = path.resolve(process.argv[1]);
+    try {
+      Module.runMain(main);
+    } catch(e) {
+      throw new Error(["Unlucky! Cannot find module", main].join(' '));
+    }
+  }
+
 })();

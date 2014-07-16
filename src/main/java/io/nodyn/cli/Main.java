@@ -17,7 +17,9 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
+import io.nodyn.loop.RefHandle;
 import org.dynjs.cli.Options;
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -90,7 +92,15 @@ public class Main {
                 // which creates a new reference anyway. If it doesn't
                 // do async stuff, no need to wait around after the
                 // script has executed.
-                getRuntime().start().unref();
+                RefHandle start = null;
+                try {
+                    start = getRuntime().start();
+                } catch (ThrowException e) {
+                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    if (start != null) start.unref();
+                }
                 return;
             } else {
                 getOutputStream().println("please specify source to eval or file");
