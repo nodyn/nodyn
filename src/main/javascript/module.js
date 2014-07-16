@@ -1,10 +1,7 @@
 
 
 var path = require('path');
-
-function Module() {
-}
-
+var Module = require('jvm-npm');
 
 // 'from' is the __dirname of the module.
 Module._nodeModulePaths = function(from) {

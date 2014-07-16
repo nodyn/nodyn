@@ -81,8 +81,15 @@ public class Main {
                 executeSource(getArguments().getEval());
                 return;
             } else if (getArguments().getFilename() != null) {
-                //executeFile(new File(getArguments().getFilename()));
-                // let node.js handle it
+                // node.js will use process.argv[1] to load the
+                // main .js file using Module._load. It's not
+                // totally clear to me if unref() here is correct.
+                // I think it should be, because we only need to run
+                // as long as the script holds a reference. It will
+                // only hold a reference if it does some async stuff
+                // which creates a new reference anyway. If it doesn't
+                // do async stuff, no need to wait around after the
+                // script has executed.
                 getRuntime().start().unref();
                 return;
             } else {

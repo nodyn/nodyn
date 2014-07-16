@@ -23,11 +23,9 @@ stdout = java.lang.System.out;
   var Process = require('process');
   process = new Process();
   if (process.argv[1]) {
+    var Module = require('module');
     var path = require('path');
-    process.argv[1] = path.resolve(process.argv[1]);
-    print("Process argv[1] "+process.argv[1]);
-    var Module = require('jvm-npm');
-    Module.runMain(process.argv[1]);
+    Module.runMain(path.resolve(process.argv[1]));
   }
 
   var streams = require('nodyn/streams');
