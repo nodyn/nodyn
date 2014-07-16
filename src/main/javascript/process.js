@@ -61,7 +61,7 @@ var Process = function() {
   this.env = getEnv();
   this.pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
   this.execPath = System.getProperty("user.dir"); // TODO: This doesn't make much sense
-  this.argv = [ System.getProperty('nodyn.binary') || 'nodyn' ]
+  this.argv = [ System.getProperty('nodyn.binary') || 'nodyn' ];
   if ( dynjs.argv ) {
     for ( i = 0 ; i < dynjs.argv.length ; ++i ) {
       this.argv.push( dynjs.argv[i] );
@@ -114,7 +114,7 @@ Process.prototype.exit = function() {
 
 Process.prototype._setupDomainUse = function(domain,flags) {
   //print( "_setupDomainUse, whatever that means" );
-}
+};
 
 // for now
 Process.prototype.abort = Process.prototype.exit;

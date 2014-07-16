@@ -21,7 +21,7 @@
 
 
 var isWindows = process.platform === 'win32';
-var util = NativeRequire.require('util');
+var util = require('util');
 
 
 // resolves . and .. elements in a path array with directory names there
@@ -59,11 +59,11 @@ if (isWindows) {
   // Regex to split a windows path into three parts: [*, device, slash,
   // tail] windows-only
   var splitDeviceRe =
-      /^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$/;
+      /^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/;
 
   // Regex to split the tail part of the above into [*, dir, basename, ext]
   var splitTailRe =
-      /^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$/;
+      /^([\s\S]*?)((?:\.{1,2}|[^\\\/]+?|)(\.[^.\/\\]*|))(?:[\\\/]*)$/;
 
   // Function to split a filename into [root, dir, basename, ext]
   // windows version
@@ -74,10 +74,14 @@ if (isWindows) {
         tail = result[3] || '';
     // Split the tail into dir, basename and extension
     var result2 = splitTailRe.exec(tail),
-        dir = result2[1] || '',
-        basename = result2[2] || '',
-        ext = result2[3] || '';
+        dir = result2[1],
+        basename = result2[2],
+        ext = result2[3];
     return [device, dir, basename, ext];
+  };
+
+  var normalizeUNCRoot = function(device) {
+    return '\\\\' + device.replace(/^[\\\/]+/, '').replace(/[\\\/]+/g, '\\');
   };
 
   // path.resolve([from ...], to)
@@ -108,14 +112,16 @@ if (isWindows) {
       }
 
       // Skip empty and invalid entries
-      if (typeof path !== 'string' || !path) {
+      if (!util.isString(path)) {
+        throw new TypeError('Arguments to path.resolve must be strings');
+      } else if (!path) {
         continue;
       }
 
       var result = splitDeviceRe.exec(path),
           device = result[1] || '',
           isUnc = device && device.charAt(1) !== ':',
-          isAbsolute = !!result[2] || isUnc, // UNC paths are always absolute
+          isAbsolute = exports.isAbsolute(path),
           tail = result[3];
 
       if (device &&
@@ -138,8 +144,11 @@ if (isWindows) {
       }
     }
 
-    // Replace slashes (in UNC share name) by backslashes
-    resolvedDevice = resolvedDevice.replace(/\//g, '\\');
+    // Convert slashes to backslashes when `resolvedDevice` points to an UNC
+    // root. Also squash multiple slashes into a single one where appropriate.
+    if (isUnc) {
+      resolvedDevice = normalizeUNCRoot(resolvedDevice);
+    }
 
     // At this point the path should be resolved to a full absolute path,
     // but handle relative paths to be safe (might happen when process.cwd()
@@ -163,9 +172,14 @@ if (isWindows) {
     var result = splitDeviceRe.exec(path),
         device = result[1] || '',
         isUnc = device && device.charAt(1) !== ':',
-        isAbsolute = !!result[2] || isUnc, // UNC paths are always absolute
+        isAbsolute = exports.isAbsolute(path),
         tail = result[3],
         trailingSlash = /[\\\/]$/.test(tail);
+
+    // If device is a drive letter, we'll normalize to lower case.
+    if (device && device.charAt(1) === ':') {
+      device = device[0].toLowerCase() + device.substr(1);
+    }
 
     // Normalize the tail path
     tail = normalizeArray(tail.split(/[\\\/]+/).filter(function(p) {
@@ -180,25 +194,50 @@ if (isWindows) {
     }
 
     // Convert slashes to backslashes when `device` points to an UNC root.
-    device = device.replace(/\//g, '\\');
+    // Also squash multiple slashes into a single one where appropriate.
+    if (isUnc) {
+      device = normalizeUNCRoot(device);
+    }
 
     return device + (isAbsolute ? '\\' : '') + tail;
   };
 
   // windows version
+  exports.isAbsolute = function(path) {
+    var result = splitDeviceRe.exec(path),
+        device = result[1] || '',
+        isUnc = device && device.charAt(1) !== ':';
+    // UNC paths are always absolute
+    return !!result[2] || isUnc;
+  };
+
+  // windows version
   exports.join = function() {
     function f(p) {
-      return p && typeof p === 'string';
+      if (!util.isString(p)) {
+        throw new TypeError('Arguments to path.join must be strings');
+      }
+      return p;
     }
 
     var paths = Array.prototype.filter.call(arguments, f);
     var joined = paths.join('\\');
 
-    // Make sure that the joined path doesn't start with two slashes
-    // - it will be mistaken for an unc path by normalize() -
-    // unless the paths[0] also starts with two slashes
-    if (/^[\\\/]{2}/.test(joined) && !/^[\\\/]{2}/.test(paths[0])) {
-      joined = joined.substr(1);
+    // Make sure that the joined path doesn't start with two slashes, because
+    // normalize() will mistake it for an UNC path then.
+    //
+    // This step is skipped when it is very clear that the user actually
+    // intended to point at an UNC path. This is assumed when the first
+    // non-empty string arguments starts with exactly two slashes followed by
+    // at least one more non-slash character.
+    //
+    // Note that for normalize() to treat a path as an UNC path it needs to
+    // have at least 2 components, so we don't filter for that here.
+    // This means that the user can use join to construct UNC paths from
+    // a server name and a share name; for example:
+    //   path.join('//server', 'share') -> '\\\\server\\share\')
+    if (!/^[\\\/]{2}[^\\\/]/.test(paths[0])) {
+      joined = joined.replace(/^[\\\/]{2,}/, '\\');
     }
 
     return exports.normalize(joined);
@@ -269,10 +308,9 @@ if (isWindows) {
   // Split a filename into [root, dir, basename, ext], unix version
   // 'root' is just a slash, or nothing.
   var splitPathRe =
-      /^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$/;
+      /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
   var splitPath = function(filename) {
-    var result = splitPathRe.exec(filename);
-    return [result[1] || '', result[2] || '', result[3] || '', result[4] || ''];
+    return splitPathRe.exec(filename).slice(1);
   };
 
   // path.resolve([from ...], to)
@@ -285,7 +323,9 @@ if (isWindows) {
       var path = (i >= 0) ? arguments[i] : process.cwd();
 
       // Skip empty and invalid entries
-      if (typeof path !== 'string' || !path) {
+      if (!util.isString(path)) {
+        throw new TypeError('Arguments to path.resolve must be strings');
+      } else if (!path) {
         continue;
       }
 
@@ -307,13 +347,18 @@ if (isWindows) {
   // path.normalize(path)
   // posix version
   exports.normalize = function(path) {
-    var isAbsolute = path.charAt(0) === '/',
-        trailingSlash = path.substr(-1) === '/';
+    var isAbsolute = exports.isAbsolute(path),
+        trailingSlash = path[path.length - 1] === '/',
+        segments = path.split('/'),
+        nonEmptySegments = [];
 
     // Normalize the path
-    path = normalizeArray(path.split('/').filter(function(p) {
-      return !!p;
-    }), !isAbsolute).join('/');
+    for (var i = 0; i < segments.length; i++) {
+      if (segments[i]) {
+        nonEmptySegments.push(segments[i]);
+      }
+    }
+    path = normalizeArray(nonEmptySegments, !isAbsolute).join('/');
 
     if (!path && !isAbsolute) {
       path = '.';
@@ -322,17 +367,31 @@ if (isWindows) {
       path += '/';
     }
 
-    var x = (isAbsolute ? '/' : '') + path;
-    return x;
+    return (isAbsolute ? '/' : '') + path;
   };
 
+  // posix version
+  exports.isAbsolute = function(path) {
+    return path.charAt(0) === '/';
+  };
 
   // posix version
   exports.join = function() {
-    var paths = Array.prototype.slice.call(arguments, 0);
-    return exports.normalize(paths.filter(function(p, index) {
-      return p && typeof p === 'string';
-    }).join('/'));
+    var path = '';
+    for (var i = 0; i < arguments.length; i++) {
+      var segment = arguments[i];
+      if (!util.isString(segment)) {
+        throw new TypeError('Arguments to path.join must be strings');
+      }
+      if (segment) {
+        if (!path) {
+          path += segment;
+        } else {
+          path += '/' + segment;
+        }
+      }
+    }
+    return exports.normalize(path);
   };
 
 
@@ -383,7 +442,6 @@ if (isWindows) {
   exports.delimiter = ':';
 }
 
-
 exports.dirname = function(path) {
   var result = splitPath(path),
       root = result[0],
@@ -419,18 +477,21 @@ exports.extname = function(path) {
 
 
 exports.exists = util.deprecate(function(path, callback) {
-  NativeRequire.require('fs').exists(path, callback);
+  require('fs').exists(path, callback);
 }, 'path.exists is now called `fs.exists`.');
 
 
 exports.existsSync = util.deprecate(function(path) {
-  return NativeRequire.require('fs').existsSync(path);
+  return require('fs').existsSync(path);
 }, 'path.existsSync is now called `fs.existsSync`.');
 
 
 if (isWindows) {
   exports._makeLong = function(path) {
-    path = '' + path;
+    // Note: this will *probably* throw somewhere.
+    if (!util.isString(path))
+      return path;
+
     if (!path) {
       return '';
     }

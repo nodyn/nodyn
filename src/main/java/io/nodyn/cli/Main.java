@@ -17,7 +17,6 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
-import io.nodyn.loop.RefHandle;
 import org.dynjs.cli.Options;
 import org.dynjs.runtime.Runner;
 import org.kohsuke.args4j.CmdLineException;
@@ -82,7 +81,9 @@ public class Main {
                 executeSource(getArguments().getEval());
                 return;
             } else if (getArguments().getFilename() != null) {
-                executeFile(new File(getArguments().getFilename()));
+                //executeFile(new File(getArguments().getFilename()));
+                // let node.js handle it
+                getRuntime().start().unref();
                 return;
             } else {
                 getOutputStream().println("please specify source to eval or file");

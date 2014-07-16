@@ -7,19 +7,17 @@ var fileSep   = java.lang.System.getProperty("file.separator");
 describe('The path module', function() {
   it('should pass testNormalize', function() {
     if(isWindows) {
-      expect(path.normalize('/foo/bar//baz/asdf/quux/..')).toBe("\\foo\\bar\\baz\\asdf"); 
+      expect(path.normalize('/foo/bar//baz/asdf/quux/..')).toBe("\\foo\\bar\\baz\\asdf");
     } else {
-      expect(path.normalize('/foo/bar//baz/asdf/quux/..')).toBe("/foo/bar/baz/asdf"); 
+      expect(path.normalize('/foo/bar//baz/asdf/quux/..')).toBe("/foo/bar/baz/asdf");
     }
   });
 
-  it('should pass testJoin', function() {
+  it('should join path elements as expected per OS', function() {
     if(isWindows) {
-      expect(path.join('/foo', 'bar', 'baz/asdf', 'quux', '..')).toBe("\\foo\\bar\\baz\\asdf"); 
-      expect( path.join('foo', {}, 'bar') ).toBe("foo\\bar");
+      expect(path.join('/foo', 'bar', 'baz/asdf', 'quux', '..')).toBe("\\foo\\bar\\baz\\asdf");
     } else {
       expect( path.join('/foo', 'bar', 'baz/asdf', 'quux', '..') ).toBe("/foo/bar/baz/asdf");
-      expect( path.join('foo', {}, 'bar') ).toBe("foo/bar");
     }
   });
 
@@ -56,4 +54,3 @@ describe('The path module', function() {
     expect( path.sep ).toBe(fileSep);
   });
 });
-
