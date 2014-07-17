@@ -1,9 +1,6 @@
 package io.nodyn.http.server;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.LastHttpContent;
@@ -44,9 +41,24 @@ public class KeepAliveHandler extends AbstractServerHandler {
                 promise.addListener( new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
-                        future.channel().pipeline().remove( "discard" );
-                        future.channel().pipeline().remove( "trailers" );
-                        future.channel().pipeline().remove( "incoming.data" );
+                        ChannelPipeline pipeline = future.channel().pipeline();
+                        ChannelHandler handler = null;
+
+                        handler = pipeline.get("discard");
+                        if ( handler != null ) {
+                            pipeline.remove( handler );
+                        }
+
+                        handler = pipeline.get( "trailers" );
+                        if ( handler != null ) {
+                            pipeline.remove( handler );
+                        }
+
+                        handler = pipeline.get( "incoming.data" );
+                        if ( handler != null ) {
+                            pipeline.remove( handler );
+                        }
+
                         future.channel().config().setAutoRead(true);
                     }
                 });
