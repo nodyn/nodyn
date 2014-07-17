@@ -1,10 +1,10 @@
-var util  = NativeRequire.require('util');
-var nodyn = NativeRequire.require('nodyn');
-var Stream = NativeRequire.require('stream');
-var EventEmitter = require('events').EventEmitter;
+var util            = require('util');
+var nodyn           = require('nodyn');
+var Stream          = require('stream');
+var EventEmitter    = require('events').EventEmitter;
 var IncomingMessage = require('_http_incoming').IncomingMessage;
-var Buffer = require("buffer").Buffer;
-var net           = require('net');
+var Buffer          = require("buffer").Buffer;
+var net             = require('net');
 
 function Server(requestListener) {
   net.Server.call( this );

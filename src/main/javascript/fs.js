@@ -9,6 +9,8 @@ var system = process.context.fileSystem(),
     posix     = Packages.jnr.posix.POSIXFactory.getPOSIX(new io.nodyn.posix.NodePosixHandler(), true),
     Errno     = Packages.jnr.constants.platform.Errno;
 
+var Buffer = require('buffer').Buffer;
+
 var FS = {};
 
 // TODO: implement these functions

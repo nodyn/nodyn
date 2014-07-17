@@ -192,8 +192,10 @@ describe('http request and response', function() {
       req.on('data', function(chunk) {
         result += chunk;
       });
-      res.writeHead(200);
-      res.end('hello world\n');
+      req.on('end', function() {
+        res.writeHead(200);
+        res.end('hello world\n');
+      })
     });
 
     server.listen(test_options.port, function() {

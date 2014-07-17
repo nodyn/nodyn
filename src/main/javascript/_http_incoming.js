@@ -1,12 +1,9 @@
 "use strict";
 
-var net   = NativeRequire.require('net');
-var util  = NativeRequire.require('util');
-
+var net          = require('net');
+var util         = require('util');
 var EventEmitter = require('events').EventEmitter;
-
-var Stream = NativeRequire.require('stream');
-var MultiMap = NativeRequire.require('nodyn/multiMap');
+var Stream       = require('stream');
 
 function IncomingMessage(incoming) {
   if (!(this instanceof IncomingMessage)) {

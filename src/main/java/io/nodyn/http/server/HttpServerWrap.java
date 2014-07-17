@@ -34,6 +34,7 @@ public class HttpServerWrap extends NetServerWrap {
         pipeline.addLast("emit.connect", new ConnectEventHandler(HttpServerWrap.this));
         pipeline.addLast("emit.upgrade", new UpgradeEventHandler(HttpServerWrap.this));
         pipeline.addLast("emit.request", new RequestEventHandler(HttpServerWrap.this));
+        pipeline.addLast("http.keepalive", new KeepAliveHandler(HttpServerWrap.this));
 
         initializeConnectionChannelTail(channel);
     }

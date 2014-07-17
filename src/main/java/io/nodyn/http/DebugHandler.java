@@ -19,7 +19,6 @@ public class DebugHandler extends ChannelDuplexHandler {
         this.name = name;
     }
 
-    /*
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.err.println(ctx.channel() + " | " + this.name + " >> READ >> " + msg.getClass() );
@@ -32,7 +31,6 @@ public class DebugHandler extends ChannelDuplexHandler {
         System.err.println("-->>" );
         super.channelRead(ctx, msg);
     }
-    */
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -110,8 +108,14 @@ public class DebugHandler extends ChannelDuplexHandler {
 
     @Override
     public void read(ChannelHandlerContext ctx) throws Exception {
-        System.err.println(ctx.channel() + " | " + this.name + " >> READ()" );
+        System.err.println(ctx.channel() + " | " + this.name + " << READ() autoRead=" + ctx.channel().config().isAutoRead() );
         super.read(ctx);
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        System.err.println(ctx.channel() + " | " + this.name + " >> READ COMPLETE" );
+        super.channelReadComplete(ctx);
     }
 
     @Override
@@ -122,7 +126,8 @@ public class DebugHandler extends ChannelDuplexHandler {
 
     @Override
     public void flush(ChannelHandlerContext ctx) throws Exception {
-        System.err.println(ctx.channel() + " | " + this.name + " >> FLUSH()" );
+        System.err.println(ctx.channel() + " | " + this.name + " << FLUSH()" );
         super.flush(ctx);
     }
+
 }
