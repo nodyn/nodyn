@@ -77,7 +77,7 @@ public class Nodyn extends DynJS {
         InputStream is = this.config.getClassLoader().getResourceAsStream(resource);
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            new Runner(getExecutionContext()).withFileName(resource).withSource(reader).evaluate();
+            new Runner(this).withFileName(resource).withSource(reader).evaluate();
             try {
                 is.close();
             } catch (IOException e) {
