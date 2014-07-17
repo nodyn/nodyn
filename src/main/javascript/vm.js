@@ -50,8 +50,8 @@ function createScript(code,options) {
 module.exports.createScript = createScript;
 
 function Script(code,options) {
-  this._code = code;
-  this._filename = ( options && options.filename ) || '<script>';
+  var filename = ( options && options.filename ) || '<script>';
+  this._script = __nodyn.newCompiler().withSource( code ).withFileName( filename ).compile();
 }
 
 Script.prototype.runInThisContext = function() {
@@ -64,7 +64,7 @@ Script.prototype.runInNewContext = function(sandbox) {
 };
 
 Script.prototype.runInContext = function(context,options) {
-  var runner = context.__nodyn.newRunner().withSource( this._code ).withFileName( this._filename );
+  var runner = context.__nodyn.newRunner().withSource( this._script ).withContext( context.__nodyn.defaultExecutionContext );
   return context.__nodyn.start( runner );
 }
 
