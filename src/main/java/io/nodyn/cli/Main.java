@@ -97,7 +97,7 @@ public class Main {
                     start = getRuntime().start();
                 } catch (ThrowException e) {
                     System.err.println(e.getMessage());
-                    e.printStackTrace();
+                    System.exit(1);
                 } finally {
                     if (start != null) start.unref();
                 }

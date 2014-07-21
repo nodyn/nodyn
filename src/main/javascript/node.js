@@ -58,7 +58,8 @@ stdout = java.lang.System.out;
     try {
       Module.runMain(main);
     } catch(e) {
-      throw new Error(["Unlucky! Cannot find module", main].join(' '));
+      print(e)
+      throw new Error(["Unlucky! Cannot run", process.argv[1]].join(' '));
     }
   }
 
