@@ -29,8 +29,8 @@ public class InputStreamWrap extends StreamWrapper {
         setChannel(channel);
         //channel.pipeline().addLast(new DebugHandler("pipe"));
         channel.pipeline().addLast(new StreamEventsHandler(this));
-        channel.pipeline().addLast( new ErrorHandler() );
-        channel.pipeline().addLast( getManagedLoop().newHandle().handler() );
+        channel.pipeline().addLast(new ErrorHandler());
+        channel.pipeline().addLast(getManagedLoop().newHandle().handler());
         channel.config().setAutoRead(false);
         eventLoopGroup.register(channel);
         channel.read();

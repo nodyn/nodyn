@@ -1,7 +1,10 @@
 load('jvm-npm.js');
+
 System = java.lang.System;
 System.setProperty("java.net.preferIPv4Stack", "true");
 System.setProperty("java.net.preferIPv6Addresses", "false");
+
+
 Nodyn  = io.nodyn;
 nodyn  = {};
 global = this;
@@ -22,11 +25,31 @@ stdout = java.lang.System.out;
 (function() {
   var Process = require('process');
   process = new Process();
+
   var streams = require('nodyn/streams');
+  var tty     = require('tty');
+
+  Object.defineProperty( process, "terminal", {
+    get: function() {
+      if ( ! System.console() ) {
+        return;
+      }
+      if ( ! this._terminal )  {
+        this._terminal = new io.nodyn.tty.POSIXTerminalWrap( System.in, System.out );
+      }
+      return this._terminal;
+    },
+    enumerable: false,
+  });
+
   Object.defineProperty( process, 'stdin', {
     get: function() {
       if ( ! this._stdin ) {
-        this._stdin = new streams.InputStream( System.in );
+        if ( this.terminal ) {
+          this._stdin = new tty.ReadStream( this.terminal );
+        } else {
+          this._stdin = new streams.InputStream( System.in );
+        }
         this._stdin._start();
         this._stdin._stream.readStop();
       }
@@ -37,7 +60,12 @@ stdout = java.lang.System.out;
   Object.defineProperty( process, 'stdout', {
     get: function() {
       if (!this._stdout) {
-        this._stdout = new streams.OutputStream( System.out );
+        if ( this.terminal ) {
+          this._stdout = new tty.WriteStream( this.terminal );
+        } else {
+          this._stdout = new streams.OutputStream( System.out );
+        }
+        this._stdout._start();
       }
       return this._stdout;
     }

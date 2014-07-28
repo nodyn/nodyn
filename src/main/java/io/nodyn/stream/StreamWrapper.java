@@ -21,7 +21,7 @@ public abstract class StreamWrapper extends EventSource implements Closeable {
         this.managedLoop = managedLoop;
     }
 
-    public abstract void start() throws IOException;
+    public abstract void start() throws IOException, InterruptedException;
 
     public void ref() {
         this.getChannel().pipeline().fireUserEventTriggered(RefEvents.REF);

@@ -368,6 +368,8 @@ Interface.prototype._tabComplete = function() {
       return;
     }
 
+    var timeStart = System.currentTimeMillis();
+
     var completions = rv[0],
         completeOn = rv[1];  // the text that was completed
     if (completions && completions.length) {
@@ -402,6 +404,8 @@ Interface.prototype._tabComplete = function() {
 
       }
       self._refreshLine();
+
+      var timeStop = System.currentTimeMillis();
     }
   });
 };
@@ -411,8 +415,10 @@ function handleGroup(self, group, width, maxColumns) {
   if (group.length == 0) {
     return;
   }
+
   var minRows = Math.ceil(group.length / maxColumns);
   for (var row = 0; row < minRows; row++) {
+    var timeStart = System.currentTimeMillis();
     for (var col = 0; col < maxColumns; col++) {
       var idx = row * maxColumns + col;
       if (idx >= group.length) {
@@ -428,6 +434,7 @@ function handleGroup(self, group, width, maxColumns) {
       }
     }
     self.output.write('\r\n');
+    var timeStop = System.currentTimeMillis();
   }
   self.output.write('\r\n');
 }

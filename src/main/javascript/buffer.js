@@ -57,9 +57,6 @@ function Buffer() {
 }
 
 function encodingToJava(enc) {
-  if ( ! Buffer.isEncoding(enc) ) {
-    throw new TypeError( 'Unknown encoding: ' + enc );
-  }
   enc = enc.toLowerCase();
   if ( enc == 'ascii' || enc == 'us-ascii') {
     return 'us-ascii';
@@ -71,6 +68,10 @@ function encodingToJava(enc) {
 
   if ( enc == 'ucs2' || enc == 'utf16le' || enc == 'utf-16le' ) {
     return 'utf-16le';
+  }
+
+  if ( ! Buffer.isEncoding(enc) ) {
+    throw new TypeError( 'Unknown encoding: ' + enc );
   }
 
   return enc;

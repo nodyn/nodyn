@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
+import java.nio.channels.SelectableChannel;
 
 /**
  * @author Bob McWhirter

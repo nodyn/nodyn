@@ -16,7 +16,7 @@
       this.emit('close');
     });
 
-    this.isTTY = this._stream.isTTY();
+    this.isTTY = false;
   }
   util.inherits(InputStream, Stream.Readable);
 
@@ -58,8 +58,8 @@
 
   module.exports.InputStream = InputStream;
 
-  function OutputStream(stream) {
-    Stream.Writable.call( this );
+  function OutputStream(stream, options) {
+    Stream.Writable.call( this, options );
     this._stream = new io.nodyn.stream.OutputStreamWrap( process.EVENT_LOOP, stream );
 
     this.on('end', function() {
@@ -71,22 +71,50 @@
     this.on('unpipe', OutputStream.prototype._onUnpipe.bind(this));
     this.on('error', OutputStream.prototype._onError.bind(this));
 
-    this.isTTY = this._stream.isTTY();
+    this.isTTY = false;
   }
   util.inherits(OutputStream, Stream.Writable);
 
+  OutputStream.prototype._start = function() {
+    this._stream.start();
+  }
+
   OutputStream.prototype._write = function(chunk, encoding, callback) {
     if (chunk instanceof Buffer) {
-      this._stream.write(chunk.toString());
+      this._stream.write(chunk.delegate.byteBuf )
     } else if (typeof chunk === 'string') {
-      encoding = encoding || 'utf8';
-      this._stream.write(chunk.getBytes(encoding));
+      this._stream.write( chunk, encoding );
+      //encoding = encoding || 'utf8';
+      //this._stream.write( new Buffer( chunk, encoding ).delegate.byteBuf )
     } else {
-      // Not sure why we're getting here
-      this._stream.write(chunk.toString());
+      this._stream.write( chunk, encoding );
+      //this._stream.write( new Buffer( chunk ).delegate.byteBuf )
     }
     callback();
   };
+
+/*
+  OutputStream.prototype._writev = function(chunks, vcallback) {
+    for ( i = 0 ; i < chunks.length ; ++i ) {
+      var chunk = chunks[i].chunk;
+      var encoding = chunks[i].encoding;
+      var callback = chunks[i].callback;
+
+      if (chunk instanceof Buffer) {
+        this._stream.writeNoFlush(chunk.delegate.byteBuf )
+      } else if (typeof chunk === 'string') {
+        encoding = encoding || 'utf8';
+        this._stream.writeNoFlush( new Buffer( chunk, encoding ).delegate.byteBuf )
+      } else {
+        this._stream.writeNoFlush( new Buffer( chunk ).delegate.byteBuf )
+      }
+
+      callback();
+    }
+    this._stream.flush();
+    vcallback();
+  };
+  */
 
   OutputStream.prototype._onDrain = function() {
     print("DRAINING")
