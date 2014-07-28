@@ -1,5 +1,6 @@
 var helper = require('specHelper'),
     Stream = require('stream'),
+    EE = require('events').EventEmitter,
     javaProcess = new io.nodyn.process.Process();
 
 describe('process', function() {
@@ -130,5 +131,52 @@ describe('process', function() {
   it('should pass testUndocumentedProperties', function() {
     expect(process.noDeprecation).toBe(false);
     expect(process.traceDeprecation).toBe(false);
+  });
+
+  describe('zlib binding', function() {
+    it('should have an enumeration of zlib modes', function() {
+      var binding = process.binding('zlib');
+      var values = io.nodyn.zlib.Mode.values();
+      for(var i=0; i<values.length; i++) {
+        expect(binding[values[i]]).toBe(values[i].ordinal());
+      }
+    });
+
+    it('should have an enumeration of zlib codes', function() {
+      var binding = process.binding('zlib');
+      var values = io.nodyn.zlib.Code.values();
+      for(var i=0; i<values.length; i++) {
+        expect(binding[values[i]]).toBe(values[i].ordinal());
+      }
+    });
+
+    it('should have an enumeration of zlib strategies', function() {
+      var binding = process.binding('zlib');
+      var values = io.nodyn.zlib.Strategy.values();
+      for(var i=0; i<values.length; i++) {
+        expect(binding[values[i]]).toBe(values[i].ordinal());
+      }
+    });
+
+    it('should have an enumeration of zlib flush options', function() {
+      var binding = process.binding('zlib');
+      var values = io.nodyn.zlib.Flush.values();
+      for(var i=0; i<values.length; i++) {
+        expect(binding[values[i]]).toBe(values[i].ordinal());
+      }
+    });
+
+    it('should take a mode in its constructor function', function() {
+      var binding = process.binding('zlib');
+      var sut = new binding.Zlib(binding.DEFLATE);
+      expect(sut).toBeTruthy();
+    });
+
+    it('should be an EventEmitter', function() {
+      var binding = process.binding('zlib');
+      var sut = new binding.Zlib(binding.DEFLATE);
+      expect(sut instanceof EE).toBeTruthy();
+    });
+
   });
 });

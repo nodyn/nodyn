@@ -1,4 +1,3 @@
-
 var getEnv = function() {
   env = {};
   tmpDir = System.getProperty("java.io.tmpdir");
@@ -17,9 +16,7 @@ var getEnv = function() {
 };
 
 var Process = function() {
-  var Mode         = java.nio.file.AccessMode,
-      Open         = java.nio.file.StandardOpenOption,
-      Node         = io.nodyn.Nodyn,
+  var Node         = io.nodyn.Nodyn,
       javaProcess  = new io.nodyn.process.Process();
 
   this.context     = __vertx;
@@ -31,16 +28,6 @@ var Process = function() {
       node: Node.VERSION,
       dynjs: org.dynjs.runtime.DynJS.VERSION,
       java: System.getProperty("java.version")
-  };
-
-  this.binding     = {
-    constants: {
-      O_RDONLY: Mode.READ.toString(),
-      O_WRONLY: Mode.WRITE.toString(),
-      O_RDWR: Mode.WRITE.toString(),
-      O_APPEND: Open.APPEND.toString(),
-      S_IMFT: 0
-    }
   };
 
   this.stderr = {
@@ -118,5 +105,27 @@ Process.prototype._setupDomainUse = function(domain,flags) {
 
 // for now
 Process.prototype.abort = Process.prototype.exit;
+
+// Mimic node.js process.binding()
+var ZlibBinding = require('nodyn/zlib_binding');
+Process.prototype.binding = function(name) {
+  switch(name) {
+    case 'zlib':
+      return ZlibBinding;
+    default:
+      return {};
+  }
+};
+
+var Mode = java.nio.file.AccessMode,
+    Open = java.nio.file.StandardOpenOption;
+
+Process.prototype.binding.constants = {
+    O_RDONLY: Mode.READ.toString(),
+    O_WRONLY: Mode.WRITE.toString(),
+    O_RDWR:   Mode.WRITE.toString(),
+    O_APPEND: Open.APPEND.toString(),
+    S_IMFT: 0
+};
 
 module.exports = Process;

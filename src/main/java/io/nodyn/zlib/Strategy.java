@@ -1,0 +1,8 @@
+package io.nodyn.zlib;
+
+/**
+ * @author Lance Ball
+ */
+public enum Strategy {
+    Z_NO_COMPRESSION, Z_BEST_SPEED, Z_BEST_COMPRESSION, Z_DEFAULT_COMPRESSION, Z_FILTERED, Z_HUFFMAN_ONLY, Z_RLE, Z_FIXED, Z_DEFAULT_STRATEGY, ZLIB_VERNUM;
+}
