@@ -586,7 +586,10 @@ function isPrimitive(arg) {
 exports.isPrimitive = isPrimitive;
 
 function isBuffer(arg) {
-  return arg instanceof Buffer;
+  return (arg instanceof Buffer) ||
+    // HACKETY HACK HACK
+    // TODO: Figure out why instanceof is not working for our Buffer objects
+    (!isNullOrUndefined(arg) && (typeof arg.delegate === 'org.vertx.java.core.buffer.Buffer'));
 }
 exports.isBuffer = isBuffer;
 
