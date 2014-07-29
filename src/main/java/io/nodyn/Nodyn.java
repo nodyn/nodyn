@@ -27,6 +27,8 @@ public class Nodyn extends DynJS {
 
     private final ManagedEventLoopGroup managedLoop;
 
+    private boolean started;
+
     public Nodyn(Nodyn parent) {
         this(parent, parent.config);
     }
@@ -90,7 +92,10 @@ public class Nodyn extends DynJS {
 
     public Object start(Runner runner) {
         RefHandle handle = this.managedLoop.newHandle();
-        loadFromClasspath(NODE_JS);
+        if ( ! this.started ) {
+            loadFromClasspath(NODE_JS);
+            this.started = true;
+        }
         try {
             if (runner != null) {
                 Object result = runner.execute();
