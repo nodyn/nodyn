@@ -130,13 +130,13 @@ FS.existsSync = function(path) {
 
 FS.read = function(fd, buffer, offset, length, position, callback) {
   // fd is a vertx AsyncFile
-  fd.read(buffer.delegate, offset, position, length, nodyn.vertxHandler(function(err, buf) {
+  fd.read(buffer._vertxBuffer(), offset, position, length, nodyn.vertxHandler(function(err, buf) {
     callback(err, length, buf);
   }));
 };
 
 FS.readSync = function(fd, buffer, offset, length, position) {
-  fd.read(buffer.delegate, offset, position, length);
+  fd.read(buffer._vertxBuffer(), offset, position, length);
 };
 
 FS.readFile = function(path) { // [options], callback
@@ -214,7 +214,7 @@ FS.writeFile = function(filename, data, options, callback) {
     };
   }
   if (data instanceof Buffer) {
-    buffer = data.delegate;
+    buffer = data._vertxBuffer();
   } else {
     buffer = new org.vertx.java.core.buffer.Buffer( data.toString() );
   }
@@ -233,7 +233,7 @@ FS.writeFileSync = function(filename, data, options) {
     };
   }
   if (data instanceof Buffer) {
-    buffer = data.delegate;
+    buffer = data._vertxBuffer();
   } else {
     buffer = new org.vertx.java.core.buffer.Buffer( data.toString() );
   }

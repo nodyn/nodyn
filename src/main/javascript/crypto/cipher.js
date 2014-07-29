@@ -47,7 +47,7 @@ Cipher.prototype.setAutoPadding = function(auto_padding) {
 
 Cipher.prototype._write = function(chunk, enc, callback) {
   if ( chunk instanceof Buffer ) {
-    this._cipher.update( chunk.delegate.bytes );
+    this._cipher.update( chunk._byteArray() );
   } else {
     this._cipher.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
   }
@@ -63,8 +63,8 @@ Cipher.createCipher = function(algorithm, password) {
 
 Cipher.createCipheriv = function(algorithm,key,iv) {
   var cipherType = CipherCommon.CipherTypes.get( algorithm );
-  var keySpec = new SecretKeySpec( new Buffer( key ).delegate.bytes, cipherType.algorithm );
-  var ivSpec = new IvParameterSpec( new Buffer( iv ).delegate.bytes );
+  var keySpec = new SecretKeySpec( new Buffer( key )._byteArray(), cipherType.algorithm );
+  var ivSpec = new IvParameterSpec( new Buffer( iv )._byteArray() );
 
   return new Cipher(algorithm, keySpec, ivSpec);
 }

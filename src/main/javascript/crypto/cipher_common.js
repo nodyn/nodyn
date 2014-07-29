@@ -100,8 +100,8 @@ function createKeyAndIv(cipherType, password) {
     kiv = kdf( new Buffer( bytes ), cipherType.key_len, cipherType.iv_len );
   }
 
-  var key = new SecretKeySpec( kiv.key.delegate.bytes, cipherType.algorithm );
-  var iv = new IvParameterSpec( kiv.iv.delegate.bytes );
+  var key = new SecretKeySpec( kiv.key._byteArray(), cipherType.algorithm );
+  var iv = new IvParameterSpec( kiv.iv._byteArray() );
   return {
     key: key,
     iv: iv,

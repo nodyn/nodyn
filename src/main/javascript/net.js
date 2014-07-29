@@ -157,7 +157,7 @@ Socket.prototype.connect = function(port, host, callback) {
 
 Socket.prototype._write = function(chunk,encoding,callback) {
   if ( chunk instanceof Buffer ) {
-    this._socket.write( chunk.delegate.byteBuf );
+    this._socket.write( chunk._nettyBuffer() );
   }
 
   callback();

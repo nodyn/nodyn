@@ -1,27 +1,34 @@
 "use strict";
 
 
+var VertxBuffer = org.vertx.java.core.buffer.Buffer;
+var NettyBuffer = io.netty.buffer.ByteBuf;
+var Unpooled    = io.netty.buffer.Unpooled;
+var Charset     = java.nio.charset.Charset
+
+var BufferWrap = io.nodyn.buffer.BufferWrap;
+
 function Buffer() {
   if (!(this instanceof Buffer)) return new Buffer(arguments);
 
   var self = new JSAdapter(
     Buffer.prototype,
     {
-      delegate: {},
+      _buffer: {},
       _charsWritten: 0,
     },
     {
       __get__: function(name) {
         var index = Number(name);
         if ( ( typeof index ) == 'number' && ( index != NaN) ) {
-          return this.delegate.getByte( index ) & 0xFF;
+          return this._buffer.getByte( index );
         }
       },
       __set__: function(name, value) {
         var index = Number(name);
         if ( ( typeof index) == 'number' && ( index != NaN )) {
           var byte = Number(value) & 0xFF;
-          this.delegate.setByte( index, byte );
+          this._buffer.putByte( index, byte );
           return byte;
         }
       }
@@ -29,18 +36,18 @@ function Buffer() {
 
   if ( arguments.length == 1 ) {
     var first = arguments[0];
-    // WARNING: Using a Vert.x buffer in the ctor function
-    // for a Nodyn Buffer will work, but will not copy or
-    // clone the Vert.x buffer, so changes made to it on
-    // either side will be reflected in both.
-    if ( first instanceof org.vertx.java.core.buffer.Buffer ) {
-      self.delegate = first;
+    if ( first instanceof BufferWrap ) {
+      self._buffer = first;
+    }  else if ( first instanceof VertxBuffer ) {
+      self._buffer = new BufferWrap( Unpooled.copiedBuffer( first.byteBuf ) );
+    } else if ( first instanceof NettyBuffer ) {
+      self._buffer = new BufferWrap( first );
     } else if ( ( typeof first ) == 'number' ) {
-      self.delegate = new org.vertx.java.core.buffer.Buffer( first );
+      self._buffer = new BufferWrap( first );
     } else if ( ( typeof first ) == 'string' ) {
-      self.delegate = new org.vertx.java.core.buffer.Buffer( first.toString() );
+      self._buffer = new BufferWrap( first.toString(), 'utf8' );
     } else if ( first.length ) {
-      self.delegate = new org.vertx.java.core.buffer.Buffer( first.length );
+      self._buffer = new BufferWrap( first.length );
       for ( var i = 0 ; i < first.length ; ++i ) {
         self[i] = first[i];
       }
@@ -48,13 +55,19 @@ function Buffer() {
   } else if ( arguments.length == 2 ) {
     var str = arguments[0];
     var enc = encodingToJava( arguments[1] );
-    self.delegate = new org.vertx.java.core.buffer.Buffer( str, enc );
+    self._buffer = new BufferWrap( str, enc );
   }
 
   self.toString = bufferToString;
 
   return self;
 }
+
+Object.defineProperty( Buffer, "_charsWritten", {
+  get: function() {
+    return BufferWrap._charsWritten;
+  }
+});
 
 function encodingToJava(enc) {
   enc = enc.toLowerCase();
@@ -81,19 +94,18 @@ Buffer.encodingToJava = encodingToJava;
 
 Object.defineProperty( Buffer.prototype, "length", {
   get: function() {
-    return this.delegate.byteBuf.capacity();
+    return this._buffer.length;
   }
 } );
 
 var bufferToString = function(enc,start,end) {
   if (arguments.length <= 1 && enc == null) {
-    return this.delegate.toString('utf-8');
+    return this._buffer.toString( "utf8" );
   }
 
-  if ( end > this.delegate.length() ) {
-    end = this.delegate.length();
+  if ( end > this._buffer.length ) {
+    end = this._buffer.length;
   }
-
 
   var codec = Codec.get( enc );
 
@@ -113,6 +125,18 @@ var bufferToString = function(enc,start,end) {
     return codec.encode( this.slice(start,end) );
   }
 };
+
+Buffer.prototype._byteArray = function() {
+  return this._buffer.byteArray();
+}
+
+Buffer.prototype._vertxBuffer = function() {
+  return new VertxBuffer( this._buffer.byteBuf );
+}
+
+Buffer.prototype._nettyBuffer = function() {
+  return this._buffer.byteBuf;
+}
 
 Buffer.prototype.write = function(/*str,offset,len,enc*/) {
 
@@ -144,19 +168,14 @@ Buffer.prototype.write = function(/*str,offset,len,enc*/) {
 
   enc = encodingToJava(enc);
 
-  var numChars = Math.min( str.length, this.length - offset, len );
-  str = str.substring(0, numChars );
-
-  var bytes = Helper.bytes( str, enc );
-
-  this.delegate.setBytes( offset, bytes );
-  this._charsWritten = numChars;
-  return bytes.length;
+  return this._buffer.write( str, offset, len, enc );
 };
 
 
-Buffer.prototype.toJSON = function() {
-};
+Buffer.prototype.utf8Write = function(str, offset) {
+  return this.write( str, offset, this.length, 'utf8' );
+}
+
 
 Buffer.prototype.copy = function(targetBuf,targetStart,sourceStart,sourceEnd) {
   if ( ! targetStart ) {
@@ -166,195 +185,153 @@ Buffer.prototype.copy = function(targetBuf,targetStart,sourceStart,sourceEnd) {
     sourceStart = 0;
   }
   if ( ! sourceEnd ) {
-    sourceEnd = this.length;
+    sourceEnd = -1;
   }
 
   if ( targetStart > ( targetBuf.length - 1 ) ) {
     throw new RangeError( "targetStart out of bounds" );
   }
 
-  var sourceLen = sourceEnd - sourceStart;
-  var destLen = targetBuf.length - targetStart;
-
-  if ( sourceLen > destLen ) {
-    sourceLen = destLen;
-  }
-
-  var source = this.delegate.getBuffer( sourceStart, sourceStart + sourceLen );
-  targetBuf.delegate.setBuffer( targetStart, source );
-  return sourceLen;
+  return this._buffer.copy( targetBuf._buffer, targetStart, sourceStart, sourceEnd );
 };
 
 Buffer.prototype.slice = function(start,end) {
-  var b = new Buffer(0);
   if ( ! start ) {
     start = 0;
   }
   if ( ! end ) {
-    end = this.length;
+    end = -1;
   }
-  b.delegate = new org.vertx.java.core.buffer.Buffer( this.delegate.byteBuf.slice( start, (end - start ) ) );
-  return b;
+  return new Buffer( this._buffer.slice( start, end ) );
 };
 
 // 8-bit Unsigned
 
 Buffer.prototype.readUInt8 = function(offset,noAssert) {
-  return this.delegate.getByte( offset ) & 0xFF;
+  return this._buffer.readUInt8( offset );
 };
 
 Buffer.prototype.writeUInt8 = function(value,offset,noAssert) {
-  return this.delegate.getByte( offset ) & 0xFF;
+  return this._buffer.writeUInt8( value, offset );
 };
 
 // 8-bit Signed
 
 Buffer.prototype.readInt8 = function(offset,noAssert) {
-  return this.delegate.getByte( offset );
+  return this._buffer.readInt8(offset);
 };
 
 Buffer.prototype.writeInt8 = function(value,offset,noAssert) {
-  this.delegate.setByte(offset, value);
+  return this._buffer.writeInt8( value, offset );
 };
 
 // 16-bit Unsigned
 
 Buffer.prototype.readUInt16LE = function(offset,noAssert) {
-  return java.lang.Short.reverseBytes( this.delegate.getShort( offset ) ) & 0xFFFF;
+  return this._buffer.readUInt16LE( offset );
 };
 
 Buffer.prototype.readUInt16BE = function(offset,noAssert) {
-  return this.delegate.getShort( offset ) & 0xFFFF;
+  return this._buffer.readUInt16BE( offset );
 };
 
 Buffer.prototype.writeUInt16LE = function(value,offset,noAssert) {
-  this.delegate.setShort(offset, java.lang.Short.reverseBytes( value ) );
+  return this._buffer.writeUInt16LE(value, offset);
 };
 
 Buffer.prototype.writeUInt16BE = function(value,offset,noAssert) {
-  this.delegate.setShort(offset, value);
+  return this._buffer.writeUInt16BE(value, offset);
 };
 
 // 16-bit Signed
 
 Buffer.prototype.readInt16LE = function(offset,noAssert) {
-  return java.lang.Short.reverseBytes( this.delegate.getShort( offset ) );
+  return this._buffer.readInt16LE( offset );
 };
 
 Buffer.prototype.readInt16BE = function(offset,noAssert) {
-  return this.delegate.getShort( offset );
+  return this._buffer.readInt16BE( offset );
 };
 
 Buffer.prototype.writeInt16LE = function(value,offset,noAssert) {
-  this.delegate.setShort(offset, java.lang.Short.reverseBytes( value) );
+  return this._buffer.writeInt16LE(value,offset);
 };
 
 Buffer.prototype.writeInt16BE = function(value,offset,noAssert) {
-  this.delegate.setShort(offset, value);
+  return this._buffer.writeInt16BE(value,offset);
 };
 
 // 32-bit Unsigned
 
 Buffer.prototype.readUInt32LE = function(offset,noAssert) {
-  //return java.lang.Integer.toUnsignedLong( java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) ) & 0xFFFFFFFF );
-  var val = java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) );
-  val = val & 0xFFFFFFFF;
-  if ( val < 0 ) {
-    if ( val == -2147483648 ) {
-      val = 0;
-    }
-    val = Number(-val);
-    val = val + 2147483648;
-  }
-  return val;
+  return this._buffer.readUInt32LE( offset );
 };
 
 Buffer.prototype.readUInt32BE = function(offset,noAssert) {
-  var val = this.delegate.getInt( offset );
-  val = val & 0xFFFFFFFF;
-  if ( val < 0 ) {
-    if ( val == -2147483648 ) {
-      val = 0;
-    }
-    val = Number(-val);
-    val = val + 2147483648;
-  }
-  return val;
+  return this._buffer.readUInt32BE( offset );
 };
 
 Buffer.prototype.writeUInt32LE = function(value,offset,noAssert) {
-  this.delegate.setInt(offset, java.lang.Integer.reverseBytes( value ) );
+  return this._buffer.writeUInt32LE(value,offset);
 };
 
 Buffer.prototype.writeUInt32BE = function(value,offset,noAssert) {
-  this.delegate.setInt(offset, value);
+  return this._buffer.writeUInt32BE(value,offset);
 };
 
 // 32-bit Signed
 
 Buffer.prototype.readInt32LE = function(offset,noAssert) {
-  return java.lang.Integer.reverseBytes( this.delegate.getInt( offset ) );
+  return this._buffer.readInt32LE(offset);
 };
 
 Buffer.prototype.readInt32BE = function(offset,noAssert) {
-  return this.delegate.getInt( offset ) & 0xFFFFFFFF;
+  return this._buffer.readInt32BE(offset);
 };
 
 Buffer.prototype.writeInt32LE = function(value,offset,noAssert) {
-  this.delegate.setInt(offset, java.lang.Integer.reverseBytes( value) );
+  return this._buffer.writeInt32LE(value,offset);
 };
 
 Buffer.prototype.writeInt32BE = function(value,offset,noAssert) {
-  this.delegate.setInt(offset, value);
+  return this._buffer.writeInt32BE(value, offset);
 };
 
 // Float
 
 Buffer.prototype.readFloatLE = function(offset,noAssert) {
-  var b = java.nio.ByteBuffer.allocate(4).order( java.nio.ByteOrder.LITTLE_ENDIAN );
-  var bytes = this.delegate.getBytes(offset, offset+4);
-  b.put( bytes );
-  b.flip();
-  return b.getFloat();
+  return this._buffer.readFloatLE(offset);
 };
 
 Buffer.prototype.readFloatBE = function(offset,noAssert) {
-  return this.delegate.getFloat(offset);
+  return this._buffer.readFloatBE(offset);
 };
 
 Buffer.prototype.writeFloatLE = function(value,offset,noAssert) {
-  var b = java.nio.ByteBuffer.allocate(4).order( java.nio.ByteOrder.LITTLE_ENDIAN );
-  b.putFloat(value);
-  this.delegate.setBytes(offset,b.array());
+  return this._buffer.writeFloatLE(value,offset);
 };
 
 Buffer.prototype.writeFloatBE = function(value,offset,noAssert) {
-  this.delegate.setFloat(offset, value);
+  return this._buffer.writeFloatBE(value,offset);
 };
 
 
 // Double
 
 Buffer.prototype.readDoubleLE = function(offset,noAssert) {
-  var b = java.nio.ByteBuffer.allocate(8).order( java.nio.ByteOrder.LITTLE_ENDIAN );
-  var bytes = this.delegate.getBytes(offset, offset+8);
-  b.put( bytes );
-  b.flip();
-  return b.getDouble();
+  return this._buffer.readDoubleLE(offset);
 };
 
 Buffer.prototype.readDoubleBE = function(offset,noAssert) {
-  return this.delegate.getDouble(offset);
+  return this._buffer.readDoubleBE(offset);
 };
 
 Buffer.prototype.writeDoubleLE = function(value,offset,noAssert) {
-  var b = java.nio.ByteBuffer.allocate(8).order( java.nio.ByteOrder.LITTLE_ENDIAN );
-  b.putDouble(value);
-  this.delegate.setBytes(offset,b.array());
+  return this._buffer.writeDoubleLE(value, offset);
 };
 
 Buffer.prototype.writeDoubleBE = function(value,offset,noAssert) {
-  this.delegate.setDouble(offset, value);
+  return this._buffer.writeDoubleBE(value,offset);
 };
 
 // Class functions
@@ -365,24 +342,14 @@ Buffer.prototype.fill = function(value,offset,end) {
   }
 
   if ( ! end ) {
-    end = this.length;
+    end = -1;
   }
 
   if ( end > this.length ) {
     throw new RangeError( 'end out of bounds' );
   }
 
-  var byte;
-
-  if ( typeof value == 'string' ) {
-    byte = value.charCodeAt(0);
-  } else {
-    byte = Number(value);
-  }
-
-  for ( var i = offset ; i < end ; ++i ) {
-    this.delegate.setByte( i, byte );
-  }
+  this._buffer.fill(value, offset, end);
 };
 
 // Class methods
@@ -392,7 +359,7 @@ Buffer.byteLength = function(str,enc) {
     enc = 'utf8';
   }
 
-  return Helper.bytes(str, encodingToJava(enc)).length;
+  return BufferWrap.byteLength(str, encodingToJava(enc));
 }
 
 Buffer.isEncoding = function(enc) {
@@ -441,5 +408,4 @@ module.exports.buffer = {
   INSPECT_MAX_BYTES: 50
 }
 
-var Helper = io.nodyn.buffer.Helper;
 var Codec = require('nodyn/codec');

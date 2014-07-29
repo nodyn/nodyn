@@ -6,7 +6,7 @@ USASCII.toString = function() {
 }
 
 USASCII.encode = function(bytes) {
-  return bytes.delegate.toString( 'us-ascii' );
+  return bytes._buffer.toString( 'us-ascii' );
 }
 
 module.exports = USASCII;

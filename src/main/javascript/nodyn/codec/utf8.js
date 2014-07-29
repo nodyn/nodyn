@@ -5,7 +5,7 @@ UTF8.toString = function() {
 }
 
 UTF8.encode = function(bytes) {
-  return bytes.delegate.toString('utf-8');
+  return bytes._buffer.toString('utf-8');
 }
 
 module.exports = UTF8;

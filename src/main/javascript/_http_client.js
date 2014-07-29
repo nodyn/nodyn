@@ -73,7 +73,7 @@ ClientRequest.prototype._onUpgrade = function(result) {
 
 ClientRequest.prototype._write = function(chunk, encoding, callback) {
   if ( chunk instanceof Buffer ) {
-    this._request.write( chunk.delegate.byteBuf );
+    this._request.write( chunk._nettyBuffer() );
   }
   callback();
 };

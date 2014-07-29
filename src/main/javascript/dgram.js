@@ -97,7 +97,7 @@ Socket.prototype.send = function(buf, offset, length, port, address, callback) {
   if (!(buf instanceof Buffer)) {
     buf = new Buffer(buf.toString());
   }
-  this._delegate.send(buf.slice(offset, offset+length).delegate, address, port, function(result) {
+  this._delegate.send(buf.slice(offset, offset+length)._vertxBuffer(), address, port, function(result) {
     if (result.failed()) { this.emit('error', new Error(result.cause())); }
     else if (typeof callback === 'function') {
       callback.call();

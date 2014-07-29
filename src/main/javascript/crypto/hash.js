@@ -53,7 +53,7 @@ Hash.prototype.digest = function(enc) {
 
 Hash.prototype._write = function(chunk, enc, callback) {
   if ( chunk instanceof Buffer ) {
-    this._digest.update( chunk.delegate.getBytes() );
+    this._digest.update( chunk._byteArray() );
   } else {
     this._digest.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
   }

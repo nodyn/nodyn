@@ -204,7 +204,7 @@ Object.defineProperty(ServerResponse.prototype, 'statusCode', {
 
 ServerResponse.prototype._write = function(chunk, encoding, callback) {
   if ( chunk instanceof Buffer ) {
-    this._response.write(chunk.delegate.byteBuf);
+    this._response.write(chunk._nettyBuffer());
   }
   callback();
 };

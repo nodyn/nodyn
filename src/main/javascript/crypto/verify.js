@@ -21,9 +21,9 @@ var Verify = function(algorithm) {
 
   Stream.Writable.call( this, {} );
 
-  this.algorithm = algorithm;
+  this.algorithm  = algorithm;
   this._algorithm = SignCommon.SignatureTypes.get( algorithm );
-  this._buffer= new org.vertx.java.core.buffer.Buffer();
+  this._buffer    = io.netty.buffer.Unpooled.buffer();
 
   return this;
 };
@@ -39,12 +39,12 @@ Verify.prototype.verify = function(object, signature, signature_format) {
   if ( signature_format == 'base64' ) {
     sigBytes = Base64.decode( signature );
   } else if ( signature instanceof Buffer ) {
-    sigBytes = signature.delegate.bytes;
+    sigBytes = signature._byteArray();
   }
 
   var pubKey = SignCommon.createKeyFromString( object );
 
-  var content = new TypedData( this._buffer.bytes );
+  var content = new TypedData( this._buffer.array() );
 
   try {
     var sigData = new SignedData( content, sigBytes );
@@ -67,7 +67,7 @@ Verify.prototype.verify = function(object, signature, signature_format) {
 
 Verify.prototype._write = function(chunk, enc, callback) {
   if ( chunk instanceof Buffer ) {
-    this._buffer.appendBuffer( chunk.delegate)
+    this._buffer.writeBytes( chunk._nettyBuffer() )
   } else {
     this._buffer.appendBytes(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
   }

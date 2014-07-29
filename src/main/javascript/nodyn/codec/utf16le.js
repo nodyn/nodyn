@@ -6,7 +6,7 @@ UTF16LE.toString = function() {
 }
 
 UTF16LE.encode = function(bytes) {
-  return bytes.delegate.toString( 'utf-16le');
+  return bytes._buffer.toString( 'utf-16le');
 }
 
 module.exports = UTF16LE;

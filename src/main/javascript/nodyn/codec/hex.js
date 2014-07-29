@@ -16,7 +16,7 @@ Hex.encode = function(bytes) {
   if ( typeof bytes == 'string' ) {
     bytes = Helper.bytes( bytes, 'utf8' );
   } else {
-    bytes = bytes.delegate.bytes;
+    bytes = bytes._byteArray();
   }
   return jHex.toHexString( bytes );
 }
@@ -25,6 +25,6 @@ Hex.decode = function(input) {
   if ( typeof input == 'string' ) {
     return new Buffer( jHex.decode( input ) );
   } else {
-    return new Buffer( jHex.decode( input.delegate.bytes ) );
+    return new Buffer( jHex.decode( input._byteArray() ) );
   }
 }

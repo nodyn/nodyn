@@ -62,7 +62,7 @@ Hmac.prototype.digest = function(enc) {
 
 Hmac.prototype._write = function(chunk, enc, callback) {
   if ( chunk instanceof Buffer ) {
-    this._hmac.update( chunk.delegate.bytes );
+    this._hmac.update( chunk._byteArray() );
   } else {
     this._hmac.update(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
   }

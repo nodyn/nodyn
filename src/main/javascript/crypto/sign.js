@@ -20,9 +20,9 @@ var Sign = function(algorithm) {
 
   Stream.Writable.call( this, {} );
 
-  this.algorithm = algorithm;
+  this.algorithm  = algorithm;
   this._algorithm = SignCommon.SignatureTypes.get( algorithm );
-  this._buffer= new org.vertx.java.core.buffer.Buffer();
+  this._buffer    = io.netty.buffer.Unpooled.buffer();
 
   return this;
 };
@@ -43,7 +43,7 @@ Sign.prototype.sign = function(private_key, output_format) {
 
   gen.addSignerInfoGenerator( signerInfo );
 
-  var msg = new TypedData( this._buffer.bytes );
+  var msg = new TypedData( this._buffer.array() );
 
   var sigData = gen.generate(msg);
   var sigBytes = sigData.encoded;
@@ -53,7 +53,7 @@ Sign.prototype.sign = function(private_key, output_format) {
 
 Sign.prototype._write = function(chunk, enc, callback) {
   if ( chunk instanceof Buffer ) {
-    this._buffer.appendBuffer( chunk.delegate)
+    this._buffer.writeBytes( chunk._nettyBuffer() );
   } else {
     this._buffer.appendBytes(Helper.bytes( chunk, Buffer.encodingToJava( enc ) ) );
   }
