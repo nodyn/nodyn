@@ -1,5 +1,5 @@
 var helper = require('specHelper');
-var nodyn  = NativeRequire.require('nodyn');
+var nodyn  = require('nodyn');
 
 var MockEmitter = function() {};
 nodyn.makeEventEmitter(MockEmitter);

@@ -1,5 +1,5 @@
-var util          = NativeRequire.require('util');
-var EventEmitter  = NativeRequire.require('events').EventEmitter;
+var util          = require('util');
+var EventEmitter  = require('events').EventEmitter;
 
 function makeEventEmitter(ctor) {
   util._extend(ctor.prototype, EventEmitter.prototype);

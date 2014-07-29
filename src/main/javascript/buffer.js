@@ -20,13 +20,19 @@ function Buffer() {
     {
       __get__: function(name) {
         var index = Number(name);
-        if ( ( typeof index ) == 'number' && ( index != NaN) ) {
+        if ( ( typeof index ) == 'number' && ( ! isNaN(index) ) ) {
+          if ( index >= this.length ) {
+            return;
+          }
           return this._buffer.getByte( index );
         }
       },
       __set__: function(name, value) {
         var index = Number(name);
-        if ( ( typeof index) == 'number' && ( index != NaN )) {
+        if ( ( typeof index) == 'number' && ( ! isNaN(index) ) ) {
+          if ( index >= this.length ) {
+            return;
+          }
           var byte = Number(value) & 0xFF;
           this._buffer.putByte( index, byte );
           return byte;

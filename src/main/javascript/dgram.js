@@ -1,5 +1,5 @@
-var util         = NativeRequire.require('util');
-var EventEmitter = NativeRequire.require('events').EventEmitter;
+var util         = require('util');
+var EventEmitter = require('events').EventEmitter;
 var vertx        = org.vertx.java.core.datagram;
 
 var Socket = function(type, callback) {

@@ -73,7 +73,7 @@ var EE   = require('events').EventEmitter;
 util.inherits(Process, EE);
 
 Process.prototype.memoryUsage = function() {
-  os = NativeRequire.require('os');
+  os = require('os');
   var obj = {};
   obj.heapTotal = os.totalmem();
   obj.heapUsed  = os.totalmem() - os.freemem();

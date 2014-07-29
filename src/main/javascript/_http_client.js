@@ -1,10 +1,10 @@
 var http = require('http');
-var url   = NativeRequire.require('url');
-var net   = NativeRequire.require('net');
-var util  = NativeRequire.require('util');
-var nodyn = NativeRequire.require('nodyn');
-var Stream = NativeRequire.require('stream');
-var MultiMap = NativeRequire.require('nodyn/multiMap');
+var url   = require('url');
+var net   = require('net');
+var util  = require('util');
+var nodyn = require('nodyn');
+var Stream = require('stream');
+var MultiMap = require('nodyn/multiMap');
 var EventEmitter = require('events').EventEmitter;
 var IncomingMessage = require('_http_incoming').IncomingMessage;
 
