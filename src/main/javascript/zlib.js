@@ -473,8 +473,10 @@ Zlib.prototype._transform = function(chunk, encoding, cb) {
   var ending = ws.ending || ws.ended;
   var last = ending && (!chunk || ws.length === chunk.length);
 
-  if (!util.isNull(chunk) && !util.isBuffer(chunk))
+  util.inspect(chunk);
+  if (!util.isNull(chunk) && !util.isBuffer(chunk)) {
     return cb(new Error('invalid input'));
+  }
 
   // If it's the last chunk, or a final flush, we use the Z_FINISH flush flag.
   // If it's explicitly flushing at some other time, then we use

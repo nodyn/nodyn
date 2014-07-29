@@ -9,6 +9,11 @@ var helper = require('specHelper');
 
 describe("Buffer", function() {
 
+  it('should be an instanceof Buffer', function() {
+    var b = new Buffer('............');
+    expect(b instanceof Buffer).toBeTruthy();
+  });
+
   it('should pass testSafeConstructor', function() {
     var b = new Buffer(10);
     expect(b.length).toBe(10);

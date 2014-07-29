@@ -37,11 +37,11 @@ Zlib.prototype.close = function() {
 };
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  this._delegate.write(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen);
+  return new Buffer(this._delegate.write(flushFlag, chunk.delegate, inOffset, inLen, outBuffer.delegate, outOffset, outLen));
 };
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  this._delegate.writeSync(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen);
+  return this._delegate.writeSync(flushFlag, chunk.delegate, inOffset, inLen, outBuffer.delegate, outOffset, outLen);
 };
 
 Zlib.prototype._onError = function(result) {

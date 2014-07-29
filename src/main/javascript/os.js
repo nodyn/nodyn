@@ -88,7 +88,7 @@ exports.uptime = function() {
 exports.loadavg = function() {
   if(isWindows) {
 	// http://nodejs.org/api/os.html#os_os_loadavg - windows always returns [0, 0, 0]
-	return [0, 0, 0];	
+	return [0, 0, 0];
   } else {
     avg = java.lang.management.ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
     // node.js likes 1/5/15 minute averages -  we'll just do one 3x
