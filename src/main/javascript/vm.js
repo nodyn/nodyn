@@ -1,76 +1,74 @@
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var binding = process.binding('contextify');
+var Script = binding.ContextifyScript;
+var util = require('util');
 
-module.exports.runInThisContext = function(code,options) {
-  var script  = createScript(code,options);
-  return script.runInThisContext();
+// The binding provides a few useful primitives:
+// - ContextifyScript(code, { filename = "evalmachine.anonymous",
+//                            displayErrors = true } = {})
+//   with methods:
+//   - runInThisContext({ displayErrors = true } = {})
+//   - runInContext(sandbox, { displayErrors = true, timeout = undefined } = {})
+// - makeContext(sandbox)
+// - isContext(sandbox)
+// From this we build the entire documented API.
+
+Script.prototype.runInNewContext = function(sandbox, options) {
+  var context = exports.createContext(sandbox);
+  return this.runInContext(context, options);
 };
 
-module.exports.runInNewContext = function() {
-  var code = arguments[0];
-  var sandbox = {};
-  var filename = "<script>";
+exports.Script = Script;
 
-  if ( arguments.length == 2 ) {
-    if ( arguments[1] instanceof String ) {
-      filename = arguments[1];
-    } else {
-      sandbox = arguments[1];
-    }
-  } else if ( arguments.length == 3) {
-    sandbox  = arguments[1];
-    filename = arguments[2];
+exports.createScript = function(code, options) {
+  return new Script(code, options);
+};
+
+exports.createContext = function(sandbox) {
+  if (util.isUndefined(sandbox)) {
+    sandbox = {};
+  } else if (binding.isContext(sandbox)) {
+    return sandbox;
   }
-  var script  = createScript(code, {filename: filename} );
-  return script.runInNewContext( sandbox );
+
+  binding.makeContext(sandbox);
+  return sandbox;
 };
 
-module.exports.runInContext = function(code,context,options) {
-  var script = createScript(code,options);
-  return script.runInContext(context,options);
+exports.runInContext = function(code, contextifiedSandbox, options) {
+  var script = new Script(code, options);
+  return script.runInContext(contextifiedSandbox, options);
 };
 
-function createContext(sandbox) {
-  var runtime = new io.nodyn.Nodyn(__nodyn);
-  var g = runtime.globalObject;
-
-  if ( sandbox ) {
-    for ( k in sandbox ) {
-      g[k] = sandbox[k];
-    }
-  }
-
-  return g;
+exports.runInNewContext = function(code, sandbox, options) {
+  var script = new Script(code, options);
+  return script.runInNewContext(sandbox, options);
 };
 
-module.exports.createContext = createContext;
-
-function createScript(code,options) {
-  return new Script(code,options);
-};
-module.exports.createScript = createScript;
-
-function Script(code,options) {
-  var filename = ( options && options.filename ) || '<script>';
-  this._script = __nodyn.newCompiler().withSource( code ).withFileName( filename ).compile();
-}
-
-Script.prototype.runInThisContext = function() {
-  return this.runInContext( global );
+exports.runInThisContext = function(code, options) {
+  var script = new Script(code, options);
+  return script.runInThisContext(options);
 };
 
-Script.prototype.runInNewContext = function(sandbox) {
-  var context = createContext(sandbox);
-  return this.runInContext(context);
-};
-
-Script.prototype.runInContext = function(context,options) {
-  var runner = context.__nodyn.newRunner().withSource( this._script ).withContext( context.__nodyn.defaultExecutionContext );
-  return context.__nodyn.start( runner );
-}
-
-
-module.exports.Script = Script;
-
-  
-
+exports.isContext = binding.isContext;
 

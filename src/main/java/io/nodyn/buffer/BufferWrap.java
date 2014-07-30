@@ -103,7 +103,7 @@ public class BufferWrap {
 
         target.buffer.setBytes(targetStart, this.buffer, sourceStart, copyLen);
 
-        target.buffer.writerIndex(targetStart + copyLen);
+        target.buffer.writerIndex( Math.max( target.buffer.writerIndex(), targetStart + copyLen) );
 
         return copyLen;
     }

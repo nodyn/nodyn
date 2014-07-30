@@ -418,7 +418,6 @@ function handleGroup(self, group, width, maxColumns) {
 
   var minRows = Math.ceil(group.length / maxColumns);
   for (var row = 0; row < minRows; row++) {
-    var timeStart = System.currentTimeMillis();
     for (var col = 0; col < maxColumns; col++) {
       var idx = row * maxColumns + col;
       if (idx >= group.length) {
@@ -434,7 +433,6 @@ function handleGroup(self, group, width, maxColumns) {
       }
     }
     self.output.write('\r\n');
-    var timeStop = System.currentTimeMillis();
   }
   self.output.write('\r\n');
 }

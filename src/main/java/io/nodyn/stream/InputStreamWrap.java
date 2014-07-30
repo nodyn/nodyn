@@ -27,7 +27,7 @@ public class InputStreamWrap extends StreamWrapper {
         EventLoopGroup eventLoopGroup = getManagedLoop().getEventLoopGroup();
         Channel channel = NioInputStreamChannel.create(this.in);
         setChannel(channel);
-        //channel.pipeline().addLast(new DebugHandler("pipe"));
+        //channel.pipeline().addLast(new DebugHandler("in"));
         channel.pipeline().addLast(new StreamEventsHandler(this));
         channel.pipeline().addLast(new ErrorHandler());
         channel.pipeline().addLast(getManagedLoop().newHandle().handler());

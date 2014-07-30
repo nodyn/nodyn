@@ -310,7 +310,6 @@ describe("Buffer", function() {
   });
 
   it( 'should provide for live/linked slices', function() {
-    try {
     var buf = new Buffer( "original" );
     var slice = buf.slice();
     expect(slice.toString()).toBe("original");
@@ -318,11 +317,6 @@ describe("Buffer", function() {
     expect(slice.toString()).toBe("oBiginal");
     slice[3] = 66;
     expect(buf.toString()).toBe("oBiBinal");
-    } catch (err) {
-      err.printStackTrace();
-    }
-
-
   });
 
   describe( "reading and writing", function() {

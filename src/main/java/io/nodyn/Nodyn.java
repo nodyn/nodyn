@@ -5,22 +5,20 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefHandle;
 import io.nodyn.loop.RootManagedEventLoopGroup;
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.Runner;
+import io.nodyn.process.Process;
+import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Nodyn extends DynJS {
 
-    public static final String VERSION = "0.1.0";
     private static final String NODE_JS = "node.js";
+    private static final String PROCESS = "nodyn/process.js";
 
     private final Vertx vertx;
     private final NodynConfig config;
@@ -67,7 +65,7 @@ public class Nodyn extends DynJS {
         }
     }
 
-    public ManagedEventLoopGroup getManagedLoop() {
+    public ManagedEventLoopGroup getEventLoop() {
         return this.managedLoop;
     }
 
@@ -75,41 +73,30 @@ public class Nodyn extends DynJS {
         return this.vertx;
     }
 
-    private void loadFromClasspath(String resource) {
-        InputStream is = this.config.getClassLoader().getResourceAsStream(resource);
-        if (is != null) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            new Runner(this).withFileName(resource).withSource(reader).evaluate();
-            try {
-                is.close();
-            } catch (IOException e) {
-                // ignore
-            }
-        } else {
-            config.getErrorStream().println("[ERROR] Cannot initialize Nodyn");
-        }
-    }
-
-    public Object start(Runner runner) {
+    public void run() {
         RefHandle handle = this.managedLoop.newHandle();
-        if ( ! this.started ) {
-            loadFromClasspath(NODE_JS);
-            this.started = true;
-        }
         try {
-            if (runner != null) {
-                Object result = runner.execute();
-                return result;
-            }
+            Process javaProcess = new Process(this);
+
+            JSFunction processFunction = (JSFunction) run(PROCESS);
+            JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
+
+            JSFunction nodeFunction = (JSFunction) run(NODE_JS);
+            getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
+        } catch (Throwable t) {
+            t.printStackTrace();
         } finally {
             handle.unref();
         }
-
-        return null;
     }
 
-    public RefHandle start() {
-        loadFromClasspath(NODE_JS);
-        return this.managedLoop.newHandle();
+    protected Object run(String scriptName) {
+        Runner runner = newRunner();
+        InputStream repl = getConfig().getClassLoader().getResourceAsStream(scriptName);
+        BufferedReader in = new BufferedReader(new InputStreamReader(repl));
+        runner.withSource(in);
+        runner.withFileName(scriptName);
+        return runner.execute();
     }
+
 }
