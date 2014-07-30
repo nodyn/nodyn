@@ -204,6 +204,7 @@ function zlibBuffer(engine, buffer, callback) {
   function flow() {
     var chunk;
     while (null !== (chunk = engine.read())) {
+      print("PUSHING CHUNK " + chunk);
       buffers.push(chunk);
       nread += chunk.length;
     }
@@ -219,6 +220,7 @@ function zlibBuffer(engine, buffer, callback) {
   function onEnd() {
     var buf = Buffer.concat(buffers, nread);
     buffers = [];
+    print("ENDING WITH " + buf)
     callback(null, buf);
     engine.close();
   }
@@ -473,7 +475,7 @@ Zlib.prototype._transform = function(chunk, encoding, cb) {
   var ending = ws.ending || ws.ended;
   var last = ending && (!chunk || ws.length === chunk.length);
 
-  util.inspect(chunk);
+  print("CHUNK:  " + chunk);
   if (!util.isNull(chunk) && !util.isBuffer(chunk)) {
     return cb(new Error('invalid input'));
   }
@@ -534,6 +536,7 @@ Zlib.prototype._processChunk = function(chunk, flushFlag, cb) {
     return buf;
   }
 
+  print("ABOUT TO WRITE " + chunk)
   var req = this._handle.write(flushFlag,
                                chunk, // in
                                inOff, // in_off
@@ -542,10 +545,15 @@ Zlib.prototype._processChunk = function(chunk, flushFlag, cb) {
                                this._offset, //out_off
                                availOutBefore); // out_len
 
+  print("WROTE")
   req.buffer = chunk;
   req.callback = callback;
 
+  print("REQ " + util.inspect(req));
+  print("CB " + callback);
+
   function callback(availInAfter, availOutAfter) {
+    print("HERE WE ARE IN CALLBACK")
     if (self._hadError)
       return;
 

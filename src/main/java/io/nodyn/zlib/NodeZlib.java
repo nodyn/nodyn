@@ -1,77 +1,70 @@
 package io.nodyn.zlib;
 
 import io.nodyn.EventSource;
-import org.dynjs.runtime.DynObject;
 import org.vertx.java.core.buffer.Buffer;
 
 import java.util.zip.Deflater;
 
 /**
  * Provides a process binding for zlib functions as expected by zlib.js
+ * Used by nodyn/bindings/zlib.js
  * @author Lance Ball
  */
 public class NodeZlib extends EventSource {
-    private final Mode mode;
     private int level;
+    private Mode mode;
     private Strategy strategy;
 
     public NodeZlib(int mode) {
         this.mode = Mode.values()[mode];
-        System.err.println("NodeZlib#ctor()");
-        System.err.println("NodeZlib#mode: " + this.mode);
     }
 
     public void init(int windowBits, int level, int memLevel, int strategy, String dictionary) {
         this.level = level;
         this.strategy = Strategy.values()[strategy];
-        System.err.println("NodeZlib#init()");
-        System.err.println("NodeZlib#level: " + this.level);
-        System.err.println("NodeZlib#strategy: " + this.strategy);
-        System.err.println("NodeZlib#dictionary: " + dictionary);
     }
 
     public void params(int level, int strategy) {
         this.level = level;
         this.strategy = Strategy.values()[strategy];
-        System.err.println("NodeZlib#params()");
-        System.err.println("NodeZlib#level: " + this.level);
-        System.err.println("NodeZlib#strategy: " + this.strategy);
     }
 
     public void reset() {
-        System.err.println("NodeZlib#reset()");
+        this.level = Strategy.Z_DEFAULT_COMPRESSION.ordinal();
+        this.strategy = Strategy.Z_DEFAULT_STRATEGY;
+        this.mode = Mode.DEFLATE;
     }
 
     public void close() {
-        System.err.println("NodeZlib#close()");
+        // umm?
     }
 
-    public Buffer write(int flush, Buffer chunk, int inOffset, int inLen, Buffer outBuffer, int outOffset, int outLen) {
+    public byte[] write(int flush, byte[] chunk, int inOffset, int inLen) {
         System.err.println("NodeZlib#write()");
-        return __write(flush, chunk, inOffset, inLen, outBuffer, outOffset, outLen);
+        return __write(flush, chunk, inOffset, inLen);
     }
 
-    public Buffer writeSync(int flush, Buffer chunk, int inOffset, int inLen, Buffer outBuffer, int outOffset, int outLen) {
+    public byte[] writeSync(int flush, byte[] chunk, int inOffset, int inLen) {
         System.err.println("NodeZlib#writeSync()");
-        return __write(flush, chunk, inOffset, inLen, outBuffer, outOffset, outLen);
+        return __write(flush, chunk, inOffset, inLen);
     }
 
-    private Buffer __write(int flush, Buffer chunk, int inOffset, int inLen, Buffer outBuffer, int outOffset, int outLen) {
+    private byte[] __write(int flush, byte[] chunk, int inOffset, int inLen) {
         switch(this.mode) {
-            case DEFLATE: return deflate(flush, chunk, inOffset, inLen, outBuffer, outOffset, outLen);
+            case DEFLATE: return deflate(flush, chunk, inOffset, inLen);
         }
-        return new Buffer("Mode not implemented: " + this.mode);
+        return null;
     }
 
-    private Buffer deflate(int flush, Buffer chunk, int inOffset, int inLen, Buffer outBuffer, int outOffset, int outLen) {
+    private byte[] deflate(int flush, byte[] chunk, int inOffset, int inLen) {
+        System.err.println("NodeZlib#deflate()");
         Deflater deflater = new Deflater(this.level);
-        deflater.setInput(chunk.getBytes(), inOffset, inLen);
+        System.err.println("SETTING INPUT " + chunk);
+        deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
-        byte[] output = new byte[chunk.length()*2]; // shouldn't be longer than 2x the input :)
-        outLen = deflater.deflate(output);
+        byte[] output = new byte[chunk.length*2]; // shouldn't be longer than 2x the input :)
         deflater.end();
-        outBuffer.setBytes(outOffset, output, 0, outLen);
-        return outBuffer;
+        return output;
     }
 
 }
