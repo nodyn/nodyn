@@ -107,7 +107,7 @@ Process.prototype._setupDomainUse = function(domain,flags) {
 Process.prototype.abort = Process.prototype.exit;
 
 // Mimic node.js process.binding()
-var ZlibBinding = require('nodyn/zlib_binding');
+var ZlibBinding = require('nodyn/bindings/zlib');
 Process.prototype.binding = function(name) {
   switch(name) {
     case 'zlib':
