@@ -5,7 +5,7 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefHandle;
 import io.nodyn.loop.RootManagedEventLoopGroup;
-import io.nodyn.process.Process;
+import io.nodyn.process.NodeProcess;
 import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -63,6 +63,7 @@ public class Nodyn extends DynJS {
         } else {
             this.managedLoop = parent.managedLoop.newChild();
         }
+
     }
 
     public ManagedEventLoopGroup getEventLoop() {
@@ -76,7 +77,7 @@ public class Nodyn extends DynJS {
     public void run() {
         RefHandle handle = this.managedLoop.newHandle();
         try {
-            Process javaProcess = new Process(this);
+            NodeProcess javaProcess = new NodeProcess(this);
 
             JSFunction processFunction = (JSFunction) run(PROCESS);
             JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);

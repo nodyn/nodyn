@@ -20,7 +20,7 @@ function isTTY(fd) {
 // ----------------------------------------
 
 function TTY(fd,readable) {
-  this._stream = new io.nodyn.tty.TTYWrap(process.EVENT_LOOP, fd, readable);
+  this._stream = new io.nodyn.tty.TTYWrap(process._process, fd, readable);
   Stream.call( this, fd, readable );
 }
 

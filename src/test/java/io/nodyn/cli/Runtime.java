@@ -33,7 +33,7 @@ public class Runtime {
         Nodyn nodyn = new Nodyn(config);
         Executor executor = (Executor) nodyn.newRunner().withSource("var executor = require('specRunner'); executor").evaluate();
         executor.execute(specs, notifier);
-        nodyn.start(nodyn.newRunner().withSource("executor.run()"));
+        //nodyn.start(nodyn.newRunner().withSource("executor.run()"));
     }
 
     public static class Builder {

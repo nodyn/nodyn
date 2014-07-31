@@ -3,6 +3,7 @@ package io.nodyn.stream;
 import io.netty.buffer.ByteBuf;
 import io.nodyn.Callback;
 import io.nodyn.handle.HandleWrap;
+import io.nodyn.process.NodeProcess;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,6 +14,10 @@ import java.io.UnsupportedEncodingException;
 public class StreamWrap extends HandleWrap {
 
     private StreamWrapper stream;
+
+    public StreamWrap(NodeProcess process) {
+        super(process);
+    }
 
     protected void setStream(StreamWrapper stream) throws IOException, InterruptedException {
         this.stream = stream;

@@ -17,9 +17,18 @@
     };
 
     this._setupAsyncListener = function(asyncFlags, runAsyncQueue, loadAsyncQueue, unloadAsyncQueue) {
+      this._process.setupAsyncListener( runAsyncQueue, loadAsyncQueue, unloadAsyncQueue);
+
+      this._runAsyncQueue = runAsyncQueue;
+      this._loadAsyncQueue = loadAsyncQueue;
+      this._unloadAsyncQueue = unloadAsyncQueue;
     };
 
     this._setupNextTick = function(tickInfo, tickCallback) {
+      this._process.setupNextTick( tickInfo, tickCallback );
+
+      this._tickInfo = tickInfo;
+      this._tickCallback = tickCallback;
     };
 
     this._setupDomainUse = function(domain, domainFlag) {

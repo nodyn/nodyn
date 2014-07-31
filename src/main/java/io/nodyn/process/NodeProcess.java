@@ -2,6 +2,7 @@ package io.nodyn.process;
 
 import io.nodyn.Nodyn;
 import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.Ticker;
 import org.dynjs.runtime.Runner;
 import org.vertx.java.core.Vertx;
 
@@ -10,8 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class Process {
-
+public class NodeProcess {
 
     private final Map<String, Object> bindings = new HashMap<>();
 
@@ -19,14 +19,41 @@ public class Process {
     private final String osName;
     private final String osArch;
 
-    public Process(Nodyn nodyn) {
+    private Runnable runAsyncQueue;
+    private Runnable loadAsyncQueue;
+    private Runnable unloadAsyncQueue;
+
+    public NodeProcess(Nodyn nodyn) {
         this(nodyn, System.getProperties());
     }
 
-    public Process(Nodyn nodyn, Properties props) {
+    public NodeProcess(Nodyn nodyn, Properties props) {
         this.nodyn = nodyn;
         this.osName = props.getProperty("os.name").toLowerCase();
         this.osArch = props.getProperty("os.arch").toLowerCase();
+
+    }
+
+    public void setupNextTick(Object tickInfo, Runnable tickCallback) {
+        new Ticker( this.nodyn.getEventLoop().getEventLoopGroup(), tickCallback ).run();
+    }
+
+    public void setupAsyncListener(Runnable runAsyncQueue, Runnable loadAsyncQueue, Runnable unloadAsyncQueue) {
+        this.runAsyncQueue = runAsyncQueue;
+        this.loadAsyncQueue = loadAsyncQueue;
+        this.unloadAsyncQueue = unloadAsyncQueue;
+    }
+
+    public Runnable getRunAsyncQueue() {
+        return this.runAsyncQueue;
+    }
+
+    public Runnable getLoadAsyncQueue() {
+        return this.loadAsyncQueue;
+    }
+
+    public Runnable getUnloadAsyncQueue() {
+        return this.unloadAsyncQueue;
     }
 
     public Nodyn getNodyn() {

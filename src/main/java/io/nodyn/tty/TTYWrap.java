@@ -1,6 +1,7 @@
 package io.nodyn.tty;
 
 import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.process.NodeProcess;
 import io.nodyn.stream.InputStreamWrap;
 import io.nodyn.stream.OutputStreamWrap;
 import io.nodyn.stream.StreamWrap;
@@ -19,13 +20,14 @@ public class TTYWrap extends StreamWrap {
     private String ttyConfig;
     private String ttyProps;
 
-    public TTYWrap(ManagedEventLoopGroup managedLoop, int fd, boolean readable) throws IOException, InterruptedException {
+    public TTYWrap(NodeProcess process, int fd, boolean readable) throws IOException, InterruptedException {
+        super( process );
         if ( fd == 0 ) {
-            setStream( new InputStreamWrap(managedLoop, System.in) );
+            setStream( new InputStreamWrap(process.getEventLoop(), System.in) );
         } else if ( fd == 1 ) {
-            setStream( new OutputStreamWrap(managedLoop, System.out) );
+            setStream( new OutputStreamWrap(process.getEventLoop(), System.out) );
         } else if ( fd == 2 ) {
-            setStream( new OutputStreamWrap(managedLoop, System.err) );
+            setStream( new OutputStreamWrap(process.getEventLoop(), System.err) );
         }
     }
 
