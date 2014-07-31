@@ -107,8 +107,10 @@ Process.prototype._setupDomainUse = function(domain,flags) {
 Process.prototype.abort = Process.prototype.exit;
 
 // Mimic node.js process.binding()
-var ZlibBinding = require('nodyn/bindings/zlib');
 Process.prototype.binding = function(name) {
+  // Lazily require bindings to prevent
+  // race conditions during bootstrap
+  var ZlibBinding = require('nodyn/bindings/zlib');
   switch(name) {
     case 'zlib':
       return ZlibBinding;

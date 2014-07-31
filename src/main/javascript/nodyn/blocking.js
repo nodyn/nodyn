@@ -1,4 +1,3 @@
-
 var blocking = new io.nodyn.loop.Blocking(process.EVENT_LOOP);
 
 module.exports.submit = function(task) {

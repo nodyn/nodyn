@@ -1,7 +1,7 @@
 package io.nodyn.zlib;
 
+import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import org.vertx.java.core.buffer.Buffer;
 
 import java.util.zip.Deflater;
 
@@ -58,12 +58,17 @@ public class NodeZlib extends EventSource {
 
     private byte[] deflate(int flush, byte[] chunk, int inOffset, int inLen) {
         System.err.println("NodeZlib#deflate()");
+        if (chunk == null || chunk.length == 0) {
+            // just a nothing
+            System.err.println("Got a nothing");
+            return null;
+        }
         Deflater deflater = new Deflater(this.level);
-        System.err.println("SETTING INPUT " + chunk);
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length*2]; // shouldn't be longer than 2x the input :)
         deflater.end();
+        this.emit("after", CallbackResult.createSuccess(output));
         return output;
     }
 
