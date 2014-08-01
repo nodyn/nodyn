@@ -1,4 +1,4 @@
-var specHelper = require('specHelper'),
+var specHelper = require('./specHelper'),
     zlib = require('zlib');
 
 describe('The zlib module', function() {

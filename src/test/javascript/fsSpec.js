@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var fs = require('fs');
 
 describe("fs module", function() {

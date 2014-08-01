@@ -17,23 +17,32 @@ public abstract class AbstractManagedEventLoopGroup implements ManagedEventLoopG
 
     public ChildManagedEventLoopGroup newChild() {
         ChildManagedEventLoopGroup child = new ChildManagedEventLoopGroup(this);
-        this.children.add( child );
+        this.children.add(child);
         return child;
+    }
+
+    public int refCount() {
+        return this.counter;
     }
 
     public RefHandle newHandle() {
         return new RefHandle(this);
     }
 
+    public RefHandle newHandle(boolean count) {
+        return new RefHandle(this, count);
+    }
+
+
     public synchronized void incrCount() {
         ++this.counter;
-        //System.err.println( getClass().getSimpleName() + " ++ " + this.counter );
+        //System.err.println(getClass().getSimpleName() + " ++ " + this.counter);
     }
 
     public synchronized void decrCount() {
         --this.counter;
-        //System.err.println( getClass().getSimpleName() + " -- " + this.counter );
-        if (this.counter == 0 ) {
+        //System.err.println(getClass().getSimpleName() + " -- " + this.counter);
+        if (this.counter == 0) {
             doShutdown();
         }
     }
@@ -43,8 +52,8 @@ public abstract class AbstractManagedEventLoopGroup implements ManagedEventLoopG
     }
 
     protected void doShutdown() {
-        //System.err.println( getClass().getSimpleName() + " XX doShutdown()" );
-        for ( ChildManagedEventLoopGroup each : this.children ) {
+        //System.err.println(getClass().getSimpleName() + " XX doShutdown()");
+        for (ChildManagedEventLoopGroup each : this.children) {
             each.doShutdown();
         }
 

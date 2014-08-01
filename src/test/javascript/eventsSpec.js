@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var nodyn  = require('nodyn');
 
 var MockEmitter = function() {};

@@ -1,5 +1,6 @@
 package io.nodyn.async;
 
+import io.netty.channel.EventLoopGroup;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
 import io.nodyn.process.NodeProcess;
@@ -9,10 +10,18 @@ import io.nodyn.process.NodeProcess;
  */
 public class AsyncWrap extends EventSource {
 
-    private final NodeProcess process;
+    protected final NodeProcess process;
 
     public AsyncWrap(NodeProcess process) {
         this.process = process;
+    }
+
+    protected EventLoopGroup getEventLoopGroup() {
+        return this.process.getEventLoop().getEventLoopGroup();
+    }
+
+    public NodeProcess getProcess() {
+        return this.process;
     }
 
     public void makeCallback(int index) {

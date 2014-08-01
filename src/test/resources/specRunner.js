@@ -7,7 +7,7 @@ module.exports = new org.jasmine.Executor({
 
   run: function() {
     load("jasmine-1.3.1/jasmine.js");
-    var notifierReporter = require("jasmine-jvm/reporter").reporter;
+    var notifierReporter = require("./reporter.js").reporter;
     var jasmineEnv = jasmine.getEnv();
 
     jasmineEnv.addReporter(notifierReporter(this.notifier));
@@ -25,8 +25,5 @@ module.exports = new org.jasmine.Executor({
 
     var start = java.lang.System.currentTimeMillis();
     process.nextTick(jasmineEnv.execute.bind(jasmineEnv));
-    done.get();
-    var stop = java.lang.System.currentTimeMillis();
-    console.log(["Tests complete in", (stop-start)/1000, "seconds"].join(" "));
   }
 });

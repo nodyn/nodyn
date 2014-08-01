@@ -209,10 +209,10 @@ function arrayToHash(array) {
   return hash;
 }
 
-
 function formatValue(ctx, value, recurseTimes) {
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
+
   if (ctx.customInspect &&
       value &&
       isFunction(value.inspect) &&

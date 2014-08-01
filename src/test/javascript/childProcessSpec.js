@@ -1,5 +1,5 @@
 
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var child_process = require('child_process');
 
 describe( 'child_process', function() {

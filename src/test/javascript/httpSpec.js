@@ -1,4 +1,4 @@
-var helper = require('specHelper'),
+var helper = require('./specHelper'),
     http   = require('http'),
     test_headers, test_options;
 

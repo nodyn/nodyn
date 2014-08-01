@@ -1,6 +1,6 @@
 "use strict";
 
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var http   = require('http');
 var net    = require('net');
 

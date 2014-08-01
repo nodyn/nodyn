@@ -1,4 +1,4 @@
-var specHelper = require('specHelper'),
+var specHelper = require('./specHelper'),
     util = require('util');
 
 describe('The util module', function() {

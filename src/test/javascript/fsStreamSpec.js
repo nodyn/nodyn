@@ -1,4 +1,4 @@
-var helper = require('specHelper'),
+var helper = require('./specHelper'),
     stream = require('stream'),
     util   = require('util'),
     fs     = require('fs');

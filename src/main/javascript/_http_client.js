@@ -4,7 +4,6 @@ var net   = require('net');
 var util  = require('util');
 var nodyn = require('nodyn');
 var Stream = require('stream');
-var MultiMap = require('nodyn/multiMap');
 var EventEmitter = require('events').EventEmitter;
 var IncomingMessage = require('_http_incoming').IncomingMessage;
 

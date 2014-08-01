@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 
 describe("The assert module", function() {
   var assert = require('assert');

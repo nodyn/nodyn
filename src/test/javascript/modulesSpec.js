@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 
 var System    = java.lang.System;
 var userDir   = System.getProperty('user.dir');

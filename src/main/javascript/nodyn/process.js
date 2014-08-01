@@ -1,3 +1,14 @@
+DTRACE_NET_SERVER_CONNECTION = function() {};
+DTRACE_NET_STREAM_END        = function() {};
+DTRACE_NET_SOCKET_READ       = function() {};
+DTRACE_NET_SOCKET_WRITE      = function() {};
+DTRACE_HTTP_SERVER_REQUEST   = function() {};
+DTRACE_HTTP_SERVER_RESPONSE  = function() {};
+DTRACE_HTTP_CLIENT_REQUEST   = function() {};
+DTRACE_HTTP_CLIENT_RESPONSE  = function() {};
+COUNTER_NET_SERVER_CONNECTION = function() {};
+COUNTER_NET_SERVER_CONNECTION_CLOSE = function() {};
+
 (function(javaProcess){
 
   function Process(process) {
@@ -42,9 +53,23 @@
 
     // ARGV
     this.argv = [];
-    this.argv.push( System.getProperty( "nodyn.binary" ) );
-    for ( i = 0 ; i < this._process.nodyn.config.argv.length ; ++i ) {
-      this.argv.push( this._process.nodyn.config.argv[i] );
+    this.argv.push( this._process.argv0 );
+
+    var rawArgv = this._process.nodyn.config.argv;
+    if ( rawArgv ) {
+      var numArgs = rawArgv.length;
+
+      var i = 0;
+      while ( i < numArgs ) {
+        var arg = rawArgv[i];
+        if ( arg == '-e' || arg == '--eval') {
+          ++i;
+          this._eval = rawArgv[i];
+        } else {
+          this.argv.push( rawArgv[i] );
+        }
+        ++i;
+      }
     }
 
     this.env = {

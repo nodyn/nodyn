@@ -1,5 +1,5 @@
 
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var vm     = require('vm');
 
 describe('vm functions', function() {

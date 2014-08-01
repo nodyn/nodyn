@@ -225,6 +225,7 @@
                   <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
                   <systemPropertyVariables>
                     <dynjs.compile.mode>OFF</dynjs.compile.mode>
+                    <test.pattern>${test.pattern}</test.pattern>
                   </systemPropertyVariables>
                   <arguments>
                     <argument>--format</argument>

@@ -1,4 +1,4 @@
-var helper     = require('specHelper'),
+var helper     = require('./specHelper'),
     dns        = require('dns');
 
 describe('The dns module', function() {

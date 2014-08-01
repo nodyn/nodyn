@@ -25,6 +25,9 @@ public class TimerWrap extends HandleWrap implements Runnable {
     }
 
     public void start(int msec, int repeat) {
+        if ( msec == 0 ) {
+            msec = 1;
+        }
         this.future = this.eventLoop.schedule(this, msec, TimeUnit.MILLISECONDS);
     }
 

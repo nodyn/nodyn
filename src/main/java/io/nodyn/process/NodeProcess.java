@@ -2,6 +2,7 @@ package io.nodyn.process;
 
 import io.nodyn.Nodyn;
 import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.TickInfo;
 import io.nodyn.loop.Ticker;
 import org.dynjs.runtime.Runner;
 import org.vertx.java.core.Vertx;
@@ -35,7 +36,7 @@ public class NodeProcess {
     }
 
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
-        new Ticker( this.nodyn.getEventLoop().getEventLoopGroup(), tickCallback ).run();
+        nodyn.getEventLoop().getEventLoopGroup().submit( new Ticker( this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)  ) );
     }
 
     public void setupAsyncListener(Runnable runAsyncQueue, Runnable loadAsyncQueue, Runnable unloadAsyncQueue) {
@@ -96,8 +97,20 @@ public class NodeProcess {
         }
     }
 
+    public String getArgv0() {
+        String bin = System.getProperty( "nodyn.binary" );
+        if ( bin == null ) {
+            bin = "nodyn";
+        }
+        return bin;
+    }
+
     public String getExecPath() {
-        File nodynBinary = new File( System.getProperty( "nodyn.binary" ) );
+        String bin = System.getProperty( "nodyn.binary" );
+        if ( bin == null ) {
+            bin = "node";
+        }
+        File nodynBinary = new File( bin );
         nodynBinary = nodynBinary.getAbsoluteFile();
         return nodynBinary.getParentFile().getParent();
     }

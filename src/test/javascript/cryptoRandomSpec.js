@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var crypto = require('crypto');
 
 describe("crypto random functions", function() {

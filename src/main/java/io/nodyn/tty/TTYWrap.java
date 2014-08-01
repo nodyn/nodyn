@@ -1,5 +1,6 @@
 package io.nodyn.tty;
 
+import io.netty.channel.ChannelFuture;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.process.NodeProcess;
 import io.nodyn.stream.InputStreamWrap;
@@ -20,23 +21,17 @@ public class TTYWrap extends StreamWrap {
     private String ttyConfig;
     private String ttyProps;
 
-    public TTYWrap(NodeProcess process, int fd, boolean readable) throws IOException, InterruptedException {
-        super( process );
-        if ( fd == 0 ) {
-            setStream( new InputStreamWrap(process.getEventLoop(), System.in) );
-        } else if ( fd == 1 ) {
-            setStream( new OutputStreamWrap(process.getEventLoop(), System.out) );
-        } else if ( fd == 2 ) {
-            setStream( new OutputStreamWrap(process.getEventLoop(), System.err) );
-        }
+    public TTYWrap(NodeProcess process, int fd, boolean readable) throws IOException {
+        super(process);
+        this.channelFuture = (readable ? ReadStream.create(process, fd, this) : WriteStream.create(process, fd, this));
     }
 
     public int getColumns() throws IOException, InterruptedException {
-        return getTerminalProperty( "columns" );
+        return getTerminalProperty("columns");
     }
 
     public int getRows() throws IOException, InterruptedException {
-        return getTerminalProperty( "rows" );
+        return getTerminalProperty("rows");
     }
 
     public void setRawMode(boolean mode) {
@@ -185,8 +180,7 @@ public class TTYWrap extends StreamWrap {
                 int index = str.lastIndexOf(" ");
 
                 return Integer.parseInt(str.substring(index).trim());
-            }
-            else if (str.endsWith(prop)) {
+            } else if (str.endsWith(prop)) {
                 int index = str.indexOf(" ");
 
                 return Integer.parseInt(str.substring(0, index).trim());

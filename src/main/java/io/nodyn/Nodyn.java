@@ -75,20 +75,27 @@ public class Nodyn extends DynJS {
     }
 
     public void run() {
-        RefHandle handle = this.managedLoop.newHandle();
-        try {
-            NodeProcess javaProcess = new NodeProcess(this);
+        final RefHandle handle = this.managedLoop.newHandle();
+        EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
+        elg.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    NodeProcess javaProcess = new NodeProcess(Nodyn.this);
 
-            JSFunction processFunction = (JSFunction) run(PROCESS);
-            JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
+                    JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
+                    JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
 
-            JSFunction nodeFunction = (JSFunction) run(NODE_JS);
-            getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        } finally {
-            handle.unref();
-        }
+                    JSFunction nodeFunction = (JSFunction) Nodyn.this.run(NODE_JS);
+                    getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                } finally {
+                    handle.unref();
+                }
+            }
+        });
+
     }
 
     protected Object run(String scriptName) {

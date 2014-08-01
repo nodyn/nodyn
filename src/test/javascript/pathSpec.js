@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var path   = require('path');
 
 var isWindows = process.platform === 'win32';

@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var http   = require('http');
 
 describe( "http.Agent", function() {

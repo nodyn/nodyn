@@ -1,9 +1,16 @@
 
 "use strict";
 
-function Stream(fd) {
+var util = require('util');
+var Handle = require('nodyn/bindings/handle_wrap').Handle;
+
+function Stream(stream) {
+  this._stream = stream;
   this._stream.on( "data", Stream.prototype._onData.bind(this) );
+  Handle.call( this, this._stream );
 }
+
+util.inherits(Stream, Handle);
 
 // ----------------------------------------
 Stream.prototype._onData = function(result) {

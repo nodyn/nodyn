@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 
 describe("Nodyn globals", function() {
   it('should pass testGlobal', function() {

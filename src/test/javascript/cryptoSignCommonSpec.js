@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var SignCommon = require('crypto/sign_common');
 
 describe("crypto Sign-common module", function() {

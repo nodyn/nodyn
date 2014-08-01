@@ -37,6 +37,9 @@ var source = {};
   '_stream_transform',
   '_stream_passthrough',
 
+  'punycode',
+  'os',
+
   'tty',
   'nodyn/streams',
 
@@ -48,9 +51,48 @@ var source = {};
   'string_decoder',
 
   'net',
+  'querystring',
+  'http',
+  '_http_agent',
+  '_http_client',
+  '_http_server',
+  '_http_incoming',
+  'url',
+  'dns',
+  'dgram',
 
   'timers',
   '_linklist',
+
+  'zlib',
+
+  'cluster',
+  'child_process',
+
+  'crypto',
+  'crypto/cipher_common',
+  'crypto/hash',
+  'crypto/hmac',
+  'crypto/cipher',
+  'crypto/decipher',
+  'crypto/sign',
+  'crypto/verify',
+  'crypto/sign_common',
+
+  'crypto/pbkdf2',
+  'crypto/random',
+
+  'nodyn/bindings/async_wrap',
+  'nodyn/bindings/handle_wrap',
+  'nodyn/bindings/stream_wrap',
+  'nodyn/bindings/timer_wrap',
+  'nodyn/bindings/pipe_wrap',
+  'nodyn/bindings/signal_wrap',
+  'nodyn/bindings/tty_wrap',
+  'nodyn/bindings/uv',
+  'nodyn/bindings/cares_wrap',
+  'nodyn/bindings/v8',
+  'nodyn/bindings/zlib',
 
 ].forEach( function(name) {
   source[name] = getSource(name);

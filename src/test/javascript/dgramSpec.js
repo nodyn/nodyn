@@ -1,4 +1,4 @@
-var helper = require('specHelper');
+var helper = require('./specHelper');
 var util   = require('util');
 var dgram  = require('dgram');
 

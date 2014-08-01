@@ -21,7 +21,7 @@ function isTTY(fd) {
 
 function TTY(fd,readable) {
   this._stream = new io.nodyn.tty.TTYWrap(process._process, fd, readable);
-  Stream.call( this, fd, readable );
+  Stream.call( this, this._stream );
 }
 
 util.inherits(TTY,Stream);

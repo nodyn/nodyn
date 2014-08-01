@@ -6,7 +6,6 @@ function Timer() {
   this._timer = new io.nodyn.timer.TimerWrap( process._process );
   Handle.call( this, this._timer );
 }
-
 util.inherits( Timer, Handle );
 
 Timer.prototype.start = function(msec, repeat) {

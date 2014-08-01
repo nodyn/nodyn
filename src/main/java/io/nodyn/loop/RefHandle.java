@@ -9,8 +9,14 @@ public class RefHandle {
     private boolean counted;
 
     public RefHandle(RefCounted refCounted) {
+        this( refCounted, true );
+    }
+
+    public RefHandle(RefCounted refCounted, boolean count) {
         this.refCounted = refCounted;
-        ref();
+        if ( count ) {
+            ref();
+        }
     }
 
     public RefHandle create() {

@@ -1,4 +1,5 @@
-var helper = require('specHelper');
+/*
+var helper = require('./specHelper');
 var javaProcess = new io.nodyn.process.Process();
 var isWindows = process.platform === 'win32';
 var os = require('os');
@@ -75,3 +76,4 @@ describe('OS module', function() {
     }
   });
 });
+*/

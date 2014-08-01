@@ -1,20 +1,32 @@
 package io.nodyn;
 
-import io.nodyn.cli.Arguments;
-import io.nodyn.cli.Runtime;
-import org.jasmine.cli.CliNotifier;
-import org.jasmine.cli.JVM;
+import org.dynjs.Config;
 
 /**
  * @author lanceball
  */
 public class TestRunner {
-    public static void main(String... args){
-        Arguments arguments = Arguments.parse(args);
 
-        Runtime.Builder builder = new Runtime.Builder();
-        arguments.compileMode().apply(builder);
-        builder.specs(arguments.specs());
-        builder.build().execute(new CliNotifier(System.out, new JVM(), arguments.formatter()));
+    private static final String SCRIPT = "" +
+            "var executor = require('./target/test-classes/specRunner.js');" +
+            "var jvm = new org.jasmine.cli.JVM();" +
+            "var formatter = new org.jasmine.cli.DocumentationFormatter();" +
+            "var notifier = new org.jasmine.cli.CliNotifier(System.out, jvm, formatter);" +
+            "var specs = new java.util.ArrayList();" +
+            "var scanner = new org.jasmine.SpecScanner();" +
+            "var iter = scanner.findSpecs('" + System.getProperty( "test.pattern" ) + "').iterator();" +
+            "while ( iter.hasNext() ) {" +
+            "  var file = new java.io.File( iter.next() );" +
+            "  specs.add( file.absolutePath );" +
+            "}" +
+            "executor.execute(specs, notifier);" +
+            "executor.run();";
+
+    public static void main(String... args) {
+        NodynConfig config = new NodynConfig(TestRunner.class.getClassLoader());
+        config.setCompileMode(Config.CompileMode.OFF);
+        config.setArgv(new String[]{"-e", SCRIPT});
+        Nodyn nodyn = new Nodyn(config);
+        nodyn.run();
     }
 }

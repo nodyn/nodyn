@@ -1,6 +1,7 @@
 package io.nodyn.loop;
 
 import io.netty.channel.EventLoopGroup;
+import io.nodyn.process.NodeProcess;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,17 +10,25 @@ import java.util.concurrent.TimeUnit;
  */
 public class Ticker implements Runnable {
 
-    private final EventLoopGroup eventLoop;
+    private final ManagedEventLoopGroup managedLoop;
     private final Runnable tickCallback;
+    private final TickInfo tickInfo;
+    private final RefHandle handle;
 
-    public Ticker(EventLoopGroup eventLoop, Runnable tickCallback) {
-        this.eventLoop = eventLoop;
+    public Ticker(NodeProcess process, Runnable tickCallback, TickInfo tickInfo) {
+        this.managedLoop = process.getEventLoop();
+        this.handle = process.getEventLoop().newHandle();
         this.tickCallback = tickCallback;
+        this.tickInfo = tickInfo;
     }
 
     @Override
     public void run() {
         this.tickCallback.run();
-        this.eventLoop.schedule( this, 500, TimeUnit.MILLISECONDS );
+        if ( this.tickInfo.getLength() == 0 && this.managedLoop.refCount() == 1 ) {
+            this.handle.unref();
+            return;
+        }
+        this.managedLoop.getEventLoopGroup().schedule(this, 500, TimeUnit.MILLISECONDS);
     }
 }

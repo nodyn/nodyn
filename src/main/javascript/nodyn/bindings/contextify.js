@@ -2,7 +2,9 @@
 "use strict";
 
 function ContextifyScript(script,options) {
-  var filename = options.filename || "<eval>";
+  options = options || {};
+
+  var filename = options.filename || '<eval>';
   var displayErrors = options.displayErrors || false;
 
   this._script = new io.nodyn.contextify.ContextifyScriptWrap(__nodyn, script, filename, displayErrors);
@@ -20,11 +22,11 @@ function isContext(obj) {
   return (obj instanceof org.dynjs.runtime.GlobalObject );
 }
 
-function makeSandbox(obj) {
- var runtime = new io.nodyn.Nodyn(__nodyn);
+function makeContext(obj) {
+  var runtime = new io.nodyn.Nodyn(__nodyn);
   var g = runtime.globalObject;
 
-  for ( k in obj ) {
+  for ( var k in obj ) {
     g[k] = obj[k];
   }
 
@@ -33,4 +35,4 @@ function makeSandbox(obj) {
 
 module.exports.ContextifyScript = ContextifyScript;
 module.exports.isContext        = isContext;
-module.exports.makeSandbox      = makeSandbox;
+module.exports.makeContext      = makeContext;

@@ -1,5 +1,7 @@
 package io.nodyn.natives;
 
+import org.dynjs.exception.ThrowException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,25 +14,30 @@ import java.util.Map;
 public class NativesWrap {
 
     public static String getSource(String name) throws IOException {
-        InputStream in = NativesWrap.class.getClassLoader().getResourceAsStream(name + ".js" );
-        InputStreamReader reader = new InputStreamReader(in);
-
-        StringBuilder source = new StringBuilder();
         try {
+            InputStream in = NativesWrap.class.getClassLoader().getResourceAsStream(name + ".js");
+            InputStreamReader reader = new InputStreamReader(in);
 
-            char[] buf = new char[4096];
-            int numRead = 0;
-
-            while ((numRead = reader.read(buf)) >= 0) {
-                source.append(buf, 0, numRead);
-            }
-        } finally {
+            StringBuilder source = new StringBuilder();
             try {
-                reader.close();
-            } catch (IOException e) {
-            }
-        }
 
-        return source.toString();
+                char[] buf = new char[4096];
+                int numRead = 0;
+
+                while ((numRead = reader.read(buf)) >= 0) {
+                    source.append(buf, 0, numRead);
+                }
+            } finally {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+
+            return source.toString();
+        } catch (Throwable t) {
+            System.err.println( "error loading: " + name );
+            throw t;
+        }
     }
 }

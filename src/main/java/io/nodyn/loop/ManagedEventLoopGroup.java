@@ -8,10 +8,13 @@ import io.netty.channel.EventLoopGroup;
 public interface ManagedEventLoopGroup {
 
     RefHandle newHandle();
+    RefHandle newHandle(boolean count);
 
     EventLoopGroup getEventLoopGroup();
 
     ChildManagedEventLoopGroup newChild();
+
+    int refCount();
 
     void shutdown();
 }

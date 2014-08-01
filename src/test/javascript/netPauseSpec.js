@@ -1,4 +1,4 @@
-var helper    = require('specHelper');
+var helper    = require('./specHelper');
 var net       = require('net');
 
 describe('The net module', function() {
