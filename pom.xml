@@ -79,7 +79,7 @@
     <version.bouncycastle>1.50</version.bouncycastle>
     <version.jnr-posix>3.0.2-SNAPSHOT</version.jnr-posix>
 
-    <test.pattern>src/test/**/*Spec.js</test.pattern>
+    <test.pattern>**/*Spec.js</test.pattern>
   </properties>
 
   <repositories>
@@ -225,7 +225,7 @@
                   <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
                   <systemPropertyVariables>
                     <dynjs.compile.mode>OFF</dynjs.compile.mode>
-                    <test.pattern>${test.pattern}</test.pattern>
+                    <!--<test.pattern>${test.pattern}</test.pattern>-->
                   </systemPropertyVariables>
                   <arguments>
                     <argument>--format</argument>

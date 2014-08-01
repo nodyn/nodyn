@@ -48,9 +48,10 @@ describe( "net.Server", function() {
   });
 
   it("should fire a 'connect' callback on client connection", function() {
+    waitsFor(helper.testComplete, "waiting for connection handler to fire", 5000 );
     var server = net.createServer();
     server.listen(8800, function() {
-      net.connect(8800, function(socket) {
+      var socket = net.connect(8800, function() {
         // stop accepting connections
         server.close( function() {
           // only called once all connections are closed
@@ -60,11 +61,10 @@ describe( "net.Server", function() {
         socket.destroy();
       });
     });
-    waitsFor(helper.testComplete, "waiting for connection handler to fire", 10000);
   });
 
-
   it("should allow reading and writing from both client/server connections", function() {
+    waitsFor(helper.testComplete, "waiting for read/write to complete", 3000);
     var completedCallback = false;
     var server = net.createServer();
     server.on('connection', function(conn) {
@@ -85,7 +85,6 @@ describe( "net.Server", function() {
         socket.write("crunchy bacon");
       });
     });
-    waitsFor(helper.testComplete, "waiting for read/write to complete", 3000);
   });
 
   it("should support an idle socket timeout", function() {
@@ -102,6 +101,7 @@ describe( "net.Server", function() {
     });
     waitsFor(helper.testComplete, "waiting for timeout to fire", 15000);
   });
+
   it("should allow cancellation of an idle socket timeout", function() {
     var server = net.createServer();
     server.on('connection', function(socket) {
@@ -126,7 +126,7 @@ describe( "net.Server", function() {
   it( "should provide a remote address", function() {
     var server = net.createServer();
     server.listen(8800, function() {
-      net.connect(8800, function(socket) {
+      var socket = net.connect(8800, function() {
         expect(socket.remoteAddress).toBe('127.0.0.1');
         expect(socket.remotePort).toBe(8800);
         socket.destroy();
@@ -140,7 +140,7 @@ describe( "net.Server", function() {
   it( "should provide a server address", function() {
     var server = net.createServer();
     server.listen(8800, function() {
-      net.connect(8800, function(socket) {
+      var socket = net.connect(8800, function() {
         var address = server.address();
         expect(address.port).toBe(8800);
         if ( address.family == 'IPv4' ) {

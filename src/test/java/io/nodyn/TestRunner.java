@@ -14,13 +14,22 @@ public class TestRunner {
             "var notifier = new org.jasmine.cli.CliNotifier(System.out, jvm, formatter);" +
             "var specs = new java.util.ArrayList();" +
             "var scanner = new org.jasmine.SpecScanner();" +
-            "var iter = scanner.findSpecs('" + System.getProperty( "test.pattern" ) + "').iterator();" +
+            "var iter = scanner.findSpecs('" + testPattern() + "').iterator();" +
             "while ( iter.hasNext() ) {" +
             "  var file = new java.io.File( iter.next() );" +
             "  specs.add( file.absolutePath );" +
             "}" +
             "executor.execute(specs, notifier);" +
             "executor.run();";
+
+    public static String testPattern() {
+        String pattern = System.getProperty( "test.pattern" );
+        if ( pattern == null ) {
+            pattern = "**/*Spec.js";
+        }
+
+        return pattern;
+    }
 
     public static void main(String... args) {
         NodynConfig config = new NodynConfig(TestRunner.class.getClassLoader());

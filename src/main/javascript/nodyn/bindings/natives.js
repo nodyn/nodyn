@@ -86,6 +86,7 @@ var source = {};
   'nodyn/bindings/handle_wrap',
   'nodyn/bindings/stream_wrap',
   'nodyn/bindings/timer_wrap',
+  'nodyn/bindings/tcp_wrap',
   'nodyn/bindings/pipe_wrap',
   'nodyn/bindings/signal_wrap',
   'nodyn/bindings/tty_wrap',

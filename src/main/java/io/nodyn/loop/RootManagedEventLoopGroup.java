@@ -50,6 +50,7 @@ public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
     protected void doShutdown() {
         super.doShutdown();
         if (this.eventLoopGroup != null) {
+            System.err.println( "*** SHUTDOWN" );
             this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.eventLoopGroup = null;
         }
