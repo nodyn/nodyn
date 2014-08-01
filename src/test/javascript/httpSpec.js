@@ -15,6 +15,7 @@ describe('http', function(){
     };
   });
 
+/*
   it('createServer should return a Server', function(done) {
     expect(http.createServer() instanceof http.Server).toBeTruthy();
     helper.testComplete(true);
@@ -37,6 +38,7 @@ describe('http', function(){
     // simulate a request event
     server.emit('request');
   });
+  */
 
   it('should be able to request with no callback', function() {
     waitsFor(helper.testComplete, "waiting for http request", 5000);

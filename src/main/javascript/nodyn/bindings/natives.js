@@ -57,12 +57,15 @@ var source = {};
   '_http_client',
   '_http_server',
   '_http_incoming',
+  '_http_outgoing',
+  '_http_common',
   'url',
   'dns',
   'dgram',
 
   'timers',
   '_linklist',
+  'freelist',
 
   'zlib',
 
@@ -94,6 +97,7 @@ var source = {};
   'nodyn/bindings/cares_wrap',
   'nodyn/bindings/v8',
   'nodyn/bindings/zlib',
+  'nodyn/bindings/http_parser',
 
 ].forEach( function(name) {
   source[name] = getSource(name);

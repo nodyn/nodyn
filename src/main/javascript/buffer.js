@@ -77,6 +77,9 @@ Object.defineProperty( Buffer, "_charsWritten", {
 
 function encodingToJava(enc) {
   enc = enc.toLowerCase();
+  if ( enc == 'binary' ) {
+    return enc;
+  }
   if ( enc == 'ascii' || enc == 'us-ascii') {
     return 'us-ascii';
   }

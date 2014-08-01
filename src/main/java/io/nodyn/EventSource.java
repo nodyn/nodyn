@@ -14,11 +14,12 @@ public class EventSource {
 
     }
 
-    public void emit(String event, CallbackResult result) {
+    public Object emit(String event, CallbackResult result) {
         Callback callback = this.callbacks.get(event);
         if (callback != null) {
-            callback.call(result);
+            return callback.call(result);
         }
+        return null;
     }
 
     public void on(String event, Callback callback) {

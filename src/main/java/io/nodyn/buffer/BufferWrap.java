@@ -31,7 +31,11 @@ public class BufferWrap {
     }
 
     public BufferWrap(String contents, String encoding) {
-        this.buffer = Unpooled.copiedBuffer(contents, Charset.forName(encoding));
+        if (encoding.equals("binary")) {
+            this.buffer = Unpooled.copiedBuffer(contents.getBytes());
+        } else {
+            this.buffer = Unpooled.copiedBuffer(contents, Charset.forName(encoding));
+        }
         this.length = this.buffer.readableBytes();
     }
 
@@ -46,7 +50,7 @@ public class BufferWrap {
 
     public void putByte(int offset, int value) {
         this.buffer.setByte(offset, value & 0xFF);
-        this.buffer.writerIndex( Math.max( this.buffer.writerIndex(), offset + 1 ) );
+        this.buffer.writerIndex(Math.max(this.buffer.writerIndex(), offset + 1));
     }
 
     public int getLength() {
@@ -54,8 +58,8 @@ public class BufferWrap {
     }
 
     public byte[] byteArray() {
-        byte[] bytes = new byte[ this.buffer.readableBytes() ];
-        this.buffer.getBytes(0, bytes );
+        byte[] bytes = new byte[this.buffer.readableBytes()];
+        this.buffer.getBytes(0, bytes);
         return bytes;
         //return this.buffer.array();
     }
@@ -103,7 +107,7 @@ public class BufferWrap {
 
         target.buffer.setBytes(targetStart, this.buffer, sourceStart, copyLen);
 
-        target.buffer.writerIndex( Math.max( target.buffer.writerIndex(), targetStart + copyLen) );
+        target.buffer.writerIndex(Math.max(target.buffer.writerIndex(), targetStart + copyLen));
 
         return copyLen;
     }
@@ -259,17 +263,17 @@ public class BufferWrap {
     }
 
     public void writeDoubleBE(double value, int offset) {
-        this.buffer.setDouble(offset,value);
+        this.buffer.setDouble(offset, value);
     }
 
     public double readDoubleLE(int offset) {
         long bits = this.buffer.getLong(offset);
-        return Double.longBitsToDouble( Long.reverseBytes( bits ) );
+        return Double.longBitsToDouble(Long.reverseBytes(bits));
     }
 
     public void writeDoubleLE(double value, int offset) {
-        long bits = Double.doubleToLongBits( value );
-        this.buffer.setLong( offset, Long.reverse( bits ) );
+        long bits = Double.doubleToLongBits(value);
+        this.buffer.setLong(offset, Long.reverse(bits));
     }
 
     //

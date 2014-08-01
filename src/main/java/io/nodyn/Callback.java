@@ -5,6 +5,6 @@ package io.nodyn;
  */
 public interface Callback {
 
-    void call(CallbackResult result);
+    Object call(CallbackResult result);
 
 }
