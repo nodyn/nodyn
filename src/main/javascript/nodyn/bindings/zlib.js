@@ -10,6 +10,7 @@ function exportEnums(_enum) {
 
 exportEnums(io.nodyn.zlib.Mode.values());
 exportEnums(io.nodyn.zlib.Code.values());
+exportEnums(io.nodyn.zlib.Level.values());
 exportEnums(io.nodyn.zlib.Strategy.values());
 exportEnums(io.nodyn.zlib.Flush.values());
 
@@ -39,15 +40,13 @@ Zlib.prototype.close = function() {
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
   return new ZlibRequest(this._delegate).run(function() {
-    var out = this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outOffset, outLen);
-    if (out) {
-      outBuffer.write(out, outOffset);
-    }
+    this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._buffer, outOffset, outLen);
   }.bind(this));
 };
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  var bytes = this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outOffset, outLen);
+  this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._buffer, outOffset, outLen);
+  // TODO
   return {
     AvailInAfter: 0,
     AvailOutAfter: 0

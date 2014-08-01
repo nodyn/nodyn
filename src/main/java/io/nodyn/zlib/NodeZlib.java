@@ -2,6 +2,7 @@ package io.nodyn.zlib;
 
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
+import io.nodyn.buffer.BufferWrap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class NodeZlib extends EventSource {
     }
 
     public void reset() {
-        this.level = Strategy.Z_DEFAULT_COMPRESSION.ordinal();
+        this.level = Level.Z_DEFAULT_COMPRESSION.ordinal();
         this.strategy = Strategy.Z_DEFAULT_STRATEGY;
         this.mode = Mode.DEFLATE;
     }
@@ -41,35 +42,36 @@ public class NodeZlib extends EventSource {
         // umm?
     }
 
-    public String write(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
-        return __write(flush, chunk, inOffset, inLen, outOffset, outLen);
+    public void write(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+        __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 
-    public String writeSync(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
+    public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
         System.err.println("NodeZlib#writeSync()");
-        return __write(flush, chunk, inOffset, inLen, outOffset, outLen);
+        __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 
-    private String __write(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
+    private void __write(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
         switch(this.mode) {
-            case DEFLATE: return deflate(flush, chunk, inOffset, inLen, outOffset, outLen);
+            case DEFLATE:
+                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                break;
         }
-        return null;
     }
 
-    private String deflate(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
+    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
         if (chunk == null || chunk.length == 0) {
             after(null, 0, outLen);
-            return null;
+            return;
         }
-        Deflater deflater = new Deflater(this.level);
+        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level));
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
-        byte[] output = new byte[chunk.length*2]; // shouldn't be longer than 2x the input :)
+        byte[] output = new byte[chunk.length];
         int compressedLength = deflater.deflate(output);
         deflater.end();
+        new BufferWrap(output).copy(buffer, outOffset, 0, compressedLength);
         after(output, 0, outLen - compressedLength);
-        return new String(output);
     }
 
     private void after(byte[] output, int inAfter, int outAfter) {
