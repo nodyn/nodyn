@@ -3,6 +3,8 @@ package io.nodyn.zlib;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.Deflater;
 
 /**
@@ -39,37 +41,43 @@ public class NodeZlib extends EventSource {
         // umm?
     }
 
-    public byte[] write(int flush, byte[] chunk, int inOffset, int inLen) {
-        System.err.println("NodeZlib#write()");
-        return __write(flush, chunk, inOffset, inLen);
+    public String write(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
+        return __write(flush, chunk, inOffset, inLen, outOffset, outLen);
     }
 
-    public byte[] writeSync(int flush, byte[] chunk, int inOffset, int inLen) {
+    public String writeSync(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
         System.err.println("NodeZlib#writeSync()");
-        return __write(flush, chunk, inOffset, inLen);
+        return __write(flush, chunk, inOffset, inLen, outOffset, outLen);
     }
 
-    private byte[] __write(int flush, byte[] chunk, int inOffset, int inLen) {
+    private String __write(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
         switch(this.mode) {
-            case DEFLATE: return deflate(flush, chunk, inOffset, inLen);
+            case DEFLATE: return deflate(flush, chunk, inOffset, inLen, outOffset, outLen);
         }
         return null;
     }
 
-    private byte[] deflate(int flush, byte[] chunk, int inOffset, int inLen) {
-        System.err.println("NodeZlib#deflate()");
+    private String deflate(int flush, byte[] chunk, int inOffset, int inLen, int outOffset, int outLen) {
         if (chunk == null || chunk.length == 0) {
-            // just a nothing
-            System.err.println("Got a nothing");
+            after(null, 0, outLen);
             return null;
         }
         Deflater deflater = new Deflater(this.level);
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length*2]; // shouldn't be longer than 2x the input :)
+        int compressedLength = deflater.deflate(output);
         deflater.end();
-        this.emit("after", CallbackResult.createSuccess(output));
-        return output;
+        after(output, 0, outLen - compressedLength);
+        return new String(output);
+    }
+
+    private void after(byte[] output, int inAfter, int outAfter) {
+        Map result = new HashMap();
+        result.put("output", output);
+        result.put("outAfter", outAfter);
+        result.put("inAfter", inAfter);
+        this.emit("after", CallbackResult.createSuccess(result));
     }
 
 }

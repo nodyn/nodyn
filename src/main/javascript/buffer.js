@@ -173,7 +173,6 @@ Buffer.prototype.write = function(/*str,offset,len,enc*/) {
   }
 
   enc = encodingToJava(enc);
-
   return this._buffer.write( str, offset, len, enc );
 };
 

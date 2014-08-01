@@ -37,37 +37,17 @@ Zlib.prototype.close = function() {
   this._delegate.close();
 };
 
-var ZlibRequest = function ZlibRequest(delegate) {
-  if (!(this instanceof ZlibRequest)) return new ZlibRequest();
-  delegate.on('after', this._onAfter.bind(this));
-  this._cb = undefined;
-  Object.defineProperty( this, 'callback', {
-    set: function(cb) { this._cb = cb; }.bind(this),
-    get: function() { return this._cb; }.bind(this),
-    enumerable: false
-  });
-};
-
-ZlibRequest.prototype._onAfter = function _onAfter(result) {
-  if (this.callback) {
-    this.callback();
-  }
-};
-
-ZlibRequest.prototype.run = function run(f) {
-  blocking.submit(f);
-  return this;
-};
-
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  var req = new ZlibRequest(this._delegate);
-  return req.run(function() {
-    this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen);
+  return new ZlibRequest(this._delegate).run(function() {
+    var out = this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outOffset, outLen);
+    if (out) {
+      outBuffer.write(out, outOffset);
+    }
   }.bind(this));
 };
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  var bytes = this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen);
+  var bytes = this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outOffset, outLen);
   return {
     AvailInAfter: 0,
     AvailOutAfter: 0
@@ -79,4 +59,28 @@ Zlib.prototype._onError = function(result) {
     this.onerror(result.error.message, result.result);
   else
     console.error("WTF");
+};
+
+function ZlibRequest(delegate) {
+  if (!(this instanceof ZlibRequest)) return new ZlibRequest();
+  delegate.on('after', this._onAfter.bind(this));
+}
+
+ZlibRequest.prototype._onAfter = function _onAfter(result) {
+  if (this.callback) {
+    if (result.error) {
+      throw new Error("Unable to process zlib request", result.error);
+    }
+    var inAfter = 0, outAfter = 1;
+    if (result.result) {
+      inAfter = result.result.inAfter;
+      outAfter = result.result.outAfter;
+    }
+    this.callback(inAfter, outAfter);
+  }
+};
+
+ZlibRequest.prototype.run = function run(f) {
+  blocking.submit(f);
+  return this;
 };
