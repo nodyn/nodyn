@@ -1,218 +1,319 @@
-var nodyn = require('nodyn');
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-function errorConverter(err) {
+var net = require('net');
+var util = require('util');
+
+var cares = process.binding('cares_wrap');
+var uv = process.binding('uv');
+
+var isIp = net.isIP;
+
+
+function errnoException(err, syscall, hostname) {
+  // FIXME(bnoordhuis) Remove this backwards compatibility shite and pass
+  // the true error to the user. ENOTFOUND is not even a proper POSIX error!
+  if (err === uv.UV_EAI_MEMORY ||
+      err === uv.UV_EAI_NODATA ||
+      err === uv.UV_EAI_NONAME) {
+    err = 'ENOTFOUND';
+  }
+  var ex = null;
+  if (typeof err === 'string') {  // c-ares error code.
+    ex = new Error(syscall + ' ' + err);
+    ex.code = err;
+    ex.errno = err;
+    ex.syscall = syscall;
+  } else {
+    ex = util._errnoException(err, syscall);
+  }
+  if (hostname) {
+    ex.hostname = hostname;
+  }
+  return ex;
+}
+
+
+// c-ares invokes a callback either synchronously or asynchronously,
+// but the dns API should always invoke a callback asynchronously.
+//
+// This function makes sure that the callback is invoked asynchronously.
+// It returns a function that invokes the callback within nextTick().
+//
+// To avoid invoking unnecessary nextTick(), `immediately` property of
+// returned function should be set to true after c-ares returned.
+//
+// Usage:
+//
+// function someAPI(callback) {
+//   callback = makeAsync(callback);
+//   channel.someAPI(..., callback);
+//   callback.immediately = true;
+// }
+function makeAsync(callback) {
+  if (!util.isFunction(callback)) {
+    return callback;
+  }
+  return function asyncCallback() {
+    if (asyncCallback.immediately) {
+      // The API already returned, we can invoke the callback immediately.
+      callback.apply(null, arguments);
+    } else {
+      var args = arguments;
+      process.nextTick(function() {
+        callback.apply(null, args);
+      });
+    }
+  };
+}
+
+
+function onlookup(err, addresses) {
   if (err) {
-    err.code = err.cause.code().name();
-    // TODO: Convert other errors to node.js names
-    if(err.code === 'NXDOMAIN') {
-      err.code = DNS.NOTFOUND;
-    }
-    return err;
+    return this.callback(errnoException(err, 'getaddrinfo', this.hostname));
   }
-  return null;
-}
-
-function stringMutator(list) {
-  if (!list) return null;
-  return list.toArray();
-}
-function stringHandler(callback) {
-  return nodyn.vertxHandler(function(e,r) {
-    callback(errorConverter(e), stringMutator(r));
-  });
-}
-
-function addressMutator(addresses) {
-  if (!addresses) return null;
-  var addrs = [];
-  for (var i = 0; i < addresses.size(); i++) {
-    addrs[i] = addresses.get(i).getHostAddress();
+  if (this.family) {
+    this.callback(null, addresses[0], this.family);
+  } else {
+    this.callback(null, addresses[0], addresses[0].indexOf(':') >= 0 ? 6 : 4);
   }
-  return addrs;
-}
-function addressHandler(callback) {
-  return nodyn.vertxHandler(function(e,r) {
-    callback(errorConverter(e), addressMutator(r));
-  });
 }
 
-function mxMutator(records) {
-  if (!records) return null;
-  var recs = [];
-  for (var i = 0; i < records.size(); i++) {
-    recs[i] = {
-      priority: records.get(i).priority(),
-      exchange: records.get(i).name()
-    };
-  }
-  return recs;
-}
-function mxHandler(callback) {
-  return nodyn.vertxHandler(function(e,r) {
-    callback(errorConverter(e), mxMutator(r));
-  });
-}
 
-function srvMutator(records) {
-  if (!records) return null;
-  var recs = [];
-  for (var i = 0; i < records.size(); i++) {
-    var record = records.get(i);
-    recs[i] = {
-      priority: record.priority(),
-      weight: record.weight(),
-      port: record.port(),
-      name: record.name(),
-      protocol: record.protocol(),
-      service: record.service(),
-      target: record.target()
-    };
-  }
-  return recs;
-}
-function srvHandler(callback) {
-  return nodyn.vertxHandler(function(e,r) {
-    callback(errorConverter(e), srvMutator(r));
-  });
-}
-
-function serverAddress(srv) {
-  return [new java.net.InetSocketAddress(java.net.InetAddress.getByName(srv.host), srv.port)];
-}
-
-var client = process.context.createDnsClient(serverAddress({host: '127.0.0.1', port: 53})),
-    DNS = {};
-
-DNS.NODATA = 'ENODATA';
-DNS.FORMERR = 'EFORMERR';
-DNS.SERVFAIL = 'ESERVFAIL';
-DNS.NOTFOUND = 'ENOTFOUND';
-DNS.NOTIMP = 'ENOTIMP';
-DNS.REFUSED = 'EREFUSED';
-DNS.BADQUERY = 'EBADQUERY';
-DNS.ADNAME = 'EADNAME';
-DNS.BADFAMILY = 'EBADFAMILY';
-DNS.BADRESP = 'EBADRESP';
-DNS.CONNREFUSED = 'ECONNREFUSED';
-DNS.TIMEOUT = 'ETIMEOUT';
-DNS.EOF = 'EOF';
-DNS.FILE = 'EFILE';
-DNS.NOMEM = 'ENOMEM';
-DNS.DESTRUCTION = 'EDESTRUCTION';
-DNS.BADSTR = 'EBADSTR';
-DNS.BADFLAGS = 'EBADFLAGS';
-DNS.NONAME = 'ENONAME';
-DNS.BADHINTS = 'EBADHINTS';
-DNS.NOTINITIALIZED = 'ENOTINITIALIZED';
-DNS.LOADIPHLPAPI = 'ELOADIPHLPAPI';
-DNS.ADDRGETNETWORKPARAMS = 'EADDRGETNETWORKPARAMS';
-DNS.CANCELLED = 'ECANCELLED';
-
-/**
- * Sets the nameserver address and port
- * {
- *   host: '127.0.0.1',
- *   port: 53530
- * }
- */
-DNS.server = function server(srv) {
-  if (srv) {
-    client = process.context.createDnsClient(serverAddress(srv));
-  }
-};
-
-
-DNS.lookup = function lookup(domain, family, callback) {
-  if (typeof family === 'function') {
+// Easy DNS A/AAAA look up
+// lookup(hostname, [family,] callback)
+exports.lookup = function(hostname, family, callback) {
+  // parse arguments
+  if (arguments.length === 2) {
     callback = family;
-    family = 4;
+    family = 0;
+  } else if (!family) {
+    family = 0;
+  } else {
+    family = +family;
+    if (family !== 4 && family !== 6) {
+      throw new Error('invalid argument: `family` must be 4 or 6');
+    }
   }
-  var handler = nodyn.vertxHandler(function(e,r) {
-    callback(errorConverter(e), (r ? r.toString() : null), family);
+  callback = makeAsync(callback);
+
+  if (!hostname) {
+    callback(null, null, family === 6 ? 6 : 4);
+    return {};
+  }
+
+  var matchedFamily = net.isIP(hostname);
+  if (matchedFamily) {
+    callback(null, hostname, matchedFamily);
+    return {};
+  }
+
+  var req = {
+    callback: callback,
+    family: family,
+    hostname: hostname,
+    oncomplete: onlookup
+  };
+
+  var err = cares.getaddrinfo(req, hostname, family);
+  if (err) {
+    callback(errnoException(err, 'getaddrinfo', hostname));
+    return {};
+  }
+
+  callback.immediately = true;
+  return req;
+};
+
+
+function onlookupservice(err, host, service) {
+  if (err)
+    return this.callback(errnoException(err, 'getnameinfo', this.host));
+
+  this.callback(null, host, service);
+}
+
+
+// lookupService(address, port, callback)
+exports.lookupService = function(host, port, callback) {
+  if (arguments.length !== 3)
+    throw new Error('invalid arguments');
+
+  if (cares.isIP(host) === 0)
+    throw new TypeError('host needs to be a valid IP address');
+
+  callback = makeAsync(callback);
+
+  var req = {
+    callback: callback,
+    host: host,
+    port: port,
+    oncomplete: onlookupservice
+  };
+  var err = cares.getnameinfo(req, host, port);
+  if (err) throw errnoException(err, 'getnameinfo', host);
+
+  callback.immediately = true;
+  return req;
+};
+
+
+function onresolve(err, result) {
+  if (err)
+    this.callback(errnoException(err, this.bindingName, this.hostname));
+  else
+    this.callback(null, result);
+}
+
+
+function resolver(bindingName) {
+  var binding = cares[bindingName];
+
+  return function query(name, callback) {
+    if (!util.isString(name)) {
+      throw new Error('Name must be a string');
+    } else if (!util.isFunction(callback)) {
+      throw new Error('Callback must be a function');
+    }
+
+    callback = makeAsync(callback);
+    var req = {
+      bindingName: bindingName,
+      callback: callback,
+      hostname: name,
+      oncomplete: onresolve
+    };
+    var err = binding(req, name);
+    if (err) throw errnoException(err, bindingName);
+    callback.immediately = true;
+    return req;
+  }
+}
+
+
+var resolveMap = {};
+exports.resolve4 = resolveMap.A = resolver('queryA');
+exports.resolve6 = resolveMap.AAAA = resolver('queryAaaa');
+exports.resolveCname = resolveMap.CNAME = resolver('queryCname');
+exports.resolveMx = resolveMap.MX = resolver('queryMx');
+exports.resolveNs = resolveMap.NS = resolver('queryNs');
+exports.resolveTxt = resolveMap.TXT = resolver('queryTxt');
+exports.resolveSrv = resolveMap.SRV = resolver('querySrv');
+exports.resolveNaptr = resolveMap.NAPTR = resolver('queryNaptr');
+exports.resolveSoa = resolveMap.SOA = resolver('querySoa');
+exports.reverse = resolveMap.PTR = resolver('getHostByAddr');
+
+
+exports.resolve = function(hostname, type_, callback_) {
+  var resolver, callback;
+  if (util.isString(type_)) {
+    resolver = resolveMap[type_];
+    callback = callback_;
+  } else if (util.isFunction(type_)) {
+    resolver = exports.resolve4;
+    callback = type_;
+  } else {
+    throw new Error('Type must be a string');
+  }
+
+  if (util.isFunction(resolver)) {
+    return resolver(hostname, callback);
+  } else {
+    throw new Error('Unknown type "' + type_ + '"');
+  }
+};
+
+
+exports.getServers = function() {
+  return cares.getServers();
+};
+
+
+exports.setServers = function(servers) {
+  // cache the original servers because in the event of an error setting the
+  // servers cares won't have any servers available for resolution
+  var orig = cares.getServers();
+
+  var newSet = [];
+
+  servers.forEach(function(serv) {
+    var ver = isIp(serv);
+
+    if (ver)
+      return newSet.push([ver, serv]);
+
+    var match = serv.match(/\[(.*)\](:\d+)?/);
+
+    // we have an IPv6 in brackets
+    if (match) {
+      ver = isIp(match[1]);
+      if (ver)
+        return newSet.push([ver, match[1]]);
+    }
+
+    var s = serv.split(/:\d+$/)[0];
+    ver = isIp(s);
+
+    if (ver)
+      return newSet.push([ver, s]);
+
+    throw new Error('IP address is not properly formatted: ' + serv);
   });
 
-  if (family === 4) {
-    client.lookup4(domain, handler);
-  } else if (family === 6) {
-    client.lookup6(domain, handler);
+  var r = cares.setServers(newSet);
+
+  if (r) {
+    // reset the servers to the old servers, because ares probably unset them
+    cares.setServers(orig.join(','));
+
+    var err = cares.strerror(r);
+    throw new Error('c-ares failed to set servers: "' + err +
+                    '" [' + servers + ']');
   }
 };
 
-DNS.resolve = function resolve(domain, rrtype, callback) {
-  if (typeof rrtype == 'function') {
-    callback = rrtype;
-    rrtype = 'A';
-  }
 
-  switch(rrtype) {
-    case 'A': {
-      client.resolveA(domain, addressHandler(callback));
-      break;
-    }
-    case 'AAAA': {
-      client.resolveAAAA(domain, addressHandler(callback));
-      break;
-    }
-    case 'CNAME': {
-      client.resolveCNAME(domain, stringHandler(callback));
-      break;
-    }
-    case 'MX': {
-      client.resolveMX(domain, mxHandler(callback));
-      break;
-    }
-    case 'NS': {
-      client.resolveNS(domain, stringHandler(callback));
-      break;
-    }
-    case 'PTR': {
-      client.resolvePTR(domain, nodyn.vertxHandler(callback));
-      break;
-    }
-    case 'SRV': {
-      client.resolveSRV(domain, srvHandler(callback));
-      break;
-    }
-    case 'TXT': {
-      client.resolveTXT(domain, stringHandler(callback));
-      break;
-    }
-    default: {
-      callback({code: DNS.BADQUERY});
-    }
-  }
-};
+// ERROR CODES
+exports.NODATA = 'ENODATA';
+exports.FORMERR = 'EFORMERR';
+exports.SERVFAIL = 'ESERVFAIL';
+exports.NOTFOUND = 'ENOTFOUND';
+exports.NOTIMP = 'ENOTIMP';
+exports.REFUSED = 'EREFUSED';
+exports.BADQUERY = 'EBADQUERY';
+exports.ADNAME = 'EADNAME';
+exports.BADFAMILY = 'EBADFAMILY';
+exports.BADRESP = 'EBADRESP';
+exports.CONNREFUSED = 'ECONNREFUSED';
+exports.TIMEOUT = 'ETIMEOUT';
+exports.EOF = 'EOF';
+exports.FILE = 'EFILE';
+exports.NOMEM = 'ENOMEM';
+exports.DESTRUCTION = 'EDESTRUCTION';
+exports.BADSTR = 'EBADSTR';
+exports.BADFLAGS = 'EBADFLAGS';
+exports.NONAME = 'ENONAME';
+exports.BADHINTS = 'EBADHINTS';
+exports.NOTINITIALIZED = 'ENOTINITIALIZED';
+exports.LOADIPHLPAPI = 'ELOADIPHLPAPI';
+exports.ADDRGETNETWORKPARAMS = 'EADDRGETNETWORKPARAMS';
+exports.CANCELLED = 'ECANCELLED';
 
-DNS.resolve4 = function resolve4(domain, callback) {
-  DNS.resolve(domain, 'A', callback);
-};
-
-DNS.resolve6 = function resolve6(domain, callback) {
-  DNS.resolve(domain, 'AAAA', callback);
-};
-
-DNS.resolveMx = function resolveMx(domain, callback) {
-  DNS.resolve(domain, 'MX', callback);
-};
-
-DNS.resolveTxt = function(domain, callback) {
-  DNS.resolve(domain, 'TXT', callback);
-};
-
-DNS.resolveSrv = function(domain, callback) {
-  DNS.resolve(domain, 'SRV', callback);
-};
-
-DNS.resolveNs = function(domain, callback) {
-  DNS.resolve(domain, 'NS', callback);
-};
-
-DNS.resolveCname = function(domain, callback) {
-  DNS.resolve(domain, 'CNAME', callback);
-};
-
-DNS.reverse = function(ip, callback) {
-  DNS.resolve(ip, 'PTR', callback);
-};
-
-module.exports = DNS;

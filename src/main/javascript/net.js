@@ -885,7 +885,11 @@ Socket.prototype.connect = function(options, cb) {
     var family = options.family || 4;
     debug('connect: find host ' + host);
     self._host = host;
+    console.log( "LOOKUP!!!! " + host + " // " + family );
     require('dns').lookup(host, family, function(err, ip, addressType) {
+      console.log( "err= " + err);
+      console.log( "ip= " + ip);
+      console.log( "addressType= " + addressType);
       self.emit('lookup', err, ip, addressType);
 
       // It's possible we were destroyed while looking this up.

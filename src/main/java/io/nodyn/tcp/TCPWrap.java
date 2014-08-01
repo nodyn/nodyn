@@ -80,6 +80,7 @@ public class TCPWrap extends StreamWrap {
             }
         });
 
+        System.err.println( "CONNECT: " + addr + " // " + port );
         this.channelFuture = bootstrap.connect(addr, port);
         this.channelFuture.addListener( new ChannelFutureListener() {
             @Override

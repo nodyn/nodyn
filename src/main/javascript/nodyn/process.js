@@ -16,6 +16,8 @@ COUNTER_HTTP_SERVER_RESPONSE = function() {};
 COUNTER_HTTP_CLIENT_REQUEST = function() {};
 COUNTER_HTTP_CLIENT_RESPONSE = function() {};
 
+Number.isFinite = isFinite;
+
 (function(javaProcess){
 
   function Process(process) {

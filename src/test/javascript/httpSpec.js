@@ -43,6 +43,7 @@ describe('http', function(){
   it('should be able to request with no callback', function() {
     waitsFor(helper.testComplete, "waiting for http request", 5000);
     var server = http.createServer(function(request, response) {
+      console.log( "request inbound" );
       request.on('data', function(data) {
         expect('crispy bacon').toBe(data.toString());
         response.end();
@@ -59,6 +60,7 @@ describe('http', function(){
     });
   });
 
+/*
   it('should response.write', function() {
     waitsFor(helper.testComplete, "waiting for http response.write", 5000);
     var server = http.createServer(function(request, response) {
@@ -99,8 +101,10 @@ describe('http', function(){
       request.end();
     });
   });
+  */
 });
 
+/*
 describe('http request and response', function() {
   beforeEach(function() {
     //System.err.println( "-------------->>>>>" );
@@ -586,3 +590,4 @@ describe('http request and response', function() {
     });
   });
 });
+*/
