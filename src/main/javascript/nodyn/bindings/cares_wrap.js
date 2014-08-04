@@ -12,7 +12,8 @@ function Cares() {
 
 Cares.prototype._onLookup = function(result) {
   var addr = result.result;
-  this._req.oncomplete( undefined, result.result, 4 );
+  var family = ( result.result instanceof java.net.Inet4Address ? 4 : 6 );
+  this._req.oncomplete( undefined, [ result.result.hostAddress ], family );
 }
 
 Cares.prototype.lookup4 = function(host) {
