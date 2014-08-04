@@ -85,6 +85,7 @@ var source = {};
   'crypto/pbkdf2',
   'crypto/random',
 
+  'nodyn/bindings/constants',
   'nodyn/bindings/async_wrap',
   'nodyn/bindings/handle_wrap',
   'nodyn/bindings/stream_wrap',

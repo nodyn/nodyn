@@ -2,10 +2,7 @@ package io.nodyn.stream;
 
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
-import io.nodyn.EventSource;
-import io.nodyn.http.DebugHandler;
 import io.nodyn.loop.ManagedEventLoopGroup;
-import io.nodyn.loop.RefEvents;
 import io.nodyn.net.ErrorHandler;
 import io.nodyn.netty.pipe.NioInputStreamChannel;
 

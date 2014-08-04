@@ -26,6 +26,10 @@ Stream.prototype._onEof = function(result) {
 
 // ----------------------------------------
 
+Stream.prototype.destroy = function() {
+  console.log( "destroy!" );
+}
+
 Stream.prototype.readStart = function() {
   this._stream.readStart();
 }
@@ -35,7 +39,11 @@ Stream.prototype.readStop = function() {
 }
 
 Stream.prototype.writeUtf8String = function(req,data) {
-  this._stream.writeUtf8String( data );
+  this._stream.writeUtf8String(data);
+}
+
+Stream.prototype.writeAsciiString = function(req,data) {
+  this._stream.writeAsciiString(data);
 }
 
 Stream.prototype.writeBuffer = function(req,data) {
@@ -44,7 +52,6 @@ Stream.prototype.writeBuffer = function(req,data) {
 }
 
 Stream.prototype.shutdown = function(req) {
-  console.log( ".shutdown" );
 }
 
 module.exports.Stream = Stream;

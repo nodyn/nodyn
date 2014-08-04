@@ -6,9 +6,7 @@ import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Bob McWhirter
@@ -21,9 +19,10 @@ public class HTTPParser extends EventSource {
     public final static int RESPONSE = 2;
     public final static int HEADERS = 3;
     public final static int BODY = 4;
+    public final static int TRAILERS = 5;
 
-    public final static int CHUNK_START = 5;
-    public final static int CHUNK_CONTENT = 6;
+    public final static int CHUNK_START = 6;
+    public final static int CHUNK_CONTENT = 7;
 
     private int state;
 
@@ -47,13 +46,38 @@ public class HTTPParser extends EventSource {
 
     private int lengthRead;
 
-    private Map<String, String> headers = new HashMap<>();
+    private List<String> headers = new ArrayList<>();
+    private List<String> trailers = new ArrayList<>();
+
+    private Set<String> expectedTrailers = new HashSet<>();
 
     public static final String[] METHODS = new String[]{
-            "GET",
-            "PUT",
-            "POST",
             "DELETE",
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
+            "CONNECT",
+            "OPTIONS",
+            "TRACE",
+            "COPY",
+            "LOCK",
+            "MKCOL",
+            "MOVE",
+            "PROPFIND",
+            "PROPPATCH",
+            "SEARCH",
+            "UNLOCK",
+            "REPORT",
+            "MKACTIVITY",
+            "CHECKOUT",
+            "MERGE",
+            "MSEARCH",
+            "NOTIFY",
+            "SUBSCRIBE",
+            "UNSUBSCRIBE",
+            "PATCH",
+            "PURGE",
     };
 
     public HTTPParser() {
@@ -66,6 +90,8 @@ public class HTTPParser extends EventSource {
         this.versionMajor = 0;
         this.versionMinor = 0;
         this.headers.clear();
+        this.trailers.clear();
+        this.expectedTrailers.clear();
         this.shouldKeepAlive = null;
 
         this.contentLength = null;
@@ -92,8 +118,20 @@ public class HTTPParser extends EventSource {
         return this.versionMinor;
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    public int getStatusCode() {
+        return this.statusCode;
+    }
+
+    public String getStatusMessage() {
+        return this.statusMessage;
+    }
+
+    public String[] getHeaders() {
+        return (String[]) this.headers.toArray(new String[this.headers.size()]);
+    }
+
+    public String[] getTrailers() {
+        return (String[]) this.trailers.toArray(new String[this.headers.size()]);
     }
 
     public boolean getShouldKeepAlive() {
@@ -114,6 +152,7 @@ public class HTTPParser extends EventSource {
             switch (this.state) {
                 case REQUEST: {
                     int eol = buf.indexOf(buf.readerIndex(), buf.readerIndex() + buf.readableBytes(), (byte) '\n');
+
                     if (eol < 0) {
                         return 0;
                     }
@@ -183,7 +222,8 @@ public class HTTPParser extends EventSource {
                     }
                     String name = line.substring(0, colonLoc).trim();
                     String value = line.substring(colonLoc + 1).trim();
-                    this.headers.put(name, value);
+                    this.headers.add(name);
+                    this.headers.add(value);
                     if (name.equalsIgnoreCase("connection")) {
                         if (value.equalsIgnoreCase("keep-alive")) {
                             this.shouldKeepAlive = true;
@@ -196,7 +236,43 @@ public class HTTPParser extends EventSource {
                         if (value.equalsIgnoreCase("chunked")) {
                             this.chunked = true;
                         }
+                    } else if (name.equalsIgnoreCase("trailer")) {
+                        String[] names = value.split(",");
+                        for (int i = 0; i < names.length; ++i) {
+                            this.expectedTrailers.add(names[i].trim().toLowerCase());
+                        }
                     }
+                    break;
+                }
+                case TRAILERS: {
+                    int eol = buf.indexOf(buf.readerIndex(), buf.readerIndex() + buf.readableBytes(), (byte) '\n');
+                    int len = eol - buf.readerIndex();
+                    String line = buf.toString(buf.readerIndex(), len, UTF8);
+
+                    if ( line.trim().equals( "" ) ) {
+                        emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
+                        return 0;
+                    }
+
+                    int colonLoc = line.indexOf(':');
+                    if (colonLoc < 0) {
+                        emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
+                        return 0;
+                    }
+
+                    String name = line.substring(0, colonLoc).trim();
+                    String value = line.substring(colonLoc + 1).trim();
+
+
+                    if (this.expectedTrailers.contains(name.toLowerCase())) {
+                        this.trailers.add(name);
+                        this.trailers.add(value);
+                    } else {
+                        emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
+                        return 0;
+                    }
+                    buf.readerIndex(eol + 1);
+                    line = line.trim();
                     break;
                 }
                 case BODY: {
@@ -209,11 +285,11 @@ public class HTTPParser extends EventSource {
                         int remaining = this.contentLength - this.lengthRead;
                         this.lengthRead = this.contentLength;
                         buf = buf.readSlice(remaining);
-                        emit("body", CallbackResult.createSuccess(Unpooled.copiedBuffer(buf)));
-                        buf.readerIndex(remaining);
+                        emit("body", CallbackResult.createSuccess(Unpooled.wrappedBuffer(buf)));
+                        buf.readerIndex(buf.readerIndex() + remaining);
                     } else {
                         this.lengthRead += buf.readableBytes();
-                        emit("body", CallbackResult.createSuccess(Unpooled.copiedBuffer(buf)));
+                        emit("body", CallbackResult.createSuccess(Unpooled.wrappedBuffer(buf)));
                         buf.readerIndex(buf.readerIndex() + buf.readableBytes());
                     }
                     if (this.contentLength != null && this.lengthRead == this.contentLength) {
@@ -231,25 +307,35 @@ public class HTTPParser extends EventSource {
                     String line = buf.toString(buf.readerIndex(), len, UTF8);
                     buf.readerIndex(eol + 1);
 
-                    this.chunkLength = Integer.parseInt(line.trim(), 8);
+                    this.chunkLength = Integer.parseInt(line.trim(), 16);
 
                     if (this.chunkLength == 0) {
-                        emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
-                        break LOOP;
+                        if (this.expectedTrailers.isEmpty()) {
+                            buf.readerIndex( buf.readerIndex() + 2 );
+                            emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
+                            break LOOP;
+                        } else {
+                            this.state = TRAILERS;
+                        }
+                    } else {
+                        this.state = CHUNK_CONTENT;
                     }
-
-                    this.state = CHUNK_CONTENT;
                     break;
                 }
                 case CHUNK_CONTENT: {
-                    if (this.lengthRead + buf.readableBytes() > this.contentLength) {
-                        this.lengthRead = this.contentLength;
-                        buf = buf.readSlice(buf.readableBytes() - this.lengthRead);
+                    if (this.lengthRead + buf.readableBytes() > this.chunkLength) {
+                        int remaining = this.chunkLength - this.lengthRead;
+                        this.lengthRead = this.chunkLength;
+                        ByteBuf chunk = buf.readSlice(remaining);
+                        emit("body", CallbackResult.createSuccess(chunk));
                     } else {
                         this.lengthRead += buf.readableBytes();
+                        emit("body", CallbackResult.createSuccess(Unpooled.wrappedBuffer(buf)));
+                        buf.readerIndex(buf.readerIndex() + buf.readableBytes());
                     }
-                    emit("body", CallbackResult.createSuccess(buf));
                     if (this.lengthRead == this.chunkLength) {
+                        this.lengthRead = 0;
+                        buf.readerIndex(buf.readerIndex() + 2);
                         this.state = CHUNK_START;
                     }
                     break;
@@ -257,7 +343,8 @@ public class HTTPParser extends EventSource {
             }
         }
 
-        return numReadable - buf.readableBytes();
+        int numRead = numReadable - buf.readableBytes();
+        return numRead;
     }
 
     public void finish() {

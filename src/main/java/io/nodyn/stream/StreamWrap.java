@@ -42,4 +42,10 @@ public class StreamWrap extends HandleWrap {
         write( buf );
     }
 
+    public void writeAsciiString(String str) throws IOException {
+        ByteBuf buf = this.channelFuture.channel().alloc().buffer();
+        buf.writeBytes( str.getBytes( "us-ascii" ));
+        write( buf );
+    }
+
 }

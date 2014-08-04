@@ -1,4 +1,4 @@
-package io.nodyn.http;
+package io.nodyn.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
@@ -24,6 +24,7 @@ public class DebugHandler extends ChannelDuplexHandler {
         System.err.println(ctx.channel() + " | " + this.name + " >> READ >> " + msg.getClass() );
         System.err.println("-->>" );
         if (msg instanceof ByteBuf) {
+            System.err.println(msg);
             System.err.println(((ByteBuf) msg).toString(Charset.defaultCharset()));
         } else {
             System.err.println(msg.toString());

@@ -5,7 +5,6 @@ import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import io.nodyn.http.DebugHandler;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefEvents;
 import io.nodyn.loop.RefHandle;

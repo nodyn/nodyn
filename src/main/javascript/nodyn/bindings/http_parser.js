@@ -16,16 +16,14 @@ HTTPParser.prototype._onHeadersComplete = function(result) {
   this.versionMinor    = this._parser.versionMinor;
   this.shouldKeepAlive = this._parser.shouldKeepAlive;
 
+  this.statusCode      = this._parser.statusCode;
+  this.statusMessage   = this._parser.statusMessage;
+
   // headers
   this.headers = [];
-
-  var headersMap = this._parser.headers;
-  var keyIter = headersMap.keySet().iterator();
-  while ( keyIter.hasNext() ) {
-    var key   = keyIter.next();
-    var value = headersMap[key];
-    this.headers.push( key );
-    this.headers.push( value );
+  var jHeaders = this._parser.headers;
+  for ( var i = 0 ; i < jHeaders.length ; ++i ) {
+    this.headers.push( jHeaders[i] );
   }
 
   return this[HTTPParser.kOnHeadersComplete].call(this, this);
@@ -37,6 +35,13 @@ HTTPParser.prototype._onBody = function(result) {
 }
 
 HTTPParser.prototype._onMessageComplete = function(result) {
+  // trailers
+  this._headers = [];
+  var jHeaders = this._parser.trailers;
+  for ( var i = 0 ; i < jHeaders.length ; ++i ) {
+    this._headers.push( jHeaders[i] );
+  }
+
   this[HTTPParser.kOnMessageComplete].call(this);
 }
 
@@ -50,6 +55,12 @@ HTTPParser.prototype.reinitialize = function(state) {
   delete this.versionMinor;
   delete this.headers;
   delete this.shouldKeepAlive;
+
+  delete this.statusCode;
+  delete this.statusMessage;
+
+  delete this._headers;
+
   this._parser.reinitialize( state );
 }
 

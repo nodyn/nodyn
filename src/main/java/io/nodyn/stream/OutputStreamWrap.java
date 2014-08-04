@@ -3,13 +3,11 @@ package io.nodyn.stream;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
-import io.nodyn.http.DebugHandler;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.netty.pipe.NioOutputStreamChannel;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 
 /**
  * @author Lance Ball

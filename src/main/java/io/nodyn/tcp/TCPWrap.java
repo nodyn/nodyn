@@ -8,7 +8,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.nodyn.http.DebugHandler;
+import io.nodyn.netty.DebugHandler;
 import io.nodyn.process.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 
@@ -43,6 +43,7 @@ public class TCPWrap extends StreamWrap {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.config().setAutoRead(false);
+                //ch.pipeline().addLast( "debug", new DebugHandler( "server" ) );
                 ch.pipeline().addLast("emit.connection", new ConnectionEventHandler(TCPWrap.this.process, TCPWrap.this));
             }
         });

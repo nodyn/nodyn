@@ -17,8 +17,11 @@ Handle.prototype.unref = function() {
   this._handle.unref();
 }
 
-Handle.prototype.close = function() {
+Handle.prototype.close = function(callback) {
   this._handle.close();
+  if ( callback ) {
+    callback();
+  }
 }
 
 
