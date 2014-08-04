@@ -6,16 +6,22 @@ var Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function Stream(stream) {
   this._stream = stream;
-  this._stream.on( "data", Stream.prototype._onData.bind(this) );
+  this._stream.on( 'data', Stream.prototype._onData.bind(this) );
+  this._stream.on( 'eof', Stream.prototype._onEof.bind(this) );
   Handle.call( this, this._stream );
 }
 
 util.inherits(Stream, Handle);
 
 // ----------------------------------------
+
 Stream.prototype._onData = function(result) {
   var nread = result.result.readableBytes();
   this.onread( nread, new Buffer( result.result ) );
+}
+
+Stream.prototype._onEof = function(result) {
+  this.onread( -1 );
 }
 
 // ----------------------------------------
@@ -30,6 +36,15 @@ Stream.prototype.readStop = function() {
 
 Stream.prototype.writeUtf8String = function(req,data) {
   this._stream.writeUtf8String( data );
+}
+
+Stream.prototype.writeBuffer = function(req,data) {
+  this._stream.write( data._nettyBuffer() );
+  req.oncomplete(0, this, req );
+}
+
+Stream.prototype.shutdown = function(req) {
+  console.log( ".shutdown" );
 }
 
 module.exports.Stream = Stream;

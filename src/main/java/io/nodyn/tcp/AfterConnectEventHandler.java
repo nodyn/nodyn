@@ -10,21 +10,18 @@ import io.nodyn.process.NodeProcess;
  */
 public class AfterConnectEventHandler extends AbstractEventSourceHandler {
 
-    public AfterConnectEventHandler(NodeProcess process, EventSource eventSource) {
-        super(process, eventSource);
+    private final TCPWrap tcp;
+
+    public AfterConnectEventHandler(NodeProcess process, TCPWrap tcp) {
+        super(process, tcp);
+        this.tcp = tcp;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        TCPWrap clientHandle = new TCPWrap( this.process, ctx.channel().newSucceededFuture() );
-        ctx.pipeline().addAfter(ctx.name(), "emit.data", new DataEventHandler(this.process, clientHandle));
-        emit("afterConnect", clientHandle );
+        ctx.pipeline().addAfter(ctx.name(), "emit.data", new DataEventHandler(this.process, this.tcp));
+        emit("afterConnect", this.tcp );
         super.channelActive(ctx);
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
     }
 
 }

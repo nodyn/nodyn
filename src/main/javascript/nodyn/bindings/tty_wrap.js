@@ -5,9 +5,9 @@ var Stream = require('nodyn/bindings/stream_wrap').Stream;
 
 function guessHandleType(fd) {
   if ( fd <= 2 ) {
-    if ( System.console() ) {
+    //if ( System.console() ) {
       return 'TTY';
-    }
+    //}
     return 'PIPE';
   }
 

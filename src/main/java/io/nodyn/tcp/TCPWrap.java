@@ -2,19 +2,16 @@ package io.nodyn.tcp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.nodyn.http.DebugHandler;
 import io.nodyn.process.NodeProcess;
-import io.nodyn.stream.InputStreamWrap;
-import io.nodyn.stream.OutputStreamWrap;
 import io.nodyn.stream.StreamWrap;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 
 /**
@@ -50,7 +47,7 @@ public class TCPWrap extends StreamWrap {
             }
         });
         this.channelFuture = bootstrap.bind(this.addr, this.port);
-        this.channelFuture.addListener( new ChannelFutureListener() {
+        this.channelFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 // TODO callback error
@@ -63,8 +60,8 @@ public class TCPWrap extends StreamWrap {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(getEventLoopGroup());
         bootstrap.channel(NioSocketChannel.class);
-        if ( this.port >= 0 ) {
-            if ( this.addr != null ) {
+        if (this.port >= 0) {
+            if (this.addr != null) {
                 bootstrap.localAddress(this.addr, this.port);
             } else {
                 bootstrap.localAddress(this.port);
@@ -75,14 +72,14 @@ public class TCPWrap extends StreamWrap {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.config().setAutoRead(false);
-                ch.pipeline().addLast("emit.afterConnect", new AfterConnectEventHandler(TCPWrap.this.process, TCPWrap.this ) );
-
+                //ch.pipeline().addLast("debug", new DebugHandler("client"));
+                ch.pipeline().addLast("emit.afterConnect", new AfterConnectEventHandler(TCPWrap.this.process, TCPWrap.this));
+                ch.pipeline().addLast("emit.close", new EOFEventHandler(TCPWrap.this.process, TCPWrap.this));
             }
         });
 
-        System.err.println( "CONNECT: " + addr + " // " + port );
         this.channelFuture = bootstrap.connect(addr, port);
-        this.channelFuture.addListener( new ChannelFutureListener() {
+        this.channelFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 // TODO callback error
@@ -93,8 +90,8 @@ public class TCPWrap extends StreamWrap {
 
     @Override
     public void close() {
-        if ( this.channelFuture != null ) {
-            this.channelFuture.addListener( ChannelFutureListener.CLOSE );
+        if (this.channelFuture != null) {
+            this.channelFuture.addListener(ChannelFutureListener.CLOSE);
         }
         super.close();
     }
