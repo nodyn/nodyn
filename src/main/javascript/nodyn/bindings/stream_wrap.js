@@ -21,14 +21,12 @@ Stream.prototype._onData = function(result) {
 }
 
 Stream.prototype._onEof = function(result) {
-  this.onread( -1 );
+  if ( this.onread ) {
+    this.onread( -1 );
+  }
 }
 
 // ----------------------------------------
-
-Stream.prototype.destroy = function() {
-  console.log( "destroy!" );
-}
 
 Stream.prototype.readStart = function() {
   this._stream.readStart();
@@ -52,6 +50,8 @@ Stream.prototype.writeBuffer = function(req,data) {
 }
 
 Stream.prototype.shutdown = function(req) {
+  this._stream.shutdown();
+  req.oncomplete( 0, this, req );
 }
 
 module.exports.Stream = Stream;

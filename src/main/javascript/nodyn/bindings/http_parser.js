@@ -9,7 +9,6 @@ function HTTPParser() {
 // ----------------------------------------
 
 HTTPParser.prototype._onHeadersComplete = function(result) {
-
   this.method          = this._parser.method;
   this.url             = this._parser.url;
   this.versionMajor    = this._parser.versionMajor;
@@ -18,6 +17,8 @@ HTTPParser.prototype._onHeadersComplete = function(result) {
 
   this.statusCode      = this._parser.statusCode;
   this.statusMessage   = this._parser.statusMessage;
+
+  this.upgrade         = this._parser.upgrade;
 
   // headers
   this.headers = [];

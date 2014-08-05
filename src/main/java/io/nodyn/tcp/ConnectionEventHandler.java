@@ -19,17 +19,11 @@ public class ConnectionEventHandler extends AbstractEventSourceHandler {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        //this.server.emit("connection", CallbackResult.createSuccess(socket(ctx)));
-        TCPWrap clientHandle = new TCPWrap( this.process, ctx.channel().newSucceededFuture() );
-        ctx.pipeline().addAfter( ctx.name(), "emit.data", new DataEventHandler( this.process, clientHandle ) );
-        emit("connection", clientHandle );
+        TCPWrap clientHandle = new TCPWrap(this.process, ctx.channel().newSucceededFuture());
+        ctx.pipeline().addAfter(ctx.name(), "emit.close", new EOFEventHandler(this.process, clientHandle));
+        ctx.pipeline().addAfter(ctx.name(), "emit.data", new DataEventHandler(this.process, clientHandle));
+        emit("connection", clientHandle);
         super.channelActive(ctx);
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        //this.server.decrConnection();
-        super.channelInactive(ctx);
     }
 
 }

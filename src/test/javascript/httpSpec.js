@@ -100,6 +100,7 @@ describe('http', function(){
 });
 
 describe('http request and response', function() {
+
   beforeEach(function() {
     //System.err.println( "-------------->>>>>" );
     helper.testComplete(false);
@@ -214,7 +215,7 @@ describe('http request and response', function() {
     });
   });
 
-  xit('should pause and resume', function() {
+  it('should pause and resume', function() {
     var expectedServer = 'Request Body from Client';
     var resultServer = '';
     var expectedClient = 'Response Body from Server';
@@ -349,7 +350,7 @@ describe('http request and response', function() {
     });
   });
 
-  xit('should have a request setTimeout', function() {
+  it('should have a request setTimeout', function() {
     waitsFor(helper.testComplete, "waiting for timeout handler to fire", 5000);
     var server = http.createServer(function(request, response) {
       // do nothing - we want the connection to timeout
@@ -357,9 +358,11 @@ describe('http request and response', function() {
     server.listen(test_options.port, function() {
       var request = http.request(test_options);
       request.setTimeout(2000, function() {
-        request.socket.end();
-        server.close(function() {
+        request.on('error', function(e) {
           helper.testComplete(true);
+        });
+        request.abort();
+        server.close(function() {
         });
       });
       request.end();
@@ -388,7 +391,7 @@ describe('http request and response', function() {
     });
   });
 
-  xit('should have a close', function() {
+  it('should have a close', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5000);
     http.createServer().close(function() {
       helper.testComplete(true);
@@ -402,18 +405,6 @@ describe('http request and response', function() {
   });
 
 
-  xit('should setTimeout', function() {
-    var timedOut = false;
-    waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5000);
-    http.createServer().setTimeout(10, function(sock) {
-      timedOut = true;
-      sock.close();
-    });
-    setTimeout(function() {
-      expect(timedOut).toEqual(true);
-      helper.testComplete(true);
-    }, 100);
-  });
 
   it('should have a close event', function() {
     var closed = false;
@@ -431,31 +422,46 @@ describe('http request and response', function() {
     } );
   });
 
-  xit('should have a continue event', function() {
+  it('should have a continue event', function() {
+    var continueChecked = false;
+    var continueReceived = false;
+
     var server = http.createServer();
+
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5000);
     server.on('checkContinue', function(request, response) {
+      continueChecked = true;
       response.writeContinue();
-      response.end();
+      request.on('data', function(d) {
+        response.write( "cheese" );
+      } );
+      request.on('end', function() {
+        response.end();
+      });
     });
     server.listen(test_options.port, function() {
       var headers = {
-        'Expect': '100-Continue'
+        'Expect': '100-Continue',
+        'Content-Length': 5,
+        'Connection': 'close',
       };
       test_options.headers = headers;
-      var request = http.request(test_options, function(response) {});
-      request.on('continue', function() {
-        console.log( "continue!" );
-        request.connection.destroy();
+      test_options.method = 'POST';
+      var request = http.request(test_options, function(response) {
         server.close( function() {
+          expect( continueChecked ).toBe( true );
+          expect( continueReceived ).toBe( true );
           helper.testComplete(true);
         });
       });
-      request.end();
+      request.on('continue', function() {
+        continueReceived = true;
+        request.end( "taco!" );
+      });
     });
   });
 
-  xit('should have a connect fired event', function() {
+  it('should have a connect fired event', function() {
     var server = http.createServer();
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5000);
     server.on('request', function(request, response) {
@@ -497,7 +503,7 @@ describe('http request and response', function() {
     });
   });
 
-  xit('should do a connection upgrade', function() {
+  it('should do a connection upgrade', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 10000);
     var server = http.createServer(function(req, resp) {
       resp.writeHead(200, {'Content-Type': 'text/plain'});
@@ -505,7 +511,7 @@ describe('http request and response', function() {
     });
 
     server.on('upgrade', function(req, socket, head) {
-      expect(req.headers.Connection).toBe('Upgrade');
+      expect(req.headers.connection).toBe('Upgrade');
       socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
                    'Upgrade: WebSocket\r\n' +
                     'Connection: Upgrade\r\n' +
@@ -524,14 +530,11 @@ describe('http request and response', function() {
       request.end();
 
       request.on('upgrade', function(resp, socket, head) {
-        expect(resp.headers.Connection).toBe('Upgrade');
-
-        socket.on( 'data', function(d) {
-          expect( d.toString() ).toBe( 'fajitas' );
-          socket.destroy();
-          server.close( function() {
-            helper.testComplete(true);
-          });
+        expect(resp.headers.connection).toBe('Upgrade');
+        expect( head.toString() ).toBe( 'fajitas' );
+        socket.end();
+        server.close( function() {
+          helper.testComplete(true);
         });
       });
     });
@@ -567,11 +570,9 @@ describe('http request and response', function() {
     });
   });
 
-/*
   it('should return a ClientRequest on a Request', function() {
     waitsFor(helper.testComplete, "waiting for .listen(handler) to fire", 5000);
     var server = http.createServer(function(request, response) {
-      console.log( "got request" );
       response.writeHead(200);
       response.end();
     });
@@ -589,5 +590,5 @@ describe('http request and response', function() {
       request.end();
     });
   });
-*/
+
 });

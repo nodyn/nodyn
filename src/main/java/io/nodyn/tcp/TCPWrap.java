@@ -43,7 +43,7 @@ public class TCPWrap extends StreamWrap {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.config().setAutoRead(false);
-                //ch.pipeline().addLast( "debug", new DebugHandler( "server" ) );
+                //ch.pipeline().addLast("debug", new DebugHandler("server"));
                 ch.pipeline().addLast("emit.connection", new ConnectionEventHandler(TCPWrap.this.process, TCPWrap.this));
             }
         });
@@ -90,11 +90,8 @@ public class TCPWrap extends StreamWrap {
     }
 
     @Override
-    public void close() {
-        if (this.channelFuture != null) {
-            this.channelFuture.addListener(ChannelFutureListener.CLOSE);
-        }
-        super.close();
+    public void shutdown() {
+        ((NioSocketChannel) this.channelFuture.channel()).shutdownOutput();
     }
 
     public SocketAddress getRemoteAddress() {

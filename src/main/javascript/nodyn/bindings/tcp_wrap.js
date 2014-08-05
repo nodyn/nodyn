@@ -27,7 +27,6 @@ util.inherits(TCP, Stream);
 TCP.prototype._onConnection = function(result) {
   var err;
   var clientHandle = new TCP( result.result );
-
   this.onconnection(err, clientHandle);
 }
 
