@@ -15,7 +15,7 @@ describe("The timers module", function() {
     setTimeout(function() {
       expect(x).toBe(1);
       helper.testComplete(true);
-    }, 10);
+    }, 100);
   });
 
   it('should pass testSetTimeoutWaits', function() {

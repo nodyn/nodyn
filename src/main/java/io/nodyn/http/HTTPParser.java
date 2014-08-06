@@ -1,6 +1,7 @@
 package io.nodyn.http;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
@@ -94,7 +95,7 @@ public class HTTPParser extends EventSource {
     private State state;
     private Error error;
 
-    private ByteBuf buf;
+    private CompositeByteBuf buf;
 
     // common
     private String url;
@@ -209,7 +210,7 @@ public class HTTPParser extends EventSource {
     }
 
     public void setError(Error error) {
-        System.err.println( "!! " + error );
+        System.err.println("!! " + error);
         this.error = error;
     }
 
@@ -347,6 +348,7 @@ public class HTTPParser extends EventSource {
 
     void addBuffer(ByteBuf buf) {
         this.buf.writeBytes(buf);
+        //this.buf.addComponent( buf );
     }
 
     int readableBytes() {

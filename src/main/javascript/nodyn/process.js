@@ -37,8 +37,6 @@ Number.isFinite = isFinite;
     };
 
     this._setupAsyncListener = function(asyncFlags, runAsyncQueue, loadAsyncQueue, unloadAsyncQueue) {
-      this._process.setupAsyncListener( runAsyncQueue, loadAsyncQueue, unloadAsyncQueue);
-
       this._runAsyncQueue = runAsyncQueue;
       this._loadAsyncQueue = loadAsyncQueue;
       this._unloadAsyncQueue = unloadAsyncQueue;
@@ -88,6 +86,21 @@ Number.isFinite = isFinite;
     this.reallyExit = function(code) {
       System.exit( code );
     };
+
+
+    Object.defineProperty( this, '_needImmediateCallback', {
+      get: function() {
+        return this._process.needImmediateCallback;
+      },
+      set: function(v) {
+        this._process.needImmediateCallback = true;
+      }
+    });
+
+    this._process.on('checkImmediate', function() {
+      this._immediateCallback();
+    }.bind(this) );
+
   }
 
 

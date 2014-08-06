@@ -1,6 +1,9 @@
 package io.nodyn.process;
 
+import io.nodyn.CallbackResult;
+import io.nodyn.EventSource;
 import io.nodyn.Nodyn;
+import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.TickInfo;
 import io.nodyn.loop.Ticker;
@@ -12,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class NodeProcess {
+public class NodeProcess extends EventSource {
 
     private final Map<String, Object> bindings = new HashMap<>();
 
@@ -24,6 +27,9 @@ public class NodeProcess {
     private Runnable loadAsyncQueue;
     private Runnable unloadAsyncQueue;
 
+    private ImmediateCheckHandle immediateCheckHandle;
+    private boolean needImmediateCallback;
+
     public NodeProcess(Nodyn nodyn) {
         this(nodyn, System.getProperties());
     }
@@ -33,17 +39,23 @@ public class NodeProcess {
         this.osName = props.getProperty("os.name").toLowerCase();
         this.osArch = props.getProperty("os.arch").toLowerCase();
 
+        this.immediateCheckHandle = new ImmediateCheckHandle( nodyn.getEventLoop(), new Runnable() {
+            @Override
+            public void run() {
+                emit("checkImmediate", CallbackResult.EMPTY_SUCCESS );
+            }
+        });
     }
 
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
         nodyn.getEventLoop().getEventLoopGroup().submit( new Ticker( this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)  ) );
     }
 
-    public void setupAsyncListener(Runnable runAsyncQueue, Runnable loadAsyncQueue, Runnable unloadAsyncQueue) {
-        this.runAsyncQueue = runAsyncQueue;
-        this.loadAsyncQueue = loadAsyncQueue;
-        this.unloadAsyncQueue = unloadAsyncQueue;
-    }
+    //public void setupAsyncListener(Runnable runAsyncQueue, Runnable loadAsyncQueue, Runnable unloadAsyncQueue) {
+        //this.runAsyncQueue = runAsyncQueue;
+        //this.loadAsyncQueue = loadAsyncQueue;
+        //this.unloadAsyncQueue = unloadAsyncQueue;
+    //}
 
     public Runnable getRunAsyncQueue() {
         return this.runAsyncQueue;
@@ -55,6 +67,22 @@ public class NodeProcess {
 
     public Runnable getUnloadAsyncQueue() {
         return this.unloadAsyncQueue;
+    }
+
+    public boolean getNeedImmediateCallback() {
+        return this.needImmediateCallback;
+    }
+
+    public void setNeedImmediateCallback(boolean v) {
+        if ( this.immediateCheckHandle.isActive() == v ) {
+            return;
+        }
+        this.needImmediateCallback = v;
+        if ( v ) {
+            this.immediateCheckHandle.start();
+        } else {
+            this.immediateCheckHandle.stop();
+        }
     }
 
     public Nodyn getNodyn() {
