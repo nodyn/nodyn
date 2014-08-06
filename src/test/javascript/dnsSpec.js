@@ -9,6 +9,7 @@ describe('The dns module', function() {
   beforeEach(function() {
     System.setProperty( "dns.server", "127.0.0.1" );
     System.setProperty( "dns.port",   "53530" );
+    io.nodyn.dns.ResolverConfig.refresh();
     helper.testComplete(false);
   });
 
@@ -16,6 +17,9 @@ describe('The dns module', function() {
     if (server) {
       server.stop();
     }
+    System.clearProperty("dns.server")
+    System.clearProperty("dns.port");
+    io.nodyn.dns.ResolverConfig.refresh();
   });
 
   //dns.server({host: '127.0.0.1', port: 53530});
@@ -31,11 +35,9 @@ describe('The dns module', function() {
     waitsFor(helper.testComplete, "the dns lookup test to complete", 10000);
     prepareDns(DnsServer.testResolveA(ip), function() {
       dns.lookup("nodyn.io", function(err, address, family) {
-        expect("Unexpected error: " + err, err === null).toBeTruthy();
-        expect("Address should not be null", address !== null).toBeTruthy();
-        expect("Unexpected address: " + address, ip === address).toBeTruthy();
-        expect("Family should be set.", family !== null).toBeTruthy();
-        expect("Family should be a number.", typeof family === 'number').toBeTruthy();
+        expect( err ).toBe( null );
+        expect( address ).toBe( ip );
+        expect( family ).toBe( 4 );
         helper.testComplete(true);
       });
     });
