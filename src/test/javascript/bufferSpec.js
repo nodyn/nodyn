@@ -90,7 +90,7 @@ describe("Buffer", function() {
   });
 
   it('should pass testSlowBufferIndexedAccess', function() {
-    var b = new SlowBuffer(1024);
+    var b = new (require('buffer').SlowBuffer)(1024);
     expect(b.length).toBe(1024);
     b[4] = 10;
     expect(b[4]).toBe(10);

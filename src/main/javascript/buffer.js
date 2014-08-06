@@ -411,8 +411,8 @@ Buffer.concat = function(list,len) {
   return b;
 }
 
-Buffer.SlowBuffer = Buffer;
 module.exports.Buffer = Buffer;
+module.exports.SlowBuffer = Buffer;
 module.exports.buffer = {
   INSPECT_MAX_BYTES: 50
 }
