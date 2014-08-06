@@ -990,7 +990,6 @@ fs.writeFileSync = function(path, data, options) {
 
   var flag = options.flag || 'w';
   var fd = fs.openSync(path, flag, options.mode);
-  print("OPENSYNCHING " + path + " GOT " + fd);
   if (!util.isBuffer(data)) {
     data = new Buffer('' + data, options.encoding || 'utf8');
   }
@@ -1521,6 +1520,7 @@ ReadStream.prototype.open = function() {
 };
 
 ReadStream.prototype._read = function(n) {
+  print(">>>>>>>>>>> IN _READ")
   if (!util.isNumber(this.fd))
     return this.once('open', function() {
       this._read(n);
@@ -1552,12 +1552,6 @@ ReadStream.prototype._read = function(n) {
 
   // the actual read.
   var self = this;
-  print("ABOUT TO READ FD " + this.fd);
-  print("POOL " + pool);
-  print("POOL USED " + pool.used);
-  print("TO READ " + toRead);
-  print("POS " + this.pos);
-  print("ONREAD " + onread);
   fs.read(this.fd, pool, pool.used, toRead, this.pos, onread);
 
   // move the pool positions, and internal position for reading.

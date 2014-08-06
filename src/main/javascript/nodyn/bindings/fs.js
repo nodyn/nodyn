@@ -179,6 +179,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
       var bytes = Fs.read(fd, buffer._buffer, offset, length, position), err;
       if (bytes === -1) err = posixError(fd, 'read');
       process.nextTick(function() {
+        print("CALLING BACK >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + err)
+        print("CALLING BACK BYTES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + bytes)
+        print("CALLING BACK >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + buffer)
         callback(err, bytes, buffer);
       }.bind(this));
     }.bind(this));
