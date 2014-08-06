@@ -11,12 +11,14 @@ var BufferWrap = io.nodyn.buffer.BufferWrap;
 function Buffer() {
   if (!(this instanceof Buffer)) return new Buffer(arguments);
 
+  var backingObject = {
+    _buffer: {},
+    _charsWritten: 0,
+  };
+
   var self = new JSAdapter(
     Buffer.prototype,
-    {
-      _buffer: {},
-      _charsWritten: 0,
-    },
+    backingObject,
     {
       __get__: function(name) {
         var index = Number(name);
@@ -25,6 +27,8 @@ function Buffer() {
             return;
           }
           return this._buffer.getByte( index );
+        } else {
+          return backingObject[name];
         }
       },
       __set__: function(name, value) {
@@ -36,6 +40,8 @@ function Buffer() {
           var byte = Number(value) & 0xFF;
           this._buffer.putByte( index, byte );
           return byte;
+        } else {
+          backingObject[name] = value;
         }
       }
     } );
