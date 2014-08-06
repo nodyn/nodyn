@@ -173,15 +173,10 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
   offset = offset || 0;
   // we can't use the executeWork function here because the read() callback
   // takes 3 parameters, and executeWork only works with cb(err, result)
-  print(new Error().stack);
   if (typeof callback === 'function') { // Async
     blocking.submit(function() {
       var bytes = Fs.read(fd, buffer._buffer, offset, length, position), err;
-      if (bytes === -1) err = posixError(fd, 'read');
       process.nextTick(function() {
-        print("CALLING BACK >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + err)
-        print("CALLING BACK BYTES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + bytes)
-        print("CALLING BACK >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + buffer)
         callback(err, bytes, buffer);
       }.bind(this));
     }.bind(this));

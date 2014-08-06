@@ -1520,7 +1520,6 @@ ReadStream.prototype.open = function() {
 };
 
 ReadStream.prototype._read = function(n) {
-  print(">>>>>>>>>>> IN _READ")
   if (!util.isNumber(this.fd))
     return this.once('open', function() {
       this._read(n);
@@ -1557,6 +1556,8 @@ ReadStream.prototype._read = function(n) {
   // move the pool positions, and internal position for reading.
   if (!util.isUndefined(this.pos))
     this.pos += toRead;
+  else
+    this.pos = toRead;
   pool.used += toRead;
 
   function onread(er, bytesRead) {
