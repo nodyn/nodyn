@@ -8,12 +8,12 @@ describe( "http.Agent", function() {
 
   it('should have default maxSockets', function() {
     var agent = new http.Agent();
-    expect( agent.maxSockets ).toBe( 5 );
+    expect( agent.maxSockets ).toBe( Infinity );
   });
 
   it("should allow changing of maxSockets", function() {
     var agent = new http.Agent();
-    expect( agent.maxSockets ).toBe( 5 );
+    expect( agent.maxSockets ).toBe( Infinity );
     agent.maxSockets = 15;
     expect( agent.maxSockets ).toBe( 15 );
   });
