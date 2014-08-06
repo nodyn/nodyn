@@ -110,24 +110,23 @@ Process.prototype.abort = Process.prototype.exit;
 Process.prototype.binding = function(name) {
   // Lazily require bindings to prevent
   // race conditions during bootstrap
-  var ZlibBinding = require('nodyn/bindings/zlib');
+  var fs        = require('nodyn/bindings/fs');
+  var constants = require('nodyn/bindings/constants');
+  var smalloc   = require('nodyn/bindings/smalloc');
+  var zlib      = require('nodyn/bindings/zlib');
+
   switch(name) {
     case 'zlib':
-      return ZlibBinding;
+      return zlib;
+    case 'fs':
+      return fs;
+    case 'constants':
+      return constants;
+    case 'smalloc':
+      return smalloc;
     default:
       return {};
   }
-};
-
-var Mode = java.nio.file.AccessMode,
-    Open = java.nio.file.StandardOpenOption;
-
-Process.prototype.binding.constants = {
-    O_RDONLY: Mode.READ.toString(),
-    O_WRONLY: Mode.WRITE.toString(),
-    O_RDWR:   Mode.WRITE.toString(),
-    O_APPEND: Open.APPEND.toString(),
-    S_IMFT: 0
 };
 
 module.exports = Process;

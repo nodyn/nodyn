@@ -54,6 +54,13 @@ function arrayConverter(javaArray) {
 }
 module.exports.arrayConverter = arrayConverter;
 
+function exportEnums(scope, _enum) {
+  for(var i=0; i<_enum.length; i++) {
+    scope[_enum[i]] = _enum[i].ordinal();
+  }
+}
+module.exports.exportEnums = exportEnums;
+
 function notImplemented(name, throws) {
   return function() {
     var msg = ["Error:", name, "not implemented"].join(' ');

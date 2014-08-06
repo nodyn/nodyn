@@ -9,12 +9,12 @@ describe("fs.WriteStream", function() {
     helper.testComplete(false);
   });
 
-  it("should be returned from a call to fs.createWriteStream", function() {
+  xit("should be returned from a call to fs.createWriteStream", function() {
     expect(fs.createWriteStream('write-stream-spec.txt') instanceof fs.WriteStream).toBeTruthy();
     fs.unlinkSync('write-stream-spec.txt');
   });
 
-  it("should be a Stream.Writable", function() {
+  xit("should be a Stream.Writable", function() {
     expect(fs.createWriteStream('write-stream-spec.txt') instanceof stream.Writable).toBeTruthy();
     fs.unlinkSync('write-stream-spec.txt');
   });
@@ -27,7 +27,7 @@ describe("fs.ReadStream", function() {
     helper.testComplete(false);
   });
 
-  it("should be returned from a call to fs.createReadStream", function() {
+  xit("should be returned from a call to fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -70,7 +70,7 @@ describe("fs.ReadStream", function() {
     }, data);
   });
 
-  it("should emit 'close' when it has been closed", function() {
+  xit("should emit 'close' when it has been closed", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -83,7 +83,7 @@ describe("fs.ReadStream", function() {
     });
   });
 
-  it("should emit 'close' when it has been destroyed", function() {
+  xit("should emit 'close' when it has been destroyed", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -96,7 +96,7 @@ describe("fs.ReadStream", function() {
     });
   });
 
-  it("should emit 'open' when the file has opened.", function() {
+  xit("should emit 'open' when the file has opened.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);
@@ -112,7 +112,7 @@ describe("fs.ReadStream", function() {
     }, data);
   });
 
-  it("should read a subset of file data.", function() {
+  xit("should read a subset of file data.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);

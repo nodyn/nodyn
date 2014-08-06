@@ -1,18 +1,13 @@
 var util = require('util'),
+    nodyn = require('nodyn'),
     blocking = require('nodyn/blocking'),
     EventEmitter = require('events').EventEmitter;
 
-function exportEnums(_enum) {
-  for(var i=0; i<_enum.length; i++) {
-    module.exports[_enum[i]] = _enum[i].ordinal();
-  }
-}
-
-exportEnums(io.nodyn.zlib.Mode.values());
-exportEnums(io.nodyn.zlib.Code.values());
-exportEnums(io.nodyn.zlib.Level.values());
-exportEnums(io.nodyn.zlib.Strategy.values());
-exportEnums(io.nodyn.zlib.Flush.values());
+nodyn.exportEnums(module.exports, io.nodyn.zlib.Mode.values());
+nodyn.exportEnums(module.exports, io.nodyn.zlib.Code.values());
+nodyn.exportEnums(module.exports, io.nodyn.zlib.Level.values());
+nodyn.exportEnums(module.exports, io.nodyn.zlib.Strategy.values());
+nodyn.exportEnums(module.exports, io.nodyn.zlib.Flush.values());
 
 function Zlib(mode) {
   if (!(this instanceof Zlib)) return new Zlib(mode);
