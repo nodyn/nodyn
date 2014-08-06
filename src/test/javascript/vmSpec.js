@@ -56,11 +56,6 @@ describe('vm functions', function() {
     }
   });
 
-  it('should have nodestuff in a new context', function() {
-    var code = 'process.EVENT_LOOP';
-    var result = vm.runInNewContext( code );
-    expect( result ).not.toBe( undefined );
-  })
 });
 
 describe('Script objects', function() {

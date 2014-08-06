@@ -81,21 +81,22 @@ public class Nodyn extends DynJS {
             @Override
             public void run() {
                 try {
-                    NodeProcess javaProcess = new NodeProcess(Nodyn.this);
-
-                    JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
-                    JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
-
-                    JSFunction nodeFunction = (JSFunction) Nodyn.this.run(NODE_JS);
-                    getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                    initialize();
                 } finally {
                     handle.unref();
                 }
             }
         });
+    }
 
+    public void initialize() {
+        NodeProcess javaProcess = new NodeProcess(Nodyn.this);
+
+        JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
+        JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
+
+        JSFunction nodeFunction = (JSFunction) Nodyn.this.run(NODE_JS);
+        getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
     }
 
     protected Object run(String scriptName) {
