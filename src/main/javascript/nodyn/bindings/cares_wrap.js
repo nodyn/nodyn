@@ -31,11 +31,15 @@ cares.isIP = function(host) {
 // ----------------------------------------------------------------------
 
 function translateError(err) {
-  var c = err.code().code();
-  if ( c == 3 ) {
-    return process.binding('uv').UV_EAI_NODATA;
+  if ( err instanceof org.vertx.java.core.dns.DnsException ) {
+    var c = err.code().code();
+    if ( c == 3 ) {
+      return process.binding('uv').UV_EAI_NODATA;
+    }
+    return c;
   }
-  return c;
+
+  return err.toString();
 }
 
 // ----------------------------------------------------------------------
