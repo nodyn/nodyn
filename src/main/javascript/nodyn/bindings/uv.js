@@ -19,9 +19,26 @@
 var UV = {};
 
 UV.errname = function(err) {
-  return "NO IDEA";
+  if ( err == UV.EAI_NODATA ) {
+    return "EAI_NODATA";
+  }
 }
 
 UV.UV_EOF = -1;
+
+UV.UV_EAI_ADDRFAMILY = -3000;
+UV.UV_EAI_AGAIN      = -3001;
+UV.UV_EAI_BADFLAGS   = -3002;
+UV.UV_EAI_CANCELED   = -3003;
+UV.UV_EAI_FAIL       = -3004;
+UV.UV_EAI_FAMILY     = -3005;
+UV.UV_EAI_MEMORY     = -3006;
+UV.UV_EAI_NODATA     = -3007;
+UV.UV_EAI_NONAME     = -3008;
+UV.UV_EAI_OVERFLOW   = -3009;
+UV.UV_EAI_SERVICE    = -3010;
+UV.UV_EAI_SOCKTYPE   = -3011;
+UV.UV_EAI_BADHINTS   = -3013;
+UV.UV_EAI_PROTOCOL   = -3014;
 
 module.exports = UV;

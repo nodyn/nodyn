@@ -108,8 +108,7 @@ public class ResolverConfig {
      * Servers are defined by dns.server=server1,server2...
      * The search path is defined by dns.search=domain1,domain2...
      */
-    private boolean
-    findProperty() {
+    private boolean findProperty() {
         String prop;
         List lserver = new ArrayList(0);
         StringTokenizer st;

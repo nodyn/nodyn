@@ -20,27 +20,6 @@ var util = require('util');
 
 var cares = {};
 
-function Cares() {
-  this._cares = new io.nodyn.dns.CaresWrap( process._process );
-  this._cares.on( 'lookup', Cares.prototype._onLookup.bind(this) );
-}
-
-Cares.prototype._onLookup = function(result) {
-  var addr = result.result;
-  var family = ( result.result instanceof java.net.Inet4Address ? 4 : 6 );
-  this._req.oncomplete( undefined, [ result.result.hostAddress ], family );
-}
-
-Cares.prototype.lookup4 = function(host) {
-  this._cares.lookup4( host );
-}
-
-cares.getaddrinfo = function(req, hostname, family) {
-  var c = new Cares();
-  c._req = req;
-  c.lookup4( hostname );
-}
-
 cares.isIP = function(host) {
   if ( host.match( "^[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?$" ) ) {
     return 4;
@@ -48,6 +27,249 @@ cares.isIP = function(host) {
 
   return 0;
 }
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+
+function translateError(err) {
+  var c = err.code().code();
+  if ( c == 3 ) {
+    return process.binding('uv').UV_EAI_NODATA;
+  }
+  return c;
+}
+
+// ----------------------------------------------------------------------
+// getaddrinfo
+// ----------------------------------------------------------------------
+
+cares.getaddrinfo = function(req,name,family) {
+  if ( ! ( this instanceof cares.getaddrinfo ) ) {
+    new cares.getaddrinfo(req,name,family);
+    return;
+  }
+  this._query = new io.nodyn.dns.GetAddrInfoWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( translateError( result.error ) );
+    } else {
+      var addr = result.result;
+      var family = ( addr instanceof java.net.Inet4Address ? 4 : 6 );
+      req.oncomplete( undefined, [ result.result.hostAddress ], family );
+    }
+  });
+  this._query.start();
+}
+
+
+// ----------------------------------------------------------------------
+// A
+// ----------------------------------------------------------------------
+
+cares.queryA = function(req,name) {
+  if ( ! ( this instanceof cares.queryA ) ) {
+    new cares.queryA(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryAWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        a.push( iter.next().hostAddress );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// AAAA
+// ----------------------------------------------------------------------
+
+cares.queryAaaa = function(req,name) {
+  if ( ! ( this instanceof cares.queryAaaa ) ) {
+    new cares.queryAaaa(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryAaaaWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        a.push( iter.next().hostAddress );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// MX
+// ----------------------------------------------------------------------
+
+cares.queryMx = function(req,name) {
+  if ( ! ( this instanceof cares.queryMx ) ) {
+    new cares.queryMx(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryMxWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        var each = iter.next();
+        a.push( {
+          exchange: each.name(),
+          priority: each.priority(),
+        } );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// TXT
+// ----------------------------------------------------------------------
+
+cares.queryTxt = function(req,name) {
+  if ( ! ( this instanceof cares.queryTxt ) ) {
+    new cares.queryTxt(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryTxtWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        var each = iter.next();
+        a.push( each );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// SRV
+// ----------------------------------------------------------------------
+
+cares.querySrv = function(req,name) {
+  if ( ! ( this instanceof cares.querySrv ) ) {
+    new cares.querySrv(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QuerySrvWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        var each = iter.next();
+        a.push( {
+          name:     each.target(),
+          port:     each.port(),
+          priority: each.priority(),
+          weight:   each.weight(),
+        } );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// NS
+// ----------------------------------------------------------------------
+
+cares.queryNs = function(req,name) {
+  if ( ! ( this instanceof cares.queryNs ) ) {
+    new cares.queryNs(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryNsWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        var each = iter.next();
+        a.push( each );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// CNAME
+// ----------------------------------------------------------------------
+
+cares.queryCname = function(req,name) {
+  if ( ! ( this instanceof cares.queryCname ) ) {
+    new cares.queryCname(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.QueryCnameWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      var a = [];
+      var iter = result.result.iterator();
+      while (iter.hasNext()) {
+        var each = iter.next();
+        a.push( each );
+      }
+      req.oncomplete(undefined, a);
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
+// Reverse
+// ----------------------------------------------------------------------
+
+cares.getHostByAddr = function(req,name) {
+  if ( ! ( this instanceof cares.getHostByAddr ) ) {
+    new cares.getHostByAddr(req,name);
+    return;
+  }
+  this._query = new io.nodyn.dns.GetHostByAddrWrap(process._process, name);
+  this._query.on( "complete", function(result) {
+    if ( result.error ) {
+      req.oncomplete( result.error.toString() );
+    } else {
+      req.oncomplete(undefined, [ result.result.hostName ] );
+    }
+  });
+  this._query.start();
+}
+
+// ----------------------------------------------------------------------
 
 
 module.exports = cares;

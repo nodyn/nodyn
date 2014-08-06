@@ -49,4 +49,8 @@ public class CallbackResult {
         return new CallbackResult( (Object) null );
     }
 
+    public String toString() {
+        return "[CallbackResult: result=" + this.result + "; error=" + this.error + "]";
+    }
+
 }
