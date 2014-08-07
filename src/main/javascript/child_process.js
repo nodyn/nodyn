@@ -1,4 +1,5 @@
 
+/*
 var streams      = require('nodyn/streams');
 var util         = require('util');
 var EventEmitter = require('events').EventEmitter;
@@ -138,3 +139,6 @@ module.exports.spawn     = spawn;
 module.exports.exec      = exec;
 module.exports.execFile  = execFile;
 module.exports.fork      = fork;
+*/
+
+module.exports = {};

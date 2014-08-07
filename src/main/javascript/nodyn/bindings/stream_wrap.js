@@ -32,7 +32,8 @@ util.inherits(Stream, Handle);
 
 Stream.prototype._onData = function(result) {
   var nread = result.result.readableBytes();
-  this.onread( nread, new Buffer( result.result ) );
+  var b = process.binding('buffer').createBuffer( result.result );
+  this.onread( nread, b );
 }
 
 Stream.prototype._onEof = function(result) {

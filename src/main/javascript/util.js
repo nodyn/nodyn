@@ -19,8 +19,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var Buffer = require('buffer').Buffer;
-
 var formatRegExp = /%[sdj%]/g;
 exports.format = function(f) {
   if (!isString(f)) {
@@ -209,10 +207,10 @@ function arrayToHash(array) {
   return hash;
 }
 
+
 function formatValue(ctx, value, recurseTimes) {
   // Provide a hook for user-specified inspect functions.
   // Check that value is an object with an inspect function on it
-
   if (ctx.customInspect &&
       value &&
       isFunction(value.inspect) &&
@@ -231,11 +229,6 @@ function formatValue(ctx, value, recurseTimes) {
   var primitive = formatPrimitive(ctx, value);
   if (primitive) {
     return primitive;
-  }
-
-  // FIXME: make DynJS expose Object.keys and such for non-JS objects
-  if ( ! org.dynjs.runtime.JSObject.isInstance( value ) ) {
-    return value.toString() ;
   }
 
   // Look up the keys of the object.
@@ -586,10 +579,7 @@ function isPrimitive(arg) {
 exports.isPrimitive = isPrimitive;
 
 function isBuffer(arg) {
-  return (arg instanceof Buffer) ||
-    // HACKETY HACK HACK
-    // TODO: Figure out why instanceof is not working for our Buffer objects
-    (!isNullOrUndefined(arg) && (typeof arg.delegate === 'org.vertx.java.core.buffer.Buffer'));
+  return arg instanceof Buffer;
 }
 exports.isBuffer = isBuffer;
 
@@ -755,3 +745,5 @@ exports._errnoException = function(err, syscall, original) {
   e.syscall = syscall;
   return e;
 };
+
+
