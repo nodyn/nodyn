@@ -124,6 +124,13 @@ module.exports.setupBufferJS = function(target, internal) {
 
   // ----------------------------------------
 
+  target.prototype._nettyBuffer = function() {
+    return io.nodyn.buffer.Buffer.extract( this );
+  }
+
+
+  // ----------------------------------------
+
   target.prototype.copy = function(target, targetStart, sourceStart, sourceEnd) {
     targetStart = targetStart || 0;
     sourceStart = sourceStart || 0;

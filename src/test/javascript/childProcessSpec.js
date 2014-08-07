@@ -2,7 +2,7 @@
 var helper = require('./specHelper');
 var child_process = require('child_process');
 
-describe( 'child_process', function() {
+xdescribe( 'child_process', function() {
 
   beforeEach(function() {
     helper.testComplete(false);

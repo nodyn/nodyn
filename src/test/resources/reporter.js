@@ -9,6 +9,7 @@ exports.reporter = function(notifier){
         reportSuiteResults: function(suite){
         },
         reportSpecStarting: function(spec){
+            //console.log( "start: " + spec.getFullName() );
         },
         reportSpecResults: function(spec){
             var identifier = org.jasmine.Identifier.identifier(spec.suite.id, spec.id);

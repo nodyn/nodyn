@@ -89,18 +89,9 @@ var source = {};
   'child_process',
 
   'crypto',
-  'crypto/cipher_common',
-  'crypto/hash',
-  'crypto/hmac',
-  'crypto/cipher',
-  'crypto/decipher',
-  'crypto/sign',
-  'crypto/verify',
-  'crypto/sign_common',
+  'constants',
 
-  'crypto/pbkdf2',
-  'crypto/random',
-
+  'nodyn/bindings/crypto',
   'nodyn/bindings/buffer',
   'nodyn/bindings/smalloc',
   'nodyn/bindings/constants',

@@ -1,5 +1,7 @@
 package io.nodyn.crypto;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.nodyn.crypto.encoders.Encoder;
 
 import java.nio.charset.Charset;
@@ -18,31 +20,14 @@ public class Hash {
         }
     }
 
-    public void update(String message, String encoding) {
-        this.digest.update(message.getBytes(Charset.forName(encoding)));
+    public void update(ByteBuf buf) {
+        byte[] bytes = new byte[ buf.readableBytes() ];
+        buf.getBytes( buf.readerIndex(), bytes );
+        this.digest.update( bytes );
     }
 
-    public void update(String message) {
-        // TODO: The default in node.js, when an encoding is not specified
-        // is to assume a Buffer. For now, we'll just default to UTF-8 and
-        // see how far that gets us. Soon, I'm sure, we'll need to rip out
-        // the Buffer classes from this project and move entirely to using
-        // vert.x Buffers.  It is truly amazing that all six lines of this
-        // comment have the same number of characters, isn't it?  Amazing! 
-        this.update(message, Encoder.DEFAULT_ENCODING.toString());
-    }
-
-    public String digest() throws NoSuchAlgorithmException {
-        // TODO: The default in node.js, when an encoding is not specified
-        // is to return a Buffer. See above.
-        return this.digest(Encoder.RAW);
-    }
-
-    public String digest(String encoding) throws NoSuchAlgorithmException {
-        return this.digest(Util.encoderFor(encoding));
-    }
-
-    public String digest(Encoder encoder) throws NoSuchAlgorithmException {
-        return encoder.encode(digest.digest());
+    public ByteBuf digest() throws NoSuchAlgorithmException {
+        byte[] digestBytes = this.digest.digest();
+        return Unpooled.wrappedBuffer( digestBytes );
     }
 }
