@@ -239,10 +239,13 @@ fs.readFile = function(path, options, callback_) {
         return read();
       }
 
-      if (size > kMaxLength)
-        throw new RangeError('File size is greater than possible Buffer: ' +
-                             '0x3FFFFFFF bytes');
-
+      if (size > kMaxLength) {
+        var err = new RangeError('File size is greater than possible Buffer: ' +
+            '0x3FFFFFFF bytes');
+        return fs.close(fd, function() {
+          callback(err);
+        });
+      }
       buffer = new Buffer(size);
       read();
     });
@@ -1556,8 +1559,6 @@ ReadStream.prototype._read = function(n) {
   // move the pool positions, and internal position for reading.
   if (!util.isUndefined(this.pos))
     this.pos += toRead;
-  else
-    this.pos = toRead;
   pool.used += toRead;
 
   function onread(er, bytesRead) {

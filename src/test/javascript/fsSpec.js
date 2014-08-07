@@ -373,7 +373,7 @@ describe("fs module", function() {
       });
     });
 
-    xit("should be able to read a file contents", function() {
+    it("should be able to read a file contents", function() {
       waitsFor(helper.testComplete, "the readFile to complete", 5000);
       var contents = "American Cheese";
       helper.writeFixture(function(sut) {

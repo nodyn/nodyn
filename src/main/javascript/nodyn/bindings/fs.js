@@ -169,12 +169,12 @@ binding.readdir = function(path, callback) {
 };
 
 binding.read = function(fd, buffer, offset, length, position, callback) {
+  var bytes;
   offset = offset || 0;
   // we can't use the executeWork function here because the read() callback
   // takes 3 parameters, and executeWork only works with cb(err, result)
   if (typeof callback === 'function') { // Async
     blocking.submit(function() {
-      var bytes;
       if ( position ) {
         bytes = Fs.pread(fd, buffer._buffer, offset, length, position);
       } else {
@@ -185,7 +185,11 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
       }.bind(this));
     }.bind(this));
   } else { // Sync
-    var bytes = Fs.read(fd, buffer._buffer, offset, length, position);
+    if (position) {
+      bytes = Fs.pread(fd, buffer._buffer, offset, length, position);
+    } else {
+      bytes = Fs.read(fd, buffer._buffer, offset, length);
+    }
     if (bytes === -1) throw posixError(fd, 'read');
     return bytes;
   }

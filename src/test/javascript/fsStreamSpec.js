@@ -3,7 +3,6 @@ var helper = require('specHelper'),
     util   = require('util'),
     fs     = require('fs');
 
-/*
 describe("fs.WriteStream", function() {
 
   beforeEach(function() {
@@ -21,7 +20,6 @@ describe("fs.WriteStream", function() {
   });
 
 });
-*/
 
 describe("fs.ReadStream", function() {
 
@@ -29,7 +27,7 @@ describe("fs.ReadStream", function() {
     helper.testComplete(false);
   });
 
-  xit("should be returned from a call to fs.createReadStream", function() {
+  it("should be returned from a call to fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -53,7 +51,7 @@ describe("fs.ReadStream", function() {
     }
   });
 
-  xit("should read files.", function() {
+  it("should read files.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);
@@ -63,14 +61,14 @@ describe("fs.ReadStream", function() {
 
       readStream.on('data', function(chunk) {
         result += chunk;
-        print("1st test got data " + chunk)
       });
 
       readStream.on('end', function() {
         expect(result).toEqual(data);
-        readStream.close();
-        f.delete();
-        helper.testComplete(true);
+        readStream.close(function() {
+          f.delete();
+          helper.testComplete(true);
+        });
       });
     }, data);
   });
@@ -86,20 +84,17 @@ describe("fs.ReadStream", function() {
 
       readStream.on('data', function(chunk) {
         result += chunk;
-        print("GOT DATA: " + chunk)
       });
 
       readStream.on('close', function() {
-        print("CLOSE RESULT " + result)
+        expect(result).toEqual(data);
         f.delete();
         helper.testComplete(true);
       });
 
-      readStream.on('end', function() {
-        expect(result).toEqual(data);
+      readStream.on('end', function(chunk) {
+        if (chunk) result += chunk;
         readStream.close();
-        // f.delete();
-        // helper.testComplete(true);
       });
     }, data);
   });
@@ -109,15 +104,16 @@ describe("fs.ReadStream", function() {
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
       readStream.on('data', function(chunk) {
-        readStream.on('close', function() {
-          helper.testComplete(true);
-        });
-        readStream.destroy();
+        print("DESTROY GOT CHUNK " + chunk);
       });
+      readStream.on('close', function() {
+        helper.testComplete(true);
+      });
+      readStream.destroy();
     });
   });
 
-  xit("should emit 'open' when the file has opened.", function() {
+  it("should emit 'open' when the file has opened.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);
@@ -133,7 +129,7 @@ describe("fs.ReadStream", function() {
     }, data);
   });
 
-  xit("should read a subset of file data.", function() {
+  it("should read a subset of file data.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);
@@ -147,8 +143,9 @@ describe("fs.ReadStream", function() {
       });
 
       readStream.on('end', function() {
-        expect(result).toEqual("is the winter of");
+        expect(result).toEqual("is the winter of ");
         f.delete();
+        readStream.close();
         helper.testComplete(true);
       });
     }, data);
