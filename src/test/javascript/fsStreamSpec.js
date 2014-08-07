@@ -10,13 +10,13 @@ describe("fs.WriteStream", function() {
   });
 
   it("should be returned from a call to fs.createWriteStream", function() {
-    expect(fs.createWriteStream('write-stream-spec.txt') instanceof fs.WriteStream).toBeTruthy();
-    fs.unlinkSync('write-stream-spec.txt');
+    var tmpFile = java.io.File.createTempFile("write-stream", ".txt");
+    expect(fs.createWriteStream(tmpFile.getAbsolutePath()) instanceof fs.WriteStream).toBeTruthy();
   });
 
   it("should be a Stream.Writable", function() {
-    expect(fs.createWriteStream('write-stream-spec.txt') instanceof stream.Writable).toBeTruthy();
-    fs.unlinkSync('write-stream-spec.txt');
+    var tmpFile = java.io.File.createTempFile("write-stream", ".txt");
+    expect(fs.createWriteStream(tmpFile.getAbsolutePath()) instanceof stream.Writable).toBeTruthy();
   });
 
 });
