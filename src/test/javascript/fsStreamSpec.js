@@ -9,12 +9,12 @@ describe("fs.WriteStream", function() {
     helper.testComplete(false);
   });
 
-  xit("should be returned from a call to fs.createWriteStream", function() {
+  it("should be returned from a call to fs.createWriteStream", function() {
     expect(fs.createWriteStream('write-stream-spec.txt') instanceof fs.WriteStream).toBeTruthy();
     fs.unlinkSync('write-stream-spec.txt');
   });
 
-  xit("should be a Stream.Writable", function() {
+  it("should be a Stream.Writable", function() {
     expect(fs.createWriteStream('write-stream-spec.txt') instanceof stream.Writable).toBeTruthy();
     fs.unlinkSync('write-stream-spec.txt');
   });
@@ -97,20 +97,6 @@ describe("fs.ReadStream", function() {
         readStream.close();
       });
     }, data);
-  });
-
-  xit("should emit 'close' when it has been destroyed", function() {
-    waitsFor(helper.testComplete, 5000);
-    helper.writeFixture(function(f) {
-      var readStream = fs.createReadStream(f.getAbsolutePath());
-      readStream.on('data', function(chunk) {
-        print("DESTROY GOT CHUNK " + chunk);
-      });
-      readStream.on('close', function() {
-        helper.testComplete(true);
-      });
-      readStream.destroy();
-    });
   });
 
   it("should emit 'open' when the file has opened.", function() {

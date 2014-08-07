@@ -1,5 +1,6 @@
-var helper = require('specHelper');
-var fs = require('fs');
+var helper = require('specHelper'),
+    util = require('util'),
+    fs = require('fs');
 
 describe("fs module", function() {
 
@@ -89,6 +90,54 @@ describe("fs module", function() {
       expect(new java.io.File(basedir + "/granola.txt").exists()).toBe(false);
       expect(e !== null).toBe(true);
       helper.testComplete(true);
+    });
+  });
+
+  it("should be able to write to a file", function() {
+    waitsFor(helper.testComplete, "the writeFile operation to complete", 5000);
+    helper.writeFixture(function(sut) {
+      fs.open(sut.getAbsolutePath(), 'w', function(err, fd) {
+        var data = "My bologna has a first name";
+        expect(err).toBeFalsy();
+        expect(util.isNumber(fd)).toBe(true);
+        // This is non-documented, but currently available functionality
+        fs.write(fd, data, function(err, written, buffer) {
+          expect(err).toBeFalsy();
+          expect(written).toBe(data.length);
+          expect(buffer.toString()).toBe(data);
+          helper.testComplete(true);
+        });
+      });
+    });
+  });
+
+  it("should be able to symlink files", function() {
+    waitsFor(helper.testComplete, "the symlink operation to complete", 5000);
+    helper.writeFixture(function(sut) {
+      var srcPath = sut.getAbsolutePath();
+      var dstPath = sut.getAbsolutePath() + '.link';
+      fs.symlink(srcPath, dstPath, function(err) {
+        expect(err === undefined).toBeTruthy();
+        expect(fs.readlinkSync(dstPath)).toBe(srcPath);
+        fs.unlink(srcPath);
+        fs.unlink(dstPath);
+        helper.testComplete(true);
+      });
+    });
+  });
+
+  it("should be able to link files", function() {
+    waitsFor(helper.testComplete, "the link operation to complete", 5000);
+    helper.writeFixture(function(sut) {
+      var srcPath = sut.getAbsolutePath();
+      var dstPath = sut.getAbsolutePath() + '.link';
+      fs.link(srcPath, dstPath, function(err) {
+        expect(err === undefined).toBeTruthy();
+        expect(fs.existsSync(dstPath)).toBeTruthy();
+        fs.unlink(srcPath);
+        fs.unlink(dstPath);
+        helper.testComplete(true);
+      });
     });
   });
 
@@ -252,16 +301,15 @@ describe("fs module", function() {
   });
 
   describe('realpath', function() {
-    xit('should resolve existing files', function() {
-      var filename = './realpath-spec-tmp.txt';
+    it('should resolve existing files', function() {
+      var file = java.io.File.createTempFile("realpath-test", ".txt");
       waitsFor(helper.testComplete, 'the realpath test to complete', 5000);
-      fs.writeFileSync(filename, 'To be or not to be, that is the question');
-      fs.realpath(filename, function(e, p) {
+      fs.writeFileSync(file.getAbsolutePath(), 'To be or not to be, that is the question');
+      fs.realpath(file.getAbsolutePath(), function(e, p) {
         expect(e).toBeFalsy();
         expect(p).toBeTruthy();
-        var f = new java.io.File(filename);
-        expect(p).toBe(f.getCanonicalPath());
-        fs.unlinkSync(filename);
+        expect(p).toBe(file.getCanonicalPath());
+        fs.unlinkSync(file.getAbsolutePath());
         helper.testComplete(true);
       });
     });
@@ -289,8 +337,9 @@ describe("fs module", function() {
       });
     });
 
-    xit('should have an analogous sync function', function() {
-      var filename = 'realpath-spec-tmp.txt';
+    it('should have an analogous sync function', function() {
+      var file = java.io.File.createTempFile("realpath-test", ".txt");
+      var filename = file.getAbsolutePath();
       fs.writeFileSync(filename, 'To be or not to be, that is the question');
       var p = fs.realpathSync(filename);
       expect(p).toBeTruthy();
@@ -388,7 +437,7 @@ describe("fs module", function() {
       }, contents);
     });
 
-    xit("should be able to read a file using encoding", function() {
+    it("should be able to read a file using encoding", function() {
       waitsFor(helper.testComplete, "the readFile to complete", 5000);
       var contents = "American Cheese";
       helper.writeFixture(function(sut) {
