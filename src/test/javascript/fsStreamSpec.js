@@ -3,6 +3,7 @@ var helper = require('specHelper'),
     util   = require('util'),
     fs     = require('fs');
 
+/*
 describe("fs.WriteStream", function() {
 
   beforeEach(function() {
@@ -20,6 +21,7 @@ describe("fs.WriteStream", function() {
   });
 
 });
+*/
 
 describe("fs.ReadStream", function() {
 
@@ -27,7 +29,7 @@ describe("fs.ReadStream", function() {
     helper.testComplete(false);
   });
 
-  it("should be returned from a call to fs.createReadStream", function() {
+  xit("should be returned from a call to fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());

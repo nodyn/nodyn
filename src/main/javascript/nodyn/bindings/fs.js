@@ -169,15 +169,19 @@ binding.readdir = function(path, callback) {
 };
 
 binding.read = function(fd, buffer, offset, length, position, callback) {
-  position = position || 0;
   offset = offset || 0;
   // we can't use the executeWork function here because the read() callback
   // takes 3 parameters, and executeWork only works with cb(err, result)
   if (typeof callback === 'function') { // Async
     blocking.submit(function() {
-      var bytes = Fs.read(fd, buffer._buffer, offset, length, position), err;
+      var bytes;
+      if ( position ) {
+        bytes = Fs.pread(fd, buffer._buffer, offset, length, position);
+      } else {
+        bytes = Fs.read(fd, buffer._buffer, offset, length);
+      }
       process.nextTick(function() {
-        callback(err, bytes, buffer);
+        callback(undefined, bytes, buffer);
       }.bind(this));
     }.bind(this));
   } else { // Sync
