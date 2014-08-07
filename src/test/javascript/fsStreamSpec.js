@@ -27,7 +27,7 @@ describe("fs.ReadStream", function() {
     helper.testComplete(false);
   });
 
-  xit("should be returned from a call to fs.createReadStream", function() {
+  it("should be returned from a call to fs.createReadStream", function() {
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
       var readStream = fs.createReadStream(f.getAbsolutePath());
@@ -35,6 +35,7 @@ describe("fs.ReadStream", function() {
       expect(readStream instanceof fs.ReadStream).toBeTruthy();
       expect(readStream instanceof stream.Readable).toBeTruthy();
       f.delete();
+      readStream.close();
       helper.testComplete(true);
     });
   });
@@ -50,7 +51,7 @@ describe("fs.ReadStream", function() {
     }
   });
 
-  it("should read files.", function() {
+  xit("should read files.", function() {
     var data = "Now is the winter of our discontent / " +
                "Made glorious summer by this son of York";
     waitsFor(helper.testComplete, 5000);
@@ -60,27 +61,45 @@ describe("fs.ReadStream", function() {
 
       readStream.on('data', function(chunk) {
         result += chunk;
+        print("1st test got data " + chunk)
       });
 
       readStream.on('end', function() {
         expect(result).toEqual(data);
+        readStream.close();
         f.delete();
         helper.testComplete(true);
       });
     }, data);
   });
 
-  xit("should emit 'close' when it has been closed", function() {
+  it("should emit 'close' when it has been closed", function() {
+    var data = "Now is the winter of our discontent / " +
+               "Made glorious summer by this son of York";
+
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
-      var readStream = fs.createReadStream(f.getAbsolutePath());
+      var result = '',
+          readStream = fs.createReadStream(f.getAbsolutePath());
+
       readStream.on('data', function(chunk) {
-        readStream.on('close', function() {
-          helper.testComplete(true);
-        });
-        readStream.close();
+        result += chunk;
+        print("GOT DATA: " + chunk)
       });
-    });
+
+      readStream.on('close', function() {
+        print("CLOSE RESULT " + result)
+        f.delete();
+        helper.testComplete(true);
+      });
+
+      readStream.on('end', function() {
+        expect(result).toEqual(data);
+        readStream.close();
+        // f.delete();
+        // helper.testComplete(true);
+      });
+    }, data);
   });
 
   xit("should emit 'close' when it has been destroyed", function() {
