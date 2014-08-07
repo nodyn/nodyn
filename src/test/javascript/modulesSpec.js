@@ -57,7 +57,7 @@ describe( "modules", function() {
   it("should have mod.dirname", function() {
     var dir = new java.io.File('./src/test/javascript/somemodule/lib').getCanonicalPath();
     var subdir = new java.io.File('./src/test/javascript/somemodule/lib/subdir').getCanonicalPath();
-    var mod = require('somemodule');
+    var mod = require('./somemodule');
     expect(mod.dirname).not.toBe(null);
     expect(mod.dirname).not.toBe(undefined);
     expect(mod.dirname).toBe(dir);
@@ -66,13 +66,13 @@ describe( "modules", function() {
   });
 
   it("should have locate module's index.js", function() {
-    var mod = require('amodule');
+    var mod = require('./amodule');
     expect(mod.flavor).toBe("nacho cheese");
     helper.testComplete(true);
   });
 
   it("should find module's package.json", function() {
-    var mod = require('somemodule');
+    var mod = require('./somemodule');
     expect(mod.flavor).toBe("cool ranch");
     helper.testComplete(true);
   });
@@ -84,17 +84,17 @@ describe( "modules", function() {
   });
 
   it("should have appropriate properties", function() {
-    expect(require('parent')).toHaveModuleProperties(require.root + '/properties.js');
+    expect(require('./parent')).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
 
   it("should properties loaded from define getter, whatever that means...", function() {
-    expect(require('defineGetter').props).toHaveModuleProperties(require.root + '/properties.js');
+    expect(require('./defineGetter').props).toHaveModuleProperties(require.root + '/properties.js');
     helper.testComplete(true);
   });
 
   it("should properly isolate", function() {
-    require('module-isolation/module-a.js');
+    require('./module-isolation/module-a.js');
     try {
       var shouldThrow = EventEmitter;
       expect(false).toBe(true);
