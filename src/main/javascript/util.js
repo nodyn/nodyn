@@ -231,6 +231,10 @@ function formatValue(ctx, value, recurseTimes) {
     return primitive;
   }
 
+  if ( ! ( value instanceof org.dynjs.runtime.JSObject ) ) {
+    return "[JavaObject: " + value.toString() + "]";
+  }
+
   // Look up the keys of the object.
   var keys = Object.keys(value);
   var visibleKeys = arrayToHash(keys);
