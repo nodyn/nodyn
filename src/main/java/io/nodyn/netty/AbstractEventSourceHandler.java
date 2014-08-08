@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nodyn.tcp;
+package io.nodyn.netty;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.nodyn.CallbackResult;

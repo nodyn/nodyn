@@ -51,7 +51,6 @@ var source = {};
   'os',
 
   'tty',
-  'nodyn/streams',
 
   'repl',
   'readline',
