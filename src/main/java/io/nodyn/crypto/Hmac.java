@@ -1,6 +1,20 @@
-package io.nodyn.crypto;
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import io.nodyn.crypto.encoders.Encoder;
+package io.nodyn.crypto;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -42,17 +56,5 @@ public class Hmac {
         this.update(message, "UTF-8");
     }
 
-    public String digest() throws NoSuchAlgorithmException {
-        // TODO: The default in node.js, when an encoding is not specified
-        // is to return a Buffer. See above.
-        return this.digest(Encoder.RAW);
-    }
 
-    public String digest(String encoding) throws NoSuchAlgorithmException {
-        return this.digest(Util.encoderFor(encoding));
-    }
-
-    public String digest(Encoder encoder) throws NoSuchAlgorithmException {
-        return encoder.encode(hmac.doFinal());
-    }
 }
