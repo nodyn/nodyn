@@ -17,13 +17,8 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
-import org.dynjs.runtime.*;
-import org.dynjs.runtime.Compiler;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class Main {
 
@@ -35,11 +30,12 @@ public class Main {
         this.nodyn = new Nodyn(config);
     }
 
-    public static void main(String[] args) throws IOException {
-        new Main(args).run();
+    public static void main(String[] args) throws IOException, InterruptedException {
+        int exitCode = new Main(args).run();
+        System.exit( exitCode );
     }
 
-    public void run() throws IOException {
-        this.nodyn.run();
+    public int run() throws IOException, InterruptedException {
+        return this.nodyn.run();
     }
 }

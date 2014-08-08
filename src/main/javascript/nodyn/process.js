@@ -88,9 +88,18 @@ Number.isFinite = isFinite;
     };
 
     this.reallyExit = function(code) {
-      System.exit( code );
+      this._process.exitCode = code;
+      //System.exit( code );
     };
 
+    Object.defineProperty( this, "exitCode", {
+      get: function() {
+        return this._process.exitCode;
+      },
+      set: function(v) {
+        this._process.exitCode = v;
+      }
+    });
 
     Object.defineProperty( this, '_needImmediateCallback', {
       get: function() {

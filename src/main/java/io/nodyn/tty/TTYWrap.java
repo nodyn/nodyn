@@ -33,7 +33,7 @@ public class TTYWrap extends StreamWrap {
     private String ttyProps;
 
     public TTYWrap(NodeProcess process, int fd, boolean readable) throws IOException {
-        super(process);
+        super(process, true);
         this.channelFuture = (readable ? ReadStream.create(process, fd, this) : WriteStream.create(process, fd, this));
     }
 

@@ -25,6 +25,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.nodyn.netty.DebugHandler;
+import io.nodyn.netty.UnrefHandler;
 import io.nodyn.process.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 
@@ -39,7 +40,7 @@ public class TCPWrap extends StreamWrap {
     private int port = -1;
 
     public TCPWrap(NodeProcess process) {
-        super(process);
+        super(process, false);
     }
 
     public TCPWrap(NodeProcess process, ChannelFuture channelFuture) {
@@ -61,6 +62,7 @@ public class TCPWrap extends StreamWrap {
                 ch.config().setAutoRead(false);
                 //ch.pipeline().addLast("debug", new DebugHandler("server"));
                 ch.pipeline().addLast("emit.connection", new ConnectionEventHandler(TCPWrap.this.process, TCPWrap.this));
+                ch.pipeline().addLast("handle", new UnrefHandler(TCPWrap.this));
             }
         });
         this.channelFuture = bootstrap.bind(this.addr, this.port);
@@ -91,7 +93,8 @@ public class TCPWrap extends StreamWrap {
                 ch.config().setAutoRead(false);
                 //ch.pipeline().addLast("debug", new DebugHandler("client"));
                 ch.pipeline().addLast("emit.afterConnect", new AfterConnectEventHandler(TCPWrap.this.process, TCPWrap.this));
-                ch.pipeline().addLast("emit.close", new EOFEventHandler(TCPWrap.this.process, TCPWrap.this));
+                ch.pipeline().addLast("emit.eof", new EOFEventHandler(TCPWrap.this.process, TCPWrap.this));
+                ch.pipeline().addLast("handle", new UnrefHandler(TCPWrap.this));
             }
         });
 

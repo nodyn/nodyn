@@ -37,11 +37,13 @@ public abstract class AbstractManagedEventLoopGroup implements ManagedEventLoopG
     public synchronized void incrCount() {
         ++this.counter;
         //System.err.println(getClass().getSimpleName() + " ++ " + this.counter);
+        //new Exception().printStackTrace();
     }
 
     public synchronized void decrCount() {
         --this.counter;
         //System.err.println(getClass().getSimpleName() + " -- " + this.counter);
+        //new Exception().printStackTrace();
         if (this.counter == 0) {
             doShutdown();
         }

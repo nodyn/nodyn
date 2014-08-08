@@ -16,12 +16,12 @@ public class StreamWrap extends HandleWrap {
 
     protected ChannelFuture channelFuture;
 
-    public StreamWrap(NodeProcess process) {
-        super(process);
+    public StreamWrap(NodeProcess process, boolean count) {
+        super(process, count);
     }
 
     public StreamWrap(NodeProcess process, ChannelFuture channelFuture) {
-        super(process);
+        super(process, true);
         this.channelFuture = channelFuture;
     }
 

@@ -12,9 +12,9 @@ public class HandleWrap extends AsyncWrap {
 
     private final RefHandle handle;
 
-    public HandleWrap(NodeProcess process) {
+    public HandleWrap(NodeProcess process, boolean count) {
         super( process );
-        this.handle = process.getEventLoop().newHandle(true);
+        this.handle = process.getEventLoop().newHandle(count);
     }
 
     public void close() {

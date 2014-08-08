@@ -16,7 +16,7 @@ public class ImmediateCheckHandle implements Runnable {
     private Future<?> future;
 
     public ImmediateCheckHandle(ManagedEventLoopGroup loop, Runnable callback) {
-        this.handle = loop.newHandle();
+        this.handle = loop.newHandle(false);
         this.loop = loop.getEventLoopGroup();
         this.callback = callback;
     }

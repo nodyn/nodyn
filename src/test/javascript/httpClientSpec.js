@@ -10,11 +10,15 @@ describe( "http.request", function() {
     helper.testComplete(false);
   });
 
+  afterEach(function(){
+  });
+
   it( "should allow the creation of an unsent request", function() {
-    var request = http.request( function(response) {
+    var request = http.request( {}, function(response) {
       // nothing
     });
     expect( request ).not.toBe( undefined );
+    request.abort();
   });
 
   it( "should send the request when headers are implicitly sent", function() {

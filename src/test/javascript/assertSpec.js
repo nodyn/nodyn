@@ -3,6 +3,9 @@ var helper = require('./specHelper');
 describe("The assert module", function() {
   var assert = require('assert');
 
+  //it ('should fail', function() {
+    //expect(1).toBe(2);
+  //});
   it('should testAssertFail', function() {
     try {
       assert.fail('actual', 'expected', 'message', '=');

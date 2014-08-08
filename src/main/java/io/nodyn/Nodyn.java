@@ -74,22 +74,39 @@ public class Nodyn extends DynJS {
         return this.vertx;
     }
 
-    public void run() {
+    private static class CompletionHandler {
+        public NodeProcess process;
+    }
+
+    public int run() throws InterruptedException {
         final RefHandle handle = this.managedLoop.newHandle();
         EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
+
+        final CompletionHandler completionHandler = new CompletionHandler();
+
         elg.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    initialize();
-                } finally {
+                    completionHandler.process = initialize();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+
+                } finally
+                {
                     handle.unref();
                 }
             }
         });
+
+        if (this.managedLoop instanceof RootManagedEventLoopGroup) {
+            ((RootManagedEventLoopGroup) this.managedLoop).await();
+        }
+
+        return completionHandler.process.getExitCode();
     }
 
-    public void initialize() {
+    public NodeProcess initialize() {
         NodeProcess javaProcess = new NodeProcess(Nodyn.this);
 
         JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
@@ -97,6 +114,8 @@ public class Nodyn extends DynJS {
 
         JSFunction nodeFunction = (JSFunction) Nodyn.this.run(NODE_JS);
         getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
+
+        return javaProcess;
     }
 
     protected Object run(String scriptName) {

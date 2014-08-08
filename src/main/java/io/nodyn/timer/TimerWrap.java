@@ -36,7 +36,7 @@ public class TimerWrap extends HandleWrap implements Runnable {
     private ScheduledFuture<?> future;
 
     public TimerWrap(NodeProcess process) {
-        super( process );
+        super( process, true );
         this.eventLoop = process.getEventLoop().getEventLoopGroup();
     }
 

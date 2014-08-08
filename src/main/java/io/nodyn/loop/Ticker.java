@@ -26,6 +26,7 @@ public class Ticker implements Runnable {
     public void run() {
         this.tickCallback.run();
         if ( this.tickInfo.getLength() == 0 && this.managedLoop.refCount() == 1 ) {
+            // just us
             this.handle.unref();
             return;
         }

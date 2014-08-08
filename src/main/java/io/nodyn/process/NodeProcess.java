@@ -23,12 +23,9 @@ public class NodeProcess extends EventSource {
     private final String osName;
     private final String osArch;
 
-    private Runnable runAsyncQueue;
-    private Runnable loadAsyncQueue;
-    private Runnable unloadAsyncQueue;
-
     private ImmediateCheckHandle immediateCheckHandle;
     private boolean needImmediateCallback;
+    private int exitCode = 0;
 
     public NodeProcess(Nodyn nodyn) {
         this(nodyn, System.getProperties());
@@ -47,26 +44,16 @@ public class NodeProcess extends EventSource {
         });
     }
 
+    public void setExitCode(int exitCode) {
+        this.exitCode = exitCode;
+    }
+
+    public int getExitCode() {
+        return this.exitCode;
+    }
+
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
-        nodyn.getEventLoop().getEventLoopGroup().submit( new Ticker( this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)  ) );
-    }
-
-    //public void setupAsyncListener(Runnable runAsyncQueue, Runnable loadAsyncQueue, Runnable unloadAsyncQueue) {
-        //this.runAsyncQueue = runAsyncQueue;
-        //this.loadAsyncQueue = loadAsyncQueue;
-        //this.unloadAsyncQueue = unloadAsyncQueue;
-    //}
-
-    public Runnable getRunAsyncQueue() {
-        return this.runAsyncQueue;
-    }
-
-    public Runnable getLoadAsyncQueue() {
-        return this.loadAsyncQueue;
-    }
-
-    public Runnable getUnloadAsyncQueue() {
-        return this.unloadAsyncQueue;
+        this.nodyn.getEventLoop().getEventLoopGroup().submit( new Ticker( this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)  ) );
     }
 
     public boolean getNeedImmediateCallback() {

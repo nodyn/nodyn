@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
 
+    private CountDownLatch latch = new CountDownLatch(1);
     private EventLoopGroup eventLoopGroup;
 
     public RootManagedEventLoopGroup(EventLoopGroup eventLoopGroup) {
@@ -53,7 +54,12 @@ public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
             //System.err.println( "*** SHUTDOWN" );
             this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
             this.eventLoopGroup = null;
+            this.latch.countDown();
         }
+    }
+
+    public void await() throws InterruptedException {
+        this.latch.await();
     }
 
 }
