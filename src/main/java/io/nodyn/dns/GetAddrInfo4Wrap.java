@@ -20,6 +20,7 @@ import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -39,7 +40,18 @@ public class GetAddrInfo4Wrap extends AbstractQueryWrap {
                 @Override
                 public void run() {
                     try {
-                        emit("complete", CallbackResult.createSuccess(Inet4Address.getLocalHost()));
+                        boolean found = false;
+                        InetAddress[] addrs = InetAddress.getAllByName(name);
+                        for ( int i = 0 ; i < addrs.length ; ++i ) {
+                            if ( addrs[i] instanceof Inet4Address ) {
+                                emit("complete", CallbackResult.createSuccess(addrs[i]));
+                                found = true;
+                                break;
+                            }
+                        }
+                        if ( ! found ) {
+                            emit("complete", CallbackResult.createError(new UnknownHostException()));
+                        }
                     } catch (UnknownHostException e) {
                         emit("complete", CallbackResult.createError(e));
                     }

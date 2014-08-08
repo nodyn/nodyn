@@ -19,7 +19,9 @@ package io.nodyn.dns;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 
+import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -39,7 +41,18 @@ public class GetAddrInfo6Wrap extends AbstractQueryWrap {
                 @Override
                 public void run() {
                     try {
-                        emit("complete", CallbackResult.createSuccess(Inet6Address.getLocalHost()));
+                        boolean found = false;
+                        InetAddress[] addrs = InetAddress.getAllByName(name);
+                        for ( int i = 0 ; i < addrs.length ; ++i ) {
+                            if ( addrs[i] instanceof Inet6Address) {
+                                emit("complete", CallbackResult.createSuccess(addrs[i]));
+                                found = true;
+                                break;
+                            }
+                        }
+                        if ( ! found ) {
+                            emit("complete", CallbackResult.createError(new UnknownHostException()));
+                        }
                     } catch (UnknownHostException e) {
                         emit("complete", CallbackResult.createError(e));
                     }
