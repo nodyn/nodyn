@@ -33,7 +33,7 @@ public class NodePosixHandler implements POSIXHandler {
 
     @Override
     public boolean isVerbose() {
-        return true;
+        return false;
     }
 
     @Override

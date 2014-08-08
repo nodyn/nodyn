@@ -10,13 +10,13 @@ describe("fs.WriteStream", function() {
   });
 
   it("should be returned from a call to fs.createWriteStream", function() {
-    expect(fs.createWriteStream('write-stream-spec.txt') instanceof fs.WriteStream).toBeTruthy();
-    fs.unlinkSync('write-stream-spec.txt');
+    var tmpFile = java.io.File.createTempFile("write-stream", ".txt");
+    expect(fs.createWriteStream(tmpFile.getAbsolutePath()) instanceof fs.WriteStream).toBeTruthy();
   });
 
   it("should be a Stream.Writable", function() {
-    expect(fs.createWriteStream('write-stream-spec.txt') instanceof stream.Writable).toBeTruthy();
-    fs.unlinkSync('write-stream-spec.txt');
+    var tmpFile = java.io.File.createTempFile("write-stream", ".txt");
+    expect(fs.createWriteStream(tmpFile.getAbsolutePath()) instanceof stream.Writable).toBeTruthy();
   });
 
 });
@@ -35,6 +35,7 @@ describe("fs.ReadStream", function() {
       expect(readStream instanceof fs.ReadStream).toBeTruthy();
       expect(readStream instanceof stream.Readable).toBeTruthy();
       f.delete();
+      readStream.close();
       helper.testComplete(true);
     });
   });
@@ -64,36 +65,38 @@ describe("fs.ReadStream", function() {
 
       readStream.on('end', function() {
         expect(result).toEqual(data);
-        f.delete();
-        helper.testComplete(true);
+        readStream.close(function() {
+          f.delete();
+          helper.testComplete(true);
+        });
       });
     }, data);
   });
 
   it("should emit 'close' when it has been closed", function() {
+    var data = "Now is the winter of our discontent / " +
+               "Made glorious summer by this son of York";
+
     waitsFor(helper.testComplete, 5000);
     helper.writeFixture(function(f) {
-      var readStream = fs.createReadStream(f.getAbsolutePath());
+      var result = '',
+          readStream = fs.createReadStream(f.getAbsolutePath());
+
       readStream.on('data', function(chunk) {
-        readStream.on('close', function() {
-          helper.testComplete(true);
-        });
+        result += chunk;
+      });
+
+      readStream.on('close', function() {
+        expect(result).toEqual(data);
+        f.delete();
+        helper.testComplete(true);
+      });
+
+      readStream.on('end', function(chunk) {
+        if (chunk) result += chunk;
         readStream.close();
       });
-    });
-  });
-
-  it("should emit 'close' when it has been destroyed", function() {
-    waitsFor(helper.testComplete, 5000);
-    helper.writeFixture(function(f) {
-      var readStream = fs.createReadStream(f.getAbsolutePath());
-      readStream.on('data', function(chunk) {
-        readStream.on('close', function() {
-          helper.testComplete(true);
-        });
-        readStream.destroy();
-      });
-    });
+    }, data);
   });
 
   it("should emit 'open' when the file has opened.", function() {
@@ -126,8 +129,9 @@ describe("fs.ReadStream", function() {
       });
 
       readStream.on('end', function() {
-        expect(result).toEqual("is the winter of");
+        expect(result).toEqual("is the winter of ");
         f.delete();
+        readStream.close();
         helper.testComplete(true);
       });
     }, data);
