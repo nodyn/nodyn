@@ -1,6 +1,6 @@
 package io.nodyn.loop;
 
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 import java.util.concurrent.TimeUnit;
 

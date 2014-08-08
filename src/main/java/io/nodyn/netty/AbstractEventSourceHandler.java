@@ -19,7 +19,7 @@ package io.nodyn.netty;
 import io.netty.channel.ChannelDuplexHandler;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 /**
  * @author Bob McWhirter

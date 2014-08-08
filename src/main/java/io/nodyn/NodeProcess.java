@@ -1,7 +1,8 @@
-package io.nodyn.process;
+package io.nodyn;
 
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
+import io.nodyn.ExitHandler;
 import io.nodyn.Nodyn;
 import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.loop.ManagedEventLoopGroup;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 public class NodeProcess extends EventSource {
 
@@ -46,6 +48,10 @@ public class NodeProcess extends EventSource {
 
     public void setExitCode(int exitCode) {
         this.exitCode = exitCode;
+    }
+
+    public void reallyExit() {
+        this.nodyn.reallyExit(this.exitCode);
     }
 
     public int getExitCode() {

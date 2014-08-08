@@ -2,15 +2,12 @@ package io.nodyn.dns;
 
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.dns.DnsClient;
-import org.vertx.java.core.dns.MxRecord;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.util.List;
 

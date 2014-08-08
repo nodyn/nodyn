@@ -89,6 +89,7 @@ Number.isFinite = isFinite;
 
     this.reallyExit = function(code) {
       this._process.exitCode = code;
+      this._process.reallyExit();
       //System.exit( code );
     };
 

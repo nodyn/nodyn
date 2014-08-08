@@ -18,7 +18,7 @@ package io.nodyn.tcp;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.nodyn.netty.AbstractEventSourceHandler;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 
 /**

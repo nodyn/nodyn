@@ -37,6 +37,7 @@ public class TestRunner {
         config.setCompileMode(Config.CompileMode.OFF);
         config.setArgv(new String[]{"-e", SCRIPT});
         Nodyn nodyn = new Nodyn(config);
+        nodyn.setExitHandler( new NoOpExitHandler() );
         int exitCode = nodyn.run();
         if ( exitCode != 0 ) {
             throw new TestFailureException();

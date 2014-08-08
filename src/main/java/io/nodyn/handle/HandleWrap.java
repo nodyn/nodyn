@@ -3,7 +3,7 @@ package io.nodyn.handle;
 import io.nodyn.CallbackResult;
 import io.nodyn.async.AsyncWrap;
 import io.nodyn.loop.RefHandle;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 /**
  * @author Bob McWhirter

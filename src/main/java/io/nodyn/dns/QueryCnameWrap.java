@@ -1,6 +1,6 @@
 package io.nodyn.dns;
 
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 /**
  * @author Bob McWhirter

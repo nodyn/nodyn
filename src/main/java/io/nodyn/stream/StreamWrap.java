@@ -4,10 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.nodyn.handle.HandleWrap;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * @author Bob McWhirter

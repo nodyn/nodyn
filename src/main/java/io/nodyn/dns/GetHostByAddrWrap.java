@@ -1,8 +1,6 @@
 package io.nodyn.dns;
 
-import io.nodyn.process.NodeProcess;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
+import io.nodyn.NodeProcess;
 
 import java.net.InetAddress;
 

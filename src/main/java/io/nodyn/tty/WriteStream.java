@@ -20,7 +20,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.nodyn.netty.pipe.NioOutputStreamChannel;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 import io.nodyn.tcp.DataEventHandler;
 

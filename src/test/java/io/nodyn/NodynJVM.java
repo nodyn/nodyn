@@ -1,6 +1,5 @@
 package io.nodyn;
 
-import io.nodyn.process.NodeProcess;
 import org.jasmine.cli.JVM;
 
 /**

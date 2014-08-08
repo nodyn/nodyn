@@ -1,11 +1,8 @@
 package io.nodyn.dns;
 
-import io.nodyn.CallbackResult;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @author Bob McWhirter

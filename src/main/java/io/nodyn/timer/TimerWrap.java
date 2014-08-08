@@ -19,7 +19,7 @@ package io.nodyn.timer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.ScheduledFuture;
 import io.nodyn.handle.HandleWrap;
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
 import java.util.concurrent.TimeUnit;
 

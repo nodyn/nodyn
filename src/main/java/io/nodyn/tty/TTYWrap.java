@@ -16,7 +16,7 @@
 
 package io.nodyn.tty;
 
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 
 import java.io.ByteArrayOutputStream;

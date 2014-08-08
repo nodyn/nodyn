@@ -5,7 +5,6 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefHandle;
 import io.nodyn.loop.RootManagedEventLoopGroup;
-import io.nodyn.process.NodeProcess;
 import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -24,6 +23,8 @@ public class Nodyn extends DynJS {
     private final NodynConfig config;
 
     private final ManagedEventLoopGroup managedLoop;
+
+    private ExitHandler exitHandler;
 
     private boolean started;
 
@@ -63,7 +64,23 @@ public class Nodyn extends DynJS {
         } else {
             this.managedLoop = parent.managedLoop.newChild();
         }
+    }
 
+    public void setExitHandler(ExitHandler handle) {
+        this.exitHandler = handle;
+    }
+
+    public ExitHandler getExitHandler() {
+        return this.exitHandler;
+    }
+
+    void reallyExit(int exitCode) {
+        this.managedLoop.shutdown();
+        if ( this.exitHandler != null ) {
+            this.exitHandler.reallyExit( exitCode );
+        } else {
+            System.exit( exitCode );
+        }
     }
 
     public ManagedEventLoopGroup getEventLoop() {

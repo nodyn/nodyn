@@ -1,8 +1,7 @@
 package io.nodyn.dns;
 
-import io.nodyn.process.NodeProcess;
+import io.nodyn.NodeProcess;
 
-import java.net.Inet4Address;
 import java.net.Inet6Address;
 
 /**
