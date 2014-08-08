@@ -203,9 +203,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
       } else {
         bytes = Fs.read(fd, buffer._nettyBuffer(), offset, length);
       }
-      process.nextTick(function() {
-        callback(undefined, bytes, buffer);
-      }.bind(this));
+      blocking.unblock(function(err,bytes,buffer){
+        callback(err, bytes, buffer);
+      })( undefined, bytes, buffer );
     }.bind(this));
   } else { // Sync
     if ( position && position !== -1 ) {
