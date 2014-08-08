@@ -32,7 +32,7 @@ import java.util.List;
  */
 public abstract class AbstractQueryWrap extends EventSource {
 
-    private final NodeProcess process;
+    protected final NodeProcess process;
     protected final String name;
 
     public static int port() {

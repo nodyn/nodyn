@@ -16,9 +16,11 @@
 
 package io.nodyn.dns;
 
+import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 
 import java.net.Inet4Address;
+import java.net.UnknownHostException;
 
 /**
  * @author Bob McWhirter
@@ -27,12 +29,25 @@ public class GetAddrInfo4Wrap extends AbstractQueryWrap {
 
 
     public GetAddrInfo4Wrap(NodeProcess process, String name) {
-        super( process, name );
+        super(process, name);
     }
 
     @Override
     public void start() {
-        dnsClient().lookup4(this.name, this.<Inet4Address>handler());
+        if (this.name.equals("localhost")) {
+            process.getEventLoop().getEventLoopGroup().submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        emit("complete", CallbackResult.createSuccess(Inet4Address.getLocalHost()));
+                    } catch (UnknownHostException e) {
+                        emit("complete", CallbackResult.createError(e));
+                    }
+                }
+            });
+        } else {
+            dnsClient().lookup4(this.name, this.<Inet4Address>handler());
+        }
     }
 
 }
