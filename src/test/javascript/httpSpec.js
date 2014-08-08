@@ -211,7 +211,7 @@ describe('http request and response', function() {
             helper.testComplete(true);
           });
         });
-      }).end(expected);
+      }).end(expected, 'utf8');
     });
   });
 

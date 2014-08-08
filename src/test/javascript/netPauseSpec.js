@@ -3,7 +3,7 @@ var net       = require('net');
 
 describe('The net module', function() {
   // TODO: This still appears to be racy on CI
-  xit('should handle pause and resume on a socket', function() {
+  it('should handle pause and resume on a socket', function() {
     helper.testComplete(false);
     waitsFor(helper.testComplete, "The net pause/resume test", 10000);
     var N = 200;
@@ -33,28 +33,16 @@ describe('The net module', function() {
       setTimeout(function() {
         client.pause();
         chars_recved = recv.length;
-        console.log('1 pause at: ' + chars_recved);
-        console.log('Thread id: ' +
-          java.lang.Thread.currentThread().getId());
         expect(chars_recved).toBeGreaterThan(1);
         setTimeout(function() {
-          console.log('1 resume at: ' + chars_recved);
-          console.log('Thread id: ' +
-            java.lang.Thread.currentThread().getId());
           expect(recv.length).toBe(chars_recved);
           client.resume();
 
           setTimeout(function() {
             client.pause();
             chars_recved = recv.length;
-            console.log('2 pause at: ' + chars_recved);
-            console.log('Thread id: ' +
-              java.lang.Thread.currentThread().getId());
 
             setTimeout(function() {
-              console.log('2 resume at: ' + chars_recved);
-              console.log('Thread id: ' +
-                java.lang.Thread.currentThread().getId());
               expect(recv.length).toBe(chars_recved);
               client.resume();
 

@@ -1,7 +1,7 @@
 var helper = require('./specHelper');
 var crypto = require('crypto');
 
-describe("crypto Hmac module", function() {
+xdescribe("crypto Hmac module", function() {
 
   it('should pass testCreateHmac', function() {
       expect(typeof crypto.createHmac).toBe('function');

@@ -1,6 +1,7 @@
+var helper = require('./specHelper');
+
 /*
-var helper = require('./specHelper'),
-    Stream = require('stream'),
+var  Stream = require('stream'),
     EE = require('events').EventEmitter,
     javaProcess = new io.nodyn.process.Process();
 

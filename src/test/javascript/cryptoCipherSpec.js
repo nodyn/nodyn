@@ -1,7 +1,7 @@
 var helper = require('./specHelper');
 var crypto = require('crypto');
 
-describe("crypto Cipher & Decipher module", function() {
+xdescribe("crypto Cipher & Decipher module", function() {
 
   it( "should produce the same bytes as node.js for DES", function() {
     var cipher = crypto.createCipher( 'des', 'tacos' );

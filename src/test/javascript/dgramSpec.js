@@ -61,7 +61,7 @@ describe('The dgram module', function() {
     expect(typeof socket.setMulticastLoopback).toBe('function');
   });
 
-  it('should pass testSendReceive', function() {
+  xit('should pass testSendReceive', function() {
     waitsFor(helper.testComplete, "the dgram send / receive test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
@@ -82,7 +82,7 @@ describe('The dgram module', function() {
     });
   });
 
-  it('should pass testEcho', function() {
+  xit('should pass testEcho', function() {
     waitsFor(helper.testComplete, "the dgram echo test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
@@ -110,7 +110,7 @@ describe('The dgram module', function() {
     });
   });
 
-  it('should pass testBroadcast', function() {
+  xit('should pass testBroadcast', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();

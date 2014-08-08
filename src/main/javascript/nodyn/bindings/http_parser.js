@@ -46,7 +46,8 @@ HTTPParser.prototype._onHeadersComplete = function(result) {
 }
 
 HTTPParser.prototype._onBody = function(result) {
-  var buffer = new Buffer( result.result );
+  //var buffer = new Buffer( result.result );
+  var buffer = process.binding('buffer').createBuffer( result.result );
   return this[HTTPParser.kOnBody].call(this, buffer, 0, buffer.length);
 }
 
@@ -81,7 +82,7 @@ HTTPParser.prototype.reinitialize = function(state) {
 }
 
 HTTPParser.prototype.execute = function(d) {
-  return this._parser.execute( d._buffer.byteBuf );
+  return this._parser.execute( d._nettyBuffer() );
 }
 
 HTTPParser.prototype.finish = function() {

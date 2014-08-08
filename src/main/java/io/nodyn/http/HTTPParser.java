@@ -210,7 +210,7 @@ public class HTTPParser extends EventSource {
     }
 
     public void setError(Error error) {
-        System.err.println("!! " + error);
+        //System.err.println("!! " + error);
         this.error = error;
     }
 
@@ -371,7 +371,9 @@ public class HTTPParser extends EventSource {
 
         int len = (cr + 2) - readerIndex();
 
-        return buf.readSlice(len);
+        ByteBuf line = buf.readSlice(len);
+        //System.err.println( line.toString( UTF8 ) );
+        return line;
     }
 
     protected boolean readRequestLine() {

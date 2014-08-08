@@ -1,7 +1,7 @@
 var helper = require('./specHelper');
 var crypto = require('crypto');
 
-describe("crypto random functions", function() {
+xdescribe("crypto random functions", function() {
 
   it( "should return random bytes without a callback", function() {
     var bytes = crypto.randomBytes( 15 );

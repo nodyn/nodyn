@@ -128,6 +128,11 @@ module.exports.setupBufferJS = function(target, internal) {
     return io.nodyn.buffer.Buffer.extract( this );
   }
 
+  // TODO: remove this
+  target.prototype._vertxBuffer = function() {
+    return new org.vertx.java.core.buffer.Buffer( this._nettyBuffer() );
+  }
+
 
   // ----------------------------------------
 
