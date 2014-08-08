@@ -8,7 +8,6 @@ var nodyn      = require('nodyn'),
     binding    = module.exports,
     statsCtor  = null;
 
-
 // Executes work asynchronously if async is provided and is a function -
 // otherwise, just executes the work and returns the result. If executing
 // async and successful, the callback function is executed on the next tick.
@@ -114,7 +113,7 @@ binding.writeBuffer = function(fd, buffer, offset, length, position, callback) {
     // TODO: Error checking
     // e.g. https://github.com/joyent/node/blob/master/src/node_file.cc#L788-L795
     var toWrite = buffer.slice(offset, offset+length);
-        var bytes   = toWrite._buffer.byteArray();
+        var bytes   = toWrite._nettyBuffer().byteArray();
         var written = posix.write(fd, bytes, length), err;
 
     if (written === -1) err = posixError(path, 'write');
@@ -184,9 +183,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
   if (typeof callback === 'function') { // Async
     blocking.submit(function() {
       if ( position && position !== -1 ) {
-        bytes = Fs.pread(fd, buffer._buffer, offset, length, position);
+        bytes = Fs.pread(fd, buffer._nettyBuffer(), offset, length, position);
       } else {
-        bytes = Fs.read(fd, buffer._buffer, offset, length);
+        bytes = Fs.read(fd, buffer._nettyBuffer(), offset, length);
       }
       process.nextTick(function() {
         callback(undefined, bytes, buffer);
@@ -194,9 +193,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
     }.bind(this));
   } else { // Sync
     if ( position && position !== -1 ) {
-      bytes = Fs.pread(fd, buffer._buffer, offset, length, position);
+      bytes = Fs.pread(fd, buffer._nettyBuffer(), offset, length, position);
     } else {
-      bytes = Fs.read(fd, buffer._buffer, offset, length);
+      bytes = Fs.read(fd, buffer._nettyBuffer(), offset, length);
     }
     if (bytes === -1) throw posixError(fd, 'read');
     return bytes;

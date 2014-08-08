@@ -27,6 +27,7 @@ var source = {};
   'util',
 
   'buffer',
+  'smalloc',
   'nodyn/codec',
   'nodyn/codec/base64',
   'nodyn/codec/hex',

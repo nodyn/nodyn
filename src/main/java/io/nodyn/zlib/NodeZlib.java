@@ -1,8 +1,8 @@
 package io.nodyn.zlib;
 
+import io.netty.buffer.ByteBuf;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
-import io.nodyn.buffer.BufferWrap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,16 +46,16 @@ public class NodeZlib extends EventSource {
         // umm?
     }
 
-    public void write(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+    public void write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
         __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 
-    public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+    public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
         System.err.println("NodeZlib#writeSync()");
         __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 
-    private void __write(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+    private void __write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
         switch(this.mode) {
             case DEFLATE:
             case GZIP:
@@ -70,7 +70,7 @@ public class NodeZlib extends EventSource {
         }
     }
 
-    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
         if (chunk == null || chunk.length == 0) {
             after(null, 0, outLen);
             return;
@@ -81,14 +81,14 @@ public class NodeZlib extends EventSource {
         try {
             int inflatedLen = inflater.inflate(output);
             inflater.end();
-            new BufferWrap(output).copy(buffer, outOffset, 0, inflatedLen);
+            buffer.setBytes( outOffset, output, 0, inflatedLen );
             after(output, 0, outLen - inflatedLen);
         } catch (DataFormatException e) {
             e.printStackTrace();
         }
     }
 
-    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, BufferWrap buffer, int outOffset, int outLen) {
+    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
         if (chunk == null || chunk.length == 0) {
             after(null, 0, outLen);
             return;
@@ -100,7 +100,7 @@ public class NodeZlib extends EventSource {
         byte[] output = new byte[chunk.length];
         int compressedLength = deflater.deflate(output);
         deflater.end();
-        new BufferWrap(output).copy(buffer, outOffset, 0, compressedLength);
+        buffer.setBytes( outOffset, output, 0, compressedLength );
         after(output, 0, outLen - compressedLength);
     }
 

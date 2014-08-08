@@ -35,12 +35,12 @@ Zlib.prototype.close = function() {
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
   return new ZlibRequest(this._delegate).run(function() {
-    this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._buffer, outOffset, outLen);
+    this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
   }.bind(this));
 };
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._buffer, outOffset, outLen);
+  this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
   // TODO
   return {
     AvailInAfter: 0,
