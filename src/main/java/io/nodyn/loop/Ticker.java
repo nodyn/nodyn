@@ -1,6 +1,5 @@
 package io.nodyn.loop;
 
-import io.netty.channel.EventLoopGroup;
 import io.nodyn.process.NodeProcess;
 
 import java.util.concurrent.TimeUnit;

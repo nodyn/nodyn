@@ -28,13 +28,6 @@ var source = {};
 
   'buffer',
   'smalloc',
-  'nodyn/codec',
-  'nodyn/codec/base64',
-  'nodyn/codec/hex',
-  'nodyn/codec/us_ascii',
-  'nodyn/codec/utf8',
-  'nodyn/codec/utf16le',
-
   'tracing',
 
   'path',

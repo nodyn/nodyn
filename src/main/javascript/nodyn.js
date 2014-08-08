@@ -1,11 +1,6 @@
 var util          = require('util');
 var EventEmitter  = require('events').EventEmitter;
 
-function makeEventEmitter(ctor) {
-  util._extend(ctor.prototype, EventEmitter.prototype);
-}
-module.exports.makeEventEmitter = makeEventEmitter;
-
 /**
  * Executes blockingAction asynchronously on a worker thread. To indicate
  * failure, blockingAction should return an instance of Error. Any other
