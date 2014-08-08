@@ -34,9 +34,7 @@ function executeWork(work, async, throws) {
     blocking.submit(function() {
       var result = work();
       result = result || {};
-      process.nextTick(function() {
-        async(result.err, result.result);
-      });
+      blocking.unblock(async)( result.err, result.result );
     });
   } else { // Sync
     var result = work();
@@ -175,7 +173,9 @@ binding.rename = function(from, to, callback) {
 binding.ftruncate = function(fd, len, callback) {
   function work() {
     var result = posix.ftruncate(fd, len), err;
-    if (result === -1) err = posixError(null, 'ftruncate');
+    if (result === -1) {
+      err = posixError(null, 'ftruncate');
+    }
     return {err:err, result:result};
   }
   return executeWork(work.bind(this), callback);
