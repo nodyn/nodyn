@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
 
+import java.nio.charset.Charset;
+
 /**
  * @author Lance Ball
  */
@@ -15,6 +17,7 @@ public class Fs {
         int read = posix.read(fd, input, length);
         if (read != -1) {
             buf.setBytes(offset, input, 0, read);
+            buf.writerIndex( Math.max( buf.writerIndex(), offset + read ) );
         }
         return read;
     }
@@ -24,6 +27,7 @@ public class Fs {
         int read = posix.pread(fd, input, length, position);
         if (read != -1) {
             buf.setBytes(offset, input, 0, read);
+            buf.writerIndex( Math.max( buf.writerIndex(), offset + read ) );
         }
         return read;
     }

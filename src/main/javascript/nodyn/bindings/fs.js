@@ -113,7 +113,7 @@ binding.writeBuffer = function(fd, buffer, offset, length, position, callback) {
     // TODO: Error checking
     // e.g. https://github.com/joyent/node/blob/master/src/node_file.cc#L788-L795
     var toWrite = buffer.slice(offset, offset+length);
-        var bytes   = toWrite._nettyBuffer().byteArray();
+        var bytes   = toWrite._byteArray();
         var written = posix.write(fd, bytes, length), err;
 
     if (written === -1) err = posixError(path, 'write');

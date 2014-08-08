@@ -26,6 +26,13 @@ public class Buffer {
         return ((NettyExternalIndexedData)object.getExternalIndexedData()).buffer();
     }
 
+    public static byte[] extractByteArray(JSObject object) {
+        ByteBuf buf = extract( object );
+        byte[] bytes = new byte[ bufLen( object ) ];
+        buf.getBytes( buf.readerIndex(), bytes );
+        return bytes;
+    }
+
     public static int bufLen(JSObject obj) {
         return ((Number) obj.get( null, "length" )).intValue();
     }

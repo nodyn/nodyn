@@ -10,6 +10,10 @@ module.exports.setupBufferJS = function(target, internal) {
     return io.nodyn.buffer.Buffer.extract(obj);
   }
 
+  module.exports.extractByteArray = function(obj) {
+    return io.nodyn.buffer.Buffer.extractByteArray(obj);
+  }
+
   // ----------------------------------------
   // Prototype
   // ----------------------------------------
@@ -125,7 +129,11 @@ module.exports.setupBufferJS = function(target, internal) {
   // ----------------------------------------
 
   target.prototype._nettyBuffer = function() {
-    return io.nodyn.buffer.Buffer.extract( this );
+    return module.exports.extractBuffer(this);
+  }
+
+  target.prototype._byteArray = function() {
+    return module.exports.extractByteArray(this);
   }
 
   // TODO: remove this

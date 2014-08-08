@@ -25,8 +25,9 @@ public class Smalloc {
         return obj;
     }
 
-    public static Object sliceOnto(JSObject src, JSObject dest, int start, int len) {
+    public static Object sliceOnto(JSObject src, JSObject dest, int start, int end) {
         ByteBuf srcBuf = ((NettyExternalIndexedData)src.getExternalIndexedData()).buffer();
+        int len = end - start;
         ByteBuf destBuf = srcBuf.slice( start, len );
         destBuf.writerIndex(0);
         dest.setExternalIndexedData(new NettyExternalIndexedData(destBuf));
