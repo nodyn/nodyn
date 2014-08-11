@@ -29,7 +29,12 @@ Object.defineProperty( Process.prototype, 'pid', {
 });
 
 Process.prototype._onExit = function(result) {
-  this.onexit( result.result );
+  var exitCode = result.result[0];
+  var signal   = result.result[1];
+  if ( signal <= 0 ) {
+    signal = undefined;
+  }
+  this.onexit( exitCode, signal );
 }
 
 Process.prototype.spawn = function(options) {
@@ -52,6 +57,10 @@ Process.prototype.spawn = function(options) {
 
 Process.prototype.close = function() {
   // what, exactly, should we do here?
+}
+
+Process.prototype.kill = function(signal) {
+  this._process.kill( signal );
 }
 
 module.exports.Process = Process;

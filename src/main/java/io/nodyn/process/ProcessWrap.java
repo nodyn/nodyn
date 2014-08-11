@@ -30,6 +30,7 @@ public class ProcessWrap extends HandleWrap {
 
     private Process subProcess;
     private Thread waiter;
+    private int signal = -1;
 
     public ProcessWrap(NodeProcess process) {
         super(process, false);
@@ -44,6 +45,16 @@ public class ProcessWrap extends HandleWrap {
         this.subProcess = builder.start();
         this.waiter = new Thread( new ExitWaiter(this ) );
         this.waiter.start();
+    }
+
+    public void kill(int signal) throws NoSuchFieldException, IllegalAccessException {
+        int pid = getPid();
+        this.signal = signal;
+        this.process.getPosix().kill( getPid(), signal );
+    }
+
+    int getSignal() {
+        return this.signal;
     }
 
     public OutputStream getStdin() {

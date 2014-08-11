@@ -40,5 +40,37 @@ module.exports.S_IROTH = FileStat.S_IROTH;  // read permission, other
 module.exports.S_IWOTH = FileStat.S_IWOTH;  // write permission, other
 module.exports.S_IXOTH = FileStat.S_IXOTH;  // execute permission, other
 
+module.exports.SIGHUP       =  1;
+module.exports.SIGINT       =  2;
+module.exports.SIGQUIT      =  3;
+module.exports.SIGILL       =  4;
+module.exports.SIGTRAP      =  5;
+module.exports.SIGABRT      =  6;
+module.exports.SIGEMT       =  7;
+module.exports.SIGFPE       =  8;
+module.exports.SIGKILL      =  9;
+module.exports.SIGBUS       = 10;
+module.exports.SIGSEGV      = 11;
+module.exports.SIGSYS       = 12;
+module.exports.SIGPIPE      = 13;
+module.exports.SIGALRM      = 14;
+module.exports.SIGTERM      = 15;
+module.exports.SIGURG       = 16;
+module.exports.SIGSTOP      = 17;
+module.exports.SIGTSTP      = 18;
+module.exports.SIGCONT      = 19;
+module.exports.SIGCHLD      = 20;
+module.exports.SIGTTIN      = 21;
+module.exports.SIGTTOU      = 22;
+module.exports.SIGIO        = 23;
+module.exports.SIGXCPU      = 24;
+module.exports.SIGXFSZ      = 25;
+module.exports.SIGVTALRM    = 26;
+module.exports.SIGPROF      = 27;
+module.exports.SIGWINCH     = 28;
+module.exports.SIGINFO      = 29;
+module.exports.SIGUSR1      = 30;
+module.exports.SIGUSR2      = 31;
+
 nodyn.exportEnums(module.exports, Errno.values());
 nodyn.exportEnums(module.exports, OpenFlags.values());

@@ -132,6 +132,8 @@ Number.isFinite = isFinite;
       this._immediateCallback();
     }.bind(this) );
 
+    this._posix = this._process.posix;
+
   }
 
 

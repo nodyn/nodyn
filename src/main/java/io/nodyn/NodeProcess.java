@@ -20,6 +20,9 @@ import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.TickInfo;
 import io.nodyn.loop.Ticker;
+import io.nodyn.posix.NodePosixHandler;
+import jnr.posix.POSIX;
+import jnr.posix.POSIXFactory;
 import org.dynjs.runtime.Runner;
 import org.vertx.java.core.Vertx;
 
@@ -35,6 +38,7 @@ public class NodeProcess extends EventSource {
     private final Nodyn nodyn;
     private final String osName;
     private final String osArch;
+    private final POSIX posix;
 
     private ImmediateCheckHandle immediateCheckHandle;
     private boolean needImmediateCallback;
@@ -55,6 +59,8 @@ public class NodeProcess extends EventSource {
                 emit("checkImmediate", CallbackResult.EMPTY_SUCCESS );
             }
         });
+
+        this.posix = POSIXFactory.getPOSIX( new NodePosixHandler(), true );
     }
 
     public void setExitCode(int exitCode) {
@@ -215,6 +221,10 @@ public class NodeProcess extends EventSource {
 
     public boolean isArm() {
         return osArch.indexOf("arm") >= 0;
+    }
+
+    public POSIX getPosix() {
+        return this.posix;
     }
 
 }

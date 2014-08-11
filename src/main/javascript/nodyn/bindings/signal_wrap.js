@@ -13,3 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+var util = require('util');
+var Handle = process.binding('handle_wrap').Handle;
+
+function Signal() {
+  this._signal = new io.nodyn.process.SignalWrap( process._process );
+  Handle.call( this, this._signal );
+}
+
+util.inherits( Signal, Handle );
+
+Signal.prototype.start = function(signum) {
+  this._signal.start( signum );
+}
+
+module.exports.Signal = Signal;

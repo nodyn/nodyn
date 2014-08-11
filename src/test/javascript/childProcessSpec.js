@@ -23,6 +23,16 @@ describe( 'child_process', function() {
   });
 
 
+  it('should be able to kill a spawned process', function() {
+    waitsFor(helper.testComplete, "child process to be killed", 5000 );
+    var proc = child_process.spawn( 'cat' );
+    proc.on( 'close', function(code,signal) {
+      expect( signal ).toBe( 15 );
+      helper.testComplete(true);
+    });
+    proc.kill();
+  })
+
   it('should be able to sync spawn', function() {
     var result = child_process.spawnSync('cat', [ 'pom.xml' ]);
     expect( result ).not.toBe( undefined );
