@@ -119,20 +119,9 @@ public class NodeProcess extends EventSource {
     }
 
     protected Object loadBinding(String name) {
-        try {
-            Runner runner = this.nodyn.newRunner();
-            runner.withSource("require('nodyn/" + name + "_binding');");
-            return runner.execute();
-        } catch (Throwable t) {
-            try {
-                Runner runner = this.nodyn.newRunner();
-                runner.withSource("require('nodyn/bindings/" + name + "');");
-                return runner.execute();
-            } catch (Throwable t2) {
-                t2.printStackTrace();
-                return null;
-            }
-        }
+        Runner runner = this.nodyn.newRunner();
+        runner.withSource("require('nodyn/bindings/" + name + "');");
+        return runner.execute();
     }
 
     public String getArgv0() {
