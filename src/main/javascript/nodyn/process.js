@@ -34,7 +34,7 @@ COUNTER_HTTP_CLIENT_RESPONSE = function() {};
 
 Error.captureStackTrace = function() {
   // no-op, we already do this?
-}
+};
 
 Number.isFinite = isFinite;
 
@@ -53,6 +53,7 @@ Number.isFinite = isFinite;
     this.context = this._process.vertx;
 
     this.binding = function(name) {
+      // return require(['nodyn', 'bindings', name].join('/'));
       return this._process.binding(name);
     };
 
@@ -74,7 +75,7 @@ Number.isFinite = isFinite;
 
     this.cwd = function() {
       return System.getProperty("user.dir");
-    }
+    };
 
     this.execPath = this._process.execPath;
 
@@ -135,8 +136,4 @@ Number.isFinite = isFinite;
 
 
   return new Process(javaProcess);
-})
-
-
-
-
+});

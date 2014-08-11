@@ -17,7 +17,7 @@
 "use strict";
 
 var util = require('util');
-var Handle = require('nodyn/bindings/handle_wrap').Handle;
+var Handle = process.binding('handle_wrap').Handle;
 
 function Stream(stream) {
   this._stream = stream;
@@ -34,40 +34,40 @@ Stream.prototype._onData = function(result) {
   var nread = result.result.readableBytes();
   var b = process.binding('buffer').createBuffer( result.result );
   this.onread( nread, b );
-}
+};
 
 Stream.prototype._onEof = function(result) {
   if ( this.onread ) {
     this.onread( -1 );
   }
-}
+};
 
 // ----------------------------------------
 
 Stream.prototype.readStart = function() {
   this._stream.readStart();
-}
+};
 
 Stream.prototype.readStop = function() {
   this._stream.readStop();
-}
+};
 
 Stream.prototype.writeUtf8String = function(req,data) {
   this._stream.writeUtf8String(data);
-}
+};
 
 Stream.prototype.writeAsciiString = function(req,data) {
   this._stream.writeAsciiString(data);
-}
+};
 
 Stream.prototype.writeBuffer = function(req,data) {
   this._stream.write( data._nettyBuffer() );
   req.oncomplete(0, this, req );
-}
+};
 
 Stream.prototype.shutdown = function(req) {
   this._stream.shutdown();
   req.oncomplete( 0, this, req );
-}
+};
 
 module.exports.Stream = Stream;
