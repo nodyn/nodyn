@@ -24,6 +24,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.UnrefHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;

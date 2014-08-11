@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package io.nodyn.tcp;
+package io.nodyn.netty;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.nodyn.CallbackResult;
-import io.nodyn.netty.AbstractEventSourceHandler;
+import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
+
 
 /**
  * @author Bob McWhirter
  */
-public class EOFEventHandler extends AbstractEventSourceHandler {
+public class DataEventHandler extends AbstractEventSourceHandler {
 
-    public EOFEventHandler(NodeProcess process, TCPWrap tcp) {
-        super( process, tcp );
+    public DataEventHandler(NodeProcess process, EventSource eventSource) {
+        super(process, eventSource);
     }
 
+
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        emit( "eof", CallbackResult.EMPTY_SUCCESS );
-        super.channelInactive(ctx);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        emit( "data", msg );
+        super.channelRead(ctx, msg);
     }
 }

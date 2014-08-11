@@ -2,7 +2,7 @@
 var helper = require('./specHelper');
 var child_process = require('child_process');
 
-xdescribe( 'child_process', function() {
+describe( 'child_process', function() {
 
   beforeEach(function() {
     helper.testComplete(false);
@@ -10,7 +10,6 @@ xdescribe( 'child_process', function() {
 
   it('should work', function() {
     waitsFor(helper.testComplete, "child process to read", 5000 );
-    try {
     var content = '';
     var proc = child_process.spawn('cat', [ 'pom.xml' ]);
     proc.stdout.on('data', function(d) {
@@ -21,8 +20,5 @@ xdescribe( 'child_process', function() {
       expect( content.indexOf( '</project>' ) ).toBeGreaterThan(0);
       helper.testComplete(true);
     })
-    } catch (err) {
-      System.err.println( err );
-    }
   });
 });

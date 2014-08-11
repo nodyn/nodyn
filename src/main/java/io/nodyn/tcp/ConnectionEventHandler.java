@@ -20,6 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.nodyn.EventSource;
 import io.nodyn.netty.AbstractEventSourceHandler;
 import io.nodyn.NodeProcess;
+import io.nodyn.netty.DataEventHandler;
+import io.nodyn.netty.EOFEventHandler;
 
 
 /**

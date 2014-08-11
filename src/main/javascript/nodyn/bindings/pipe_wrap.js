@@ -16,4 +16,38 @@
 
 "use strict";
 
-module.exports = {};
+var util = require('util');
+var Stream = require('nodyn/bindings/stream_wrap').Stream;
+
+function Pipe(ipc) {
+  this._pipe = new io.nodyn.pipe.PipeWrap( process._process );
+  Stream.call( this, this._pipe );
+}
+
+util.inherits(Pipe, Stream);
+
+Object.defineProperty( Pipe.prototype, 'input', {
+  set: function(v) {
+    this._pipe.input = v;
+  }
+});
+
+Object.defineProperty( Pipe.prototype, 'output', {
+  set: function(v) {
+    this._pipe.output = v;
+  }
+} );
+
+Pipe.prototype.bind = function() {
+};
+
+Pipe.prototype.listen = function() {
+};
+
+Pipe.prototype.connect = function() {
+};
+
+Pipe.prototype.open = function(fd) {
+};
+
+module.exports.Pipe = Pipe;

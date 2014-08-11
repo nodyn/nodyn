@@ -22,7 +22,7 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.netty.pipe.NioOutputStreamChannel;
 import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;
-import io.nodyn.tcp.DataEventHandler;
+import io.nodyn.netty.DataEventHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;

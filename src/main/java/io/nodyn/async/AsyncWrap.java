@@ -43,4 +43,13 @@ public class AsyncWrap extends EventSource {
     public void makeCallback(int index) {
         emit("makeCallbackByIndex", CallbackResult.createSuccess( index ) );
     }
+
+    public void emitBackToJavascript(final String event, final CallbackResult result ) {
+        this.process.getEventLoop().getEventLoopGroup().submit( new Runnable() {
+            @Override
+            public void run() {
+                emit( event, result );
+            }
+        });
+    }
 }
