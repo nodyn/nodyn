@@ -102,6 +102,7 @@ var source = {};
   'nodyn/bindings/zlib',
   'nodyn/bindings/http_parser',
   'nodyn/bindings/process_wrap',
+  'nodyn/bindings/spawn_sync',
 
 ].forEach( function(name) {
   source[name] = getSource(name);
