@@ -22,7 +22,6 @@ describe( 'child_process', function() {
     })
   });
 
-
   it('should be able to kill a spawned process', function() {
     waitsFor(helper.testComplete, "child process to be killed", 5000 );
     var proc = child_process.spawn( 'cat' );
@@ -43,5 +42,14 @@ describe( 'child_process', function() {
     expect( result.stdout.toString().indexOf( '</project>' ) ).toBeGreaterThan( 0 );
     expect( result.stdout.toString() ).toBe( result.output[1].toString() );
   });
+
+  it( 'should be able to exec', function() {
+    waitsFor(helper.testComplete, "child process to be exec'd", 5000 );
+    child_process.exec( 'cat pom.xml | wc -l', function(err, stdout, stderr) {
+      expect( stdout ).toBeGreaterThan( 300 );
+      expect( stdout ).toBeLessThan( 500 );
+      helper.testComplete(true);
+    } );
+  })
 
 });

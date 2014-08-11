@@ -22,6 +22,7 @@ import io.nodyn.handle.HandleWrap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * @author Bob McWhirter
