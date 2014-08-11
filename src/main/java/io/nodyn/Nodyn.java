@@ -21,6 +21,7 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.RefHandle;
 import io.nodyn.loop.RootManagedEventLoopGroup;
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -92,10 +93,10 @@ public class Nodyn extends DynJS {
 
     void reallyExit(int exitCode) {
         this.managedLoop.shutdown();
-        if ( this.exitHandler != null ) {
-            this.exitHandler.reallyExit( exitCode );
+        if (this.exitHandler != null) {
+            this.exitHandler.reallyExit(exitCode);
         } else {
-            System.exit( exitCode );
+            System.exit(exitCode);
         }
     }
 
@@ -109,9 +110,10 @@ public class Nodyn extends DynJS {
 
     private static class CompletionHandler {
         public NodeProcess process;
+        public Throwable error;
     }
 
-    public int run() throws InterruptedException {
+    public int run() throws Throwable {
         final RefHandle handle = this.managedLoop.newHandle();
         EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
 
@@ -123,10 +125,8 @@ public class Nodyn extends DynJS {
                 try {
                     completionHandler.process = initialize();
                 } catch (Throwable t) {
-                    t.printStackTrace();
-
-                } finally
-                {
+                    completionHandler.error = t;
+                } finally {
                     handle.unref();
                 }
             }
@@ -134,6 +134,14 @@ public class Nodyn extends DynJS {
 
         if (this.managedLoop instanceof RootManagedEventLoopGroup) {
             ((RootManagedEventLoopGroup) this.managedLoop).await();
+        }
+
+        if (completionHandler.error != null ) {
+            throw completionHandler.error;
+        }
+
+        if (completionHandler.process == null ) {
+            return -255;
         }
 
         return completionHandler.process.getExitCode();
