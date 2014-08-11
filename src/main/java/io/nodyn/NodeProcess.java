@@ -111,9 +111,9 @@ public class NodeProcess extends EventSource {
         Object binding = this.bindings.get(name);
         if (binding == null) {
             binding = loadBinding(name);
-            if (binding != null) {
+//            if (binding != null) {
                 this.bindings.put(name, binding);
-            }
+//            }
         }
         return binding;
     }

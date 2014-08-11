@@ -329,7 +329,7 @@ Module._resolveFilename = function(request, parent) {
   var paths = resolvedModule[1];
 
   // look up the filename first, since that's the cache key.
-  debug('looking for ' + JSON.stringify(id) +
+  print('looking for ' + JSON.stringify(id) +
         ' in ' + JSON.stringify(paths));
 
   var filename = Module._findPath(request, paths);
@@ -539,4 +539,3 @@ Module._initPaths();
 
 // backwards compatibility
 Module.Module = Module;
-
