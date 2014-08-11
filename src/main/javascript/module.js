@@ -171,6 +171,7 @@ Module._findPath = function(request, paths) {
     var filename;
 
     if (!trailingSlash) {
+      print("Looking for " + basePath);
       // try to join the request to the path
       filename = tryFile(basePath);
 
@@ -329,7 +330,7 @@ Module._resolveFilename = function(request, parent) {
   var paths = resolvedModule[1];
 
   // look up the filename first, since that's the cache key.
-  print('looking for ' + JSON.stringify(id) +
+  debug('looking for ' + JSON.stringify(id) +
         ' in ' + JSON.stringify(paths));
 
   var filename = Module._findPath(request, paths);
