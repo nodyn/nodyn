@@ -15,7 +15,7 @@
  */
 
 var util = require('util');
-var Handle = process.binding('handle_wrap').Handle;
+var Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function Timer() {
   this._timer = new io.nodyn.timer.TimerWrap( process._process );

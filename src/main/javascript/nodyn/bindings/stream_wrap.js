@@ -17,7 +17,7 @@
 "use strict";
 
 var util = require('util');
-var Handle = process.binding('handle_wrap').Handle;
+var Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function Stream(stream) {
   this._stream = stream;

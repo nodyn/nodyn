@@ -17,7 +17,7 @@
 "use strict";
 
 var util = require('util');
-var Stream = process.binding('stream_wrap').Stream;
+var Stream = require('nodyn/bindings/stream_wrap').Stream;
 
 function guessHandleType(fd) {
   if ( fd <= 2 ) {
