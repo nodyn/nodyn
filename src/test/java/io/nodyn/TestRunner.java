@@ -38,9 +38,13 @@ public class TestRunner {
         config.setArgv(new String[]{"-e", SCRIPT});
         Nodyn nodyn = new Nodyn(config);
         nodyn.setExitHandler( new NoOpExitHandler() );
-        int exitCode = nodyn.run();
-        if ( exitCode != 0 ) {
-            throw new TestFailureException();
+        try {
+            int exitCode = nodyn.run();
+            if (exitCode != 0) {
+                throw new TestFailureException();
+            }
+        } catch (Throwable t) {
+            throw new TestFailureException( t );
         }
     }
 }
