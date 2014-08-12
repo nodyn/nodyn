@@ -1,5 +1,5 @@
 
-var helper = require('./specHelper');
+var helper = require('./specHelper.js');
 var child_process = require('child_process');
 
 describe( 'child_process', function() {
@@ -8,6 +8,7 @@ describe( 'child_process', function() {
     helper.testComplete(false);
   });
 
+/*
   it('should be able to async spawn', function() {
     waitsFor(helper.testComplete, "child process to read", 5000 );
     var content = '';
@@ -50,6 +51,29 @@ describe( 'child_process', function() {
       expect( stdout ).toBeLessThan( 500 );
       helper.testComplete(true);
     } );
-  })
+  });
+  */
+
+  it( 'should be able to fork', function() {
+    waitsFor(helper.testComplete, "child process to be killed", 5000 );
+    try {
+      console.log( "about to fork" );
+      var child = child_process.fork( './forked_module.js' );
+      console.log( "did fork" );
+      setTimeout( function() {
+        console.log( "about to kill" );
+        child.kill();
+        console.log( "did kill" );
+        helper.testComplete( true );
+      }, 2000 )
+    } catch (err) {
+      console.log( err );
+      if ( err.stack ) {
+        console.log( err.stack );
+      } else if ( err.printStackTrace ) {
+        err.printStackTrace();
+      }
+    }
+  });
 
 });

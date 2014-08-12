@@ -213,16 +213,8 @@
                   <daemonThreadJoinTimeout>1000</daemonThreadJoinTimeout>
                   <systemPropertyVariables>
                     <dynjs.compile.mode>OFF</dynjs.compile.mode>
-                    <!--<test.pattern>${test.pattern}</test.pattern>-->
+                    <nodyn.binary>./bin/nodyn</nodyn.binary>
                   </systemPropertyVariables>
-                  <arguments>
-                    <argument>--format</argument>
-                    <argument>DOC</argument>
-                    <argument>--pattern</argument>
-                    <argument>${test.pattern}</argument>
-                    <argument>--compile-mode</argument>
-                    <argument>OFF</argument>
-                  </arguments>
                 </configuration>
               </execution>
             </executions>

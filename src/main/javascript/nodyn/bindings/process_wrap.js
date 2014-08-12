@@ -38,18 +38,35 @@ Process.prototype._onExit = function(result) {
 }
 
 Process.prototype.spawn = function(options) {
+  console.log( "SPAWN!" );
+  console.log( options );
+
+  for ( i = 0 ; i < options.envPairs.length ; ++i ) {
+    this._process.addEnvPair( options.envPairs[i] );
+  }
+
+  for ( i = 0 ; i < options.stdio.length ; ++i ) {
+    if ( i < 3 ) {
+      if ( options.stdio[i].type == 'fd' ) {
+        this._process.inheritStdio( i );
+      }
+    }
+  }
+
   this._process.spawn( options.file, options.args );
 
   var stdio = options.stdio;
 
   for ( i = 0 ; i < stdio.length ; ++i ) {
-    if ( stdio[i].handle instanceof Pipe ) {
+    if ( stdio[i].type === 'pipe' ) {
       if ( i == 0 ) {
         stdio[i].handle.output = this._process.stdin
       }  else if ( i == 1 ) {
-        stdio[i].handle.input = this._process.stdout
+        stdio[i].handle.input  = this._process.stdout
       }  else if ( i == 2 ) {
-        stdio[i].handle.input = this._process.stderr
+        stdio[i].handle.input  = this._process.stderr
+      } else {
+        //stdio[i].handle.input  =
       }
     }
   }

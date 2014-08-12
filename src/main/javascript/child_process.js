@@ -573,6 +573,8 @@ exports.fork = function(modulePath /*, args, options*/) {
 
   options.execPath = options.execPath || process.execPath;
 
+  console.log( "execPath: " + options.execPath );
+
   return spawn(options.execPath, args, options);
 };
 

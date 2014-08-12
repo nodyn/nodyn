@@ -78,6 +78,7 @@ Number.isFinite = isFinite;
     };
 
     this.execPath = this._process.execPath;
+    this.execArgv = [];
 
     // ARGV
     this.argv = [];

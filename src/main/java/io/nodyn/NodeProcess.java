@@ -21,6 +21,7 @@ import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.TickInfo;
 import io.nodyn.loop.Ticker;
 import io.nodyn.posix.NodePosixHandler;
+import jnr.posix.FileStat;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
 import org.dynjs.runtime.Runner;
@@ -53,14 +54,34 @@ public class NodeProcess extends EventSource {
         this.osName = props.getProperty("os.name").toLowerCase();
         this.osArch = props.getProperty("os.arch").toLowerCase();
 
-        this.immediateCheckHandle = new ImmediateCheckHandle( nodyn.getEventLoop(), new Runnable() {
+        this.immediateCheckHandle = new ImmediateCheckHandle(nodyn.getEventLoop(), new Runnable() {
             @Override
             public void run() {
-                emit("checkImmediate", CallbackResult.EMPTY_SUCCESS );
+                emit("checkImmediate", CallbackResult.EMPTY_SUCCESS);
             }
         });
 
-        this.posix = POSIXFactory.getPOSIX( new NodePosixHandler(), true );
+        this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
+
+        dumpFds();
+    }
+
+    private void dumpFds() {
+        /*
+        int i = 0;
+
+        while (true) {
+            FileStat stat = this.posix.fstat(i);
+            System.err.println(i + " > " + this.posix.errno());
+            System.err.println(stat.isBlockDev());
+            System.err.println(stat.isCharDev());
+
+            ++i;
+            if (i > 15) {
+                break;
+            }
+        }
+        */
     }
 
     public void setExitCode(int exitCode) {
@@ -76,7 +97,7 @@ public class NodeProcess extends EventSource {
     }
 
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
-        this.nodyn.getEventLoop().getEventLoopGroup().submit( new Ticker( this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)  ) );
+        this.nodyn.getEventLoop().getEventLoopGroup().submit(new Ticker(this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)));
     }
 
     public boolean getNeedImmediateCallback() {
@@ -84,11 +105,11 @@ public class NodeProcess extends EventSource {
     }
 
     public void setNeedImmediateCallback(boolean v) {
-        if ( this.immediateCheckHandle.isActive() == v ) {
+        if (this.immediateCheckHandle.isActive() == v) {
             return;
         }
         this.needImmediateCallback = v;
-        if ( v ) {
+        if (v) {
             this.immediateCheckHandle.start();
         } else {
             this.immediateCheckHandle.stop();
@@ -123,21 +144,25 @@ public class NodeProcess extends EventSource {
     }
 
     public String getArgv0() {
-        String bin = System.getProperty( "nodyn.binary" );
-        if ( bin == null ) {
+        String bin = System.getProperty("nodyn.binary");
+        if (bin == null) {
             bin = "nodyn";
         }
         return bin;
     }
 
     public String getExecPath() {
-        String bin = System.getProperty( "nodyn.binary" );
-        if ( bin == null ) {
-            bin = "node";
+        String bin = System.getProperty("nodyn.binary");
+        if (bin == null) {
+            bin = "nodyn";
         }
-        File nodynBinary = new File( bin );
+        File nodynBinary = new File(bin);
+        System.err.println("getExecPath.a:" + nodynBinary);
         nodynBinary = nodynBinary.getAbsoluteFile();
-        return nodynBinary.getParentFile().getParent();
+        System.err.println("getExecPath.b:" + nodynBinary);
+        String path = nodynBinary.getAbsolutePath();
+        System.err.println("getExecPath.c:" + path);
+        return path;
     }
 
     /**

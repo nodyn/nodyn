@@ -29,20 +29,43 @@ import java.util.Arrays;
  */
 public class ProcessWrap extends HandleWrap {
 
+    private final ProcessBuilder builder;
     private Process subProcess;
     private Thread waiter;
     private int signal = -1;
 
     public ProcessWrap(NodeProcess process) {
         super(process, false);
+        this.builder = new ProcessBuilder();
     }
 
     public int getPid() throws NoSuchFieldException, IllegalAccessException {
         return UnsafeProcess.getPid( this.subProcess );
     }
 
+    public void addEnvPair(String pair) {
+        int equalLoc = pair.indexOf( "=" );
+        if ( equalLoc < 0 ) {
+            return;
+        }
+
+        String name = pair.substring( 0, equalLoc ).trim();
+        String value = pair.substring( equalLoc + 1 ).trim();
+        this.builder.environment().put( name, value );
+    }
+
+    public void inheritStdio(int fd) {
+        if ( fd == 0 ) {
+            this.builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
+        } else if ( fd == 1 ) {
+            this.builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        } else if ( fd == 2 ) {
+            this.builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        }
+    }
+
     public void spawn(String file, String...args) throws IOException {
-        ProcessBuilder builder = new ProcessBuilder( args );
+        builder.command( args );
         this.subProcess = builder.start();
         this.waiter = new Thread( new ExitWaiter(this ) );
         this.waiter.start();
