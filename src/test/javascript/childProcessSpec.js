@@ -8,11 +8,10 @@ describe( 'child_process', function() {
     helper.testComplete(false);
   });
 
-/*
   it('should be able to async spawn', function() {
     waitsFor(helper.testComplete, "child process to read", 5000 );
     var content = '';
-    var proc = child_process.spawn('cat', [ 'pom.xml' ]);
+    var proc = child_process.spawn('/bin/cat', [ 'pom.xml' ]);
     proc.stdout.on('data', function(d) {
       content += d.toString();
     })
@@ -25,7 +24,7 @@ describe( 'child_process', function() {
 
   it('should be able to kill a spawned process', function() {
     waitsFor(helper.testComplete, "child process to be killed", 5000 );
-    var proc = child_process.spawn( 'cat' );
+    var proc = child_process.spawn( '/bin/cat' );
     proc.on( 'close', function(code,signal) {
       expect( signal ).toBe( 15 );
       helper.testComplete(true);
@@ -52,28 +51,24 @@ describe( 'child_process', function() {
       helper.testComplete(true);
     } );
   });
-  */
 
-  it( 'should be able to fork', function() {
-    waitsFor(helper.testComplete, "child process to be killed", 5000 );
-    try {
-      console.log( "about to fork" );
-      var child = child_process.fork( './forked_module.js' );
-      console.log( "did fork" );
-      setTimeout( function() {
-        console.log( "about to kill" );
-        child.kill();
-        console.log( "did kill" );
-        helper.testComplete( true );
-      }, 2000 )
-    } catch (err) {
-      console.log( err );
-      if ( err.stack ) {
-        console.log( err.stack );
-      } else if ( err.printStackTrace ) {
-        err.printStackTrace();
-      }
-    }
+  xit( 'should be able to fork', function() {
+    waitsFor(helper.testComplete, "child process to be killed", 10000 );
+    console.log( "about to fork" );
+    var child = child_process.fork( './src/test/javascript/forked_module.js' );
+    console.log( "did fork" );
+    child.on( "exit", function() {
+      console.log( 'child exited' );
+      console.log( 'child exited' );
+      console.log( 'child exited' );
+      console.log( 'child exited' );
+      console.log( 'child exited' );
+      helper.testComplete( true );
+    })
+    setTimeout( function() {
+      console.log( "sending message to child" );
+      child.send( { cheese: 'cheddar' } );
+    }, 4000 );
   });
 
 });

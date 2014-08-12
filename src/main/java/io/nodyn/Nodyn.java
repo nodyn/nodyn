@@ -30,6 +30,7 @@ import org.vertx.java.core.impl.DefaultVertx;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 public class Nodyn extends DynJS {
 
@@ -115,6 +116,7 @@ public class Nodyn extends DynJS {
     }
 
     public int run() throws Throwable {
+
         final RefHandle handle = this.managedLoop.newHandle();
         EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
 

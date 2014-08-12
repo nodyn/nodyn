@@ -18,82 +18,142 @@ package io.nodyn.process;
 
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
+import jnr.constants.platform.Errno;
+import jnr.posix.POSIX;
+import jnr.posix.SpawnFileAction;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Bob McWhirter
  */
 public class ProcessWrap extends HandleWrap {
 
-    private final ProcessBuilder builder;
-    private Process subProcess;
     private Thread waiter;
     private int signal = -1;
+    private int pid;
+
+    private List<String> envp = new ArrayList<>();
+
+    private List<StdioConfig> stdio = new ArrayList<>();
+
+    private static class StdioOption {
+        private static enum Type {
+            FD,
+            PIPE,
+            IGNORE,
+        }
+
+        public Type type;
+        public int fd;
+    }
 
     public ProcessWrap(NodeProcess process) {
         super(process, false);
-        this.builder = new ProcessBuilder();
     }
 
     public int getPid() throws NoSuchFieldException, IllegalAccessException {
-        return UnsafeProcess.getPid( this.subProcess );
+        return this.pid;
     }
 
     public void addEnvPair(String pair) {
-        int equalLoc = pair.indexOf( "=" );
-        if ( equalLoc < 0 ) {
-            return;
+        this.envp.add(pair);
+    }
+
+    private static final class StdioConfig {
+        public static enum Type {
+            OPEN,
+            CLOSE,
         }
 
-        String name = pair.substring( 0, equalLoc ).trim();
-        String value = pair.substring( equalLoc + 1 ).trim();
-        this.builder.environment().put( name, value );
+        public Type type;
+        public int fd;
     }
 
-    public void inheritStdio(int fd) {
-        if ( fd == 0 ) {
-            this.builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
-        } else if ( fd == 1 ) {
-            this.builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        } else if ( fd == 2 ) {
-            this.builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+    public void stdio(String type, int fd) {
+        StdioConfig c = new StdioConfig();
+        c.type = StdioConfig.Type.valueOf(type.toUpperCase());
+        c.fd = fd;
+        this.stdio.add(c);
+    }
+
+    public void spawn(String file, String... args) throws IOException {
+        POSIX posix = this.process.getPosix();
+
+        List<String> argv = new ArrayList<>();
+        for (int i = 0; i < args.length; ++i) {
+            argv.add(args[i]);
         }
-    }
 
-    public void spawn(String file, String...args) throws IOException {
-        builder.command( args );
-        this.subProcess = builder.start();
-        this.waiter = new Thread( new ExitWaiter(this ) );
-        this.waiter.start();
+        Collection<SpawnFileAction> fileActions = new ArrayList<>();
+
+        int i = 0;
+        for ( StdioConfig each : this.stdio ) {
+            switch (each.type) {
+                case OPEN:
+                    fileActions.add( SpawnFileAction.dup( each.fd, i ) );
+                    ++i;
+                    break;
+                case CLOSE:
+                    fileActions.add( SpawnFileAction.close( each.fd ) );
+                    break;
+            }
+
+        }
+
+        long result = posix.posix_spawnp(args[0], fileActions, argv, this.envp);
+
+        this.pid = (int) result;
+        new Thread(new ExitWaiter(this)).start();
+
     }
+    /*
+    public void spawn(String file, String... args) throws IOException {
+        POSIX posix = this.process.getPosix();
+        int result = posix.fork();
+        if (result == 0) {
+            System.err.println( "INSIDE FORK!" );
+            int i = 0;
+            for (StdioConfig each : this.stdio) {
+                switch (each.type) {
+                    case OPEN:
+                        System.err.println( "map " + each.fd + " to " + i );
+                        posix.dup2(each.fd, i);
+                        ++i;
+                        break;
+                    case CLOSE:
+                        System.err.println( "close: " + each.fd );
+                        posix.close(each.fd);
+                        break;
+                }
+            }
+            int execResult = posix.execve(args[0], args, envp.toArray(new String[]{}));
+            System.err.println("***** execResult: " + execResult);
+            System.err.println("***** errNo: " + Errno.valueOf(posix.errno()));
+        }
+
+        this.pid = result;
+        new Thread(new ExitWaiter(this)).start();
+    }
+    */
 
     public void kill(int signal) throws NoSuchFieldException, IllegalAccessException {
-        int pid = getPid();
         this.signal = signal;
-        this.process.getPosix().kill( getPid(), signal );
+        this.process.getPosix().kill(this.pid, signal);
     }
 
     int getSignal() {
         return this.signal;
     }
 
-    public OutputStream getStdin() {
-        return this.subProcess.getOutputStream();
-    }
-
-    public InputStream getStdout() {
-        return this.subProcess.getInputStream();
-    }
-
-    public InputStream getStderr() {
-        return this.subProcess.getErrorStream();
-    }
-
     public int waitFor() throws InterruptedException {
-        return this.subProcess.waitFor();
+        int[] status = new int[16];
+        int flags = 0;
+        int result = this.process.getPosix().waitpid(this.pid, status, flags);
+        return result;
     }
 }

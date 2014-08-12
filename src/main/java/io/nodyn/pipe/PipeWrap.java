@@ -1,69 +1,90 @@
 package io.nodyn.pipe;
 
-import io.netty.channel.ChannelFuture;
 import io.nodyn.NodeProcess;
+import io.nodyn.fs.UnsafeFs;
 import io.nodyn.netty.DataEventHandler;
+import io.nodyn.netty.DebugHandler;
 import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.pipe.NioInputStreamChannel;
 import io.nodyn.netty.pipe.NioOutputStreamChannel;
 import io.nodyn.stream.StreamWrap;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * @author Bob McWhirter
  */
 public class PipeWrap extends StreamWrap {
 
-    private static enum Type {
-        INPUT,
-        OUTPUT,
-    }
+    private static final int READER = 0;
+    private static final int WRITER = 1;
 
-    private Type type;
+    private int type;
+    private int[] fileDescriptors = new int[2];
 
-    public PipeWrap(NodeProcess process) {
+    public PipeWrap(NodeProcess process) throws NoSuchFieldException, IllegalAccessException, IOException {
         super(process, true);
+        process.getPosix().pipe(this.fileDescriptors);
     }
 
-    public PipeWrap(NodeProcess process, ChannelFuture channelFuture) {
-        super(process, channelFuture);
+    public int getReader() {
+        return this.fileDescriptors[READER];
     }
 
-    public void setInput(InputStream in) throws IOException {
-        NioInputStreamChannel channel = NioInputStreamChannel.create(in);
-        channel.config().setAutoRead(false);
-        channel.pipeline().addLast("emit.data", new DataEventHandler(this.process, this));
-        channel.pipeline().addLast("emit.eof", new EOFEventHandler(this.process, this));
-        this.channelFuture = channel.newSucceededFuture();
-        process.getEventLoop().getEventLoopGroup().register(channel);
-        this.type = Type.INPUT;
+    public int getWriter() {
+        return this.fileDescriptors[WRITER];
     }
 
-    public void setOutput(OutputStream out) throws IOException {
-        NioOutputStreamChannel channel = NioOutputStreamChannel.create(out);
-        channel.config().setAutoRead(false);
-        //channel.pipeline().addLast("emit.eof", new EOFEventHandler(this.process, this));
-        this.channelFuture = channel.newSucceededFuture();
-        process.getEventLoop().getEventLoopGroup().register(channel);
-        this.type = Type.OUTPUT;
+    public void becomeReader() throws NoSuchFieldException, IllegalAccessException, IOException {
+        this.type = READER;
+
+        FileDescriptor readerFileDesc = UnsafeFs.createFileDescriptor(this.fileDescriptors[READER]);
+        FileInputStream reader = new FileInputStream( readerFileDesc );
+        NioInputStreamChannel nioReader = NioInputStreamChannel.create( reader );
+
+        nioReader.config().setAutoRead(false);
+        //nioReader.pipeline().addLast("debug", new DebugHandler("reader"));
+        nioReader.pipeline().addLast("emit.data", new DataEventHandler(this.process, this));
+        nioReader.pipeline().addLast("emit.eof", new EOFEventHandler(this.process, this));
+        this.channelFuture = nioReader.newSucceededFuture();
+        process.getEventLoop().getEventLoopGroup().register(nioReader);
+    }
+
+    public void shutdownReader() {
+        this.process.getPosix().close(this.fileDescriptors[READER]);
+    }
+
+    public void becomeWriter() throws Exception {
+        this.type = WRITER;
+
+        FileDescriptor writerFileDesc = UnsafeFs.createFileDescriptor(this.fileDescriptors[WRITER]);
+        FileOutputStream writer = new FileOutputStream(writerFileDesc);
+        NioOutputStreamChannel nioWriter = NioOutputStreamChannel.create(writer);
+
+        nioWriter.config().setAutoRead(false);
+        //nioWriter.pipeline().addLast("debug", new DebugHandler("writer"));
+        this.channelFuture = nioWriter.newSucceededFuture();
+        process.getEventLoop().getEventLoopGroup().register(nioWriter);
+    }
+
+    public void shutdownWriter() {
+        this.process.getPosix().close(this.fileDescriptors[WRITER]);
     }
 
     @Override
     public void readStart() {
-        if (this.type == Type.OUTPUT) {
-            return;
+        if (this.type == READER) {
+            super.readStart();
         }
-        super.readStart();
     }
 
     @Override
     public void readStop() {
-        if (this.type == Type.OUTPUT) {
-            return;
+        if (this.type == READER) {
+            super.readStop();
         }
-        super.readStop();
     }
 }

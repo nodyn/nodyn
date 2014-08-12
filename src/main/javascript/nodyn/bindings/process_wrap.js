@@ -38,35 +38,49 @@ Process.prototype._onExit = function(result) {
 }
 
 Process.prototype.spawn = function(options) {
-  console.log( "SPAWN!" );
-  console.log( options );
-
   for ( i = 0 ; i < options.envPairs.length ; ++i ) {
     this._process.addEnvPair( options.envPairs[i] );
   }
 
   for ( i = 0 ; i < options.stdio.length ; ++i ) {
-    if ( i < 3 ) {
-      if ( options.stdio[i].type == 'fd' ) {
-        this._process.inheritStdio( i );
+    var fd;
+
+    if ( options.stdio[i].type == 'fd' ) {
+      fd = options.stdio[i].fd;
+      this._process.stdio( "open", fd );
+    } else if ( options.stdio[i].type == 'pipe' ) {
+      if ( i == 0 ) {
+        fd = options.stdio[i].handle._reader;
+        this._process.stdio( "open", fd );
+        this._process.stdio( "close", options.stdio[i].handle._writer );
+        options.stdio[i].handle.becomeWriter();
+      } else if ( options.stdio[i].ipc ) {
+        fd = options.stdio[i].handle._reader;
+        this._process.stdio( "open", fd );
+        this._process.stdio( "close", options.stdio[i].handle._writer );
+        options.stdio[i].handle.becomeWriter();
+      } else {
+        fd = options.stdio[i].handle._writer;
+        this._process.stdio( "open", fd );
+        this._process.stdio( "close", options.stdio[i].handle._reader );
+        options.stdio[i].handle.becomeReader();
       }
     }
   }
 
   this._process.spawn( options.file, options.args );
 
-  var stdio = options.stdio;
+  for ( i = 0 ; i < options.stdio.length ; ++i ) {
+    var fd;
 
-  for ( i = 0 ; i < stdio.length ; ++i ) {
-    if ( stdio[i].type === 'pipe' ) {
+    if ( options.stdio[i].type == 'pipe' ) {
       if ( i == 0 ) {
-        stdio[i].handle.output = this._process.stdin
-      }  else if ( i == 1 ) {
-        stdio[i].handle.input  = this._process.stdout
-      }  else if ( i == 2 ) {
-        stdio[i].handle.input  = this._process.stderr
+        options.stdio[i].handle.shutdownReader();
+      } else if ( options.stdio[i].ipc ) {
+        options.stdio[i].handle.shutdownReader();
       } else {
-        //stdio[i].handle.input  =
+        fd = options.stdio[i].handle._writer;
+        options.stdio[i].handle.shutdownWriter();
       }
     }
   }

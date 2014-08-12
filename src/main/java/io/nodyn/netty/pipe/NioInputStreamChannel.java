@@ -64,7 +64,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
                     try {
                         NioInputStreamChannel.this.pipe.sink().close();
                     } catch (IOException e1) {
-                        //e1.printStackTrace();
+                        e1.printStackTrace();
                     }
                 }
             }

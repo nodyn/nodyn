@@ -62,26 +62,6 @@ public class NodeProcess extends EventSource {
         });
 
         this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
-
-        dumpFds();
-    }
-
-    private void dumpFds() {
-        /*
-        int i = 0;
-
-        while (true) {
-            FileStat stat = this.posix.fstat(i);
-            System.err.println(i + " > " + this.posix.errno());
-            System.err.println(stat.isBlockDev());
-            System.err.println(stat.isCharDev());
-
-            ++i;
-            if (i > 15) {
-                break;
-            }
-        }
-        */
     }
 
     public void setExitCode(int exitCode) {
@@ -157,11 +137,8 @@ public class NodeProcess extends EventSource {
             bin = "nodyn";
         }
         File nodynBinary = new File(bin);
-        System.err.println("getExecPath.a:" + nodynBinary);
         nodynBinary = nodynBinary.getAbsoluteFile();
-        System.err.println("getExecPath.b:" + nodynBinary);
         String path = nodynBinary.getAbsolutePath();
-        System.err.println("getExecPath.c:" + path);
         return path;
     }
 
