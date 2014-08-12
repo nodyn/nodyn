@@ -82,6 +82,7 @@ function buildStat(path, statf) {
 }
 
 binding.stat = function(path, callback) {
+  console.log("POSX: " + posix);
   function work() {
     return buildStat(path, function(stat) { return posix.stat(path, stat); });
   }
