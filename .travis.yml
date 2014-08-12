@@ -10,4 +10,5 @@ notifications:
 branches:
   only:
     - master
+    - stat-debug
 
