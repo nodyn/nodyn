@@ -35,6 +35,7 @@ public class Nodyn extends DynJS {
 
     private static final String NODE_JS = "node.js";
     private static final String PROCESS = "nodyn/process.js";
+    private static final String ES6_POLYFILL = "nodyn/polyfill.js";
 
     private final Vertx vertx;
     private final NodynConfig config;
@@ -149,6 +150,9 @@ public class Nodyn extends DynJS {
 
     public NodeProcess initialize() {
         NodeProcess javaProcess = new NodeProcess(Nodyn.this);
+
+        // Adds ES6 capabilities not provided by DynJS to global scope
+        Nodyn.this.run(ES6_POLYFILL);
 
         JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
         JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);

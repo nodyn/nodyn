@@ -84,8 +84,16 @@ var debug = Module._debug;
 
 function statPath(path) {
   try {
-    return fs.statSync(path);
-  } catch (ex) {}
+    var stat = fs.statSync(path);
+    if (path.endsWith('specRunner.js')) {
+      console.log("Found specRunner.js")
+      console.log(util.inspect(stat));
+    }
+    return stat;
+  } catch (ex) {
+    console.error("Cannot stat " + path);
+    console.error(ex);
+  }
   return false;
 }
 
@@ -171,7 +179,6 @@ Module._findPath = function(request, paths) {
     var filename;
 
     if (!trailingSlash) {
-      print("Looking for " + basePath);
       // try to join the request to the path
       filename = tryFile(basePath);
 
