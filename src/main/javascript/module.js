@@ -84,16 +84,8 @@ var debug = Module._debug;
 
 function statPath(path) {
   try {
-    var stat = fs.statSync(path);
-    if (path.endsWith('specRunner.js')) {
-      console.log("Found specRunner.js")
-      console.log(util.inspect(stat));
-    }
-    return stat;
-  } catch (ex) {
-    console.error("Cannot stat " + path);
-    console.error(ex);
-  }
+    return fs.statSync(path);
+  } catch (ex) {}
   return false;
 }
 

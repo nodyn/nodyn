@@ -60,9 +60,6 @@ function buildStat(path, statf) {
       delegate = posix.allocateStat(),
       result = statf(delegate);
 
-  console.log( "buildStat.result: " + result );
-  console.log( "buildStat.errno: " + posix.errno() );
-
   if (result !== -1) {
     stats = new statsCtor(
       delegate.dev(),
@@ -85,7 +82,6 @@ function buildStat(path, statf) {
 }
 
 binding.stat = function(path, callback) {
-  console.log("POSX: " + posix);
   function work() {
     return buildStat(path, function(stat) { return posix.stat(path, stat); });
   }
