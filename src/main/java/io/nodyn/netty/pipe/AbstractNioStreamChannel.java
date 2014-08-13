@@ -29,13 +29,11 @@ import java.nio.channels.Pipe;
  */
 public abstract class AbstractNioStreamChannel extends AbstractNioByteChannel {
 
-    protected final Pipe pipe;
     protected final ChannelConfig config;
     protected final ChannelMetadata metadata;
 
     protected AbstractNioStreamChannel(Pipe pipe) {
         super(null, pipe.source());
-        this.pipe = pipe;
         this.config = new DefaultChannelConfig(this);
         this.metadata = new ChannelMetadata(false);
     }

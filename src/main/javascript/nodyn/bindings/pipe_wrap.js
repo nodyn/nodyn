@@ -20,29 +20,21 @@ var util = require('util');
 var Stream = require('nodyn/bindings/stream_wrap').Stream;
 
 function Pipe(ipc) {
+  this._ipc = ipc;
   this._pipe = new io.nodyn.pipe.PipeWrap( process._process );
   Stream.call( this, this._pipe );
-
-  this._reader = this._pipe.reader
-  this._writer = this._pipe.writer
 }
 
 util.inherits(Pipe, Stream);
 
-Pipe.prototype.becomeReader = function() {
-  this._pipe.becomeReader();
+Pipe.prototype.closeDownstream = function() {
+  this._pipe.closeDownstream();
 }
 
-Pipe.prototype.shutdownReader = function() {
-  this._pipe.shutdownReader();
-}
-
-Pipe.prototype.becomeWriter = function() {
-  this._pipe.becomeWriter();
-}
-
-Pipe.prototype.shutdownWriter = function() {
-  this._pipe.shutdownWriter();
+Pipe.prototype._create = function(downstreamFd) {
+  this._pipe.create(downstreamFd);
+  this._upstream   = this._pipe.upstream
+  this._downstream = this._pipe.downstream
 }
 
 Pipe.prototype.bind = function() {
@@ -58,7 +50,7 @@ Pipe.prototype.connect = function() {
 };
 
 Pipe.prototype.open = function(fd) {
-  console.log( "Pipe.open" );
+  this._pipe.open(fd, true, true);
 };
 
 module.exports.Pipe = Pipe;

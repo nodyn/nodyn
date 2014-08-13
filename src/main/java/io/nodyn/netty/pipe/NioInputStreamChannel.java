@@ -30,6 +30,7 @@ import java.nio.channels.Pipe;
 public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     private final InputStream in;
+    private final Pipe pipe;
     private Thread pump;
 
     public static NioInputStreamChannel create(InputStream in) throws IOException {
@@ -39,6 +40,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     protected NioInputStreamChannel(InputStream in, Pipe pipe) {
         super(pipe);
+        this.pipe = pipe;
         this.in = in;
         startPump();
     }

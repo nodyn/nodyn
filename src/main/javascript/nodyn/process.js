@@ -101,9 +101,17 @@ Number.isFinite = isFinite;
       }
     }
 
-    this.env = {
-      HOME: System.getProperty("user.home"),
-    };
+    this.env = {};
+
+    var envMap = System.getenv();
+
+    var keyIter = envMap.keySet().iterator();
+
+    while ( keyIter.hasNext() ) {
+      var envName = keyIter.next();
+      var envVal  = envMap.get( envName );
+      this.env[envName] = envVal;
+    }
 
     this.reallyExit = function(code) {
       this._process.exitCode = code;

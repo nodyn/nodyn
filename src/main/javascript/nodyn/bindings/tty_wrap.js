@@ -21,9 +21,9 @@ var Stream = require('nodyn/bindings/stream_wrap').Stream;
 
 function guessHandleType(fd) {
   if ( fd <= 2 ) {
-    //if ( System.console() ) {
+    if ( process._process.isatty( fd ) ) {
       return 'TTY';
-    //}
+    }
     return 'PIPE';
   }
 

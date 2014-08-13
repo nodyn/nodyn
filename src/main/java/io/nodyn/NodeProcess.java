@@ -16,6 +16,7 @@
 
 package io.nodyn;
 
+import io.nodyn.fs.UnsafeFs;
 import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.TickInfo;
@@ -62,6 +63,10 @@ public class NodeProcess extends EventSource {
         });
 
         this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
+    }
+
+    public boolean isatty(int fd) throws NoSuchFieldException, IllegalAccessException {
+        return this.posix.isatty(UnsafeFs.createFileDescriptor( fd ) );
     }
 
     public void setExitCode(int exitCode) {

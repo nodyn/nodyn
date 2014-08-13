@@ -34,6 +34,7 @@ import java.nio.charset.Charset;
 public class NioOutputStreamChannel extends AbstractNioStreamChannel {
 
     private final OutputStream out;
+    private final Pipe pipe;
 
     public static NioOutputStreamChannel create(OutputStream out) throws IOException {
         Pipe pipe = Pipe.open();
@@ -42,6 +43,7 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
 
     protected NioOutputStreamChannel(OutputStream out, Pipe pipe) {
         super(pipe);
+        this.pipe = pipe;
         try {
             pipe.sink().configureBlocking(false);
         } catch (IOException e) {

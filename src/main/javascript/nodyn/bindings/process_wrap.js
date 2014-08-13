@@ -18,7 +18,6 @@ var Pipe = process.binding( "pipe_wrap" ).Pipe;
 
 function Process() {
   this._process = new io.nodyn.process.ProcessWrap( process._process );
-
   this._process.on( 'exit', Process.prototype._onExit.bind(this) );
 }
 
@@ -49,39 +48,18 @@ Process.prototype.spawn = function(options) {
       fd = options.stdio[i].fd;
       this._process.stdio( "open", fd );
     } else if ( options.stdio[i].type == 'pipe' ) {
-      if ( i == 0 ) {
-        fd = options.stdio[i].handle._reader;
-        this._process.stdio( "open", fd );
-        this._process.stdio( "close", options.stdio[i].handle._writer );
-        options.stdio[i].handle.becomeWriter();
-      } else if ( options.stdio[i].ipc ) {
-        fd = options.stdio[i].handle._reader;
-        this._process.stdio( "open", fd );
-        this._process.stdio( "close", options.stdio[i].handle._writer );
-        options.stdio[i].handle.becomeWriter();
-      } else {
-        fd = options.stdio[i].handle._writer;
-        this._process.stdio( "open", fd );
-        this._process.stdio( "close", options.stdio[i].handle._reader );
-        options.stdio[i].handle.becomeReader();
-      }
+      options.stdio[i].handle._create(i);
+      fd = options.stdio[i].handle._downstream;
+      this._process.stdio( "open", fd );
+      this._process.stdio( "close", options.stdio[i].handle._upstream );
     }
   }
 
   this._process.spawn( options.file, options.args );
 
   for ( i = 0 ; i < options.stdio.length ; ++i ) {
-    var fd;
-
     if ( options.stdio[i].type == 'pipe' ) {
-      if ( i == 0 ) {
-        options.stdio[i].handle.shutdownReader();
-      } else if ( options.stdio[i].ipc ) {
-        options.stdio[i].handle.shutdownReader();
-      } else {
-        fd = options.stdio[i].handle._writer;
-        options.stdio[i].handle.shutdownWriter();
-      }
+      options.stdio[i].handle.closeDownstream();
     }
   }
 }

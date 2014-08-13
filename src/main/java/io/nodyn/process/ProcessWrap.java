@@ -111,35 +111,6 @@ public class ProcessWrap extends HandleWrap {
         new Thread(new ExitWaiter(this)).start();
 
     }
-    /*
-    public void spawn(String file, String... args) throws IOException {
-        POSIX posix = this.process.getPosix();
-        int result = posix.fork();
-        if (result == 0) {
-            System.err.println( "INSIDE FORK!" );
-            int i = 0;
-            for (StdioConfig each : this.stdio) {
-                switch (each.type) {
-                    case OPEN:
-                        System.err.println( "map " + each.fd + " to " + i );
-                        posix.dup2(each.fd, i);
-                        ++i;
-                        break;
-                    case CLOSE:
-                        System.err.println( "close: " + each.fd );
-                        posix.close(each.fd);
-                        break;
-                }
-            }
-            int execResult = posix.execve(args[0], args, envp.toArray(new String[]{}));
-            System.err.println("***** execResult: " + execResult);
-            System.err.println("***** errNo: " + Errno.valueOf(posix.errno()));
-        }
-
-        this.pid = result;
-        new Thread(new ExitWaiter(this)).start();
-    }
-    */
 
     public void kill(int signal) throws NoSuchFieldException, IllegalAccessException {
         this.signal = signal;
@@ -151,9 +122,9 @@ public class ProcessWrap extends HandleWrap {
     }
 
     public int waitFor() throws InterruptedException {
-        int[] status = new int[16];
+        int[] status = new int[1];
         int flags = 0;
         int result = this.process.getPosix().waitpid(this.pid, status, flags);
-        return result;
+        return ( status[0] & 0xFF00 ) >> 8;
     }
 }

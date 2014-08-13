@@ -52,22 +52,15 @@ describe( 'child_process', function() {
     } );
   });
 
-  xit( 'should be able to fork', function() {
+  it( 'should be able to fork', function() {
     waitsFor(helper.testComplete, "child process to be killed", 10000 );
-    console.log( "about to fork" );
     var child = child_process.fork( './src/test/javascript/forked_module.js' );
-    console.log( "did fork" );
-    child.on( "exit", function() {
-      console.log( 'child exited' );
-      console.log( 'child exited' );
-      console.log( 'child exited' );
-      console.log( 'child exited' );
-      console.log( 'child exited' );
+    child.on( "exit", function(code, signal) {
+      expect( code ).toBe( 42 );
       helper.testComplete( true );
     })
     setTimeout( function() {
-      console.log( "sending message to child" );
-      child.send( { cheese: 'cheddar' } );
+      child.send( { exit: 42 } );
     }, 4000 );
   });
 
