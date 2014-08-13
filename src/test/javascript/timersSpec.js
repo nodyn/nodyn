@@ -11,11 +11,11 @@ describe("The timers module", function() {
     waitsFor(helper.testComplete, "the setTimeout test to complete", 3000);
     setTimeout(function() {
       x = x+1;
-    }, 1);
+    }, 10);
     setTimeout(function() {
       expect(x).toBe(1);
       helper.testComplete(true);
-    }, 100);
+    }, 1000);
   });
 
   it('should pass testSetTimeoutWaits', function() {
