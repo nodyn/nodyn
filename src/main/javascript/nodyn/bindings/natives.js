@@ -105,7 +105,8 @@ var source = {};
   'nodyn/bindings/spawn_sync',
   'nodyn/bindings/fs',
   'nodyn/bindings/fs_event_wrap',
-  'nodyn/bindings/stat_watcher'
+  'nodyn/bindings/stat_watcher',
+  'nodyn/bindings/udp_wrap'
 
 ].forEach( function(name) {
   source[name] = getSource(name);

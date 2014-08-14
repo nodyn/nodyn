@@ -9,16 +9,25 @@ describe('The dgram module', function() {
     expect(typeof dgram.Socket).toBe('function');
   });
 
-  it('should allow creation of datagram socket objects', function() {
+  it('should allow creation of datagram udp4 socket objects', function() {
     expect(typeof dgram.createSocket).toBe('function');
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(socket instanceof dgram.Socket).toBeTruthy();
+    socket.close();
   });
 
-  it('should pass testSocketBind', function() {
+  it('should allow creation of datagram udp6 socket objects', function() {
+    expect(typeof dgram.createSocket).toBe('function');
+    var socket = dgram.createSocket('udp6');
+    expect(socket !== null).toBeTruthy();
+    expect(socket instanceof dgram.Socket).toBeTruthy();
+    socket.close();
+  });
+
+  it('should bind a udp4 socket', function() {
     waitsFor(helper.testComplete, "the dgram bind test", 5000);
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.bind).toBe('function');
     socket.bind(54321, function() {
@@ -27,26 +36,26 @@ describe('The dgram module', function() {
     });
   });
 
-  it('should pass testSocketClose', function() {
+  it('should close a udp4 socket', function() {
     waitsFor(helper.testComplete, "the dgram socket close test", 5000);
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.close).toBe('function');
     socket.on('close', function() { helper.testComplete(true); });
     socket.close();
   });
 
-  it('should pass testSocketAddress', function() {
+  it('should have a socket with an address', function() {
     waitsFor(helper.testComplete, "the dgram socket address test", 5000);
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.address).toBe('function');
     socket.bind(54321, function() {
       var addr = socket.address();
       expect(addr !== undefined).toBeTruthy();
-      expect(typeof addr.address).toBe('string');
-      expect(typeof addr.family).toBe('string');
-      expect(typeof addr.port).toBe('number');
+      expect(addr.address).toBe('0.0.0.0');
+      expect(addr.family).toBe('IPv4');
+      expect(addr.port).toBe(54321);
       socket.on('close', function() { helper.testComplete(true); });
       socket.close();
     });
@@ -54,17 +63,17 @@ describe('The dgram module', function() {
 
   // only tests the existence of the functions and not their behavior
   it('should pass testConfigurationFunctions', function() {
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(typeof socket.setBroadcast).toBe('function');
     expect(typeof socket.setMulticastTTL).toBe('function');
     expect(typeof socket.setTTL).toBe('function');
     expect(typeof socket.setMulticastLoopback).toBe('function');
   });
 
-  xit('should pass testSendReceive', function() {
+  it('should send and receive packets', function() {
     waitsFor(helper.testComplete, "the dgram send / receive test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
     var buffer = new Buffer('turkey dinner');
 
     peer1.on('error', unexpectedError.bind(this));
@@ -72,20 +81,20 @@ describe('The dgram module', function() {
 
     peer2.on('message', function(msg, rinfo) {
       expect(buffer.toString()).toBe(msg.toString());
-      peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
+      peer1.on('close', function() { peer2.close(); });
       peer1.close();
     });
 
     peer2.bind(54321, function() {
-      peer1.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
+      peer1.send(buffer, 0, buffer.length, 54321, 'localhost');
     });
   });
 
-  xit('should pass testEcho', function() {
+  it('should echo packets', function() {
     waitsFor(helper.testComplete, "the dgram echo test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
     var buffer = new Buffer('turkey dinner');
 
     peer1.on('error', unexpectedError.bind(this));
@@ -105,15 +114,15 @@ describe('The dgram module', function() {
 
     peer2.bind(54321, function() {
       peer1.bind(54322, function() {
-        peer2.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
+        peer2.send(buffer, 0, buffer.length, 54321, 'localhost');
       });
     });
   });
 
-  xit('should pass testBroadcast', function() {
+  it('should allow setting the broadcast option on a socket', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
 
     peer1.setBroadcast(true);
     peer2.setBroadcast(true);
@@ -142,8 +151,8 @@ describe('The dgram module', function() {
     var groupAddress = '230.0.0.1';
     var received = false;
 
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
 
     peer1.on('error', unexpectedError.bind(this));
     peer2.on('error', unexpectedError.bind(this));
@@ -180,4 +189,4 @@ describe('The dgram module', function() {
   });
 });
 
-function unexpectedError(e) { print("ERROR: " + e); this.fail(e); }
+function unexpectedError(e) { console.error("ERROR: " + e); this.fail(e); }
