@@ -17,7 +17,6 @@
 var nodyn      = require('nodyn'),
     util       = require('util'),
     blocking   = require('nodyn/blocking'),
-    //posix      = Packages.jnr.posix.POSIXFactory.getPOSIX(new io.nodyn.posix.NodePosixHandler(), true),
     posix      = process._posix,
     Errno      = Packages.jnr.constants.platform.Errno,
     File       = Packages.java.io.File,
