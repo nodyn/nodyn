@@ -22,20 +22,20 @@ function Async(object) {
     this._asyncFlags = this._asyncFlags | 1;
   }
 
-  this._object.on( "makeCallbackByIndex", Async.prototype._makeCallbackByIndex.bind(this) );
+  this._object.on( "makeCallbackByIndex", _makeCallbackByIndex.bind(this) );
 }
 
 Async.prototype._hasAsyncListener = function() {
   return this._asyncFlags & 1;
-}
+};
 
-Async.prototype._makeCallbackByIndex = function(result) {
+function _makeCallbackByIndex(result) {
   var index = result.result;
   var callback = this[index];
-  this._makeCallback( callback );
+  _makeCallback.bind(this)( callback );
 }
 
-Async.prototype._makeCallback = function(callback) {
+function _makeCallback(callback) {
   if ( this._hasAsyncListener() ) {
     try {
       process._loadAsyncQueue( this );
@@ -44,7 +44,7 @@ Async.prototype._makeCallback = function(callback) {
     }
   }
 
-  var ret = undefined;
+  var ret;
 
   try {
     ret = callback.apply( this );
@@ -63,7 +63,7 @@ Async.prototype._makeCallback = function(callback) {
   if ( process._tickInfo.inTick ) {
     return ret;
   }
-  if ( process._tickInfo[1] == 0 ) {
+  if ( process._tickInfo[1] === 0 ) {
     process._tickInfo[0] = 0;
     return ret;
   }
