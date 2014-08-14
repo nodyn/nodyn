@@ -199,9 +199,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
   if (typeof callback === 'function') { // Async
     blocking.submit(function() {
       if ( position && position !== -1 ) {
-        bytes = Fs.pread(fd, buffer._nettyBuffer(), offset, length, position);
+        bytes = Fs.pread(posix, fd, buffer._nettyBuffer(), offset, length, position);
       } else {
-        bytes = Fs.read(fd, buffer._nettyBuffer(), offset, length);
+        bytes = Fs.read(posix, fd, buffer._nettyBuffer(), offset, length);
       }
       blocking.unblock(function() {
         callback(undefined, bytes, buffer);
@@ -209,9 +209,9 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
     }.bind(this));
   } else { // Sync
     if ( position && position !== -1 ) {
-      bytes = Fs.pread(fd, buffer._nettyBuffer(), offset, length, position);
+      bytes = Fs.pread(posix, fd, buffer._nettyBuffer(), offset, length, position);
     } else {
-      bytes = Fs.read(fd, buffer._nettyBuffer(), offset, length);
+      bytes = Fs.read(posix, fd, buffer._nettyBuffer(), offset, length);
     }
     if (bytes === -1) throw posixError(fd, 'read');
     return bytes;
