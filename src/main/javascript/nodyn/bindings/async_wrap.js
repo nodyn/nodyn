@@ -25,9 +25,9 @@ function Async(object) {
   this._object.on( "makeCallbackByIndex", _makeCallbackByIndex.bind(this) );
 }
 
-Async.prototype._hasAsyncListener = function() {
+function _hasAsyncListener() {
   return this._asyncFlags & 1;
-};
+}
 
 function _makeCallbackByIndex(result) {
   var index = result.result;
@@ -36,7 +36,7 @@ function _makeCallbackByIndex(result) {
 }
 
 function _makeCallback(callback) {
-  if ( this._hasAsyncListener() ) {
+  if ( _hasAsyncListener.bind(this)() ) {
     try {
       process._loadAsyncQueue( this );
     } catch (err) {
@@ -52,7 +52,7 @@ function _makeCallback(callback) {
     return;
   }
 
-  if ( this._hasAsyncListener() ) {
+  if ( _hasAsyncListener.bind(this)() ) {
     try {
       process._unloadAsyncQueue( this );
     } catch(err) {
