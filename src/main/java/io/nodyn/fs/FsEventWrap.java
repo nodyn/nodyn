@@ -6,6 +6,7 @@ import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.*;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -30,14 +31,22 @@ public class FsEventWrap extends HandleWrap {
             watchedDir = watchedFile.getParentFile();
         }
         thread = new Thread(new Worker());
-        thread.start();
+        Path toWatch = null;
+        try {
+            toWatch = Paths.get(watchedDir.getCanonicalPath());
+            watcher = toWatch.getFileSystem().newWatchService();
+            toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            thread.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void close() {
         try {
-            this.thread.join();
             this.watcher.close();
+            this.thread.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -47,11 +56,8 @@ public class FsEventWrap extends HandleWrap {
         @Override
         public void run() {
             try {
-                Path toWatch = Paths.get(watchedDir.getCanonicalPath());
-                watcher = toWatch.getFileSystem().newWatchService();
-                toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
                 WatchKey key = watcher.take();
-                while(key != null) {
+                while(key != null && key.isValid()) {
                     for (final WatchEvent event : key.pollEvents()) {
                         if (watchedFile == null || watchedFile.getName().equals(event.context().toString())) {
                             eventLoop.submit(new Runnable() {
@@ -66,7 +72,8 @@ public class FsEventWrap extends HandleWrap {
                     key = watcher.take();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                // If a thread is currently blocked in the take or poll methods waiting for a key to be queued then it immediately receives a ClosedWatchServiceException.
+                // Any valid keys associated with this watch service are invalidated.
             }
         }
     }
