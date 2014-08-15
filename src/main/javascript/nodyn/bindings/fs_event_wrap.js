@@ -16,18 +16,31 @@
 
 var fs = require('fs'),
     util = require('util'),
+    Path = require('path'),
     Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function FSEvent() {
   this._wrap = new io.nodyn.fs.FsEventWrap( process._process );
+  this[0] = _callback.bind(this);
   Handle.call( this, this._wrap );
 }
 util.inherits( FSEvent, Handle );
 
 FSEvent.prototype.start = function(path, persistent, recursive) {
-  fs.stat(path);  // throws ENOENT if not found
+  path = Path.resolve(path);
+  fs.statSync(path);  // throws ENOENT if not found
   this._wrap.start(path, persistent, recursive);
 };
+
+function _callback() {
+  if (typeof this.onchange === 'function') {
+    print(">>>>>>>>> executing callback with " + Array.prototype.splice(arguments).join(' '));
+    this.onchange(arguments);
+  }
+  else {
+      print(">>>>>>>>> curious");
+  }
+}
 
 module.exports.FSEvent = FSEvent;
 
