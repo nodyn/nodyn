@@ -1,18 +1,14 @@
 package io.nodyn.fs;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.util.concurrent.Future;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.*;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * @author Lance Ball
