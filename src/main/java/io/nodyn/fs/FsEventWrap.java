@@ -2,7 +2,6 @@ package io.nodyn.fs;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.ScheduledFuture;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
@@ -10,7 +9,6 @@ import io.nodyn.handle.HandleWrap;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -20,6 +18,8 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
  * @author Lance Ball
  */
 public class FsEventWrap extends HandleWrap {
+
+    private Thread thread;
 
     public FsEventWrap(NodeProcess process) {
         super(process, true);
@@ -33,24 +33,16 @@ public class FsEventWrap extends HandleWrap {
             watchedFile = watchedDir;
             watchedDir = watchedFile.getParentFile();
         }
-
-        try {
-            Path toWatch = Paths.get(watchedDir.getCanonicalPath());
-            myWatcher = toWatch.getFileSystem().newWatchService();
-            toWatch.register(myWatcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-            this.future = this.eventLoop.submit(new Worker());
-        } catch (IOException e) {
-            // TODO: Handle errors
-            e.printStackTrace();
-        }
+        thread = new Thread(new Worker());
+        thread.start();
     }
 
     @Override
     public void close() {
-        this.future.cancel( false );
         try {
-            myWatcher.close();
-        } catch (IOException e) {
+            this.thread.join();
+            this.watcher.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -59,25 +51,32 @@ public class FsEventWrap extends HandleWrap {
         @Override
         public void run() {
             try {
-                WatchKey key = myWatcher.take();
+                Path toWatch = Paths.get(watchedDir.getCanonicalPath());
+                watcher = toWatch.getFileSystem().newWatchService();
+                toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+                WatchKey key = watcher.take();
                 while(key != null) {
-                    for (WatchEvent event : key.pollEvents()) {
+                    for (final WatchEvent event : key.pollEvents()) {
                         if (watchedFile == null || watchedFile.getName().equals(event.context().toString())) {
-                            emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
+                            eventLoop.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
+                                }
+                            });
                         }
                     }
                     key.reset();
-                    key = myWatcher.take();
+                    key = watcher.take();
                 }
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
     private final EventLoopGroup eventLoop;
-    private Future<?> future;
-    private WatchService myWatcher;
+    private WatchService watcher;
     private File watchedDir;
     private File watchedFile;
 
