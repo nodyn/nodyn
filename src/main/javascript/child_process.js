@@ -477,6 +477,7 @@ function setupChannel(target, channel) {
     var err = channel.writeUtf8String(req, string, handle);
 
     if (err) {
+      console.log( err );
       if (!swallowErrors)
         this.emit('error', errnoException(err, 'write'));
     } else if (handle && !this._handleQueue) {

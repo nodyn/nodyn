@@ -8,6 +8,7 @@ describe( 'child_process', function() {
     helper.testComplete(false);
   });
 
+/*
   it('should be able to async spawn', function() {
     waitsFor(helper.testComplete, "child process to read", 5000 );
     var content = '';
@@ -63,5 +64,28 @@ describe( 'child_process', function() {
       child.send( { exit: 42 } );
     }, 4000 );
   });
+  */
+
+  it( 'should be able to send sockets to a child', function() {
+      waitsFor(helper.testComplete, "child process to be killed", 10000 );
+      var child = child_process.fork( './src/test/javascript/forked_socket_module.js' );
+      child.on( "exit", function(code, signal) {
+        console.log( 'exit.code: ' + code );
+        console.log( 'exit.signal: ' + signal );
+        expect( code ).toBe( 42 );
+        helper.testComplete( true );
+      })
+      setTimeout( function() {
+        console.log( "oepning connection" );
+        try {
+        var connection = require('net').connect( { host: 'google.com', port: 80 }, function(c) {
+          console.log( "connectino open" );
+          child.send( "connection", connection );
+        })
+        } catch (err) {
+          console.log( err );
+        }
+      }, 4000 );
+  })
 
 });

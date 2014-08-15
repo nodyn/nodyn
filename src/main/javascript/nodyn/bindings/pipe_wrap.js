@@ -53,4 +53,14 @@ Pipe.prototype.open = function(fd) {
   this._pipe.open(fd, true, true);
 };
 
+
+Pipe.prototype.writeUtf8String = function(req,data,handle) {
+  if ( ! handle ) {
+    return Stream.prototype.writeUtf8String.call(this,req,data);
+  }
+
+  console.log( "pip needs to write handle" );
+  console.log( handle );
+};
+
 module.exports.Pipe = Pipe;
