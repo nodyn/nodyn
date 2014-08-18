@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.nodyn.netty.EOFEventHandler;
@@ -29,7 +30,9 @@ import io.nodyn.netty.UnrefHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 
 /**
  * @author Bob McWhirter
@@ -41,6 +44,14 @@ public class TCPWrap extends StreamWrap {
 
     public TCPWrap(NodeProcess process) {
         super(process, false);
+    }
+
+    public TCPWrap(NodeProcess process, int fd) throws Exception {
+        super(process, false);
+        SocketChannel socketChannel = UnsafeTcp.attach(fd);
+        NioSocketChannel channel = new NioSocketChannel( socketChannel );
+        this.channelFuture = channel.newSucceededFuture();
+        process.getEventLoop().getEventLoopGroup().register( channel );
     }
 
     public TCPWrap(NodeProcess process, ChannelFuture channelFuture) {
@@ -119,6 +130,11 @@ public class TCPWrap extends StreamWrap {
 
     public SocketAddress getLocalAddress() {
         return this.channelFuture.channel().localAddress();
+    }
+
+    public int getFd() throws NoSuchFieldException, IllegalAccessException, IOException {
+        return UnsafeTcp.getFd((NioSocketChannel) this.channelFuture.channel());
+
     }
 
 }

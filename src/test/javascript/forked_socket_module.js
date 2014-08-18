@@ -1,8 +1,16 @@
 
 console.log( "*******" );
-process.on('connection', function(connection) {
+process.on('message', function(m, connection) {
+  console.log( "---> " );
+  console.log( "---> " );
+  console.log( "---> " );
+  console.log( "---> " );
   console.log( "---> " );
   console.log( connection );
+  console.log( "<--- " );
+  console.log( "<--- " );
+  console.log( "<--- " );
+  console.log( "<--- " );
   console.log( "<--- " );
   process.exit( 42 );
 });

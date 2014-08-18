@@ -320,6 +320,10 @@ function handleMessage(target, message, handle) {
       message.cmd.slice(0, INTERNAL_PREFIX.length) === INTERNAL_PREFIX) {
     eventName = 'internalMessage';
   }
+  console.log( "target: " + target );
+  console.log( "eventName: " + eventName );
+  console.log( "message: " + message );
+  console.log( "handle: " + handle );
   target.emit(eventName, message, handle);
 }
 

@@ -20,8 +20,10 @@ var util = require('util');
 var Stream = require('nodyn/bindings/stream_wrap').Stream;
 
 function TCP(tcp) {
-  if ( tcp ) {
+  if ( tcp instanceof io.nodyn.tcp.TCPWrap ) {
     this._tcp = tcp;
+  } else if ( typeof tcp == 'number' ) {
+    this._tcp = new io.nodyn.tcp.TCPWrap( process._process, tcp );
   } else {
     this._tcp = new io.nodyn.tcp.TCPWrap( process._process );
   }
@@ -36,6 +38,12 @@ function TCP(tcp) {
 }
 
 util.inherits(TCP, Stream);
+
+Object.defineProperty( TCP.prototype, '_fd', {
+  get: function() {
+    return this._tcp.fd;
+  }
+})
 
 // ----------------------------------------
 // Server

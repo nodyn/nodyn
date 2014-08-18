@@ -17,15 +17,62 @@
 "use strict";
 
 var util = require('util');
-var Stream = require('nodyn/bindings/stream_wrap').Stream;
+var Stream = process.binding('stream_wrap').Stream;
+var TCP = process.binding( 'tcp_wrap').TCP;
 
 function Pipe(ipc) {
   this._ipc = ipc;
-  this._pipe = new io.nodyn.pipe.PipeWrap( process._process );
+  this._pipe = new io.nodyn.pipe.PipeWrap( process._process, ipc );
+  if ( ipc ) {
+    this._pipe.on( 'dataWithHandle', Pipe.prototype._onDataWithHandle.bind(this) );
+  }
   Stream.call( this, this._pipe );
 }
 
 util.inherits(Pipe, Stream);
+
+Pipe.prototype._onDataWithHandle = function(result) {
+  System.err.println( "----------------- " + result );
+  var record = result.result;
+
+  var buffer = record.buffer;
+  var fd     = record.fd;
+
+  if ( fd == -1 ) {
+    fd = undefined;
+  }
+
+  var handle;
+
+  var b = process.binding('buffer').createBuffer( buffer );
+
+  console.log( "FD: " + fd );
+  if (fd) {
+    var msg = b.toString().trim();
+    console.log( "msg: " + msg );
+    try {
+    var json = JSON.parse( msg );
+    } catch (err) {
+      console.log( err );
+    }
+
+
+    //console.log( json );
+    console.log( "--A" );
+    if ( json.cmd == 'NODE_HANDLE' ) {
+      console.log( "--B" );
+      if ( json.type == 'net.Socket' ) {
+        console.log( "REHYDRATE net.Socket " );
+        System.err.println( java.lang.Thread.currentThread() );
+        handle = new TCP(fd);
+      }
+    }
+  }
+
+  var nread = buffer.readableBytes();
+  console.log( "SENDING onread HANDLE: " + handle );
+  this.onread( nread, b, handle );
+}
 
 Pipe.prototype.closeDownstream = function() {
   this._pipe.closeDownstream();
@@ -59,8 +106,8 @@ Pipe.prototype.writeUtf8String = function(req,data,handle) {
     return Stream.prototype.writeUtf8String.call(this,req,data);
   }
 
-  console.log( "pip needs to write handle" );
-  console.log( handle );
+  //System.err.println( "SEND: " + data + " // " + handle._fd );
+  this._pipe.writeUtf8String(data, handle._fd);
 };
 
 module.exports.Pipe = Pipe;
