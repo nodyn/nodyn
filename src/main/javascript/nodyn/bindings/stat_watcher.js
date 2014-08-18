@@ -18,42 +18,38 @@ var util = require('util'),
     Path = require('path'),
     Handle = require('nodyn/bindings/handle_wrap').Handle;
 
-function FSEvent() {
-  this._wrap = new io.nodyn.fs.FsEventWrap(process._process);
-  this._wrap.on('change', _callback.bind(this));
-  Handle.call( this, this._wrap );
+function StatWatcher() {
+  if (!(this instanceof StatWatcher)) return new StatWatcher();
+  this._delegate = new io.nodyn.fs.NodeStatWatcher(process._process);
+  this._delegate.on('change', _onchange.bind(this));
+  Handle.call( this, this._delegate );
 }
-util.inherits( FSEvent, Handle );
+util.inherits( StatWatcher, Handle );
 
-FSEvent.prototype.start = function(path, persistent, recursive) {
+StatWatcher.prototype.start = function(path, persistent, interval) {
   path = Path.resolve(path);
-  fs.statSync(path);  // throws ENOENT if not found
-  this._wrap.start(path, persistent, recursive);
+  this._stat = fs.statSync(path);
+  this._delegate.start(path, persistent, interval);
 };
 
-function _callback(result) {
+StatWatcher.prototype.stop = function() {
+  this._delegate.stop();
+  if (typeof this.onstop === 'function') {
+    this.onstop();
+  }
+};
+
+function _onchange(result) {
   if (typeof this.onchange === 'function') {
     if (result.error) {
-      // TODO: fs.js looks up the errno
-      this.onchange(-1);
       return;
     }
-    var event = result.result[0];
-    var name  = result.result[1];
-    switch(event) {
-      case 'ENTRY_MODIFY':
-        event = 'change';
-        break;
-      case 'ENTRY_CREATE':
-        event = 'create';
-        break;
-      case 'ENTRY_DELETE':
-        event = 'delete';
-        break;
-    }
-    this.onchange(0, event, name);
+    var stat = fs.statSync(result.result);
+    this.onchange(stat, this._stat, -1);
+    this._stat = stat;
   }
 }
 
-module.exports.FSEvent = FSEvent;
+module.exports.StatWatcher = StatWatcher;
+
 

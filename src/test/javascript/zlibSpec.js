@@ -8,7 +8,7 @@ describe('The zlib module', function() {
   });
 
   it('should deflate and inflate a string', function() {
-    waitsFor(helper.testComplete, "the test to complete", 5000);
+    waitsFor(helper.testComplete, "the test to complete", 8000);
     var str = 'Now is the winter of our discontent made glorious summer by this Son of York';
     var encoded = 'eJwVy7sNgDAQBNFWtiISIkLABk5gr3QfWXTPkY7mTRwQg18VQ7pXBQ8wFEVsZ4buaGupOB+qMAwWreW2vYlSzuw/Waj3BzTBG/I=';
     zlib.deflate(str, function(e,b) {
@@ -24,7 +24,7 @@ describe('The zlib module', function() {
   });
 
   it('should gzip and gunzip a string', function() {
-    waitsFor(helper.testComplete, "the test to complete", 5000);
+    waitsFor(helper.testComplete, "the test to complete", 8000);
     var str = 'Now is the winter of our discontent made glorious summer by this Son of York';
     var encoded = 'H4sIAAAAAAAAAxXLuw2AMBAE0Va2IhIiQsAGTmCvdB9ZdM+RjuZNHBCDXxVDulcFDzAURWxnhu5oa6k4H6owDBat5ba9iVLO7D9ZqPcHFHvOTEwAAAA=';
     zlib.gzip(str, function(e,b) {

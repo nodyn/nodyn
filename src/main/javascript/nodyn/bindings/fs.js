@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-var nodyn      = require('nodyn'),
-    util       = require('util'),
-    blocking   = require('nodyn/blocking'),
-    posix      = process._posix,
-    Errno      = Packages.jnr.constants.platform.Errno,
-    File       = Packages.java.io.File,
-    Fs         = Packages.io.nodyn.fs.Fs,
-    binding    = module.exports,
-    statsCtor  = null;
+var nodyn       = require('nodyn'),
+    util        = require('util'),
+    blocking    = require('nodyn/blocking'),
+    StatWatcher = process.binding('stat_watcher').StatWatcher,
+    posix       = process._posix,
+    Errno       = Packages.jnr.constants.platform.Errno,
+    File        = Packages.java.io.File,
+    Fs          = Packages.io.nodyn.fs.Fs,
+    binding     = module.exports,
+    statsCtor   = null;
 
 // Executes work asynchronously if async is provided and is a function -
 // otherwise, just executes the work and returns the result. If executing
@@ -79,6 +80,8 @@ function buildStat(path, statf) {
   } else err = posixError(path, 'stat');
   return {err:err, result:stats};
 }
+
+binding.StatWatcher = StatWatcher;
 
 binding.stat = function(path, callback) {
   function work() {
@@ -316,6 +319,7 @@ binding.fdatasync = function(fd) {
     return {err:nodyn.notImplemented('fdatasync')()};
   });
 };
+
 
 function posixError(path, syscall) {
   var errno = posix.errno(),
