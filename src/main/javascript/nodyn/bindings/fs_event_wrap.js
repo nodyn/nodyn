@@ -15,7 +15,6 @@
  */
 
 var util = require('util'),
-    Path = require('path'),
     Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function FSEvent() {
@@ -26,7 +25,7 @@ function FSEvent() {
 util.inherits( FSEvent, Handle );
 
 FSEvent.prototype.start = function(path, persistent, recursive) {
-  path = Path.resolve(path);
+  path = require('path').resolve(path);
   fs.statSync(path);  // throws ENOENT if not found
   this._wrap.start(path, persistent, recursive);
 };

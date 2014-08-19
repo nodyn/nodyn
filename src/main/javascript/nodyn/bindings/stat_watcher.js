@@ -15,7 +15,6 @@
  */
 
 var util = require('util'),
-    Path = require('path'),
     Handle = require('nodyn/bindings/handle_wrap').Handle;
 
 function StatWatcher() {
@@ -27,7 +26,7 @@ function StatWatcher() {
 util.inherits( StatWatcher, Handle );
 
 StatWatcher.prototype.start = function(path, persistent, interval) {
-  path = Path.resolve(path);
+  path = require('path').resolve(path);
   this._stat = fs.statSync(path);
   this._delegate.start(path, persistent, interval);
 };
