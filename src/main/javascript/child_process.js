@@ -320,10 +320,6 @@ function handleMessage(target, message, handle) {
       message.cmd.slice(0, INTERNAL_PREFIX.length) === INTERNAL_PREFIX) {
     eventName = 'internalMessage';
   }
-  console.log( "target: " + target );
-  console.log( "eventName: " + eventName );
-  console.log( "message: " + message );
-  console.log( "handle: " + handle );
   target.emit(eventName, message, handle);
 }
 
@@ -481,7 +477,6 @@ function setupChannel(target, channel) {
     var err = channel.writeUtf8String(req, string, handle);
 
     if (err) {
-      console.log( err );
       if (!swallowErrors)
         this.emit('error', errnoException(err, 'write'));
     } else if (handle && !this._handleQueue) {

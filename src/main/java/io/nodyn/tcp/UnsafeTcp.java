@@ -99,11 +99,8 @@ public class UnsafeTcp {
 
     public static SocketChannel attach(int fd) throws Exception {
         Class<?> cls = UnsafeTcp.class.getClassLoader().loadClass("sun.nio.ch.SocketChannelImpl");
-        System.err.println( "class: " + cls );
 
         Constructor<?> ctor = cls.getDeclaredConstructor(SelectorProvider.class, FileDescriptor.class, boolean.class);
-
-        System.err.println( "ctor: " + ctor );
 
         SelectorProvider provider = SelectorProvider.provider();
         FileDescriptor fileDesc = UnsafeFs.createFileDescriptor( fd );

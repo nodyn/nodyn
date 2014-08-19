@@ -75,22 +75,14 @@ describe( 'child_process', function() {
         System.err.println( err.message );
       }
       child.on( "exit", function(code, signal) {
-        console.log( 'exit.code: ' + code );
-        console.log( 'exit.signal: ' + signal );
         expect( code ).toBe( 42 );
         connection.destroy();
         helper.testComplete( true );
       })
       setTimeout( function() {
-        console.log( "oepning connection" );
-        try {
         connection = require('net').connect( { host: 'google.com', port: 80 }, function(c) {
-          console.log( "connectino open" );
           child.send( "connection", connection );
         })
-        } catch (err) {
-          console.log( err );
-        }
       }, 4000 );
   })
 

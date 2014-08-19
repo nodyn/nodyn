@@ -32,7 +32,6 @@ function Pipe(ipc) {
 util.inherits(Pipe, Stream);
 
 Pipe.prototype._onDataWithHandle = function(result) {
-  System.err.println( "----------------- " + result );
   var record = result.result;
 
   var buffer = record.buffer;
@@ -46,31 +45,17 @@ Pipe.prototype._onDataWithHandle = function(result) {
 
   var b = process.binding('buffer').createBuffer( buffer );
 
-  console.log( "FD: " + fd );
   if (fd) {
     var msg = b.toString().trim();
-    console.log( "msg: " + msg );
-    try {
     var json = JSON.parse( msg );
-    } catch (err) {
-      console.log( err );
-    }
-
-
-    //console.log( json );
-    console.log( "--A" );
     if ( json.cmd == 'NODE_HANDLE' ) {
-      console.log( "--B" );
       if ( json.type == 'net.Socket' ) {
-        console.log( "REHYDRATE net.Socket " );
-        System.err.println( java.lang.Thread.currentThread() );
         handle = new TCP(fd);
       }
     }
   }
 
   var nread = buffer.readableBytes();
-  console.log( "SENDING onread HANDLE: " + handle );
   this.onread( nread, b, handle );
 }
 
