@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
@@ -31,7 +32,10 @@ public class UnsafeTcp {
 
         int getInt() throws IllegalAccessException {
             return this.field.getInt( this.object );
+        }
 
+        void setInt(int value) throws IllegalAccessException {
+            this.field.setInt( this.object, value );
         }
 
         Object object;
@@ -100,13 +104,15 @@ public class UnsafeTcp {
     public static SocketChannel attach(int fd) throws Exception {
         Class<?> cls = UnsafeTcp.class.getClassLoader().loadClass("sun.nio.ch.SocketChannelImpl");
 
-        Constructor<?> ctor = cls.getDeclaredConstructor(SelectorProvider.class, FileDescriptor.class, boolean.class);
+        Constructor<?> ctor = cls.getDeclaredConstructor(SelectorProvider.class, FileDescriptor.class, InetSocketAddress.class);
 
         SelectorProvider provider = SelectorProvider.provider();
         FileDescriptor fileDesc = UnsafeFs.createFileDescriptor( fd );
 
         ctor.setAccessible(true);
-        return (SocketChannel) ctor.newInstance( provider, fileDesc, true );
+        SocketChannel socketChannel = (SocketChannel) ctor.newInstance(provider, fileDesc, null);
+
+        return socketChannel;
     }
 
     private static void dump(Object o) throws IllegalAccessException {

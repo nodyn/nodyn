@@ -25,6 +25,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.nodyn.netty.DebugHandler;
 import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.UnrefHandler;
 import io.nodyn.NodeProcess;
@@ -49,9 +50,12 @@ public class TCPWrap extends StreamWrap {
     public TCPWrap(NodeProcess process, int fd) throws Exception {
         super(process, false);
         SocketChannel socketChannel = UnsafeTcp.attach(fd);
-        NioSocketChannel channel = new NioSocketChannel( socketChannel );
+        NioSocketChannel channel = new NioSocketChannel(socketChannel);
         this.channelFuture = channel.newSucceededFuture();
-        process.getEventLoop().getEventLoopGroup().register( channel );
+        channel.pipeline().addLast("emit.afterConnect", new AfterConnectEventHandler(this.process, TCPWrap.this));
+        channel.pipeline().addLast("emit.eof", new EOFEventHandler(this.process, TCPWrap.this));
+        channel.pipeline().addLast("handle", new UnrefHandler(this));
+        process.getEventLoop().getEventLoopGroup().register(channel);
     }
 
     public TCPWrap(NodeProcess process, ChannelFuture channelFuture) {

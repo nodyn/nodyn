@@ -1,6 +1,17 @@
+var net = require('net');
 
 process.on('message', function(m, connection) {
-  process.exit( 42 );
+  var result = '';
+  connection.write( "GET / HTTP/1.1\r\nConnection: close\r\n\r\n");
+  connection.on( 'data', function(data) {
+    result += data.toString();
+  });
+  connection.on( 'end', function() {
+    if ( result.indexOf( 'Set-Cookie') >= 0 ) {
+      process.exit( 42 );
+    }
+    process.exit( -1 );
+  });
 });
 
 function idle() {
