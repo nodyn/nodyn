@@ -51,13 +51,13 @@ describe('The net module', function() {
               expect(recv.length).toBe(chars_recved);
               client.resume();
 
-            }, 500);
+            }, 1000);
 
-          }, 500);
+          }, 1000);
 
-        }, 500);
+        }, 1000);
 
-      }, 500);
+      }, 1000);
 
       client.on('end', function() {
         server.close();
