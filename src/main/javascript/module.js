@@ -495,6 +495,9 @@ Module._extensions['.json'] = function(module, filename) {
 //Native extension for .node
 Module._extensions['.node'] = process.dlopen;
 
+//Native extension for .jar
+Module._extensions['.jar'] = process.jaropen;
+
 
 // bootstrap main module.
 Module.runMain = function() {
