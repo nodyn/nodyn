@@ -10,14 +10,16 @@ describe('The net module', function() {
     var recv = '', chars_recved = 0;
 
     var server = net.createServer(function(connection) {
+      console.log( "server got connection" );
       function write(j) {
+        console.log( "write(" + j + ")" );
         if (j >= N) {
           connection.end();
           return;
         }
+        console.log( "server writing a C to connection" );
+        connection.write('C');
         setTimeout(function() {
-          console.log( "server writing a C to connection" );
-          connection.write('C');
           write(j + 1);
         }, 10);
       }
