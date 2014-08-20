@@ -35,6 +35,7 @@ describe('The net module', function() {
       setTimeout(function() {
         client.pause();
         chars_recved = recv.length;
+        console.log( "pause client at: " + chars_recved );
         expect(chars_recved).toBeGreaterThan(1);
         setTimeout(function() {
           expect(recv.length).toBe(chars_recved);
