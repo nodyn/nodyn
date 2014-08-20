@@ -10,7 +10,6 @@ describe('The net module', function() {
     var recv = '', chars_recved = 0;
 
     var server = net.createServer(function(connection) {
-      console.log( "server got connection" );
       function write(j) {
         console.log( "write(" + j + ")" );
         if (j >= N) {
@@ -30,14 +29,12 @@ describe('The net module', function() {
       var client = net.createConnection(8800);
       client.setEncoding('ascii');
       client.on('data', function(d) {
-        console.log( "client got: " + d.toString() );
         recv += d;
       });
 
       setTimeout(function() {
         client.pause();
         chars_recved = recv.length;
-        console.log( "pause client at: " + chars_recved );
         expect(chars_recved).toBeGreaterThan(1);
         setTimeout(function() {
           expect(recv.length).toBe(chars_recved);
