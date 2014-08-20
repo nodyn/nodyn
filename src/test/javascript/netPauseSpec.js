@@ -16,6 +16,7 @@ describe('The net module', function() {
           return;
         }
         setTimeout(function() {
+          console.log( "server writing a C to connection" );
           connection.write('C');
           write(j + 1);
         }, 10);
@@ -27,6 +28,7 @@ describe('The net module', function() {
       var client = net.createConnection(8800);
       client.setEncoding('ascii');
       client.on('data', function(d) {
+        console.log( "client got: " + d.toString() );
         recv += d;
       });
 
