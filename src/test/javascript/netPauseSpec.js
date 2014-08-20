@@ -11,12 +11,10 @@ describe('The net module', function() {
 
     var server = net.createServer(function(connection) {
       function write(j) {
-        console.log( "write(" + j + ")" );
         if (j >= N) {
           connection.end();
           return;
         }
-        console.log( "server writing a C to connection" );
         connection.write('C');
         setTimeout(function() {
           write(j + 1);
