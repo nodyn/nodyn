@@ -60,12 +60,12 @@ describe("The timers module", function() {
     waitsFor(helper.testComplete, "the setInterval test to complete", 3000);
     var id = setInterval(function() {
       x = x+1;
-    }, 10);
+    }, 100);
     setTimeout(function() {
       expect(x).toBeGreaterThan(1);
       clearInterval(id);
       helper.testComplete(true);
-    }, 150);
+    }, 1000 );
   });
 
   it('should pass testClearInterval', function() {
