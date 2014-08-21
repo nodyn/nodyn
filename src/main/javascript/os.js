@@ -24,7 +24,7 @@ var util = require('util');
 
 exports.cpus = function() {
   var cores = [];
-  var num = Runtime.getRuntime().availableProcessors();
+  var num = java.lang.Runtime.getRuntime().availableProcessors();
   for (var i = 0; i < num; i++) {
     var details = {
       model: "unknown",

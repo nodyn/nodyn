@@ -15,8 +15,6 @@
  */
 
 var nodyn = require('nodyn'),
-    Errno = Packages.jnr.constants.platform.Errno,
-    OpenFlags = Packages.jnr.constants.platform.OpenFlags,
     FileStat = Packages.jnr.posix.FileStat,
     ConstantSet = Packages.jnr.constants.ConstantSet;
 
