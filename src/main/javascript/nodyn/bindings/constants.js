@@ -17,7 +17,8 @@
 var nodyn = require('nodyn'),
     Errno = Packages.jnr.constants.platform.Errno,
     OpenFlags = Packages.jnr.constants.platform.OpenFlags,
-    FileStat = Packages.jnr.posix.FileStat;
+    FileStat = Packages.jnr.posix.FileStat,
+    ConstantSet = Packages.jnr.constants.ConstantSet;
 
 module.exports.S_IFIFO = FileStat.S_IFIFO;  // named pipe (fifo)
 module.exports.S_IFCHR = FileStat.S_IFCHR;  // character special
@@ -72,5 +73,14 @@ module.exports.SIGINFO      = 29;
 module.exports.SIGUSR1      = 30;
 module.exports.SIGUSR2      = 31;
 
-nodyn.exportEnums(module.exports, Errno.values());
-nodyn.exportEnums(module.exports, OpenFlags.values());
+jnrConstants('OpenFlags');
+jnrConstants('Errno');
+
+function jnrConstants(name) {
+  var constants = ConstantSet.getConstantSet(name);
+  var iter = constants.iterator();
+  while (iter.hasNext()) {
+    var e = iter.next();
+    module.exports[e.name()] = constants.getValue(e.name());
+  }
+}
