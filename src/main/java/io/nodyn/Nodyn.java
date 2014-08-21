@@ -26,6 +26,7 @@ import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
+import org.vertx.java.core.impl.VertxInternal;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -46,13 +47,30 @@ public class Nodyn extends DynJS {
     private ExitHandler exitHandler;
 
     private boolean started;
+    private CompletionHandler completionHandler;
+
+    public Nodyn(final NodynConfig config) {
+        this((Nodyn) null, config);
+    }
+
+    public Nodyn(Vertx vertx, NodynConfig config) {
+        super( config );
+        this.config = config;
+
+        this.vertx = vertx;
+
+        GlobalObject globalObject = getGlobalObject();
+        globalObject.defineGlobalProperty("__vertx", vertx, false);
+        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+        globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
+        globalObject.defineGlobalProperty("__nodyn", this, false);
+
+        EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
+        this.managedLoop = new RootManagedEventLoopGroup(elg, false);
+    }
 
     public Nodyn(Nodyn parent) {
         this(parent, parent.config);
-    }
-
-    public Nodyn(final NodynConfig config) {
-        this(null, config);
     }
 
     public Nodyn(final Nodyn parent, NodynConfig config) {
@@ -116,39 +134,57 @@ public class Nodyn extends DynJS {
     }
 
     public int run() throws Throwable {
+        start();
+        return await();
+    }
 
+    public void start() {
+        start( null );
+    }
+
+    public void start(final Runnable callback) {
         final RefHandle handle = this.managedLoop.newHandle();
         EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
 
-        final CompletionHandler completionHandler = new CompletionHandler();
+        this.completionHandler = new CompletionHandler();
 
         elg.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    completionHandler.process = initialize();
+                    Nodyn.this.completionHandler.process = initialize();
                 } catch (Throwable t) {
-                    completionHandler.error = t;
+                    Nodyn.this.completionHandler.error = t;
                 } finally {
                     handle.unref();
+                    if ( callback != null ) {
+                        callback.run();
+                    }
                 }
             }
         });
+    }
 
+    public void shutdown() {
+        this.managedLoop.shutdown();
+    }
+
+    public int await() throws Throwable {
         if (this.managedLoop instanceof RootManagedEventLoopGroup) {
             ((RootManagedEventLoopGroup) this.managedLoop).await();
         }
 
-        if (completionHandler.error != null ) {
+        if (this.completionHandler.error != null) {
             throw completionHandler.error;
         }
 
-        if (completionHandler.process == null ) {
+        if (this.completionHandler.process == null) {
             return -255;
         }
 
-        return completionHandler.process.getExitCode();
+        return this.completionHandler.process.getExitCode();
     }
+
 
     public NodeProcess initialize() {
         NodeProcess javaProcess = new NodeProcess(Nodyn.this);

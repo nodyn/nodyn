@@ -28,9 +28,15 @@ public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
 
     private CountDownLatch latch = new CountDownLatch(1);
     private EventLoopGroup eventLoopGroup;
+    private final boolean controlLifecycle;
 
     public RootManagedEventLoopGroup(EventLoopGroup eventLoopGroup) {
+        this( eventLoopGroup, true );
+    }
+
+    public RootManagedEventLoopGroup(EventLoopGroup eventLoopGroup, boolean controlLifecycle) {
         this.eventLoopGroup = eventLoopGroup;
+        this.controlLifecycle = controlLifecycle;
 
         final CountDownLatch latch = new CountDownLatch(1);
 
@@ -60,10 +66,10 @@ public class RootManagedEventLoopGroup extends AbstractManagedEventLoopGroup {
     protected void doShutdown() {
         super.doShutdown();
         if (this.eventLoopGroup != null) {
-            //System.err.println( "*** SHUTDOWN" );
-            //new Exception().printStackTrace();
-            this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
-            this.eventLoopGroup = null;
+            if ( this.controlLifecycle ) {
+                this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
+                this.eventLoopGroup = null;
+            }
             this.latch.countDown();
         }
     }
