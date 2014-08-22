@@ -107,6 +107,8 @@ public class HTTPParser extends EventSource {
     public static final int REQUEST = 1;
     public static final int RESPONSE = 2;
 
+    private boolean shouldReinitialize;
+
     private int type;
     private State state;
     private Error error;
@@ -176,6 +178,7 @@ public class HTTPParser extends EventSource {
         this.statusMessage = "";
 
         this.upgrade = false;
+        this.shouldReinitialize = false;
     }
 
     public Integer getMethod() {
@@ -226,7 +229,6 @@ public class HTTPParser extends EventSource {
     }
 
     public void setError(Error error) {
-        //System.err.println("!! " + error);
         this.error = error;
     }
 
@@ -359,6 +361,11 @@ public class HTTPParser extends EventSource {
 
         int endingLength = this.buf.readableBytes();
         int numRead = startingLength - endingLength;
+
+        if ( this.shouldReinitialize ) {
+            reinitialize( this.type );
+        }
+
         return numRead;
     }
 
@@ -388,7 +395,6 @@ public class HTTPParser extends EventSource {
         int len = (cr + 2) - readerIndex();
 
         ByteBuf line = buf.readSlice(len);
-        //System.err.println( line.toString( UTF8 ) );
         return line;
     }
 
@@ -663,12 +669,17 @@ public class HTTPParser extends EventSource {
 
     public void finish() {
         if ( this.type == RESPONSE && this.statusCode == 100 ) {
-            reinitialize( RESPONSE );
+            reinitialize(RESPONSE);
+            return;
         }
+
         if ( this.skipBody ) {
             return;
         }
+
         emit("messageComplete", CallbackResult.EMPTY_SUCCESS);
+        this.shouldReinitialize = true;
+
     }
 
 }
