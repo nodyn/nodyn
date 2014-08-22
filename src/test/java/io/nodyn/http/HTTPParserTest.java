@@ -16,6 +16,7 @@ public class HTTPParserTest {
 
     public static Charset UTF8 = Charset.forName("utf8");
 
+
     @Test
     public void testReadLineNoEOL() {
         HTTPParser parser = new HTTPParser();
@@ -120,7 +121,7 @@ public class HTTPParserTest {
         HTTPParser parser = new HTTPParser();
         parser.addBuffer(buffer("HTTP/1.1 99 OK\r\n"));
         assertFalse(parser.readStatusLine());
-        assertEquals( HTTPParser.Error.INVALID_STATUS, parser.getError() );
+        assertEquals(HTTPParser.Error.INVALID_STATUS, parser.getError());
     }
 
     @Test
@@ -128,22 +129,38 @@ public class HTTPParserTest {
         HTTPParser parser = new HTTPParser();
         parser.addBuffer(buffer("foo=bar\r\n"));
         assertEquals(-1, parser.readHeaders());
-        assertEquals( HTTPParser.Error.INVALID_HEADER_TOKEN, parser.getError() );
+        assertEquals(HTTPParser.Error.INVALID_HEADER_TOKEN, parser.getError());
     }
 
     @Test
     public void readHeadersNotComplete() {
         HTTPParser parser = new HTTPParser();
-        parser.addBuffer( buffer( "foo: bar\r\n" ) );
-        assertEquals( 1, parser.readHeaders() );
+        parser.addBuffer(buffer("foo: bar\r\n"));
+        assertEquals(1, parser.readHeaders());
     }
 
     @Test
     public void readHeadersComplete() {
         HTTPParser parser = new HTTPParser();
-        parser.addBuffer( buffer( "foo: bar\r\n\r\n" ) );
+        parser.addBuffer(buffer("foo: bar\r\n\r\n"));
         assertEquals(0, parser.readHeaders());
 
+    }
+
+    @Test
+    public void readMultilineHeaders() {
+        HTTPParser parser = new HTTPParser();
+        parser.addBuffer(buffer("foo: bar\r\n  baz\r\n"));
+        parser.addBuffer(buffer("taco: cheese\r\n\r\n"));
+        assertEquals(0, parser.readHeaders());
+        String[] headers = parser.getHeaders();
+
+        assertEquals(4, headers.length);
+
+        assertEquals( "foo", headers[0] );
+        assertEquals( "bar baz", headers[1] );
+        assertEquals( "taco", headers[2] );
+        assertEquals( "cheese", headers[3] );
     }
 
     @Test
@@ -151,15 +168,15 @@ public class HTTPParserTest {
         HTTPParser parser = new HTTPParser();
         parser.addBuffer(buffer("foo: bar\r\n"));
         assertEquals(1, parser.readHeaders());
-        parser.addBuffer(buffer( "baz:" ) );
-        assertEquals(1, parser.readHeaders() );
-        parser.addBuffer(buffer( "taco\r\n\r\n" ) );
-        assertEquals( 0, parser.readHeaders() );
+        parser.addBuffer(buffer("baz:"));
+        assertEquals(1, parser.readHeaders());
+        parser.addBuffer(buffer("taco\r\n\r\n"));
+        assertEquals(0, parser.readHeaders());
 
-        assertEquals( "foo", parser.getHeaders()[0] );
-        assertEquals( "bar", parser.getHeaders()[1] );
-        assertEquals( "baz", parser.getHeaders()[2] );
-        assertEquals( "taco", parser.getHeaders()[3] );
+        assertEquals("foo", parser.getHeaders()[0]);
+        assertEquals("bar", parser.getHeaders()[1]);
+        assertEquals("baz", parser.getHeaders()[2]);
+        assertEquals("taco", parser.getHeaders()[3]);
     }
 
 

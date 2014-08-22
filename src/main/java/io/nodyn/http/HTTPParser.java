@@ -91,6 +91,7 @@ public class HTTPParser extends EventSource {
     }
 
     private static final Charset UTF8 = Charset.forName("utf8");
+    private static final Charset ASCII = Charset.forName("us-ascii");
 
     private static enum State {
         REQUEST,
@@ -574,6 +575,18 @@ public class HTTPParser extends EventSource {
         int colonLoc = line.indexOf(line.readerIndex(), line.readerIndex() + line.readableBytes(), (byte) ':');
 
         if (colonLoc < 0) {
+            // maybe it's a continued header
+            if ( line.readableBytes() > 1 ) {
+                char c = (char) line.getByte(0);
+                if ( c == ' ' || c == '\t' ) {
+                    // it IS a continued header value
+                    int lastIndex = this.headers.size() - 1;
+                    String val = this.headers.get( lastIndex );
+                    val = val + " " + line.toString( ASCII ).trim();
+                    this.headers.set( lastIndex, val );
+                    return true;
+                }
+            }
             return false;
         }
 
