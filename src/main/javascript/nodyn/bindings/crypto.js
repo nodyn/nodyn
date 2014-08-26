@@ -56,3 +56,21 @@ Hmac.prototype.update = update;
 Hmac.prototype.digest = digest;
 
 module.exports.Hmac = Hmac;
+
+function CipherBase(encipher){
+  this._encipher = encipher;
+}
+
+CipherBase.prototype.init = function(cipher, password) {
+  this._delegate = new io.nodyn.crypto.Cipher( this._encipher, cipher, password._nettyBuffer() );
+}
+
+
+CipherBase.prototype.update = update;
+
+CipherBase.prototype.final = function() {
+  return process.binding('buffer').createBuffer( this._delegate.doFinal() );
+}
+
+module.exports.CipherBase = CipherBase;
+

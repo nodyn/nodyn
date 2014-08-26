@@ -1,7 +1,7 @@
 var helper = require('./specHelper');
 var crypto = require('crypto');
 
-xdescribe("crypto Cipher & Decipher module", function() {
+describe("crypto Cipher & Decipher module", function() {
 
   it( "should produce the same bytes as node.js for DES", function() {
     var cipher = crypto.createCipher( 'des', 'tacos' );
@@ -22,9 +22,10 @@ xdescribe("crypto Cipher & Decipher module", function() {
     decipher.write( f );
     f = decipher.final();
     expect( f.toString() ).toBe( 'bob' );
+
   });
 
-  it ("should produce the same bytes as node.js for DES and iv", function() {
+  xit ("should produce the same bytes as node.js for DES and iv", function() {
     var cipher = crypto.createCipheriv( 'des', 'tacotaco', 'dogsdogs' );
     cipher.write("howdy");
     var f = cipher.final();
@@ -39,7 +40,7 @@ xdescribe("crypto Cipher & Decipher module", function() {
     expect( f[7] ).toBe( 0x41 );
   })
 
-  it( "should produce the same bytes as node.js for AES-128-CBC", function() {
+  xit( "should produce the same bytes as node.js for AES-128-CBC", function() {
     var cipher = crypto.createCipher( 'aes-128-cbc', 'tacos' );
     cipher.write( "bob" );
     var f = cipher.final();
@@ -69,7 +70,7 @@ xdescribe("crypto Cipher & Decipher module", function() {
     expect( f.toString() ).toBe( 'bob' );
   });
 
-  it( "should enumerate supported cipher types", function() {
+  xit( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();
 
     expect( types ).toContain( "des" );
