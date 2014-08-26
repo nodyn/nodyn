@@ -1,182 +1,90 @@
-var Family = io.nodyn.udp.UDPWrap.Family;
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-function onRecv(nread, buffer, remoteAddress, remotePort) {
+var Handle = require('nodyn/bindings/handle_wrap').Handle,
+    Buffer = require('nodyn/bindings/buffer'),
+    Family = io.nodyn.udp.Family,
+    util   = require('util');
+
+function onRecv(result) { // [nread, buffer, remoteAddress, remotePort]
   if (typeof this.onmessage === 'function') {
+    if (result.error) throw Error(result.error); // TODO: throw here?
+    result = result.result();
     var rinfo = {
-      address: remoteAddress,
-      port: remotePort
+      address: result[2],
+      port: result[3]
     };
-    this.onmessage(nread, this, buffer, rinfo);
+    this.onmessage(result[0], this, Buffer.createBuffer(result[1]), rinfo);
   }
 }
 
 var UDP = function() {
-  if (!(this instanceof UDP)) return new UDP;
-
-  this._udp = new io.nodyn.udp.UDPWrap( process._process );
-  this._udp.on('recv', onRecv.bind(this));
-}
+  if (!(this instanceof UDP)) return new UDP();
+  Handle.call(this, new io.nodyn.udp.UDPWrap(process._process));
+};
+util.inherits(UDP, Handle);
 module.exports.UDP = UDP;
 
 UDP.prototype.bind = function(ip, port, flags) {
-  this._udp.bind(ip, port, flags, Family.IPv4);
-  // TODO: This should return an error if there is one
+  return this._handle.bind(ip, port, flags, Family.IPv4);
 };
 
 UDP.prototype.bind6 = function(ip, port, flags) {
-  this._udp.bind(ip, port, flags, Family.IPv6);
-  // TODO: This should return an error if there is one
-}
-
-UDP.prototype.close = function() {
-  this._udp.close();
+  return this._handle.bind(ip, port, flags, Family.IPv6);
 };
 
 UDP.prototype.recvStart = function() {
-  this._udp.recvStart();
-}
-
-UDP.prototype.ref = function() {
-  this._udp.ref();
-};
-
-UDP.prototype.unref = function() {
-  this._udp.unref();
+  this._handle.on('recv', onRecv.bind(this));
+  this._handle.recvStart();
 };
 
 UDP.prototype.send = function(req, buffer, offset, length, port, address) {
-  this._udp.send(Family.IPv4);
+  // TODO: Do we ignore req? It's just a JS object with two properties
+  // 'buffer' and 'length', but we're already getting the buffer itself
+  this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv4);
 };
 
 UDP.prototype.send6 = function(req, buffer, offset, length, port, address) {
-  this._udp.send(Family.IPv6);
+  // TODO: Do we ignore req? It's just a JS object with two properties
+  // 'buffer' and 'length', but we're already getting the buffer itself
+  this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv6);
 };
 
-UDP.prototype.recvStop = function() {};
-UDP.prototype.getsockname = function() {};
-UDP.prototype.addMembership = function() {};
-UDP.prototype.dropMembership = function() {};
-UDP.prototype.setMulticastTTL = function() {};
-UDP.prototype.setMulticastLoopback = function() {};
-UDP.prototype.setBroadcast = function() {};
-UDP.prototype.setTTL = function() {};
-
-/**
-var Socket = function(type, callback) {
-  var family = Datagram.InternetProtocolFamily.IPv4;
-  if (type === 'udp6') { family = Datagram.InternetProtocolFamily.IPv6; }
-
-  this._delegate = process.context.createDatagramSocket(family);
-
-  this._delegate.exceptionHandler(
-    function(err) {
-      this.emit('error', new Error(err));
-    }.bind(this));
-
-  // if a callback is provided, set it up as the message listener
-  if (typeof callback === 'function') { this.on('message', callback); }
-};
-util.inherits(Socket, EventEmitter);
-
-Socket.prototype.bind = function(port, host, callback) {
-  switch(typeof host) {
-    case 'function':
-      callback = host;
-      host = '0.0.0.0';
-      break;
-    case 'undefined':
-      host = '0.0.0.0';
-      break;
-  }
-  if (callback) {
-    this.on('listening', callback);
-  }
-  var mcastIface = java.net.NetworkInterface.getByInetAddress(java.net.InetAddress.getByName('127.0.0.1')).getName();
-  this._delegate.setMulticastNetworkInterface(mcastIface);
-
-  this._delegate.dataHandler(function(packet) {
-    var data = packet.data();
-    this.emit('message', new Buffer(data),
-      {address: convertAddress(packet.sender()), bytes: data.length()});
-  }.bind(this));
-
-  this._delegate.listen(host, port, function(result) {
-    if (!result.failed()) {
-      this.emit('listening');
-    } else {
-      this.emit('error', new Error(result.cause()));
-    }
-  }.bind(this));
+UDP.prototype.recvStop = function() {
+  this._handle.recvStop();
 };
 
-Socket.prototype.close = function() {
-  this._delegate.close(function() {
-    this.emit('close');
-  }.bind(this));
+UDP.prototype.getsockname = function() {
 };
 
-Socket.prototype.address = function() {
-  return convertAddress(this._delegate.localAddress());
+UDP.prototype.addMembership = function() {
 };
 
-Socket.prototype.setBroadcast = function(flag) {
-  this._delegate.setBroadcast(flag);
+UDP.prototype.dropMembership = function() {
 };
 
-Socket.prototype.setMulticastTTL = function(ttl) {
-  this._delegate.setMulticastTimeToLive(ttl);
-};
-Socket.prototype.setTTL = Socket.prototype.setMulticastTTL;
-
-Socket.prototype.setMulticastLoopback = function(loopback) {
-  this._delegate.setMulticastLoopbackMode(loopback);
+UDP.prototype.setMulticastTTL = function() {
 };
 
-Socket.prototype.addMembership = function(mcastAddr, mcastIface) {
-  if (!mcastIface) {
-    mcastIFace = java.net.NetworkInterface.getByInetAddress(java.net.InetAddress.getByName("127.0.0.1")).getName();
-  }
-  this._delegate.listenMulticastGroup(mcastAddr, mcastIface, null, function(result) {
-    if (result.failed()) {
-      result.cause().printStackTrace();
-      var err = new Error(result.cause());
-      this.emit('error', err);
-    }
-  }.bind(this));
+UDP.prototype.setMulticastLoopback = function() {
 };
 
-Socket.prototype.dropMembership = function(mcastAddr, mcastIface) {
-  if (!mcastIface) {
-    this._delegate.unlistenMulticastGroup(mcastAddr, null);
-  } else {
-    this._delegate.unlistenMulticastGroup(mcastAddr, mcastIface, null, null);
-  }
+UDP.prototype.setBroadcast = function() {
 };
 
-Socket.prototype.send = function(buf, offset, length, port, address, callback) {
-  if (!(buf instanceof Buffer)) {
-    buf = new Buffer(buf.toString());
-  }
-  this._delegate.send(buf.slice(offset, offset+length)._vertxBuffer(), address, port, function(result) {
-    if (result.failed()) { this.emit('error', new Error(result.cause())); }
-    else if (typeof callback === 'function') {
-      callback.call();
-    }
-  });
+UDP.prototype.setTTL = function() {
 };
 
-module.exports.createSocket = createSocket = function(type, callback) {
-  return new Socket(type, callback);
-};
-
-module.exports.Socket = Socket;
-
-function convertAddress(javaInetAddr) {
-  var addr = javaInetAddr.getAddress();
-  return {
-    address: addr.getHostAddress(),
-    port: javaInetAddr.getPort(),
-    family: (addr instanceof java.net.Inet4Address) ? 'IPv4' : 'IPv6'
-  };
-}
-*/
