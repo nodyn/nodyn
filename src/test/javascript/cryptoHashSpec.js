@@ -31,8 +31,6 @@ describe("crypto Hash module", function() {
     expect(hash.digest('hex')).toBe('2365c163a22c69f11c2394ee6064fcfec1d19284');
   });
 
-
-/*
   it('should pass testSHA256HashDigest', function() {
     var hash = crypto.createHash('sha256');
     hash.update('Now is the winter of our discontent ');
@@ -105,6 +103,5 @@ describe("crypto Hash module", function() {
       hash.write('made glorious summer');
       expect(hash.digest('base64')).toBe('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==');
   } );
-  */
 
 });

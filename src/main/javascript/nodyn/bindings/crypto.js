@@ -31,7 +31,7 @@ Hash.prototype.update = function(chunk, encoding) {
 Hash.prototype.digest = function(outputEncoding) {
   var buf = process.binding('buffer').createBuffer( this._hash.digest() );
 
-  if ( outputEncoding ) {
+  if ( outputEncoding && outputEncoding != 'buffer' ) {
     return buf.toString( outputEncoding );
   }
 

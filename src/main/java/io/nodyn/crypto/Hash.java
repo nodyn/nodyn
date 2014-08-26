@@ -18,19 +18,35 @@ package io.nodyn.crypto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.bouncycastle.jcajce.provider.digest.MD5;
+import org.bouncycastle.jcajce.provider.digest.SHA1;
+import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.bouncycastle.jcajce.provider.digest.SHA512;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Hash {
 
-    private MessageDigest digest;
+    private final MessageDigest digest;
 
     public Hash(String algorithm) {
-        try {
-            this.digest = MessageDigest.getInstance(algorithm);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hash algorithm not found: " + algorithm);
+        switch (algorithm) {
+            case "sha1":
+                this.digest = new SHA1.Digest();
+                break;
+            case "md5":
+                this.digest = new MD5.Digest();
+                break;
+            case "sha256":
+                this.digest = new SHA256.Digest();
+                break;
+            case "sha512":
+                this.digest = new SHA512.Digest();
+                break;
+            default: {
+                throw new IllegalArgumentException( "Invalid hash algorithm: " + algorithm );
+            }
         }
     }
 
