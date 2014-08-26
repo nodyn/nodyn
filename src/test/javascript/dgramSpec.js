@@ -31,24 +31,23 @@ describe('The dgram module', function() {
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.bind).toBe('function');
     socket.bind(54321, function() {
-      print("BOUND");
       socket.on('close', function() { helper.testComplete(true); });
       socket.close();
     });
   });
 
-  xit('should pass testSocketClose', function() {
+  it('should close a socket', function() {
     waitsFor(helper.testComplete, "the dgram socket close test", 5000);
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.close).toBe('function');
     socket.on('close', function() { helper.testComplete(true); });
     socket.close();
   });
 
-  xit('should pass testSocketAddress', function() {
+  it('should have a socket with an address', function() {
     waitsFor(helper.testComplete, "the dgram socket address test", 5000);
-    var socket = dgram.createSocket();
+    var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
     expect(typeof socket.address).toBe('function');
     socket.bind(54321, function() {

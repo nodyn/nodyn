@@ -210,7 +210,6 @@ Socket.prototype.bind = function(/*port, address, callback*/) {
         flags |= constants.UV_UDP_REUSEADDR;
 
       var err = self._handle.bind(ip, port || 0, flags);
-      print("DONE WITH BIND");
       if (err) {
         self.emit('error', errnoException(err, 'bind'));
         self._bindState = BIND_STATE_UNBOUND;
@@ -218,7 +217,6 @@ Socket.prototype.bind = function(/*port, address, callback*/) {
         return;
       }
 
-      print("ABOUT TO LISTEN");
       startListening(self);
     }
   });
