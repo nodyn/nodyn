@@ -65,6 +65,10 @@ CipherBase.prototype.init = function(cipher, password) {
   this._delegate = new io.nodyn.crypto.Cipher( this._encipher, cipher, password._nettyBuffer() );
 }
 
+CipherBase.prototype.initiv = function(cipher, key, iv) {
+  this._delegate = new io.nodyn.crypto.Cipher( this._encipher, cipher, key._nettyBuffer(), iv._nettyBuffer() );
+}
+
 
 CipherBase.prototype.update = update;
 

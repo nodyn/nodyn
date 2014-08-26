@@ -19,14 +19,26 @@ import java.security.InvalidKeyException;
  */
 public class Cipher {
 
-    private final BufferedBlockCipher cipher;
+    private BufferedBlockCipher cipher;
     private ByteBuf outBuf;
 
     public Cipher(boolean encipher, String cipher, ByteBuf password) throws InvalidKeyException {
         switch ( cipher ) {
             case "des":
                 this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
-                computeKey(encipher, password, 8, 8);
+                initialize(encipher, password, 8, 8);
+                break;
+            default:
+        }
+
+        this.outBuf = Unpooled.buffer();
+    }
+
+    public Cipher(boolean encipher, String cipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+        switch ( cipher ) {
+            case "des":
+                this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
+                initialize(encipher, key, iv);
                 break;
             default:
                 throw new IllegalArgumentException( "Invalid cipher algorithm: " + cipher );
@@ -35,13 +47,36 @@ public class Cipher {
         this.outBuf = Unpooled.buffer();
     }
 
-    private void computeKey(boolean encipher, ByteBuf key, int keyLen, int ivLen) throws InvalidKeyException {
-        byte[] keyBytes = new byte[ key.readableBytes() ];
-        key.readBytes( keyBytes );
+    protected void setupCipher(String cipher) {
+        switch ( cipher ) {
+            case "des":
+                this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
+                break;
+            default:
+
+        }
+    }
+
+    private void initialize(boolean encipher, ByteBuf password, int keyLen, int ivLen) throws InvalidKeyException {
+        byte[] keyBytes = new byte[ password.readableBytes() ];
+        password.readBytes(keyBytes);
         OpenSSLKDF kdf = new OpenSSLKDF(keyBytes, keyLen, ivLen);
 
         KeyParameter keyParam = new KeyParameter(kdf.key());
         CipherParameters param = new ParametersWithIV( keyParam, kdf.iv() );
+        this.cipher.init( encipher, param);
+    }
+
+    private void initialize(boolean encipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+
+        byte[] keyBytes = new byte[ key.readableBytes() ];
+        key.readBytes( keyBytes );
+
+        byte[] ivBytes = new byte[ iv.readableBytes() ];
+        iv.readBytes( ivBytes );
+
+        KeyParameter keyParam = new KeyParameter(keyBytes);
+        CipherParameters param = new ParametersWithIV( keyParam, ivBytes );
         this.cipher.init( encipher, param);
     }
 

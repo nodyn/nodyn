@@ -25,7 +25,7 @@ describe("crypto Cipher & Decipher module", function() {
 
   });
 
-  xit ("should produce the same bytes as node.js for DES and iv", function() {
+  it ("should produce the same bytes as node.js for DES and iv", function() {
     var cipher = crypto.createCipheriv( 'des', 'tacotaco', 'dogsdogs' );
     cipher.write("howdy");
     var f = cipher.final();
