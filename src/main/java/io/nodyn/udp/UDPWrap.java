@@ -4,7 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.DatagramPacket;
-import io.netty.channel.socket.oio.OioDatagramChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
@@ -26,7 +26,7 @@ public class UDPWrap extends HandleWrap {
         super(process, false);
         bootstrap = new Bootstrap();
         bootstrap.group(this.getEventLoopGroup())
-                 .channel(OioDatagramChannel.class)
+                 .channel(NioDatagramChannel.class)
                  .option(ChannelOption.SO_BROADCAST, true);
     }
 
