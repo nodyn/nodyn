@@ -16,6 +16,20 @@
 
 package io.nodyn.crypto;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.jcajce.provider.digest.MD5;
+import org.bouncycastle.jcajce.provider.digest.SHA1;
+import org.bouncycastle.jcajce.provider.digest.SHA256;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
@@ -24,36 +38,46 @@ import java.security.NoSuchAlgorithmException;
 
 public class Hmac {
 
-    private final Mac hmac;
+    private final HMac hmac;
 
-    public Hmac(String algorithm, String key) {
-        try {
-            this.hmac = Mac.getInstance(algorithm);
-            computeKey(algorithm, key);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hmac algorithm not found: " + algorithm);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException("Invalid key: " + algorithm);
+    public Hmac(String algorithm, ByteBuf key) throws InvalidKeyException {
+        switch (algorithm) {
+            case "md5":
+                this.hmac = new HMac(new MD5Digest());
+                break;
+            case "sha1":
+                this.hmac = new HMac(new SHA1Digest());
+                break;
+            case "sha256":
+                this.hmac = new HMac(new SHA256Digest());
+                break;
+            case "sha512":
+                this.hmac = new HMac(new SHA512Digest());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid HMAC algorithm: " + algorithm);
         }
+        computeKey(algorithm, key);
     }
 
-    private void computeKey(String algorithm, String key) throws InvalidKeyException {
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), algorithm);
-        this.hmac.init(secretKey);
+    private void computeKey(String algorithm, ByteBuf key) throws InvalidKeyException {
+        byte[] keyBytes = new byte[ key.readableBytes() ];
+        key.readBytes( keyBytes );
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, algorithm);
+        KeyParameter param = new KeyParameter(secretKey.getEncoded());
+        this.hmac.init(param);
     }
 
-    public void update(String message, String encoding) {
-        this.hmac.update(message.getBytes(Charset.forName(encoding)));
+    public void update(ByteBuf buf) {
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.getBytes(buf.readerIndex(), bytes);
+        this.hmac.update(bytes, 0, bytes.length);
     }
 
-    public void update(String message) {
-        // TODO: The default in node.js, when an encoding is not specified
-        // is to assume a Buffer. For now, we'll just default to UTF-8 and
-        // see how far that gets us. Soon, I'm sure, we'll need to rip out
-        // the Buffer classes from this project and move entirely to using
-        // vert.x Buffers.  It is truly amazing that all six lines of this
-        // comment have the same number of characters, isn't it?  Amazing!
-        this.update(message, "UTF-8");
+    public ByteBuf digest() throws NoSuchAlgorithmException {
+        byte[] digestBytes = new byte[this.hmac.getMacSize()];
+        this.hmac.doFinal(digestBytes, 0);
+        return Unpooled.wrappedBuffer(digestBytes);
     }
 
 

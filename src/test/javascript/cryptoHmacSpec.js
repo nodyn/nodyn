@@ -1,29 +1,23 @@
 var helper = require('./specHelper');
 var crypto = require('crypto');
 
-xdescribe("crypto Hmac module", function() {
+describe("crypto Hmac module", function() {
 
   it('should pass testCreateHmac', function() {
       expect(typeof crypto.createHmac).toBe('function');
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('sha1', key);
       expect(hmac instanceof crypto.Hmac).toBe(true);
-      expect(hmac.algorithm).toBe('sha1');
   });
 
   it('should pass testMD5HmacDigest', function() {
-  try {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('md5', key);
       hmac.update('Where the skies are so blue ');
       hmac.update('Now we all did what we could do');
       expect(hmac.digest('hex')).toBe('f41e6884025c2ba61268df653ce16cb3');
-      } catch (e) {
-        e.printStackTrace();
-      }
   });
 
-/*
   it('should pass testSHA1HmacDigest', function() {
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('sha1', key);
@@ -87,6 +81,5 @@ xdescribe("crypto Hmac module", function() {
       hmac.write('Now we all did what we could do');
       expect(hmac.digest('base64')).toBe('NcAcEQCS5dz53PTKc9/S68Hntqad6ANjNrOv7IAn50hY69p/9QYdi4mFGJxgYdZcDJoFwGxrly1hE3Q+V4+qFw==');
   });
-  */
 
 });

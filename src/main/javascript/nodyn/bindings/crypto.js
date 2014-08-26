@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-function Hash(algorithm) {
-  if ( ! this instanceof Hash ) { return new Hash(algorithm); }
-
-  this._hash = new io.nodyn.crypto.Hash( algorithm );
-}
-
-Hash.prototype.update = function(chunk, encoding) {
+function update(chunk, encoding) {
   if ( Buffer.isBuffer( chunk ) ) {
-    this._hash.update( chunk._nettyBuffer() );
+    this._delegate.update( chunk._nettyBuffer() );
   } else {
-    this._hash.update( new Buffer( chunk, encoding )._nettyBuffer() );
+    this._delegate.update( new Buffer( chunk, encoding )._nettyBuffer() );
   }
 }
 
-Hash.prototype.digest = function(outputEncoding) {
-  var buf = process.binding('buffer').createBuffer( this._hash.digest() );
+function digest(outputEncoding) {
+  var buf = process.binding('buffer').createBuffer( this._delegate.digest() );
 
   if ( outputEncoding && outputEncoding != 'buffer' ) {
     return buf.toString( outputEncoding );
@@ -38,4 +32,27 @@ Hash.prototype.digest = function(outputEncoding) {
   return buf;
 }
 
+function Hash(algorithm) {
+  if ( ! this instanceof Hash ) { return new Hash(algorithm); }
+
+  this._delegate = new io.nodyn.crypto.Hash( algorithm );
+}
+
+Hash.prototype.update = update;
+Hash.prototype.digest = digest;
+
 module.exports.Hash = Hash;
+
+
+function Hmac() {
+  if ( ! this instanceof Hmac ) { return new Hmac(); }
+}
+
+Hmac.prototype.init = function(algorithm, key) {
+  this._delegate = new io.nodyn.crypto.Hmac( algorithm, key._nettyBuffer() );
+}
+
+Hmac.prototype.update = update;
+Hmac.prototype.digest = digest;
+
+module.exports.Hmac = Hmac;
