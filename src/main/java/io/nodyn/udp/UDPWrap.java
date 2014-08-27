@@ -4,16 +4,12 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.*;
 
 /**
  * @author Lance Ball (lball@redhat.com)
@@ -21,39 +17,49 @@ import java.util.Map;
 public class UDPWrap extends HandleWrap {
 
     private ChannelFuture channelFuture;
-    private InetAddress localAddress;
-    private Family family;
-    private int port;
+    private InetSocketAddress localAddress;
+    private InetSocketAddress remoteAddress;
 
     public UDPWrap(NodeProcess process) {
         super(process, false);
     }
 
     public Object bind(final String address, final int port, int flags, final Family family) throws InterruptedException {
-        this.family = family;
-        this.port = port;
+        // TODO: Deal with flags
         try {
-            if (this.family == Family.IPv4) {
-                localAddress = Inet4Address.getByName(address);
+            if (family == Family.IPv6) {
+                localAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
             } else {
-                localAddress = Inet6Address.getByAddress(address.getBytes());
+                localAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             }
             Bootstrap bootstrap = new Bootstrap();
-            this.channelFuture = bootstrap.group(this.getEventLoopGroup())
-                                        .channel(NioDatagramChannel.class)
-                                        .option(ChannelOption.SO_BROADCAST, true)
-                                        .option(ChannelOption.AUTO_READ, false)
-                                        .handler(new DatagramInboundHandler(this))
-                                        .bind(localAddress, port);
+            bootstrap.group(getEventLoopGroup())
+                    .channel(NioDatagramChannel.class)
+                    .handler(new DatagramChannelInitializer(UDPWrap.this))
+                    .localAddress(localAddress);
+
+            this.channelFuture = bootstrap.bind(localAddress);
         } catch (Exception e) {
             e.printStackTrace();
             return e; // if failure, return an error - udp_wrap.js should turn this into a JS Error
         }
+        ref();
         return null;
     }
 
-    public void send(ByteBuf buf, int offset, int length, int port, String address, Family family) {
+    public Object send(ByteBuf buf, int offset, int length, int port, String address, Family family) {
+        try {
+            if (family == Family.IPv4) remoteAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
+            else remoteAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
 
+            // TODO: Why do we have to copy the buffer?
+            DatagramPacket packet = new DatagramPacket(buf.copy(offset, length), remoteAddress, localAddress);
+            channelFuture.channel().writeAndFlush(packet);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return e;
+        }
+        return null;
     }
 
     public void recvStart() throws Exception {
@@ -71,11 +77,12 @@ public class UDPWrap extends HandleWrap {
         super.close();
     }
 
-    public Map getSockName() {
-        Map result = new HashMap<String, Object>();
-        result.put("address", localAddress.getHostAddress());
-        result.put("port", this.port);
-        result.put("family", this.family.toString());
-        return result;
+    public SocketAddress getLocalAddress() {
+        return this.localAddress;
     }
+
+    public SocketAddress getRemoteAddress() {
+        return this.localAddress;
+    }
+
 }

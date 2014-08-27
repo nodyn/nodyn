@@ -70,10 +70,10 @@ describe('The dgram module', function() {
     expect(typeof socket.setMulticastLoopback).toBe('function');
   });
 
-  xit('should pass testSendReceive', function() {
+  it('should send and receive packets', function() {
     waitsFor(helper.testComplete, "the dgram send / receive test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
     var buffer = new Buffer('turkey dinner');
 
     peer1.on('error', unexpectedError.bind(this));
@@ -81,17 +81,17 @@ describe('The dgram module', function() {
 
     peer2.on('message', function(msg, rinfo) {
       expect(buffer.toString()).toBe(msg.toString());
-      peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
+      peer1.on('close', function() { peer2.close(); });
       peer1.close();
     });
 
     peer2.bind(54321, function() {
-      peer1.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
+      peer1.send(buffer, 0, buffer.length, 54321, 'localhost');
     });
   });
 
-  xit('should pass testEcho', function() {
+  xit('should echo packets', function() {
     waitsFor(helper.testComplete, "the dgram echo test", 5000);
     var peer1 = dgram.createSocket();
     var peer2 = dgram.createSocket();
@@ -189,4 +189,4 @@ describe('The dgram module', function() {
   });
 });
 
-function unexpectedError(e) { print("ERROR: " + e); this.fail(e); }
+function unexpectedError(e) { console.error("ERROR: " + e); this.fail(e); }

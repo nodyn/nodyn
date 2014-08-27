@@ -15,19 +15,22 @@
  */
 
 var Handle = require('nodyn/bindings/handle_wrap').Handle,
-    Buffer = require('nodyn/bindings/buffer'),
+    Helper = process.binding('buffer'),
     Family = io.nodyn.udp.Family,
     util   = require('util');
 
-function onRecv(result) { // [nread, buffer, remoteAddress, remotePort]
+function onRecv(result) { 
   if (typeof this.onmessage === 'function') {
-    if (result.error) throw Error(result.error); // TODO: throw here?
-    result = result.result();
-    var rinfo = {
-      address: result[2],
-      port: result[3]
-    };
-    this.onmessage(result[0], this, Buffer.createBuffer(result[1]), rinfo);
+    if (result.error) {
+      throw Error(result.error); // TODO: throw here?
+    }
+    var remote = this._handle.remoteAddress,
+        rinfo = {
+          address: remote.address.hostAddress,
+          port: remote.port
+        },
+        buf = process.binding('buffer').createBuffer(result.result);
+    this.onmessage(buf.length, this, buf, rinfo);
   }
 }
 
@@ -55,6 +58,9 @@ UDP.prototype.send = function(req, buffer, offset, length, port, address) {
   // TODO: Do we ignore req? It's just a JS object with two properties
   // 'buffer' and 'length', but we're already getting the buffer itself
   this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv4);
+  if (req.oncomplete) {
+    req.oncomplete();
+  }
 };
 
 UDP.prototype.send6 = function(req, buffer, offset, length, port, address) {
@@ -67,12 +73,11 @@ UDP.prototype.recvStop = function() {
   this._handle.recvStop();
 };
 
-UDP.prototype.getsockname = function(obj) {
-  var sock = this._handle.getSockName();
-  // TODO: Just a stub, obviously
-  obj.address = sock.address;
-  obj.family = sock.family;
-  obj.port = sock.port;
+UDP.prototype.getsockname = function(out) {
+  var local = this._handle.localAddress;
+  out.address = local.address.hostAddress;
+  out.port    = local.port;
+  out.family  = ( local.address instanceof java.net.Inet6Address ? 'IPv6' : 'IPv4' );
 };
 
 UDP.prototype.addMembership = function() {
