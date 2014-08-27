@@ -21,6 +21,7 @@ import io.netty.util.concurrent.*;
 
 import java.util.concurrent.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Bob McWhirter
@@ -28,6 +29,7 @@ import java.util.concurrent.Future;
 public class EventLoop implements RefCounted {
 
     private final ScheduledExecutorService userTaskExecutor;
+    private final ExecutorService blockingTaskExecutor;
     private CountDownLatch latch = new CountDownLatch(1);
     private EventLoopGroup eventLoopGroup;
     private final boolean controlLifecycle;
@@ -35,7 +37,7 @@ public class EventLoop implements RefCounted {
     protected int counter;
 
     public EventLoop(EventLoopGroup eventLoopGroup) {
-        this( eventLoopGroup, true );
+        this(eventLoopGroup, true);
     }
 
     public EventLoop(EventLoopGroup eventLoopGroup, boolean controlLifecycle) {
@@ -58,10 +60,18 @@ public class EventLoop implements RefCounted {
             this.eventLoopGroup = null;
         }
 
-        this.userTaskExecutor = Executors.newSingleThreadScheduledExecutor( new ThreadFactory() {
+        this.userTaskExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-                Thread t = new Thread( r, "user-tasks" );
+                Thread t = new Thread(r, "user-tasks");
+                return t;
+            }
+        });
+
+        this.blockingTaskExecutor = Executors.newCachedThreadPool(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "blocking-task" );
                 return t;
             }
         });
@@ -73,17 +83,21 @@ public class EventLoop implements RefCounted {
 
     public Future<?> submitUserTask(final Runnable task) {
         final RefHandle handle = newHandle();
-        return this.userTaskExecutor.submit( new Runnable() {
+        return this.userTaskExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 task.run();
                 handle.unref();
             }
-        } );
+        });
     }
 
     public void scheduleUserTask(final Runnable task, int time, TimeUnit units) {
         this.userTaskExecutor.schedule(task, time, units);
+    }
+
+    public Future<?> submitBlockingTask(final Runnable task) {
+        return this.blockingTaskExecutor.submit( task );
     }
 
     public int refCount() {
@@ -120,18 +134,20 @@ public class EventLoop implements RefCounted {
 
     protected void doShutdown() {
         if (this.eventLoopGroup != null) {
-            if ( this.controlLifecycle ) {
+            if (this.controlLifecycle) {
                 io.netty.util.concurrent.Future<?> future = this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
-                future.addListener( new FutureListener<Object>() {
+                future.addListener(new FutureListener<Object>() {
                     @Override
                     public void operationComplete(io.netty.util.concurrent.Future<Object> future) throws Exception {
                         EventLoop.this.userTaskExecutor.shutdown();
+                        EventLoop.this.blockingTaskExecutor.shutdown();
                         EventLoop.this.latch.countDown();
                     }
                 });
                 this.eventLoopGroup = null;
             } else {
                 this.userTaskExecutor.shutdown();
+                this.blockingTaskExecutor.shutdown();
                 this.latch.countDown();
             }
 

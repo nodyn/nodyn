@@ -18,6 +18,7 @@ package io.nodyn.netty.pipe;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.FileRegion;
+import io.nodyn.NodeProcess;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,17 +36,14 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
     private final Pipe inPipe;
     private final Pipe outPipe;
 
-    private Thread inPump;
-    private Thread outPump;
-
-    public static NioDuplexStreamChannel create(InputStream in, OutputStream out) throws IOException {
+    public static NioDuplexStreamChannel create(NodeProcess process, InputStream in, OutputStream out) throws IOException {
         Pipe inPipe = Pipe.open();
         Pipe outPipe = Pipe.open();
-        return new NioDuplexStreamChannel(in, inPipe, out, outPipe);
+        return new NioDuplexStreamChannel(process, in, inPipe, out, outPipe);
     }
 
-    protected NioDuplexStreamChannel(InputStream in, Pipe inPipe, OutputStream out, Pipe outPipe) {
-        super(inPipe);
+    protected NioDuplexStreamChannel(NodeProcess process, InputStream in, Pipe inPipe, OutputStream out, Pipe outPipe) {
+        super(process, inPipe);
         this.in = in;
         this.inPipe = inPipe;
         this.out = out;
@@ -59,7 +57,7 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
     }
 
     protected void startPumps() {
-        this.inPump = new Thread() {
+        this.process.getEventLoop().submitBlockingTask( new Runnable() {
             @Override
             public void run() {
                 byte[] buf = new byte[1024];
@@ -82,13 +80,9 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
                     }
                 }
             }
-        };
+        } );
 
-        this.inPump.setDaemon(true);
-        this.inPump.start();
-
-        this.outPump = new Thread() {
-            @Override
+        this.process.getEventLoop().submitBlockingTask( new Runnable() {
             public void run() {
                 ByteBuffer buf = ByteBuffer.allocate(1024);
                 int numRead = 0;
@@ -112,10 +106,7 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
                     }
                 }
             }
-        };
-
-        this.outPump.setDaemon(true);
-        this.outPump.start();
+        } );
     }
 
     @Override
@@ -137,9 +128,6 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
 
     @Override
     protected void doClose() throws Exception {
-        this.inPump.interrupt();
-        this.outPump.interrupt();
-
         this.inPipe.source().close();
         this.outPipe.sink().close();
     }

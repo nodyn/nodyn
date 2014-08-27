@@ -52,6 +52,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
     }
 
     protected void startPumps() {
+
         this.inPump = new Thread(new Runnable() {
             @Override
             public void run() {

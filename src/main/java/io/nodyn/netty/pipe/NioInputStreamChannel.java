@@ -18,6 +18,7 @@ package io.nodyn.netty.pipe;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.FileRegion;
+import io.nodyn.NodeProcess;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,15 +32,14 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     private final InputStream in;
     private final Pipe pipe;
-    private Thread pump;
 
-    public static NioInputStreamChannel create(InputStream in) throws IOException {
+    public static NioInputStreamChannel create(NodeProcess process, InputStream in) throws IOException {
         Pipe pipe = Pipe.open();
-        return new NioInputStreamChannel(in, pipe);
+        return new NioInputStreamChannel(process, in, pipe);
     }
 
-    protected NioInputStreamChannel(InputStream in, Pipe pipe) {
-        super(pipe);
+    protected NioInputStreamChannel(NodeProcess process, InputStream in, Pipe pipe) {
+        super(process, pipe);
         this.pipe = pipe;
         this.in = in;
         startPump();
@@ -51,7 +51,8 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
     }
 
     protected void startPump() {
-        this.pump = new Thread() {
+        this.process.getEventLoop().submitBlockingTask(new Runnable() {
+
             @Override
             public void run() {
                 byte[] buf = new byte[1024];
@@ -70,10 +71,7 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
                     }
                 }
             }
-        };
-
-        this.pump.setDaemon(true);
-        this.pump.start();
+        });
     }
 
     @Override
@@ -93,7 +91,6 @@ public class NioInputStreamChannel extends AbstractNioStreamChannel {
 
     @Override
     protected void doClose() throws Exception {
-        this.pump.interrupt();
         this.pipe.source().close();
     }
 

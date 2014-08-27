@@ -17,6 +17,7 @@
 package io.nodyn.process;
 
 import io.netty.buffer.ByteBuf;
+import io.nodyn.NodeProcess;
 
 import java.io.IOException;
 
@@ -25,11 +26,13 @@ import java.io.IOException;
  */
 public class SyncProcessWrap {
 
+    private final NodeProcess process;
     private Process subProcess;
     private OutputConsumer stdOutConsumer;
     private OutputConsumer stdErrConsumer;
 
-    public SyncProcessWrap() {
+    public SyncProcessWrap(NodeProcess process) {
+        this.process = process;
     }
 
     public int getPid() throws NoSuchFieldException, IllegalAccessException {
@@ -43,8 +46,8 @@ public class SyncProcessWrap {
         this.stdOutConsumer = new OutputConsumer( this.subProcess.getInputStream() );
         this.stdErrConsumer = new OutputConsumer( this.subProcess.getErrorStream() );
 
-        new Thread( this.stdOutConsumer ).start();
-        new Thread( this.stdErrConsumer ).start();
+        process.getEventLoop().submitBlockingTask( this.stdOutConsumer );
+        process.getEventLoop().submitBlockingTask( this.stdErrConsumer );
 
         return this.subProcess.waitFor();
     }

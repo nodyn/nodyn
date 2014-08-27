@@ -31,7 +31,6 @@ import java.util.List;
  */
 public class ProcessWrap extends HandleWrap {
 
-    private Thread waiter;
     private int signal = -1;
     private int pid;
 
@@ -95,7 +94,7 @@ public class ProcessWrap extends HandleWrap {
         long result = posix.posix_spawnp(args[0], fileActions, argv, this.envp);
 
         this.pid = (int) result;
-        new Thread(new ExitWaiter(this)).start();
+        this.process.getEventLoop().submitBlockingTask( new ExitWaiter(this ) );
 
     }
 

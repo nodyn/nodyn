@@ -20,6 +20,7 @@ import io.netty.channel.ChannelConfig;
 import io.netty.channel.ChannelMetadata;
 import io.netty.channel.DefaultChannelConfig;
 import io.netty.channel.nio.AbstractNioByteChannel;
+import io.nodyn.NodeProcess;
 
 import java.net.SocketAddress;
 import java.nio.channels.Pipe;
@@ -29,11 +30,13 @@ import java.nio.channels.Pipe;
  */
 public abstract class AbstractNioStreamChannel extends AbstractNioByteChannel {
 
+    protected final NodeProcess process;
     protected final ChannelConfig config;
     protected final ChannelMetadata metadata;
 
-    protected AbstractNioStreamChannel(Pipe pipe) {
+    protected AbstractNioStreamChannel(NodeProcess process, Pipe pipe) {
         super(null, pipe.source());
+        this.process = process;
         this.config = new DefaultChannelConfig(this);
         this.metadata = new ChannelMetadata(false);
     }

@@ -17,16 +17,13 @@
 package io.nodyn.netty.pipe;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
-import io.netty.channel.nio.AbstractNioByteChannel;
+import io.netty.channel.FileRegion;
+import io.nodyn.NodeProcess;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
-import java.nio.charset.Charset;
 
 /**
  * @author Bob McWhirter
@@ -36,13 +33,13 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
     private final OutputStream out;
     private final Pipe pipe;
 
-    public static NioOutputStreamChannel create(OutputStream out) throws IOException {
+    public static NioOutputStreamChannel create(NodeProcess process, OutputStream out) throws IOException {
         Pipe pipe = Pipe.open();
-        return new NioOutputStreamChannel(out, pipe);
+        return new NioOutputStreamChannel(process, out, pipe);
     }
 
-    protected NioOutputStreamChannel(OutputStream out, Pipe pipe) {
-        super(pipe);
+    protected NioOutputStreamChannel(NodeProcess process, OutputStream out, Pipe pipe) {
+        super(process, pipe);
         this.pipe = pipe;
         try {
             pipe.sink().configureBlocking(false);
@@ -56,18 +53,17 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
     @Override
     protected Pipe.SinkChannel javaChannel() {
         return pipe.sink();
-        //return (Pipe.SinkChannel) super.javaChannel();
     }
 
     protected void startPump() {
-        new Thread() {
+        this.process.getEventLoop().submitBlockingTask(new Runnable() {
             @Override
             public void run() {
                 ByteBuffer buf = ByteBuffer.allocate(1024);
                 int numRead = 0;
                 try {
-                    while ( ( numRead = NioOutputStreamChannel.this.pipe.source().read( buf ) ) >= 0 ) {
-                        if ( numRead > 0 ) {
+                    while ((numRead = NioOutputStreamChannel.this.pipe.source().read(buf)) >= 0) {
+                        if (numRead > 0) {
                             byte[] writeMe = buf.array();
                             NioOutputStreamChannel.this.out.write(writeMe, 0, numRead);
                             NioOutputStreamChannel.this.out.flush();
@@ -83,7 +79,7 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
                     }
                 }
             }
-        }.start();
+        });
     }
 
     @Override

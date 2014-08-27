@@ -16,9 +16,6 @@
 
 package io.nodyn.loop;
 
-import io.netty.channel.EventLoopGroup;
-
-
 /**
  * @author Bob McWhirter
  */
@@ -30,36 +27,19 @@ public class Blocking {
         this.eventLoop = eventLoop;
     }
 
-
     public void submit(final Runnable action) {
         final RefHandle handle = this.eventLoop.newHandle();
-        new Thread(new Runnable() {
+        this.eventLoop.submitBlockingTask(new Runnable() {
             @Override
             public void run() {
                 action.run();
                 handle.unref();
             }
-        }).start();
+        });
     }
 
     public void unblock(final Runnable action) {
         this.eventLoop.submitUserTask( action );
-        /*
-        final EventLoopGroup elg = eventLoop.getEventLoopGroup();
-        final RefHandle refHandle = eventLoop.newHandle();
-        elg.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    action.run();
-                } finally {
-                    refHandle.unref();
-                }
-
-            }
-        });
-        */
     }
-
 
 }

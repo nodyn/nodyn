@@ -37,7 +37,7 @@ public class ReadStream {
             InputStream in = System.in;
             EventLoopGroup eventLoopGroup = process.getEventLoop().getEventLoopGroup();
 
-            Channel channel = NioInputStreamChannel.create(in);
+            Channel channel = NioInputStreamChannel.create(process, in);
             channel.config().setAutoRead(false);
             channel.pipeline().addLast( new DataEventHandler( process, handle ) );
             eventLoopGroup.register(channel);

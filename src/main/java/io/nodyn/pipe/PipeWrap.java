@@ -90,7 +90,7 @@ public class PipeWrap extends StreamWrap {
     protected void openInput(int fd, FileDescriptor fileDescriptor) throws IOException {
         FileInputStream in = new FileInputStream(fileDescriptor);
 
-        NioInputStreamChannel nioChannel = NioInputStreamChannel.create(in);
+        NioInputStreamChannel nioChannel = NioInputStreamChannel.create(this.process, in);
         nioChannel.config().setAutoRead(false);
 
         //nioChannel.pipeline().addLast("debug", new DebugHandler("input:" + fd + " // " + process.getPosix().getpid()));
@@ -111,7 +111,7 @@ public class PipeWrap extends StreamWrap {
     protected void openOutput(int fd, FileDescriptor fileDescriptor) throws IOException {
         FileOutputStream out = new FileOutputStream(fileDescriptor);
 
-        NioOutputStreamChannel nioChannel = NioOutputStreamChannel.create(out);
+        NioOutputStreamChannel nioChannel = NioOutputStreamChannel.create(this.process, out);
         nioChannel.config().setAutoRead(false);
         this.channelFuture = nioChannel.newSucceededFuture();
         //nioChannel.pipeline().addLast("debug", new DebugHandler("output:" + fd + " // " + process.getPosix().getpid()));
@@ -130,7 +130,7 @@ public class PipeWrap extends StreamWrap {
             FileInputStream in = new FileInputStream(fileDescriptor);
             FileOutputStream out = new FileOutputStream(fileDescriptor);
 
-            NioDuplexStreamChannel nioChannel = NioDuplexStreamChannel.create(in, out);
+            NioDuplexStreamChannel nioChannel = NioDuplexStreamChannel.create(this.process, in, out);
             nioChannel.config().setAutoRead(false);
             nioChannel.config().setOption(ChannelOption.ALLOW_HALF_CLOSURE, true);
 

@@ -43,7 +43,7 @@ public class WriteStream {
         }
 
         EventLoopGroup eventLoopGroup = process.getEventLoop().getEventLoopGroup();
-        Channel channel = NioOutputStreamChannel.create(out);
+        Channel channel = NioOutputStreamChannel.create(process, out);
         channel.config().setAutoRead(false);
         channel.pipeline().addLast( new DataEventHandler( process, handle ));
         eventLoopGroup.register(channel);
