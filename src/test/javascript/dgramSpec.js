@@ -53,17 +53,17 @@ describe('The dgram module', function() {
     socket.bind(54321, function() {
       var addr = socket.address();
       expect(addr !== undefined).toBeTruthy();
-      expect(typeof addr.address).toBe('string');
-      expect(typeof addr.family).toBe('string');
-      expect(typeof addr.port).toBe('number');
+      expect(addr.address).toBe('0.0.0.0');
+      expect(addr.family).toBe('IPv4');
+      expect(addr.port).toBe(54321);
       socket.on('close', function() { helper.testComplete(true); });
       socket.close();
     });
   });
 
   // only tests the existence of the functions and not their behavior
-  xit('should pass testConfigurationFunctions', function() {
-    var socket = dgram.createSocket();
+  it('should pass testConfigurationFunctions', function() {
+    var socket = dgram.createSocket('udp4');
     expect(typeof socket.setBroadcast).toBe('function');
     expect(typeof socket.setMulticastTTL).toBe('function');
     expect(typeof socket.setTTL).toBe('function');

@@ -68,10 +68,11 @@ UDP.prototype.recvStop = function() {
 };
 
 UDP.prototype.getsockname = function(obj) {
+  var sock = this._handle.getSockName();
   // TODO: Just a stub, obviously
-  obj.address = 'foo';
-  obj.family = '4';
-  obj.port = 0;
+  obj.address = sock.address;
+  obj.family = sock.family;
+  obj.port = sock.port;
 };
 
 UDP.prototype.addMembership = function() {

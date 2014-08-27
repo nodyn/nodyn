@@ -12,54 +12,56 @@ import io.nodyn.handle.HandleWrap;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Lance Ball (lball@redhat.com)
  */
 public class UDPWrap extends HandleWrap {
 
-    private final Bootstrap bootstrap;
     private ChannelFuture channelFuture;
+    private InetAddress localAddress;
+    private Family family;
+    private int port;
 
     public UDPWrap(NodeProcess process) {
         super(process, false);
-        bootstrap = new Bootstrap();
-        bootstrap.group(this.getEventLoopGroup())
-                 .channel(NioDatagramChannel.class)
-                 .option(ChannelOption.SO_BROADCAST, true)
-                 .option(ChannelOption.AUTO_READ, false)
-                 .handler(new DatagramInboundHandler(this));
     }
 
-    public Object bind(String address, int port, int flags, Family family) {
+    public Object bind(final String address, final int port, int flags, final Family family) throws InterruptedException {
+        this.family = family;
+        this.port = port;
         try {
-            InetAddress addr;
-            if(family == Family.IPv4) {
-                addr = Inet4Address.getByName(address);
+            if (this.family == Family.IPv4) {
+                localAddress = Inet4Address.getByName(address);
             } else {
-                addr = Inet6Address.getByAddress(address.getBytes());
+                localAddress = Inet6Address.getByAddress(address.getBytes());
             }
-            channelFuture = bootstrap.bind(addr, port);
-//            System.err.println(">>>> Bound called. Syncing.");
-//            channelFuture.sync();
-//            System.err.println(">>>> Bind complete.");
+            Bootstrap bootstrap = new Bootstrap();
+            this.channelFuture = bootstrap.group(this.getEventLoopGroup())
+                                        .channel(NioDatagramChannel.class)
+                                        .option(ChannelOption.SO_BROADCAST, true)
+                                        .option(ChannelOption.AUTO_READ, false)
+                                        .handler(new DatagramInboundHandler(this))
+                                        .bind(localAddress, port);
         } catch (Exception e) {
             e.printStackTrace();
             return e; // if failure, return an error - udp_wrap.js should turn this into a JS Error
         }
-        return null; // indicates success
+        return null;
     }
 
     public void send(ByteBuf buf, int offset, int length, int port, String address, Family family) {
 
     }
 
-    public void recvStart() {
-        bootstrap.option(ChannelOption.AUTO_READ, true);
+    public void recvStart() throws Exception {
+        channelFuture.channel().config().setAutoRead(true);
     }
 
     public void recvStop() {
-        bootstrap.option(ChannelOption.AUTO_READ, false);
+        channelFuture.channel().config().setAutoRead(false);
     }
 
     public void close() {
@@ -67,5 +69,13 @@ public class UDPWrap extends HandleWrap {
             this.channelFuture.addListener(ChannelFutureListener.CLOSE);
         }
         super.close();
+    }
+
+    public Map getSockName() {
+        Map result = new HashMap<String, Object>();
+        result.put("address", localAddress.getHostAddress());
+        result.put("port", this.port);
+        result.put("family", this.family.toString());
+        return result;
     }
 }
