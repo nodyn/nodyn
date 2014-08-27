@@ -515,9 +515,8 @@ describe('http request and response', function() {
       socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
                    'Upgrade: WebSocket\r\n' +
                     'Connection: Upgrade\r\n' +
-                    '\r\n');
+                    '\r\nfajitas');
 
-      socket.write('fajitas');
       socket.end();
     });
 

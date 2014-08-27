@@ -34,10 +34,10 @@ public class ExitWaiter implements Runnable {
         try {
             int exitCode = this.process.waitFor();
             int signal = this.process.getSignal();
-            this.process.emitBackToJavascript("exit", CallbackResult.createSuccess(exitCode, signal));
+            this.process.emit("exit", CallbackResult.createSuccess(exitCode, signal));
         } catch (InterruptedException e) {
             e.printStackTrace();
-            this.process.emitBackToJavascript("exit", CallbackResult.createError( e ) );
+            this.process.emit("exit", CallbackResult.createError(e));
         }
     }
 }

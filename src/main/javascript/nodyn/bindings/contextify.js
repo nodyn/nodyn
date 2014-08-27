@@ -38,7 +38,7 @@ function isContext(obj) {
 }
 
 function makeContext(obj) {
-  var runtime = new io.nodyn.Nodyn(__nodyn);
+  var runtime = new org.dynjs.runtime.DynJS(__nodyn.config);
   var g = runtime.globalObject;
 
   for ( var k in obj ) {

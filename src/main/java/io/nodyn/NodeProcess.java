@@ -17,8 +17,8 @@
 package io.nodyn;
 
 import io.nodyn.fs.UnsafeFs;
+import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.ImmediateCheckHandle;
-import io.nodyn.loop.ManagedEventLoopGroup;
 import io.nodyn.loop.TickInfo;
 import io.nodyn.loop.Ticker;
 import io.nodyn.posix.NodePosixHandler;
@@ -105,7 +105,7 @@ public class NodeProcess extends EventSource {
         return this.nodyn;
     }
 
-    public ManagedEventLoopGroup getEventLoop() {
+    public EventLoop getEventLoop() {
         return this.nodyn.getEventLoop();
     }
 

@@ -18,6 +18,7 @@ package io.nodyn.tcp;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.nodyn.EventSource;
+import io.nodyn.async.AsyncWrap;
 import io.nodyn.netty.AbstractEventSourceHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.netty.DataEventHandler;
@@ -29,7 +30,7 @@ import io.nodyn.netty.EOFEventHandler;
  */
 public class ConnectionEventHandler extends AbstractEventSourceHandler {
 
-    public ConnectionEventHandler(NodeProcess process, EventSource eventSource) {
+    public ConnectionEventHandler(NodeProcess process, AsyncWrap eventSource) {
         super(process, eventSource);
     }
 

@@ -5,6 +5,7 @@ import io.netty.channel.ChannelOption;
 import io.nodyn.NodeProcess;
 import io.nodyn.fs.UnsafeFs;
 import io.nodyn.netty.DataEventHandler;
+import io.nodyn.netty.DebugHandler;
 import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.pipe.NioDuplexStreamChannel;
 import io.nodyn.netty.pipe.NioInputStreamChannel;

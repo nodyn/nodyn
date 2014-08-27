@@ -25,13 +25,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class Ticker implements Runnable {
 
-    private final ManagedEventLoopGroup managedLoop;
+    private final EventLoop eventLoop;
     private final Runnable tickCallback;
     private final TickInfo tickInfo;
     private final RefHandle handle;
 
     public Ticker(NodeProcess process, Runnable tickCallback, TickInfo tickInfo) {
-        this.managedLoop = process.getEventLoop();
+        this.eventLoop = process.getEventLoop();
         this.handle = process.getEventLoop().newHandle();
         this.tickCallback = tickCallback;
         this.tickInfo = tickInfo;
@@ -39,12 +39,17 @@ public class Ticker implements Runnable {
 
     @Override
     public void run() {
-        this.tickCallback.run();
-        if ( this.tickInfo.getLength() == 0 && this.managedLoop.refCount() == 1 ) {
-            // just us
-            this.handle.unref();
-            return;
-        }
-        this.managedLoop.getEventLoopGroup().schedule(this, 500, TimeUnit.MILLISECONDS);
+        this.eventLoop.submitUserTask(new Runnable() {
+            @Override
+            public void run() {
+                Ticker.this.tickCallback.run();
+                if ( Ticker.this.tickInfo.getLength() == 0 && Ticker.this.eventLoop.refCount() == 1 ) {
+                    // just us
+                    Ticker.this.handle.unref();
+                    return;
+                }
+                Ticker.this.eventLoop.scheduleUserTask( this, 500, TimeUnit.MILLISECONDS );
+            }
+        } );
     }
 }

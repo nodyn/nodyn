@@ -16,9 +16,9 @@
 
 package io.nodyn.loop;
 
-import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
-import io.netty.util.concurrent.Future;
+
+import java.util.concurrent.Future;
 
 /**
  * @author Bob McWhirter
@@ -26,14 +26,12 @@ import io.netty.util.concurrent.Future;
 public class ImmediateCheckHandle implements Runnable {
 
 
-    private final EventLoopGroup loop;
-    private final RefHandle handle;
+    private final EventLoop loop;
     private final Runnable callback;
     private Future<?> future;
 
-    public ImmediateCheckHandle(ManagedEventLoopGroup loop, Runnable callback) {
-        this.handle = loop.newHandle(false);
-        this.loop = loop.getEventLoopGroup();
+    public ImmediateCheckHandle(EventLoop loop, Runnable callback) {
+        this.loop = loop;
         this.callback = callback;
     }
 
@@ -45,14 +43,13 @@ public class ImmediateCheckHandle implements Runnable {
         if ( this.future != null ) {
             return;
         }
-        this.handle.ref();
-        this.future = this.loop.submit(this);
+        this.future = this.loop.submitUserTask(this);
     }
 
     public void stop() {
         if ( this.future != null ) {
-            this.handle.unref();
             this.future.cancel( true );
+            this.future = null;
         }
     }
 
@@ -64,6 +61,5 @@ public class ImmediateCheckHandle implements Runnable {
             t.printStackTrace();
         }
         this.future = null;
-        this.handle.unref();
     }
 }

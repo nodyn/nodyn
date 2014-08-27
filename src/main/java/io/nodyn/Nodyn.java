@@ -18,10 +18,8 @@ package io.nodyn;
 
 
 import io.netty.channel.EventLoopGroup;
-import io.nodyn.loop.ManagedEventLoopGroup;
+import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.RefHandle;
-import io.nodyn.loop.RootManagedEventLoopGroup;
-import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -31,7 +29,6 @@ import org.vertx.java.core.impl.VertxInternal;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 public class Nodyn extends DynJS {
 
@@ -42,19 +39,28 @@ public class Nodyn extends DynJS {
     private final Vertx vertx;
     private final NodynConfig config;
 
-    private final ManagedEventLoopGroup managedLoop;
+    private final EventLoop eventLoop;
 
     private ExitHandler exitHandler;
 
     private boolean started;
     private CompletionHandler completionHandler;
 
-    public Nodyn(final NodynConfig config) {
-        this((Nodyn) null, config);
+
+    public Nodyn(NodynConfig config) {
+        this((config.isClustered() ? VertxFactory.newVertx(config.getHost()) : VertxFactory.newVertx()),
+                config,
+                true);
     }
 
     public Nodyn(Vertx vertx, NodynConfig config) {
-        super( config );
+        this(vertx,
+                config,
+                false);
+    }
+
+    public Nodyn(Vertx vertx, NodynConfig config, boolean controlLifeCycle) {
+        super(config);
         this.config = config;
 
         this.vertx = vertx;
@@ -66,41 +72,7 @@ public class Nodyn extends DynJS {
         globalObject.defineGlobalProperty("__nodyn", this, false);
 
         EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
-        this.managedLoop = new RootManagedEventLoopGroup(elg, false);
-    }
-
-    public Nodyn(Nodyn parent) {
-        this(parent, parent.config);
-    }
-
-    public Nodyn(final Nodyn parent, NodynConfig config) {
-        super(config);
-
-        this.config = config;
-
-        if (parent == null) {
-            System.setProperty("vertx.pool.eventloop.size", "1");
-            if (config.isClustered()) {
-                this.vertx = VertxFactory.newVertx(config.getHost());
-            } else {
-                this.vertx = VertxFactory.newVertx();
-            }
-        } else {
-            this.vertx = parent.vertx;
-        }
-
-        GlobalObject globalObject = getGlobalObject();
-        globalObject.defineGlobalProperty("__vertx", vertx, false);
-        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-        globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
-        globalObject.defineGlobalProperty("__nodyn", this, false);
-
-        EventLoopGroup elg = ((DefaultVertx) vertx).getEventLoopGroup();
-        if (parent == null) {
-            this.managedLoop = new RootManagedEventLoopGroup(elg);
-        } else {
-            this.managedLoop = parent.managedLoop.newChild();
-        }
+        this.eventLoop = new EventLoop(elg, controlLifeCycle);
     }
 
     public void setExitHandler(ExitHandler handle) {
@@ -112,7 +84,7 @@ public class Nodyn extends DynJS {
     }
 
     void reallyExit(int exitCode) {
-        this.managedLoop.shutdown();
+        this.eventLoop.shutdown();
         if (this.exitHandler != null) {
             this.exitHandler.reallyExit(exitCode);
         } else {
@@ -120,8 +92,8 @@ public class Nodyn extends DynJS {
         }
     }
 
-    public ManagedEventLoopGroup getEventLoop() {
-        return this.managedLoop;
+    public EventLoop getEventLoop() {
+        return this.eventLoop;
     }
 
     public Vertx getVertx() {
@@ -139,16 +111,12 @@ public class Nodyn extends DynJS {
     }
 
     public void start() {
-        start( null );
+        start(null);
     }
 
     public void start(final Runnable callback) {
-        final RefHandle handle = this.managedLoop.newHandle();
-        EventLoopGroup elg = this.managedLoop.getEventLoopGroup();
-
         this.completionHandler = new CompletionHandler();
-
-        elg.submit(new Runnable() {
+        this.eventLoop.submitUserTask(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -156,8 +124,7 @@ public class Nodyn extends DynJS {
                 } catch (Throwable t) {
                     Nodyn.this.completionHandler.error = t;
                 } finally {
-                    handle.unref();
-                    if ( callback != null ) {
+                    if (callback != null) {
                         callback.run();
                     }
                 }
@@ -166,13 +133,11 @@ public class Nodyn extends DynJS {
     }
 
     public void shutdown() {
-        this.managedLoop.shutdown();
+        this.eventLoop.shutdown();
     }
 
     public int await() throws Throwable {
-        if (this.managedLoop instanceof RootManagedEventLoopGroup) {
-            ((RootManagedEventLoopGroup) this.managedLoop).await();
-        }
+        this.eventLoop.await();
 
         if (this.completionHandler.error != null) {
             throw completionHandler.error;

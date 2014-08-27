@@ -18,13 +18,11 @@ package io.nodyn.process;
 
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
-import jnr.constants.platform.Errno;
 import jnr.posix.POSIX;
 import jnr.posix.SpawnFileAction;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,17 +38,6 @@ public class ProcessWrap extends HandleWrap {
     private List<String> envp = new ArrayList<>();
 
     private List<StdioConfig> stdio = new ArrayList<>();
-
-    private static class StdioOption {
-        private static enum Type {
-            FD,
-            PIPE,
-            IGNORE,
-        }
-
-        public Type type;
-        public int fd;
-    }
 
     public ProcessWrap(NodeProcess process) {
         super(process, false);

@@ -18,8 +18,8 @@ package io.nodyn.netty;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.nodyn.CallbackResult;
-import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
+import io.nodyn.async.AsyncWrap;
 
 /**
  * @author Bob McWhirter
@@ -27,9 +27,9 @@ import io.nodyn.NodeProcess;
 public class AbstractEventSourceHandler extends ChannelDuplexHandler {
 
     protected final NodeProcess process;
-    protected final EventSource eventSource;
+    protected final AsyncWrap eventSource;
 
-    public AbstractEventSourceHandler(NodeProcess process, EventSource eventSource) {
+    public AbstractEventSourceHandler(NodeProcess process, AsyncWrap eventSource) {
         this.process = process;
         this.eventSource = eventSource;
     }

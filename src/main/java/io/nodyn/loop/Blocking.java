@@ -24,15 +24,15 @@ import io.netty.channel.EventLoopGroup;
  */
 public class Blocking {
 
-    private final ManagedEventLoopGroup managedLoop;
+    private final EventLoop eventLoop;
 
-    public Blocking(ManagedEventLoopGroup managedLoop) {
-        this.managedLoop = managedLoop;
+    public Blocking(EventLoop eventLoop) {
+        this.eventLoop = eventLoop;
     }
 
 
     public void submit(final Runnable action) {
-        final RefHandle handle = this.managedLoop.newHandle();
+        final RefHandle handle = this.eventLoop.newHandle();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -43,8 +43,10 @@ public class Blocking {
     }
 
     public void unblock(final Runnable action) {
-        final EventLoopGroup elg = managedLoop.getEventLoopGroup();
-        final RefHandle refHandle = managedLoop.newHandle();
+        this.eventLoop.submitUserTask( action );
+        /*
+        final EventLoopGroup elg = eventLoop.getEventLoopGroup();
+        final RefHandle refHandle = eventLoop.newHandle();
         elg.submit(new Runnable() {
             @Override
             public void run() {
@@ -56,6 +58,7 @@ public class Blocking {
 
             }
         });
+        */
     }
 
 

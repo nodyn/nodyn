@@ -17,8 +17,9 @@
 package io.nodyn.netty;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.nodyn.EventSource;
+import io.netty.util.ReferenceCountUtil;
 import io.nodyn.NodeProcess;
+import io.nodyn.async.AsyncWrap;
 
 
 /**
@@ -26,14 +27,14 @@ import io.nodyn.NodeProcess;
  */
 public class DataEventHandler extends AbstractEventSourceHandler {
 
-    public DataEventHandler(NodeProcess process, EventSource eventSource) {
+    public DataEventHandler(NodeProcess process, AsyncWrap eventSource) {
         super(process, eventSource);
     }
 
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        emit( "data", msg );
+        emit("data", ReferenceCountUtil.retain(msg));
         super.channelRead(ctx, msg);
     }
 }

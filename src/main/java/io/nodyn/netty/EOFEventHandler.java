@@ -20,13 +20,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
+import io.nodyn.async.AsyncWrap;
 
 /**
  * @author Bob McWhirter
  */
 public class EOFEventHandler extends AbstractEventSourceHandler {
 
-    public EOFEventHandler(NodeProcess process, EventSource eventSource) {
+    public EOFEventHandler(NodeProcess process, AsyncWrap eventSource) {
         super(process, eventSource);
     }
 

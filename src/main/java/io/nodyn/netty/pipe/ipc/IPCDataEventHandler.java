@@ -17,8 +17,9 @@
 package io.nodyn.netty.pipe.ipc;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.nodyn.EventSource;
+import io.netty.util.ReferenceCountUtil;
 import io.nodyn.NodeProcess;
+import io.nodyn.async.AsyncWrap;
 import io.nodyn.netty.AbstractEventSourceHandler;
 
 
@@ -27,7 +28,7 @@ import io.nodyn.netty.AbstractEventSourceHandler;
  */
 public class IPCDataEventHandler extends AbstractEventSourceHandler {
 
-    public IPCDataEventHandler(NodeProcess process, EventSource eventSource) {
+    public IPCDataEventHandler(NodeProcess process, AsyncWrap eventSource) {
         super(process, eventSource);
     }
 
@@ -37,7 +38,7 @@ public class IPCDataEventHandler extends AbstractEventSourceHandler {
         process.getEventLoop().getEventLoopGroup().submit(new Runnable() {
             @Override
             public void run() {
-                emit("dataWithHandle",msg);
+                emit("dataWithHandle", ReferenceCountUtil.retain(msg));
             }
         });
         super.channelRead(ctx, msg);
