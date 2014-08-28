@@ -23,11 +23,11 @@ describe("The timers module", function() {
     waitsFor(helper.testComplete, "the setTimeoutWaits test to complete", 3000);
     setTimeout(function() {
       x = x+1;
-    }, 100);
+    }, 300);
     setTimeout(function() {
       expect(x).toBe(1);
       helper.testComplete(true);
-    }, 200);
+    }, 2000);
   });
 
   it('should pass testSetTimeoutPassesArgs', function() {
@@ -60,12 +60,12 @@ describe("The timers module", function() {
     waitsFor(helper.testComplete, "the setInterval test to complete", 3000);
     var id = setInterval(function() {
       x = x+1;
-    }, 100);
+    }, 300);
     setTimeout(function() {
       expect(x).toBeGreaterThan(1);
       clearInterval(id);
       helper.testComplete(true);
-    }, 1000 );
+    }, 2000 );
   });
 
   it('should pass testClearInterval', function() {
