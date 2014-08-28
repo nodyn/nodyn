@@ -82,7 +82,7 @@ public class NodeProcess extends EventSource {
     }
 
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
-        this.nodyn.getEventLoop().getEventLoopGroup().submit(new Ticker(this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)));
+        this.nodyn.getEventLoop().submitUserTask(new Ticker(this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)));
     }
 
     public boolean getNeedImmediateCallback() {
