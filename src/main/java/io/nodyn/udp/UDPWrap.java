@@ -7,9 +7,9 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.ReferenceCountUtil;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
-import sun.nio.ch.Net;
 
 import java.net.*;
 
@@ -26,7 +26,8 @@ public class UDPWrap extends HandleWrap {
         super(process, false);
         bootstrap = new Bootstrap();
         bootstrap.group(getEventLoopGroup())
-                .channel(NioDatagramChannel.class);
+                 .channel(NioDatagramChannel.class)
+                 .handler(new DatagramChannelInitializer(UDPWrap.this));
     }
 
     public Object bind(final String address, final int port, int flags, final Family family) throws InterruptedException {
@@ -37,10 +38,7 @@ public class UDPWrap extends HandleWrap {
             } else {
                 localAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             }
-            bootstrap.handler(new DatagramChannelInitializer(UDPWrap.this))
-                     .localAddress(localAddress);
-
-            this.channelFuture = bootstrap.bind(localAddress);
+            this.channelFuture = bootstrap.localAddress(localAddress).bind(localAddress);
             this.channelFuture.sync();
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,8 +54,7 @@ public class UDPWrap extends HandleWrap {
             if (family == Family.IPv4) remoteAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             else remoteAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
 
-            // TODO: Why do we have to copy the buffer?
-            DatagramPacket packet = new DatagramPacket(buf.copy(offset, length), remoteAddress, localAddress);
+            DatagramPacket packet = new DatagramPacket(ReferenceCountUtil.retain(buf.slice(offset, length)),remoteAddress, localAddress);
             channelFuture.channel().writeAndFlush(packet);
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -124,7 +121,6 @@ public class UDPWrap extends HandleWrap {
     }
 
     private void setChannelOption(ChannelOption option, Object value) {
-        // TODO: Can the options just be set on bootstrap even after a bind()?
         if (channelFuture != null) {
             channelFuture.channel().config().setOption(option, value);
         } else {

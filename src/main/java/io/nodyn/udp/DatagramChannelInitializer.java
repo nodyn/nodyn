@@ -20,11 +20,9 @@ public class DatagramChannelInitializer extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel channel) throws Exception {
 
-        // datagram channel initial configuration
         channel.config().setAutoRead(false)
                 .setOption(ChannelOption.SO_BROADCAST, true);
 
-        // handler for incoming datagrams, and unrefing when the channel is closed
         channel.pipeline().addLast("recv", new DatagramInboundHandler(udpWrap))
 //                          .addLast("debug", new DebugHandler("UDP"))
                           .addLast("handle", new UnrefHandler(udpWrap));

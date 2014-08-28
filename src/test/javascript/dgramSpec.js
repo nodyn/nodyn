@@ -25,7 +25,7 @@ describe('The dgram module', function() {
     socket.close();
   });
 
-  it('should bind a socket', function() {
+  it('should bind a udp4 socket', function() {
     waitsFor(helper.testComplete, "the dgram bind test", 5000);
     var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();
@@ -36,7 +36,7 @@ describe('The dgram module', function() {
     });
   });
 
-  it('should close a socket', function() {
+  it('should close a udp4 socket', function() {
     waitsFor(helper.testComplete, "the dgram socket close test", 5000);
     var socket = dgram.createSocket('udp4');
     expect(socket !== null).toBeTruthy();

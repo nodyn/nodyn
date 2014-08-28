@@ -39,26 +39,26 @@ function onRecv(result) {
 var UDP = function() {
   if (!(this instanceof UDP)) return new UDP();
   Handle.call(this, new io.nodyn.udp.UDPWrap(process._process));
+  this._handle.on('recv', onRecv.bind(this));
 };
 util.inherits(UDP, Handle);
 module.exports.UDP = UDP;
 
 UDP.prototype.bind = function(ip, port, flags) {
-  return this._handle.bind(ip, port, flags, Family.IPv4);
+  var e = this._handle.bind(ip, port, flags, Family.IPv4);
+  if (e) return new Error(e.message);
 };
 
 UDP.prototype.bind6 = function(ip, port, flags) {
-  return this._handle.bind(ip, port, flags, Family.IPv6);
+  var e = this._handle.bind(ip, port, flags, Family.IPv6);
+  if (e) return new Error(e.message);
 };
 
 UDP.prototype.recvStart = function() {
-  this._handle.on('recv', onRecv.bind(this));
   this._handle.recvStart();
 };
 
 UDP.prototype.send = function(req, buffer, offset, length, port, address) {
-  // TODO: Do we ignore req? It's just a JS object with two properties
-  // 'buffer' and 'length', but we're already getting the buffer itself
   this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv4);
   if (req.oncomplete) {
     req.oncomplete();
@@ -66,9 +66,10 @@ UDP.prototype.send = function(req, buffer, offset, length, port, address) {
 };
 
 UDP.prototype.send6 = function(req, buffer, offset, length, port, address) {
-  // TODO: Do we ignore req? It's just a JS object with two properties
-  // 'buffer' and 'length', but we're already getting the buffer itself
   this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv6);
+  if (req.oncomplete) {
+    req.oncomplete();
+  }
 };
 
 UDP.prototype.recvStop = function() {
