@@ -30,24 +30,8 @@ public class Hash {
 
     private final MessageDigest digest;
 
-    public Hash(String algorithm) {
-        switch (algorithm) {
-            case "sha1":
-                this.digest = new SHA1.Digest();
-                break;
-            case "md5":
-                this.digest = new MD5.Digest();
-                break;
-            case "sha256":
-                this.digest = new SHA256.Digest();
-                break;
-            case "sha512":
-                this.digest = new SHA512.Digest();
-                break;
-            default: {
-                throw new IllegalArgumentException( "Invalid hash algorithm: " + algorithm );
-            }
-        }
+    public Hash(MessageDigest digest) {
+        this.digest = digest;
     }
 
     public void update(ByteBuf buf) {

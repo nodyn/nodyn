@@ -32,11 +32,24 @@ function digest(outputEncoding) {
   return buf;
 }
 
+var hashAlgorithms = {
+  'md5':     org.bouncycastle.jcajce.provider.digest.MD5.Digest,
+  'sha1':    org.bouncycastle.jcajce.provider.digest.SHA1.Digest,
+  'sha256':  org.bouncycastle.jcajce.provider.digest.SHA256.Digest,
+  'sha512':  org.bouncycastle.jcajce.provider.digest.SHA512.Digest,
+};
+
 function Hash(algorithm) {
   if ( ! this instanceof Hash ) { return new Hash(algorithm); }
 
-  this._delegate = new io.nodyn.crypto.Hash( algorithm );
-}
+  var algo = hashAlgorithms[ algorithm ];
+
+  if ( ! algo ) {
+    throw new Error( "Digest method not supported" );
+  }
+
+  this._delegate = new io.nodyn.crypto.Hash( new algo() );
+};
 
 Hash.prototype.update = update;
 Hash.prototype.digest = digest;
