@@ -33,10 +33,20 @@ function digest(outputEncoding) {
 }
 
 var hashAlgorithms = {
-  'md5':     org.bouncycastle.jcajce.provider.digest.MD5.Digest,
-  'sha1':    org.bouncycastle.jcajce.provider.digest.SHA1.Digest,
-  'sha256':  org.bouncycastle.jcajce.provider.digest.SHA256.Digest,
-  'sha512':  org.bouncycastle.jcajce.provider.digest.SHA512.Digest,
+  'md4':       org.bouncycastle.jcajce.provider.digest.MD4.Digest,
+  'md5':       org.bouncycastle.jcajce.provider.digest.MD5.Digest,
+  'sha1':      org.bouncycastle.jcajce.provider.digest.SHA1.Digest,
+  'sha3':      org.bouncycastle.jcajce.provider.digest.SHA3.Digest,
+  'sha224':    org.bouncycastle.jcajce.provider.digest.SHA224.Digest,
+  'sha256':    org.bouncycastle.jcajce.provider.digest.SHA256.Digest,
+  'sha384':    org.bouncycastle.jcajce.provider.digest.SHA384.Digest,
+  'sha512':    org.bouncycastle.jcajce.provider.digest.SHA512.Digest,
+  'ripemd120': org.bouncycastle.jcajce.provider.digest.RIPEMD128.Digest,
+  'ripemd160': org.bouncycastle.jcajce.provider.digest.RIPEMD160.Digest,
+  'ripemd256': org.bouncycastle.jcajce.provider.digest.RIPEMD256.Digest,
+  'ripemd320': org.bouncycastle.jcajce.provider.digest.RIPEMD320.Digest,
+  'rmd160':    org.bouncycastle.jcajce.provider.digest.RIPEMD160.Digest,
+  'whirlpool': org.bouncycastle.jcajce.provider.digest.Whirlpool.Digest,
 };
 
 function Hash(algorithm) {
