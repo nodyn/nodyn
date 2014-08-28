@@ -18,10 +18,7 @@ package io.nodyn.crypto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 
@@ -33,30 +30,15 @@ public class Hmac {
 
     private final HMac hmac;
 
-    public Hmac(String algorithm, ByteBuf key) throws InvalidKeyException {
-        switch (algorithm) {
-            case "md5":
-                this.hmac = new HMac(new MD5Digest());
-                break;
-            case "sha1":
-                this.hmac = new HMac(new SHA1Digest());
-                break;
-            case "sha256":
-                this.hmac = new HMac(new SHA256Digest());
-                break;
-            case "sha512":
-                this.hmac = new HMac(new SHA512Digest());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid HMAC algorithm: " + algorithm);
-        }
-        computeKey(algorithm, key);
+    public Hmac(Digest digest, ByteBuf key) throws InvalidKeyException {
+        this.hmac = new HMac( digest );
+        computeKey(key);
     }
 
-    private void computeKey(String algorithm, ByteBuf key) throws InvalidKeyException {
+    private void computeKey(ByteBuf key) throws InvalidKeyException {
         byte[] keyBytes = new byte[ key.readableBytes() ];
         key.readBytes( keyBytes );
-        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, algorithm);
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, this.hmac.getUnderlyingDigest().getAlgorithmName() );
         KeyParameter param = new KeyParameter(secretKey.getEncoded());
         this.hmac.init(param);
     }

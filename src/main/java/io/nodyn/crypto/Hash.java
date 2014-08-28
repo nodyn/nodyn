@@ -18,30 +18,27 @@ package io.nodyn.crypto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.bouncycastle.jcajce.provider.digest.MD5;
-import org.bouncycastle.jcajce.provider.digest.SHA1;
-import org.bouncycastle.jcajce.provider.digest.SHA256;
-import org.bouncycastle.jcajce.provider.digest.SHA512;
+import org.bouncycastle.crypto.Digest;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class Hash {
 
-    private final MessageDigest digest;
+    private final Digest digest;
 
-    public Hash(MessageDigest digest) {
+    public Hash(Digest digest) {
         this.digest = digest;
     }
 
     public void update(ByteBuf buf) {
         byte[] bytes = new byte[ buf.readableBytes() ];
         buf.getBytes( buf.readerIndex(), bytes );
-        this.digest.update( bytes );
+        this.digest.update( bytes, 0, bytes.length );
     }
 
     public ByteBuf digest() throws NoSuchAlgorithmException {
-        byte[] digestBytes = this.digest.digest();
+        byte[] digestBytes = new byte[ this.digest.getDigestSize() ];
+        this.digest.doFinal( digestBytes, 0 );
         return Unpooled.wrappedBuffer( digestBytes );
     }
 }

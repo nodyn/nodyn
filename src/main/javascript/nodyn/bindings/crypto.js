@@ -33,20 +33,20 @@ function digest(outputEncoding) {
 }
 
 var hashAlgorithms = {
-  'md4':       org.bouncycastle.jcajce.provider.digest.MD4.Digest,
-  'md5':       org.bouncycastle.jcajce.provider.digest.MD5.Digest,
-  'sha1':      org.bouncycastle.jcajce.provider.digest.SHA1.Digest,
-  'sha3':      org.bouncycastle.jcajce.provider.digest.SHA3.Digest,
-  'sha224':    org.bouncycastle.jcajce.provider.digest.SHA224.Digest,
-  'sha256':    org.bouncycastle.jcajce.provider.digest.SHA256.Digest,
-  'sha384':    org.bouncycastle.jcajce.provider.digest.SHA384.Digest,
-  'sha512':    org.bouncycastle.jcajce.provider.digest.SHA512.Digest,
-  'ripemd120': org.bouncycastle.jcajce.provider.digest.RIPEMD128.Digest,
-  'ripemd160': org.bouncycastle.jcajce.provider.digest.RIPEMD160.Digest,
-  'ripemd256': org.bouncycastle.jcajce.provider.digest.RIPEMD256.Digest,
-  'ripemd320': org.bouncycastle.jcajce.provider.digest.RIPEMD320.Digest,
-  'rmd160':    org.bouncycastle.jcajce.provider.digest.RIPEMD160.Digest,
-  'whirlpool': org.bouncycastle.jcajce.provider.digest.Whirlpool.Digest,
+  'md4':       org.bouncycastle.crypto.digests.MD4Digest,
+  'md5':       org.bouncycastle.crypto.digests.MD5Digest,
+  'sha1':      org.bouncycastle.crypto.digests.SHA1Digest,
+  'sha3':      org.bouncycastle.crypto.digests.SHA3Digest,
+  'sha224':    org.bouncycastle.crypto.digests.SHA224Digest,
+  'sha256':    org.bouncycastle.crypto.digests.SHA256Digest,
+  'sha384':    org.bouncycastle.crypto.digests.SHA384Digest,
+  'sha512':    org.bouncycastle.crypto.digests.SHA512Digest,
+  'ripemd120': org.bouncycastle.crypto.digests.RIPEMD128Digest,
+  'ripemd160': org.bouncycastle.crypto.digests.RIPEMD160Digest,
+  'ripemd256': org.bouncycastle.crypto.digests.RIPEMD256Digest,
+  'ripemd320': org.bouncycastle.crypto.digests.RIPEMD320Digest,
+  'rmd160':    org.bouncycastle.crypto.digests.RIPEMD160Digest,
+  'whirlpool': org.bouncycastle.crypto.digests.WhirlpoolDigest,
 };
 
 function Hash(algorithm) {
@@ -66,13 +66,19 @@ Hash.prototype.digest = digest;
 
 module.exports.Hash = Hash;
 
-
 function Hmac() {
   if ( ! this instanceof Hmac ) { return new Hmac(); }
 }
 
 Hmac.prototype.init = function(algorithm, key) {
-  this._delegate = new io.nodyn.crypto.Hmac( algorithm, key._nettyBuffer() );
+
+  var algo = hashAlgorithms[ algorithm ];
+
+  if ( ! algo ) {
+    throw new Error( "Digest method not supported" );
+  }
+
+  this._delegate = new io.nodyn.crypto.Hmac( new algo(), key._nettyBuffer() );
 }
 
 Hmac.prototype.update = update;
