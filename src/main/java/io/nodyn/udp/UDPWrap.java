@@ -4,10 +4,12 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
+import sun.nio.ch.Net;
 
 import java.net.*;
 
@@ -18,9 +20,13 @@ public class UDPWrap extends HandleWrap {
 
     private ChannelFuture channelFuture;
     private InetSocketAddress localAddress;
+    private final Bootstrap bootstrap;
 
     public UDPWrap(NodeProcess process) {
         super(process, false);
+        bootstrap = new Bootstrap();
+        bootstrap.group(getEventLoopGroup())
+                .channel(NioDatagramChannel.class);
     }
 
     public Object bind(final String address, final int port, int flags, final Family family) throws InterruptedException {
@@ -31,11 +37,8 @@ public class UDPWrap extends HandleWrap {
             } else {
                 localAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             }
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(getEventLoopGroup())
-                    .channel(NioDatagramChannel.class)
-                    .handler(new DatagramChannelInitializer(UDPWrap.this))
-                    .localAddress(localAddress);
+            bootstrap.handler(new DatagramChannelInitializer(UDPWrap.this))
+                     .localAddress(localAddress);
 
             this.channelFuture = bootstrap.bind(localAddress);
             this.channelFuture.sync();
@@ -71,6 +74,40 @@ public class UDPWrap extends HandleWrap {
         channelFuture.channel().config().setAutoRead(false);
     }
 
+    public void setBroadcast(int arg) {
+        setChannelOption(ChannelOption.SO_BROADCAST, arg == 1);
+    }
+
+    public void setTTL(int arg) {
+        // TODO: Should this be a different channel option?
+        setChannelOption(ChannelOption.IP_MULTICAST_TTL, arg);
+    }
+
+    public void setMulticastTTL(int arg) {
+        setChannelOption(ChannelOption.IP_MULTICAST_TTL, arg);
+    }
+
+    public void setMulticastLoopback(int arg) {
+        setChannelOption(ChannelOption.IP_MULTICAST_LOOP_DISABLED, arg == 1);
+    }
+
+    public void addMembership(String mcastAddr, String ifaceAddr) {
+        try {
+            if (mcastAddr != null) {
+                InetAddress mcast = InetAddress.getByName(mcastAddr);
+                setChannelOption(ChannelOption.IP_MULTICAST_ADDR, mcast);
+            }
+            if (ifaceAddr != null) {
+                System.err.println(">>>>>>>>>> SETTING IFACE TO "+ifaceAddr);
+                NetworkInterface iface = NetworkInterface.getByName(ifaceAddr);
+                System.err.println(">>>>>>>>>> SETTING IFACE TO "+iface);
+                setChannelOption(ChannelOption.IP_MULTICAST_IF, iface);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void close() {
         if (this.channelFuture != null && this.channelFuture.channel() != null) {
             this.channelFuture.addListener(ChannelFutureListener.CLOSE);
@@ -84,6 +121,15 @@ public class UDPWrap extends HandleWrap {
 
     public SocketAddress getRemoteAddress() {
         return this.channelFuture.channel().remoteAddress();
+    }
+
+    private void setChannelOption(ChannelOption option, Object value) {
+        // TODO: Can the options just be set on bootstrap even after a bind()?
+        if (channelFuture != null) {
+            channelFuture.channel().config().setOption(option, value);
+        } else {
+            bootstrap.option(option, value);
+        }
     }
 
 }

@@ -82,21 +82,26 @@ UDP.prototype.getsockname = function(out) {
   out.family  = ( local.address instanceof java.net.Inet6Address ? 'IPv6' : 'IPv4' );
 };
 
-UDP.prototype.addMembership = function() {
+UDP.prototype.addMembership = function(mcastAddr, ifaceAddr) {
+  this._handle.addMembership(mcastAddr, ifaceAddr);
 };
 
 UDP.prototype.dropMembership = function() {
 };
 
-UDP.prototype.setMulticastTTL = function() {
+UDP.prototype.setMulticastTTL = function(arg) {
+  this._handle.setMulticastTTL(arg);
 };
 
-UDP.prototype.setMulticastLoopback = function() {
+UDP.prototype.setMulticastLoopback = function(arg) {
+  this._handle.setMulticastLoopback(arg);
 };
 
-UDP.prototype.setBroadcast = function() {
+UDP.prototype.setBroadcast = function(arg) {
+  this._handle.setBroadcast(arg);
 };
 
-UDP.prototype.setTTL = function() {
+UDP.prototype.setTTL = function(arg) {
+  this._handle.setTTL(arg);
 };
 

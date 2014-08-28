@@ -91,10 +91,10 @@ describe('The dgram module', function() {
     });
   });
 
-  xit('should echo packets', function() {
+  it('should echo packets', function() {
     waitsFor(helper.testComplete, "the dgram echo test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
     var buffer = new Buffer('turkey dinner');
 
     peer1.on('error', unexpectedError.bind(this));
@@ -114,15 +114,15 @@ describe('The dgram module', function() {
 
     peer2.bind(54321, function() {
       peer1.bind(54322, function() {
-        peer2.send(buffer, 0, buffer.length, 54321, '0.0.0.0');
+        peer2.send(buffer, 0, buffer.length, 54321, 'localhost');
       });
     });
   });
 
-  xit('should pass testBroadcast', function() {
+  it('should allow setting the broadcast option on a socket', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
 
     peer1.setBroadcast(true);
     peer2.setBroadcast(true);
@@ -151,8 +151,8 @@ describe('The dgram module', function() {
     var groupAddress = '230.0.0.1';
     var received = false;
 
-    var peer1 = dgram.createSocket();
-    var peer2 = dgram.createSocket();
+    var peer1 = dgram.createSocket('udp4');
+    var peer2 = dgram.createSocket('udp4');
 
     peer1.on('error', unexpectedError.bind(this));
     peer2.on('error', unexpectedError.bind(this));
