@@ -76,7 +76,7 @@
     <version.commons.lang>3.1</version.commons.lang>
     <version.jasmine>0.0.12</version.jasmine>
     <version.bouncycastle>1.50</version.bouncycastle>
-    <version.jnr-posix>3.0.3-SNAPSHOT</version.jnr-posix>
+    <version.jnr-posix>3.0.3</version.jnr-posix>
 
     <test.pattern>**/*Spec.js</test.pattern>
   </properties>
