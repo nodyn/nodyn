@@ -39,6 +39,7 @@ public class UDPWrap extends HandleWrap {
                     .localAddress(localAddress);
 
             this.channelFuture = bootstrap.bind(localAddress);
+            this.channelFuture.sync();
         } catch (Exception e) {
             e.printStackTrace();
             return e; // if failure, return an error - udp_wrap.js should turn this into a JS Error
