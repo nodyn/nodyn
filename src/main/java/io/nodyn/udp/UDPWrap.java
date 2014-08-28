@@ -18,7 +18,6 @@ public class UDPWrap extends HandleWrap {
 
     private ChannelFuture channelFuture;
     private InetSocketAddress localAddress;
-    private InetSocketAddress remoteAddress;
 
     public UDPWrap(NodeProcess process) {
         super(process, false);
@@ -50,6 +49,7 @@ public class UDPWrap extends HandleWrap {
 
     public Object send(ByteBuf buf, int offset, int length, int port, String address, Family family) {
         try {
+            InetSocketAddress remoteAddress;
             if (family == Family.IPv4) remoteAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             else remoteAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
 
@@ -83,7 +83,7 @@ public class UDPWrap extends HandleWrap {
     }
 
     public SocketAddress getRemoteAddress() {
-        return this.localAddress;
+        return this.channelFuture.channel().remoteAddress();
     }
 
 }

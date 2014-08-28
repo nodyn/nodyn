@@ -24,12 +24,14 @@ function onRecv(result) {
     if (result.error) {
       throw Error(result.error); // TODO: throw here?
     }
-    var remote = this._handle.remoteAddress,
-        rinfo = {
-          address: remote.address.hostAddress,
-          port: remote.port
-        },
-        buf = process.binding('buffer').createBuffer(result.result);
+    var buf = process.binding('buffer').createBuffer(result.result),
+        remote = this._handle.remoteAddress,
+        rinfo = {};
+       
+    if (remote) {
+      rinfo.address = remote.address.hostAddress;
+      rinfo.port = remote.port;
+    }
     this.onmessage(buf.length, this, buf, rinfo);
   }
 }
