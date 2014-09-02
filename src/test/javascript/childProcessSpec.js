@@ -52,6 +52,16 @@ describe( 'child_process', function() {
     } );
   });
 
+  it( 'should be able to execFile', function() {
+    waitsFor(helper.testComplete, "child process to read", 5000 );
+    var content = '';
+    var proc = child_process.execFile('/bin/cat', [ 'pom.xml' ], function(error, stdout, stderr ) {
+      expect( stdout.indexOf( '<project' ) ).toBeGreaterThan( 0 );
+      expect( stdout.indexOf( '</project' ) ).toBeGreaterThan( 0 );
+      helper.testComplete(true);
+    });
+  });
+
   it( 'should be able to fork', function() {
     waitsFor(helper.testComplete, "child process to be killed", 10000 );
     var child = child_process.fork( './src/test/javascript/forked_module.js' );
