@@ -38,6 +38,7 @@ public class TimerWrap extends HandleWrap implements Runnable {
     }
 
     public void start(int msec, int repeat) {
+        // repeat seems to never be used?!
         if ( msec == 0 ) {
             msec = 1;
         }
