@@ -1,12 +1,6 @@
 
 var helper = require('./specHelper');
-try {
 var crypto = require('crypto');
-} catch( err) {
-  console.log( "crypto: " + crypto );
-  console.log( crypto );
-  System.err.println( err );
-}
 
 describe("crypto Hash module", function() {
 
@@ -103,5 +97,12 @@ describe("crypto Hash module", function() {
       hash.write('made glorious summer');
       expect(hash.digest('base64')).toBe('5iFo2A3cfZkgUxIrFm3n2NsBEkIrr0sSVbdCF4n9WVo740HCdAFTV5RW/ez4Jkp/wqDHqmhRrlMbNuvpStFrYQ==');
   } );
+
+  it('should provide a list of available hashes', function() {
+    var hashes = crypto.getHashes();
+    expect( hashes.length ).toBeGreaterThan( 5 );
+    expect( hashes ).toContain( 'md5' );
+    expect( hashes ).toContain( 'sha1' );
+  });
 
 });

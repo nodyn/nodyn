@@ -72,7 +72,6 @@ describe("crypto Cipher & Decipher module", function() {
 
   xit( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();
-
     expect( types ).toContain( "des" );
     expect( types ).toContain( "aes-128-cbc" );
   })

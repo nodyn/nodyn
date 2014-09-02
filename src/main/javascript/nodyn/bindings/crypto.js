@@ -65,6 +65,13 @@ Hash.prototype.update = update;
 Hash.prototype.digest = digest;
 
 module.exports.Hash = Hash;
+module.exports.getHashes = function() {
+  var hashes = [];
+  for ( n in hashAlgorithms ) {
+    hashes.push( n );
+  }
+  return hashes;
+}
 
 function Hmac() {
   if ( ! this instanceof Hmac ) { return new Hmac(); }
