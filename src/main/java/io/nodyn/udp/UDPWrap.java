@@ -25,7 +25,7 @@ public class UDPWrap extends HandleWrap {
     public UDPWrap(NodeProcess process) {
         super(process, false);
         bootstrap = new Bootstrap();
-        bootstrap.group(getEventLoopGroup())
+        bootstrap.group(this.process.getEventLoop().getEventLoopGroup())
                  .channel(NioDatagramChannel.class)
                  .handler(new DatagramChannelInitializer(UDPWrap.this));
     }

@@ -21,6 +21,7 @@ import io.netty.util.concurrent.*;
 
 import java.util.concurrent.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -92,8 +93,8 @@ public class EventLoop implements RefCounted {
         });
     }
 
-    public void scheduleUserTask(final Runnable task, int time, TimeUnit units) {
-        this.userTaskExecutor.schedule(task, time, units);
+    public ScheduledFuture<?> scheduleUserTask(final Runnable task, int time, TimeUnit units) {
+        return this.userTaskExecutor.schedule(task, time, units);
     }
 
     public Future<?> submitBlockingTask(final Runnable task) {

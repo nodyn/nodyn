@@ -59,7 +59,8 @@ public class ImmediateCheckHandle implements Runnable {
             this.callback.run();
         } catch (Throwable t){
             t.printStackTrace();
+        } finally {
+            this.future = null;
         }
-        this.future = null;
     }
 }

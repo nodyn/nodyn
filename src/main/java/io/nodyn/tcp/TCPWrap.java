@@ -22,13 +22,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannelConfig;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.nodyn.netty.DebugHandler;
+import io.nodyn.NodeProcess;
 import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.UnrefHandler;
-import io.nodyn.NodeProcess;
 import io.nodyn.stream.StreamWrap;
 
 import java.io.IOException;
@@ -69,7 +67,7 @@ public class TCPWrap extends StreamWrap {
 
     public void listen(int backlog) {
         ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(getEventLoopGroup());
+        bootstrap.group(this.process.getEventLoop().getEventLoopGroup());
         bootstrap.channel(NioServerSocketChannel.class);
         bootstrap.childHandler(new ChannelInitializer<Channel>() {
             @Override
@@ -92,7 +90,7 @@ public class TCPWrap extends StreamWrap {
 
     public void connect(String addr, int port) {
         Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(getEventLoopGroup());
+        bootstrap.group(this.process.getEventLoop().getEventLoopGroup());
         bootstrap.channel(NioSocketChannel.class);
         if (this.port >= 0) {
             if (this.addr != null) {
