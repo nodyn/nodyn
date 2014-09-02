@@ -59,11 +59,11 @@ describe("The timers module", function() {
     var x = 0;
     waitsFor(helper.testComplete, "the setInterval test to complete", 3000);
     var id = setInterval(function() {
-      console.log( "interval fire: " + java.lang.Thread.currentThread() );
+      //console.log( "interval fire: " + java.lang.Thread.currentThread() );
       x = x+1;
     }, 300);
     setTimeout(function() {
-      console.log( "timeout fire: " + java.lang.Thread.currentThread() );
+      //console.log( "timeout fire: " + java.lang.Thread.currentThread() );
       expect(x).toBeGreaterThan(1);
       clearInterval(id);
       helper.testComplete(true);
