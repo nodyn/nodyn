@@ -61,9 +61,11 @@ describe("The timers module", function() {
     var id = setInterval(function() {
       console.log( "interval fire: " + java.lang.Thread.currentThread() );
       x = x+1;
+      console.log( "interval x=" + x );
     }, 300);
     setTimeout(function() {
       console.log( "timeout fire: " + java.lang.Thread.currentThread() );
+      console.log( "timeout x=" + x );
       expect(x).toBeGreaterThan(1);
       clearInterval(id);
       helper.testComplete(true);
