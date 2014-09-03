@@ -173,6 +173,56 @@ describe("crypto Cipher & Decipher module", function() {
     );
   } );
 
+  it( "should produce the same bytes as node.js for idea-cbc", function() {
+    testCipher( 'idea-cbc', 'bob',
+      '2c 40 a1 a4 df 4d 25 2e'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for idea-ecb", function() {
+    testCipher( 'idea-ecb', 'bob',
+      'dc c3 0f 83 10 6e 64 9b'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for rc2-cbc", function() {
+    testCipher( 'rc2-cbc', 'bob',
+      '21 c0 d5 58 2a 41 c9 d2'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for rc2-ecb", function() {
+    testCipher( 'rc2-ecb', 'bob',
+      '15 85 c5 f8 03 71 d8 4d'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for rc2-40-cbc", function() {
+    testCipher( 'rc2-40-cbc', 'bob',
+      'd3 78 5d 73 f6 52 cb 3c'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for rc2-64-cbc", function() {
+    testCipher( 'rc2-64-cbc', 'bob',
+      'd3 1c 9f f0 ec 53 6c 2c'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for seed-cbc", function() {
+    testCipher( 'seed-cbc', 'bob',
+      '96 5a c1 97 8d 0d 03 91 c6 4a 88 67 32 a7 8c 05'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for seed-ecb", function() {
+    testCipher( 'seed-ecb', 'bob',
+      '98 6f e6 36 6f 02 9e 03 9e f8 e0 f9 3c ee 6b b0'
+    );
+  } );
+
+
+
 
   it( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();

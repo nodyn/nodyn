@@ -221,6 +221,44 @@ registerCipher( 'des3',         192, 8, des_ede_cbc );
 registerCipher( 'des-ede3',     192, 0, des_ede_ecb );
 registerCipher( 'des-ede3-cbc', 192, 8, des_ede_cbc );
 
+function idea_cbc() {
+  return pkcs7( cbc( new engines.IDEAEngine() ) );
+}
+
+function idea_ecb() {
+  return pkcs7( ecb( new engines.IDEAEngine() ) );
+}
+
+registerCipher( 'idea',     128, 8, idea_cbc );
+registerCipher( 'idea-cbc', 128, 8, idea_cbc );
+registerCipher( 'idea-ecb', 128, 0, idea_ecb );
+
+function rc2_cbc() {
+  return pkcs7( cbc( new engines.RC2Engine() ) );
+}
+
+function rc2_ecb() {
+  return pkcs7( ecb( new engines.RC2Engine() ) );
+}
+
+registerCipher( 'rc2',     128, 8, rc2_cbc );
+registerCipher( 'rc2-cbc', 128, 8, rc2_cbc );
+registerCipher( 'rc2-ecb', 128, 0, rc2_ecb );
+
+registerCipher( 'rc2-40-cbc', 40, 8, rc2_cbc );
+registerCipher( 'rc2-64-cbc', 64, 8, rc2_cbc );
+
+function seed_cbc() {
+  return pkcs7( cbc( new engines.SEEDEngine() ) );
+}
+
+function seed_ecb() {
+  return pkcs7( ecb( new engines.SEEDEngine() ) );
+}
+
+registerCipher( 'seed-cbc', 128, 16, seed_cbc );
+registerCipher( 'seed-ecb', 128, 0,  seed_ecb );
+
 function generateKeyIv(password, algo) {
   return new io.nodyn.crypto.OpenSSLKDF( password._nettyBuffer(), algo.keyLen, algo.ivLen );
 }
