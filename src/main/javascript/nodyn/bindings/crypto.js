@@ -110,6 +110,10 @@ function ecb(cipher) {
   return cipher;
 }
 
+function buffered(cipher) {
+  return new org.bouncycastle.crypto.BufferedBlockCipher( cipher );
+}
+
 function pkcs7(cipher) {
   return new paddings.PaddedBufferedBlockCipher( cipher, new paddings.PKCS7Padding() );
 }
@@ -124,17 +128,32 @@ function registerCipher(name, keyLen, ivLen, factory) {
   };
 }
 
-registerCipher( 'aes-128-cbc', 128, 16,
-  function() { return pkcs7( cbc( new engines.AESEngine() ) ); }
-);
+function aes_cbc() {
+  return pkcs7( cbc( new engines.AESEngine() ) );
+}
 
-registerCipher( 'aes-128-cfb', 128, 16,
-  function() { return pkcs7( cfb( new engines.AESEngine() ) ); }
-);
+function aes_ecb() {
+  return pkcs7( ecb( new engines.AESEngine() ) );
+}
 
-registerCipher( 'aes-128-ecb', 128, 0,
-  function() { return pkcs7( ecb( new engines.AESEngine() ) ); }
-);
+registerCipher( 'aes128',      128, 16, aes_cbc );
+registerCipher( 'aes-128-cbc', 128, 16, aes_cbc );
+registerCipher( 'aes-128-ecb', 128, 0,  aes_ecb );
+
+registerCipher( 'aes192',      192, 16, aes_cbc );
+registerCipher( 'aes-192-cbc', 192, 16, aes_cbc );
+registerCipher( 'aes-192-ecb', 192, 0,  aes_ecb );
+
+registerCipher( 'aes256',      256, 16, aes_cbc );
+registerCipher( 'aes-256-cbc', 256, 16, aes_cbc );
+registerCipher( 'aes-256-ecb', 256, 0,  aes_ecb );
+
+function bf_cbc() {
+  return pkcs7( cbc( new engines.BlowfishEngine() ) );
+}
+
+registerCipher( 'bf',     128, 8, bf_cbc );
+registerCipher( 'bf-cbc', 128, 8, bf_cbc );
 
 registerCipher( 'des', 64, 8,
   function() { return pkcs7( cbc( new engines.DESEngine() ) ); }
@@ -151,7 +170,7 @@ function CipherBase(encipher){
 CipherBase.prototype.init = function(cipher, password) {
   var algo = cipherAlgorithms[cipher];
   if ( ! algo ) {
-    throw new Error( "Cipher method not supported" );
+    throw new Error( "Unknown cipher: " + cipher );
   }
 
   var keyIv = generateKeyIv( password, algo );

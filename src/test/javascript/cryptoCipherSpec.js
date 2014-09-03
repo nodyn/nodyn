@@ -40,76 +40,79 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f[7] ).toBe( 0x41 );
   })
 
+
   it( "should produce the same bytes as node.js for AES-128-CBC", function() {
-    var cipher = crypto.createCipher( 'aes-128-cbc', 'tacos' );
-    cipher.write( "bob" );
-    var f = cipher.final();
-    // <6c cb c2 da 50 ee 0a 76 21 89 db a6 b2 68 8a 99>
-
-    expect( f[0] ).toBe( 0x6c );
-    expect( f[1] ).toBe( 0xcb );
-    expect( f[2] ).toBe( 0xc2 );
-    expect( f[3] ).toBe( 0xda );
-    expect( f[4] ).toBe( 0x50 );
-    expect( f[5] ).toBe( 0xee );
-    expect( f[6] ).toBe( 0x0a );
-    expect( f[7] ).toBe( 0x76 );
-    expect( f[8] ).toBe( 0x21 );
-    expect( f[9] ).toBe( 0x89 );
-    expect( f[10] ).toBe( 0xdb );
-    expect( f[11] ).toBe( 0xa6 );
-    expect( f[12] ).toBe( 0xb2 );
-    expect( f[13] ).toBe( 0x68 );
-    expect( f[14] ).toBe( 0x8a );
-    expect( f[15] ).toBe( 0x99 );
-
-
-    var decipher = crypto.createDecipher( 'aes-128-cbc', 'tacos' );
-    decipher.write( f );
-    f = decipher.final();
-    expect( f.toString() ).toBe( 'bob' );
-  });
+    testCipher( 'aes-128-cbc', 'bob',
+     '6c cb c2 da 50 ee 0a 76 21 89 db a6 b2 68 8a 99'
+    );
+  } );
 
   it( "should produce the same bytes as node.js for AES-128-ECB", function() {
-  try {
-    var cipher = crypto.createCipher( 'aes-128-ecb', 'tacos' );
-    cipher.write( "bob" );
-    var f = cipher.final();
-    // <ef a8 54 98 60 22 e7 e6 b3 ed 07 49 06 70 6b 5e>
+    testCipher( 'aes-128-ecb', 'bob',
+     'ef a8 54 98 60 22 e7 e6 b3 ed 07 49 06 70 6b 5e'
+    );
+  });
 
-    expect( f[0] ).toBe( 0xef );
-    expect( f[1] ).toBe( 0xa8 );
-    expect( f[2] ).toBe( 0x54 );
-    expect( f[3] ).toBe( 0x98 );
-    expect( f[4] ).toBe( 0x60 );
-    expect( f[5] ).toBe( 0x22 );
-    expect( f[6] ).toBe( 0xe7 );
-    expect( f[7] ).toBe( 0xe6 );
-    expect( f[8] ).toBe( 0xb3 );
-    expect( f[9] ).toBe( 0xed );
-    expect( f[10] ).toBe( 0x07 );
-    expect( f[11] ).toBe( 0x49 );
-    expect( f[12] ).toBe( 0x06 );
-    expect( f[13] ).toBe( 0x70 );
-    expect( f[14] ).toBe( 0x6b );
-    expect( f[15] ).toBe( 0x5e );
+  it( "should produce the same bytes as node.js for AES-192-CBC", function() {
+    testCipher( 'aes-192-cbc', 'bob',
+      '18 ed 20 9a 4c c8 9e 98 50 7b 69 06 03 f7 04 05'
+    );
+  } );
 
+  it( "should produce the same bytes as node.js for AES-192-ECB", function() {
+    testCipher( 'aes-192-ecb', 'bob',
+      'd1 ef 14 b1 fc 0a 19 55 df 68 bd d4 f4 14 85 65'
+    );
+  } );
 
-    var decipher = crypto.createDecipher( 'aes-128-ecb', 'tacos' );
-    decipher.write( f );
-    f = decipher.final();
-    expect( f.toString() ).toBe( 'bob' );
+  it( "should produce the same bytes as node.js for AES-192-CBC", function() {
+    testCipher( 'aes-256-cbc', 'bob',
+      'e8 d9 72 a6 0e ae 6c 2e 33 c2 c3 7b 89 03 a4 48'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for AES-192-ECB", function() {
+    testCipher( 'aes-256-ecb', 'bob',
+      'b5 34 54 89 1b a9 04 eb 19 c3 6f 08 fb ba f8 c9'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for blowfish", function() {
+    try {
+    testCipher( 'bf', 'bob',
+      'a9 fc 35 fa e8 c1 05 df'
+    );
     } catch (err) {
       console.log( err );
       err.printStackTrace();
     }
-  });
+  } );
 
   it( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();
     expect( types ).toContain( "des" );
     expect( types ).toContain( "aes-128-cbc" );
   })
+
+  function testCipher(name, plaintext, expected) {
+    var cipher = crypto.createCipher( name, 'tacos' );
+    cipher.write( plaintext );
+    var f = cipher.final();
+
+    var bytes = expected.split(' ' );
+
+    for ( i = 0 ; i < bytes.length ; ++i ) {
+      var left = f[i];
+      var right = parseInt( bytes[i], 16 );
+      expect( f[i] ).toBe( parseInt( "0x" + bytes[i] ) );
+    }
+
+    var decipher = crypto.createDecipher( name, 'tacos' );
+    decipher.write( f );
+    f = decipher.final();
+    expect( f.toString() ).toBe( plaintext );
+
+  }
 
 });
 
