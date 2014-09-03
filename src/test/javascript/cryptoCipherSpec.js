@@ -77,16 +77,55 @@ describe("crypto Cipher & Decipher module", function() {
     );
   } );
 
-  it( "should produce the same bytes as node.js for blowfish", function() {
-    try {
-    testCipher( 'bf', 'bob',
+  it( "should produce the same bytes as node.js for bf-cbc", function() {
+    testCipher( 'bf-cbc', 'bob',
       'a9 fc 35 fa e8 c1 05 df'
     );
-    } catch (err) {
-      console.log( err );
-      err.printStackTrace();
-    }
   } );
+
+  it( "should produce the same bytes as node.js for bf-ecb", function() {
+    testCipher( 'bf-ecb', 'bob',
+      '1a ff 55 a0 9a c3 7f c3'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-128-cbc", function() {
+    testCipher( 'camellia-128-cbc', 'bob',
+      'ca 5a be 29 b7 16 c2 18 ee 6c f7 dc 76 11 1b a3'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-128-ecb", function() {
+    testCipher( 'camellia-128-ecb', 'bob',
+      '49 26 bb d8 2f 25 f3 82 43 72 fb 04 28 c8 87 05'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-192-cbc", function() {
+    testCipher( 'camellia-192-cbc', 'bob',
+      'fb 84 75 be 36 cd af a2 4b d6 0c bc 19 44 66 49'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-192-ecb", function() {
+    testCipher( 'camellia-192-ecb', 'bob',
+      '91 73 f3 50 af a9 4d 8b 44 f0 7b 69 0f 9f 41 4e'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-256-cbc", function() {
+    testCipher( 'camellia-256-cbc', 'bob',
+      'd5 20 97 9d b0 7c 7a 85 6b d8 0d 1f 5b 04 4b 6b'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for camellia-256-ecb", function() {
+    testCipher( 'camellia-256-ecb', 'bob',
+      'c7 1e c3 92 99 ed d1 91 6f c4 99 1a a5 d8 59 22'
+    );
+  } );
+
+
 
   it( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();

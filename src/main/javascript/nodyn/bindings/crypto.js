@@ -152,8 +152,34 @@ function bf_cbc() {
   return pkcs7( cbc( new engines.BlowfishEngine() ) );
 }
 
+function bf_ecb() {
+  return pkcs7( cbc( new engines.BlowfishEngine() ) );
+}
+
 registerCipher( 'bf',     128, 8, bf_cbc );
 registerCipher( 'bf-cbc', 128, 8, bf_cbc );
+registerCipher( 'bf-ecb', 128, 0, bf_ecb );
+registerCipher( 'blowfish', 128, 0, bf_ecb );
+
+function camellia_cbc() {
+  return pkcs7( cbc( new engines.CamelliaEngine() ) );
+}
+
+function camellia_ecb() {
+  return pkcs7( ecb( new engines.CamelliaEngine() ) );
+}
+
+registerCipher( 'camellia128',      128, 16, camellia_cbc );
+registerCipher( 'camellia-128-cbc', 128, 16, camellia_cbc );
+registerCipher( 'camellia-128-ecb', 128, 0,  camellia_ecb );
+
+registerCipher( 'camellia192',      192, 16, camellia_cbc );
+registerCipher( 'camellia-192-cbc', 192, 16, camellia_cbc );
+registerCipher( 'camellia-192-ecb', 192, 0,  camellia_ecb );
+
+registerCipher( 'camellia256',      256, 16, camellia_cbc );
+registerCipher( 'camellia-256-cbc', 256, 16, camellia_cbc );
+registerCipher( 'camellia-256-ecb', 256, 0,  camellia_ecb );
 
 registerCipher( 'des', 64, 8,
   function() { return pkcs7( cbc( new engines.DESEngine() ) ); }
