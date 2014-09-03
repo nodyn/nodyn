@@ -1,5 +1,7 @@
 package io.nodyn.crypto;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,28 +13,31 @@ public class OpenSSLKDFTest {
 
     @Test
     public void testGeneration() {
-        OpenSSLKDF kdf = new OpenSSLKDF("tacos".getBytes(), 8, 8);
-        byte[] key = kdf.key();
+        ByteBuf password = Unpooled.buffer();
+        password.writeBytes( "tacos".getBytes() );
+        OpenSSLKDF kdf = new OpenSSLKDF(password, 64, 8);
 
-        assertEquals(key[0] & 0xff, 0xda);
-        assertEquals(key[1] & 0xff, 0xce);
-        assertEquals(key[2] & 0xff, 0xdf);
-        assertEquals(key[3] & 0xff, 0x41);
-        assertEquals(key[4] & 0xff, 0x21);
-        assertEquals(key[5] & 0xff, 0x04);
-        assertEquals(key[6] & 0xff, 0x44);
-        assertEquals(key[7] & 0xff, 0xfe);
+        ByteBuf key = kdf.getKey();
 
-        byte[] iv = kdf.iv();
+        assertEquals(key.getByte(0) & 0xff, 0xda);
+        assertEquals(key.getByte(1) & 0xff, 0xce);
+        assertEquals(key.getByte(2) & 0xff, 0xdf);
+        assertEquals(key.getByte(3) & 0xff, 0x41);
+        assertEquals(key.getByte(4) & 0xff, 0x21);
+        assertEquals(key.getByte(5) & 0xff, 0x04);
+        assertEquals(key.getByte(6) & 0xff, 0x44);
+        assertEquals(key.getByte(7) & 0xff, 0xfe);
 
-        assertEquals(iv[0] & 0xff, 0x85);
-        assertEquals(iv[1] & 0xff, 0x47);
-        assertEquals(iv[2] & 0xff, 0xf5);
-        assertEquals(iv[3] & 0xff, 0xb1);
-        assertEquals(iv[4] & 0xff, 0xcf);
-        assertEquals(iv[5] & 0xff, 0x08);
-        assertEquals(iv[6] & 0xff, 0x5a);
-        assertEquals(iv[7] & 0xff, 0x6c);
+        ByteBuf iv = kdf.getIv();
+
+        assertEquals(iv.getByte(0) & 0xff, 0x85);
+        assertEquals(iv.getByte(1) & 0xff, 0x47);
+        assertEquals(iv.getByte(2) & 0xff, 0xf5);
+        assertEquals(iv.getByte(3) & 0xff, 0xb1);
+        assertEquals(iv.getByte(4) & 0xff, 0xcf);
+        assertEquals(iv.getByte(5) & 0xff, 0x08);
+        assertEquals(iv.getByte(6) & 0xff, 0x5a);
+        assertEquals(iv.getByte(7) & 0xff, 0x6c);
 
 
     }

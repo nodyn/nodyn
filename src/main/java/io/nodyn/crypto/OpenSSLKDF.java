@@ -9,18 +9,20 @@ import org.bouncycastle.crypto.digests.MD5Digest;
  */
 public class OpenSSLKDF {
 
-    private byte[] key;
-    private byte[] iv;
+    private ByteBuf key;
+    private ByteBuf iv;
 
-    public OpenSSLKDF(byte[] data, int keyLen, int ivLen) {
-        kdf(data, keyLen, ivLen);
+    public OpenSSLKDF(ByteBuf data, int keyLen, int ivLen) {
+        byte[] bytes = new byte[data.readableBytes()];
+        data.readBytes(bytes);
+        kdf(bytes, keyLen / 8 , ivLen  );
     }
 
-    public byte[] key() {
+    public ByteBuf getKey() {
         return this.key;
     }
 
-    public byte[] iv() {
+    public ByteBuf getIv() {
         return this.iv;
     }
 
@@ -45,16 +47,11 @@ public class OpenSSLKDF {
             }
         }
 
-        this.key = new byte[keyLen];
-        this.iv = new byte[ivLen];
+        this.key = Unpooled.buffer(keyLen);
+        this.iv = Unpooled.buffer(ivLen);
 
-        for (int i = 0; i < keyLen; ++i) {
-            this.key[i] = kiv[i];
-        }
-
-        for (int i = 0; i < ivLen; ++i) {
-            this.iv[i] = kiv[keyLen + i];
-        }
+        this.key.writeBytes(kiv, 0, keyLen);
+        this.iv.writeBytes(kiv, keyLen, ivLen);
     }
 
     protected byte[] kdf_d(byte[] data, byte[] prev, int iter) {

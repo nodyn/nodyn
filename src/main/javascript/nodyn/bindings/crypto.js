@@ -93,16 +93,82 @@ Hmac.prototype.digest = digest;
 
 module.exports.Hmac = Hmac;
 
+var engines  = org.bouncycastle.crypto.engines;
+var modes    = org.bouncycastle.crypto.modes;
+var paddings = org.bouncycastle.crypto.paddings;
+
+function cbc(cipher) {
+  return new modes.CBCBlockCipher(cipher);
+}
+
+function cfb(cipher) {
+  return new modes.CFBBlockCipher(cipher);
+}
+
+function ecb(cipher) {
+  // nothing, just here for consistency
+  return cipher;
+}
+
+function pkcs7(cipher) {
+  return new paddings.PaddedBufferedBlockCipher( cipher, new paddings.PKCS7Padding() );
+}
+
+var cipherAlgorithms = {};
+
+function registerCipher(name, keyLen, ivLen, factory) {
+  cipherAlgorithms[name] = {
+    keyLen:  keyLen,
+    ivLen:   ivLen,
+    factory: factory,
+  };
+}
+
+registerCipher( 'aes-128-cbc', 128, 16,
+  function() { return pkcs7( cbc( new engines.AESEngine() ) ); }
+);
+
+registerCipher( 'aes-128-cfb', 128, 16,
+  function() { return pkcs7( cfb( new engines.AESEngine() ) ); }
+);
+
+registerCipher( 'aes-128-ecb', 128, 0,
+  function() { return pkcs7( ecb( new engines.AESEngine() ) ); }
+);
+
+registerCipher( 'des', 64, 8,
+  function() { return pkcs7( cbc( new engines.DESEngine() ) ); }
+);
+
+function generateKeyIv(password, algo) {
+  return new io.nodyn.crypto.OpenSSLKDF( password._nettyBuffer(), algo.keyLen, algo.ivLen );
+}
+
 function CipherBase(encipher){
   this._encipher = encipher;
 }
 
 CipherBase.prototype.init = function(cipher, password) {
-  this._delegate = new io.nodyn.crypto.Cipher( this._encipher, cipher, password._nettyBuffer() );
+  var algo = cipherAlgorithms[cipher];
+  if ( ! algo ) {
+    throw new Error( "Cipher method not supported" );
+  }
+
+  var keyIv = generateKeyIv( password, algo );
+
+  this.initiv( cipher,
+               process.binding('buffer').createBuffer( keyIv.key ),
+               process.binding('buffer').createBuffer( keyIv.iv ) );
 }
 
 CipherBase.prototype.initiv = function(cipher, key, iv) {
-  this._delegate = new io.nodyn.crypto.Cipher( this._encipher, cipher, key._nettyBuffer(), iv._nettyBuffer() );
+
+  var algo = cipherAlgorithms[cipher];
+  if ( ! algo ) {
+    throw new Error( "Cipher method not supported" );
+  }
+
+  this._delegate = new io.nodyn.crypto.Cipher( this._encipher, algo.factory(), key._nettyBuffer(), iv._nettyBuffer() );
 }
 
 
@@ -113,4 +179,13 @@ CipherBase.prototype.final = function() {
 }
 
 module.exports.CipherBase = CipherBase;
+
+module.exports.getCiphers = function() {
+  var ciphers = [];
+  for ( n in cipherAlgorithms ) {
+    ciphers.push( n );
+  }
+  return ciphers;
+}
+
 

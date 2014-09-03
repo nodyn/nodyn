@@ -2,6 +2,7 @@ package io.nodyn.crypto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -22,76 +23,41 @@ public class Cipher {
     private BufferedBlockCipher cipher;
     private ByteBuf outBuf;
 
-    public Cipher(boolean encipher, String cipher, ByteBuf password) throws InvalidKeyException {
-        switch ( cipher ) {
-            case "des":
-                this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
-                initialize(encipher, password, 8, 8);
-                break;
-            default:
-        }
-
+    public Cipher(boolean encipher, BufferedBlockCipher cipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+        this.cipher = cipher;
         this.outBuf = Unpooled.buffer();
-    }
-
-    public Cipher(boolean encipher, String cipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
-        switch ( cipher ) {
-            case "des":
-                this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
-                initialize(encipher, key, iv);
-                break;
-            default:
-                throw new IllegalArgumentException( "Invalid cipher algorithm: " + cipher );
-        }
-
-        this.outBuf = Unpooled.buffer();
-    }
-
-    protected void setupCipher(String cipher) {
-        switch ( cipher ) {
-            case "des":
-                this.cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher( new DESEngine() ), new PKCS7Padding() );
-                break;
-            default:
-
-        }
-    }
-
-    private void initialize(boolean encipher, ByteBuf password, int keyLen, int ivLen) throws InvalidKeyException {
-        byte[] keyBytes = new byte[ password.readableBytes() ];
-        password.readBytes(keyBytes);
-        OpenSSLKDF kdf = new OpenSSLKDF(keyBytes, keyLen, ivLen);
-
-        KeyParameter keyParam = new KeyParameter(kdf.key());
-        CipherParameters param = new ParametersWithIV( keyParam, kdf.iv() );
-        this.cipher.init( encipher, param);
+        initialize(encipher, key, iv);
     }
 
     private void initialize(boolean encipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+        CipherParameters params = null;
 
-        byte[] keyBytes = new byte[ key.readableBytes() ];
-        key.readBytes( keyBytes );
+        byte[] keyBytes = new byte[key.readableBytes()];
+        key.readBytes(keyBytes);
 
-        byte[] ivBytes = new byte[ iv.readableBytes() ];
-        iv.readBytes( ivBytes );
+        params = new KeyParameter(keyBytes);
 
-        KeyParameter keyParam = new KeyParameter(keyBytes);
-        CipherParameters param = new ParametersWithIV( keyParam, ivBytes );
-        this.cipher.init( encipher, param);
+        if (iv.readableBytes() > 0) {
+            byte[] ivBytes = new byte[iv.readableBytes()];
+            iv.readBytes(ivBytes);
+            params = new ParametersWithIV(params, ivBytes);
+        }
+
+        this.cipher.init(encipher, params);
     }
 
     public void update(ByteBuf buf) {
-        byte[] outBytes = new byte[ this.cipher.getUpdateOutputSize( buf.readableBytes() ) ];
-        byte[] inBytes = new byte[ buf.readableBytes() ];
-        buf.readBytes( inBytes );
+        byte[] outBytes = new byte[this.cipher.getUpdateOutputSize(buf.readableBytes())];
+        byte[] inBytes = new byte[buf.readableBytes()];
+        buf.readBytes(inBytes);
         int len = this.cipher.processBytes(inBytes, 0, inBytes.length, outBytes, 0);
-        this.outBuf.writeBytes( outBytes, 0, len );
+        this.outBuf.writeBytes(outBytes, 0, len);
     }
 
     public ByteBuf doFinal() throws InvalidCipherTextException {
-        byte[] outBytes = new byte[ this.cipher.getOutputSize(0) ];
-        int len = this.cipher.doFinal( outBytes, 0 );
-        this.outBuf.writeBytes( outBytes, 0, len );
+        byte[] outBytes = new byte[this.cipher.getOutputSize(0)];
+        int len = this.cipher.doFinal(outBytes, 0);
+        this.outBuf.writeBytes(outBytes, 0, len);
         return this.outBuf;
     }
 

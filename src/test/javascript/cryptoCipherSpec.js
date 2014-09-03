@@ -7,6 +7,7 @@ describe("crypto Cipher & Decipher module", function() {
     var cipher = crypto.createCipher( 'des', 'tacos' );
     cipher.write( "bob" );
     var f = cipher.final();
+
     // <2f a4 16 67 41 e0 37 8e>
 
     expect( f[0] ).toBe( 0x2F );
@@ -22,7 +23,6 @@ describe("crypto Cipher & Decipher module", function() {
     decipher.write( f );
     f = decipher.final();
     expect( f.toString() ).toBe( 'bob' );
-
   });
 
   it ("should produce the same bytes as node.js for DES and iv", function() {
@@ -40,7 +40,7 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f[7] ).toBe( 0x41 );
   })
 
-  xit( "should produce the same bytes as node.js for AES-128-CBC", function() {
+  it( "should produce the same bytes as node.js for AES-128-CBC", function() {
     var cipher = crypto.createCipher( 'aes-128-cbc', 'tacos' );
     cipher.write( "bob" );
     var f = cipher.final();
@@ -70,7 +70,42 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f.toString() ).toBe( 'bob' );
   });
 
-  xit( "should enumerate supported cipher types", function() {
+  it( "should produce the same bytes as node.js for AES-128-ECB", function() {
+  try {
+    var cipher = crypto.createCipher( 'aes-128-ecb', 'tacos' );
+    cipher.write( "bob" );
+    var f = cipher.final();
+    // <ef a8 54 98 60 22 e7 e6 b3 ed 07 49 06 70 6b 5e>
+
+    expect( f[0] ).toBe( 0xef );
+    expect( f[1] ).toBe( 0xa8 );
+    expect( f[2] ).toBe( 0x54 );
+    expect( f[3] ).toBe( 0x98 );
+    expect( f[4] ).toBe( 0x60 );
+    expect( f[5] ).toBe( 0x22 );
+    expect( f[6] ).toBe( 0xe7 );
+    expect( f[7] ).toBe( 0xe6 );
+    expect( f[8] ).toBe( 0xb3 );
+    expect( f[9] ).toBe( 0xed );
+    expect( f[10] ).toBe( 0x07 );
+    expect( f[11] ).toBe( 0x49 );
+    expect( f[12] ).toBe( 0x06 );
+    expect( f[13] ).toBe( 0x70 );
+    expect( f[14] ).toBe( 0x6b );
+    expect( f[15] ).toBe( 0x5e );
+
+
+    var decipher = crypto.createDecipher( 'aes-128-ecb', 'tacos' );
+    decipher.write( f );
+    f = decipher.final();
+    expect( f.toString() ).toBe( 'bob' );
+    } catch (err) {
+      console.log( err );
+      err.printStackTrace();
+    }
+  });
+
+  it( "should enumerate supported cipher types", function() {
     var types = crypto.getCiphers();
     expect( types ).toContain( "des" );
     expect( types ).toContain( "aes-128-cbc" );
