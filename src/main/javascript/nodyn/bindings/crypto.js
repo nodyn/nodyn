@@ -194,9 +194,32 @@ registerCipher( 'cast-cbc',  128, 8, cast5_cbc );
 registerCipher( 'cast5-cbc', 128, 8, cast5_cbc );
 registerCipher( 'cast5-ecb', 128, 0, cast5_ecb );
 
-registerCipher( 'des', 64, 8,
-  function() { return pkcs7( cbc( new engines.DESEngine() ) ); }
-);
+function des_cbc() {
+  return pkcs7( cbc( new engines.DESEngine() ) );
+}
+
+function des_ecb() {
+  return pkcs7( ecb( new engines.DESEngine() ) );
+}
+
+registerCipher( 'des',     64, 8, des_cbc );
+registerCipher( 'des-cbc', 64, 8, des_cbc );
+registerCipher( 'des-ecb', 64, 0, des_ecb );
+
+function des_ede_cbc() {
+  return pkcs7( cbc( new engines.DESedeEngine() ) );
+}
+
+function des_ede_ecb() {
+  return pkcs7( ecb( new engines.DESedeEngine() ) );
+}
+
+registerCipher( 'des-ede',     128, 0, des_ede_ecb );
+registerCipher( 'des-ede-cbc', 128, 8, des_ede_cbc );
+
+registerCipher( 'des3',         192, 8, des_ede_cbc );
+registerCipher( 'des-ede3',     192, 0, des_ede_ecb );
+registerCipher( 'des-ede3-cbc', 192, 8, des_ede_cbc );
 
 function generateKeyIv(password, algo) {
   return new io.nodyn.crypto.OpenSSLKDF( password._nettyBuffer(), algo.keyLen, algo.ivLen );

@@ -137,6 +137,41 @@ describe("crypto Cipher & Decipher module", function() {
     );
   } );
 
+  it( "should produce the same bytes as node.js for des-cbc", function() {
+    testCipher( 'des-cbc', 'bob',
+      '2f a4 16 67 41 e0 37 8e'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for des-ecb", function() {
+    testCipher( 'des-ecb', 'bob',
+      '01 ae 4a cc cb c4 c6 26'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for des-ede-cbc", function() {
+    testCipher( 'des-ede-cbc', 'bob',
+      'aa 07 81 ee 38 b8 cc 4d'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for des-ede", function() {
+    testCipher( 'des-ede', 'bob',
+      '1d da da d6 95 eb f5 fa'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for des-ede3-cbc", function() {
+    testCipher( 'des-ede3-cbc', 'bob',
+      '19 d3 11 6e b5 94 b4 b2'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for des-ede3", function() {
+    testCipher( 'des-ede3', 'bob',
+      '31 1b 85 62 48 5c 31 c9'
+    );
+  } );
 
 
   it( "should enumerate supported cipher types", function() {
