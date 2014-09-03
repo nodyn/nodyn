@@ -125,6 +125,18 @@ describe("crypto Cipher & Decipher module", function() {
     );
   } );
 
+  it( "should produce the same bytes as node.js for cast5-cbc", function() {
+    testCipher( 'cast5-cbc', 'bob',
+      '94 a3 e1 fa 19 de 94 8b'
+    );
+  } );
+
+  it( "should produce the same bytes as node.js for cast5-ecb", function() {
+    testCipher( 'cast5-ecb', 'bob',
+      '1f 48 d6 97 0b 4f 34 74'
+    );
+  } );
+
 
 
   it( "should enumerate supported cipher types", function() {

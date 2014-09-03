@@ -181,6 +181,19 @@ registerCipher( 'camellia256',      256, 16, camellia_cbc );
 registerCipher( 'camellia-256-cbc', 256, 16, camellia_cbc );
 registerCipher( 'camellia-256-ecb', 256, 0,  camellia_ecb );
 
+function cast5_cbc() {
+  return pkcs7( cbc( new engines.CAST5Engine() ) );
+}
+
+function cast5_ecb() {
+  return pkcs7( ecb( new engines.CAST5Engine() ) );
+}
+
+registerCipher( 'cast',      128, 8, cast5_cbc );
+registerCipher( 'cast-cbc',  128, 8, cast5_cbc );
+registerCipher( 'cast5-cbc', 128, 8, cast5_cbc );
+registerCipher( 'cast5-ecb', 128, 0, cast5_ecb );
+
 registerCipher( 'des', 64, 8,
   function() { return pkcs7( cbc( new engines.DESEngine() ) ); }
 );
