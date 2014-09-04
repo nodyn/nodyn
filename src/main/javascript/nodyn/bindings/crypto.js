@@ -332,4 +332,51 @@ module.exports.PBKDF2 = function(password, salt, iterations, keylen, digest, cal
   }
 }
 
+function randomBytes(size, callback) {
+  blocking.submit( function() {
+    var ret = io.nodyn.crypto.RandomGenerator.random(size);
+    ret = process.binding('buffer').createBuffer(ret);
+    blocking.unblock( function() {
+      callback( null, ret );
+    })();
+  } );
+}
+
+function randomBytesSync(size) {
+  return io.nodyn.crypto.RandomGenerator.random( size );
+}
+
+function pseudoRandomBytes(size, callback) {
+  blocking.submit( function() {
+    var ret = io.nodyn.crypto.RandomGenerator.pseudoRandom(size);
+    ret = process.binding('buffer').createBuffer(ret);
+    blocking.unblock( function() {
+      callback( null, ret );
+    })();
+  } );
+}
+
+function pseudoRandomBytesSync(size) {
+  return io.nodyn.crypto.RandomGenerator.pseudoRandom( size );
+}
+
+module.exports.randomBytes = function(size, callback) {
+  if ( callback ) {
+    randomBytes(size, callback);
+  } else {
+    var ret = randomBytesSync(size);
+    ret = process.binding('buffer').createBuffer(ret);
+    return ret;
+  }
+}
+
+module.exports.pseudoRandomBytes = function(size, callback) {
+  if ( callback ) {
+    pseudoRandomBytes(size, callback);
+  } else {
+    var ret = pseudoRandomBytesSync(size);
+    ret = process.binding('buffer').createBuffer(ret);
+    return ret;
+  }
+}
 
