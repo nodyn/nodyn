@@ -15,7 +15,7 @@
  */
 
 var util = require('util'),
-    Handle = require('nodyn/bindings/handle_wrap').Handle;
+    Handle = process.binding('handle_wrap').Handle;
 
 function StatWatcher() {
   if (!(this instanceof StatWatcher)) return new StatWatcher();

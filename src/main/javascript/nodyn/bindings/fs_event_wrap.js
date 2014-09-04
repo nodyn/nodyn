@@ -15,7 +15,7 @@
  */
 
 var util = require('util'),
-    Handle = require('nodyn/bindings/handle_wrap').Handle;
+    Handle = process.binding('handle_wrap').Handle;
 
 function FSEvent() {
   this._wrap = new io.nodyn.fs.FsEventWrap(process._process);

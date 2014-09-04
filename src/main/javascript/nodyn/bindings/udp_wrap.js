@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-var Handle = require('nodyn/bindings/handle_wrap').Handle,
+var Handle = process.binding('handle_wrap').Handle,
     Helper = process.binding('buffer'),
     Family = io.nodyn.udp.Family,
     util   = require('util');

@@ -124,7 +124,7 @@ public class NodeProcess extends EventSource {
 
     protected Object loadBinding(String name) {
         Runner runner = this.nodyn.newRunner();
-        runner.withSource("require('nodyn/bindings/" + name + "');");
+        runner.withSource("__native_require('nodyn/bindings/" + name + "');");
         return runner.execute();
     }
 

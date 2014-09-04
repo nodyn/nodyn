@@ -15,7 +15,7 @@
  */
 
 var util = require('util');
-var Async = require('nodyn/bindings/async_wrap').Async;
+var Async = process.binding('async_wrap').Async;
 
 function Handle(handle) {
   this._handle = handle;

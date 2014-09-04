@@ -60,6 +60,7 @@ var source = {};
   'string_decoder',
 
   'net',
+  'tls',
   'querystring',
   'http',
   '_http_agent',
@@ -83,30 +84,6 @@ var source = {};
 
   'crypto',
   'constants',
-
-  'nodyn/bindings/crypto',
-  'nodyn/bindings/buffer',
-  'nodyn/bindings/smalloc',
-  'nodyn/bindings/constants',
-  'nodyn/bindings/async_wrap',
-  'nodyn/bindings/handle_wrap',
-  'nodyn/bindings/stream_wrap',
-  'nodyn/bindings/timer_wrap',
-  'nodyn/bindings/tcp_wrap',
-  'nodyn/bindings/pipe_wrap',
-  'nodyn/bindings/signal_wrap',
-  'nodyn/bindings/tty_wrap',
-  'nodyn/bindings/uv',
-  'nodyn/bindings/cares_wrap',
-  'nodyn/bindings/v8',
-  'nodyn/bindings/zlib',
-  'nodyn/bindings/http_parser',
-  'nodyn/bindings/process_wrap',
-  'nodyn/bindings/spawn_sync',
-  'nodyn/bindings/fs',
-  'nodyn/bindings/fs_event_wrap',
-  'nodyn/bindings/stat_watcher',
-  'nodyn/bindings/udp_wrap'
 
 ].forEach( function(name) {
   source[name] = getSource(name);

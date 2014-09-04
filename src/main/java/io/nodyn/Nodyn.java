@@ -21,6 +21,7 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.RefHandle;
 import org.dynjs.runtime.*;
+import org.dynjs.runtime.builtins.Require;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 import org.vertx.java.core.impl.DefaultVertx;
@@ -70,6 +71,8 @@ public class Nodyn extends DynJS {
         globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
         globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
         globalObject.defineGlobalProperty("__nodyn", this, false);
+
+        globalObject.defineGlobalProperty("__native_require", new Require( globalObject ));
 
         EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
         this.eventLoop = new EventLoop(elg, controlLifeCycle);

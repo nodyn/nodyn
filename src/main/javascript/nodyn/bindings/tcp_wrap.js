@@ -17,7 +17,7 @@
 "use strict";
 
 var util = require('util');
-var Stream = require('nodyn/bindings/stream_wrap').Stream;
+var Stream = process.binding('stream_wrap').Stream;
 
 function TCP(tcp) {
   if ( tcp instanceof io.nodyn.tcp.TCPWrap ) {
