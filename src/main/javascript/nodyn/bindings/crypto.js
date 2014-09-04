@@ -307,4 +307,29 @@ module.exports.getCiphers = function() {
   return ciphers;
 }
 
+var blocking = require('nodyn/blocking');
+
+
+function pbkdf2(password, salt, iterations, keylen, digest, callback) {
+  blocking.submit( function() {
+    var ret = pbkdf2Sync( password, salt, iterations, keylen, digest );
+    blocking.unblock( function() {
+      callback( null, ret );
+    })();
+  });
+}
+
+function pbkdf2Sync(password, salt, iterations, keylen, digest) {
+  var key = io.nodyn.crypto.PBKDF2.pbkdf2( password._nettyBuffer(), salt._nettyBuffer(), iterations, keylen );
+  return process.binding('buffer').createBuffer( key );
+}
+
+module.exports.PBKDF2 = function(password, salt, iterations, keylen, digest, callback) {
+  if ( callback ) {
+    pbkdf2(password, salt, iterations, keylen, digest, callback);
+  } else {
+    return pbkdf2Sync(password, salt, iterations, keylen, digest);
+  }
+}
+
 
