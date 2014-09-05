@@ -43,9 +43,8 @@ public class NettyExternalIndexedData implements ExternalIndexedData {
     public void put(long l, Object o) {
         if (o instanceof Number) {
             int value = ((Number) o).intValue() & 0xFF;
-            this.buf.setByte((int) l, value );
-        } else {
-            System.err.println("ATTEMPT TO PUT: " + o);
+            this.buf.setByte((int) l, value);
+            this.buf.writerIndex((int) Math.max( this.buf.writerIndex(), l ));
         }
     }
 }
