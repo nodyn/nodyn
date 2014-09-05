@@ -69,7 +69,7 @@ describe("The timers module", function() {
       expect(x).toBeGreaterThan(1);
       clearInterval(id);
       helper.testComplete(true);
-    }, 2000 );
+    }, 3000 );
   });
 
   it('should pass testClearInterval', function() {
