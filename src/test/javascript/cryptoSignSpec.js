@@ -2,17 +2,17 @@ var helper = require('./specHelper');
 var crypto = require('crypto');
 var fs = require('fs');
 
-xdescribe("crypto Sign/Verify module", function() {
+describe("crypto Sign/Verify module", function() {
   it ('should allow signing and verification', function() {
     var message = "howdy, this is my message to sign";
-    var privateKey = fs.readFileSync( 'src/test/javascript/key-rsa512-private.pem' );
+    var privateKey = fs.readFileSync( './keys/RSA/key-rsa512-private.pem' );
 
     var sign = crypto.createSign('RSA-SHA256');
     sign.write( message );
 
     var signature = sign.sign(privateKey );
 
-    var publicKey  = fs.readFileSync( 'src/test/javascript/key-rsa512-public.pem' );
+    var publicKey  = fs.readFileSync( 'keys/RSA/key-rsa512-public.pem' );
 
     var verify = crypto.createVerify('RSA-SHA256');
     verify.write(message);

@@ -22,6 +22,13 @@ describe("Buffer", function() {
     expect(b[0]).toBe(255);
   });
 
+  it('should allow construction wtih an array of octets', function() {
+    var b = new Buffer( [ 65, 66 ] );
+    expect( b.length ).toBe( 2 );
+    expect( b[0] ).toBe( 65 );
+    expect( b[1] ).toBe( 66 );
+  })
+
   it('should pass testDefaultConstructor', function() {
     var b = new Buffer('cheezy bits');
     expect(b.toString()).toBe('cheezy bits');

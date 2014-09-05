@@ -307,6 +307,51 @@ module.exports.getCiphers = function() {
   return ciphers;
 }
 
+var signatureAlgorithms = {
+  'RSA-SHA256': 'SHA256withRSA',
+}
+
+function Sign() {
+  this._delegate = new io.nodyn.crypto.Sign();
+}
+
+Sign.prototype.init = function(algorithm) {
+  var algo = signatureAlgorithms[algorithm];
+  if ( ! algo ) {
+    throw new Error( "Invalid signature algorithm: " + algorithm );
+  }
+  this._delegate.init( algo );
+}
+
+Sign.prototype.update = update;
+
+Sign.prototype.sign = function(key, junk, passphrase) {
+  var ret = this._delegate.sign(key._nettyBuffer(), passphrase);
+  return process.binding('buffer').createBuffer( ret );
+}
+
+module.exports.Sign = Sign;
+
+function Verify() {
+  this._delegate = new io.nodyn.crypto.Verify();
+}
+
+Verify.prototype.init = function(algorithm) {
+  var algo = signatureAlgorithms[algorithm];
+  if ( ! algo ) {
+    throw new Error( "Invalid signature algorithm: " + algorithm );
+  }
+  this._delegate.init( algo );
+}
+
+Verify.prototype.update = update;
+
+Verify.prototype.verify = function(object, signature) {
+  return this._delegate.verify( object._nettyBuffer(), signature._nettyBuffer() );
+}
+
+module.exports.Verify = Verify;
+
 var blocking = require('nodyn/blocking');
 
 
