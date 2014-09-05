@@ -5,14 +5,18 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cms.*;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
+import javax.crypto.EncryptedPrivateKeyInfo;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -42,20 +46,36 @@ public class Sign {
     }
 
     public ByteBuf sign(ByteBuf privateKeyBuf, String passphrase) throws Exception {
+
         String privateKeyStr = privateKeyBuf.toString(Charset.forName("utf8"));
-        Reader privateKeyReader = new StringReader( privateKeyStr );
+        Reader privateKeyReader = new StringReader(privateKeyStr);
         PEMParser parser = new PEMParser(privateKeyReader);
         Object object = parser.readObject();
 
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
         PrivateKey privateKey = null;
 
-        if ( object instanceof PrivateKeyInfo ) {
+        if (object instanceof PrivateKeyInfo) {
             privateKey = converter.getPrivateKey((PrivateKeyInfo) object);
-        } else if ( object instanceof PEMKeyPair ) {
+        } else if (object instanceof PEMKeyPair) {
             privateKey = converter.getKeyPair((PEMKeyPair) object).getPrivate();
+        } else if (object instanceof PEMEncryptedKeyPair) {
+            char[] passphraseChars = null;
+            if ( passphrase == null ) {
+                passphraseChars = new char[]{};
+            } else {
+                passphraseChars = passphrase.toCharArray();
+            }
+
+            PEMDecryptorProvider decryptor = new JcePEMDecryptorProviderBuilder().build(passphraseChars);
+            try {
+                privateKey = converter.getKeyPair(((PEMEncryptedKeyPair) object).decryptKeyPair(decryptor)).getPrivate();
+            } catch (Exception e) {
+                throw new Exception( "Invalid passphrase" );
+            }
+
         } else {
-            throw new Exception( "Key is invalid private key" );
+            throw new Exception("Key is invalid private key: " + object);
         }
 
         CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
@@ -67,13 +87,13 @@ public class Sign {
 
         generator.addSignerInfoGenerator(signerInfo);
 
-        byte[] dataBytes = new byte[ this.data.readableBytes() ];
-        this.data.getBytes( this.data.readerIndex(), dataBytes );
+        byte[] dataBytes = new byte[this.data.readableBytes()];
+        this.data.getBytes(this.data.readerIndex(), dataBytes);
         CMSProcessableByteArray message = new CMSProcessableByteArray(dataBytes);
 
         CMSSignedData sigData = generator.generate(message);
         byte[] sigBytes = sigData.getEncoded();
 
-        return Unpooled.wrappedBuffer( sigBytes );
+        return Unpooled.wrappedBuffer(sigBytes);
     }
 }
