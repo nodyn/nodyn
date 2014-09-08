@@ -425,3 +425,35 @@ module.exports.pseudoRandomBytes = function(size, callback) {
   }
 }
 
+function SecureContext() {
+}
+
+SecureContext.prototype.init = function(secureProtocol) {
+  console.log( "secureProtocol=" + secureProtocol);
+}
+
+SecureContext.prototype.setKey = function(key, passphrase) {
+  console.log( "setKey: " + key + " // " + passphrase );
+}
+
+SecureContext.prototype.setCert = function(cert) {
+  console.log( "cert=" + cert );
+}
+
+SecureContext.prototype.setCiphers = function(ciphers) {
+  console.log( 'ciphers=' + ciphers );
+}
+
+SecureContext.prototype.setECDHCurve = function(ecdhCurve) {
+  console.log( "ecdh=" + ecdhCurve );
+}
+
+SecureContext.prototype.addRootCerts = function(rootCerts) {
+  console.log( "addRootCerts: " + rootCerts );
+}
+
+SecureContext.prototype.setSessionIdContext = function(sessionIdContext) {
+  console.log( "sessionIdContext: " + sessionIdContext );
+}
+
+module.exports.SecureContext = SecureContext;

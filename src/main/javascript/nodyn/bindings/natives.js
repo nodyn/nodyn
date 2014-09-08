@@ -61,6 +61,9 @@ var source = {};
 
   'net',
   'tls',
+  '_tls_common',
+  '_tls_wrap',
+
   'querystring',
   'http',
   '_http_agent',
