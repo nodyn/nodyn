@@ -1,9 +1,9 @@
 package io.nodyn.fs;
 
-import io.netty.channel.EventLoopGroup;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 import io.nodyn.handle.HandleWrap;
+import io.nodyn.loop.EventLoop;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +16,11 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public class FsEventWrap extends HandleWrap {
 
-    private Thread thread;
+    private final EventLoop eventLoop;
 
     public FsEventWrap(NodeProcess process) {
         super(process, true);
-        this.eventLoop = process.getEventLoop().getEventLoopGroup();
+        eventLoop = process.getEventLoop();
     }
 
     public void start(String path, boolean persistent, boolean recursive) {
@@ -30,13 +30,12 @@ public class FsEventWrap extends HandleWrap {
             watchedFile = watchedDir;
             watchedDir = watchedFile.getParentFile();
         }
-        thread = new Thread(new Worker());
-        Path toWatch = null;
         try {
+            Path toWatch = null;
             toWatch = Paths.get(watchedDir.getCanonicalPath());
             watcher = toWatch.getFileSystem().newWatchService();
             toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-            thread.start();
+            this.eventLoop.submitBlockingTask(new Worker());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -46,7 +45,7 @@ public class FsEventWrap extends HandleWrap {
     public void close() {
         try {
             this.watcher.close();
-            this.thread.join();
+            this.eventLoop.await();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,7 +59,8 @@ public class FsEventWrap extends HandleWrap {
                 while(key != null && key.isValid()) {
                     for (final WatchEvent event : key.pollEvents()) {
                         if (watchedFile == null || watchedFile.getName().equals(event.context().toString())) {
-                            eventLoop.submit(new Runnable() {
+                            eventLoop.submitUserTask(new Runnable() {
+
                                 @Override
                                 public void run() {
                                     emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
@@ -78,7 +78,6 @@ public class FsEventWrap extends HandleWrap {
         }
     }
 
-    private final EventLoopGroup eventLoop;
     private WatchService watcher;
     private File watchedDir;
     private File watchedFile;

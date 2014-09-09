@@ -74,7 +74,6 @@
 
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
-    <version.jasmine>0.0.12</version.jasmine>
     <version.bouncycastle>1.50</version.bouncycastle>
     <version.jnr-posix>3.0.3</version.jnr-posix>
 
@@ -169,18 +168,6 @@
       <groupId>org.dynjs</groupId>
       <artifactId>dynjs</artifactId>
       <version>${version.dynjs}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.akiellor.jasmine</groupId>
-      <artifactId>jasmine-cli</artifactId>
-      <version>${version.jasmine}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.dynjs</groupId>
-          <artifactId>dynjs</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 

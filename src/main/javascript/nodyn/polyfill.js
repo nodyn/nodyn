@@ -16,6 +16,19 @@
 
 // Loads into global some ES6 capabilities not provided by DynJS
 
+// Add String.prototype.startsWith
+if (!String.prototype.startsWith) {
+  Object.defineProperty(String.prototype, 'startsWith', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function (searchString, position) {
+      position = position || 0;
+      return this.lastIndexOf(searchString, position) === position;
+    }
+  });
+}
+
 // Add String.prototype.endsWith
 if (!String.prototype.endsWith) {
   Object.defineProperty(String.prototype, 'endsWith', {

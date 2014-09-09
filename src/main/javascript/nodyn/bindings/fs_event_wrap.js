@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var util = require('util'),
+var util   = require('util'),
+    fs     = require('fs'),
     Handle = process.binding('handle_wrap').Handle;
 
 function FSEvent() {

@@ -2576,6 +2576,7 @@ jasmine.WaitsForBlock.prototype.execute = function(onComplete) {
     onComplete();
   } else if (this.totalTimeSpentWaitingForLatch >= this.timeout) {
     var message = 'timed out after ' + this.timeout + ' msec waiting for ' + (this.message || 'something to happen');
+    this.env.reporter.log('>> ' + message);
     this.spec.fail({
       name: 'timeout',
       message: message

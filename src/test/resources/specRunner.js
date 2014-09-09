@@ -1,29 +1,22 @@
-module.exports = new org.jasmine.Executor({
+var scanner = require('./scanner');
 
-  execute: function(specs, notifier) {
-    this.specs = specs;
-    this.notifier = notifier;
-  },
+module.exports = {
+  run: function(pattern) {
 
-  run: function() {
+    // load jasmine and a terminal reporter into global
     load("jasmine-1.3.1/jasmine.js");
-    var notifierReporter = require("./reporter.js").reporter;
-    var jasmineEnv = jasmine.getEnv();
+    load('./terminalReporter.js');
 
-    jasmineEnv.addReporter(notifierReporter(this.notifier));
+    // load the specs
+    var jasmineEnv = jasmine.getEnv(),
+        specs      = scanner.findSpecs(pattern),
+        reporter   = new jasmine.TerminalReporter({verbosity:3,color:true}); 
 
-    var done = com.google.common.util.concurrent.SettableFuture.create();
-    jasmineEnv.addReporter({
-      reportRunnerResults: function(runner) {
-        done.set(true);
-      }
-    });
+    jasmineEnv.addReporter(reporter);
 
-    for(var i = 0; i < this.specs.size(); i++) {
-      require(this.specs.get(i));
+    for(var i = 0; i < specs.length; i++) {
+      require(specs[i]);
     }
-
-    var start = java.lang.System.currentTimeMillis();
     process.nextTick(jasmineEnv.execute.bind(jasmineEnv));
   }
-});
+};
