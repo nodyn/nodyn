@@ -10,16 +10,22 @@ describe("fs.watch", function() {
     helper.testComplete(false);
   });
 
-  xit('should recive change events', function() {
-    waitsFor(helper.testComplete, "fs.watch", 5000);
+  it('should recive change events', function() {
+    waitsFor(helper.testComplete, "fs.watch", 8000);
     fs.writeFileSync(tmpFile, 'change event: ');
-    fs.watch(tmpFile, function(evt, filename) {
-      expect(evt).toBe('create');
+    var watcher = fs.watch(tmpFile, function(evt, filename) {
       expect(filename).toBe('fs-watch-spec.tmp');
+      expect(evt).toBe('change');
+      watcher.close();
       fs.unlinkSync(tmpFile);
       helper.testComplete(true);
     });
-    fs.appendFileSync(tmpFile, 'changed');
+    // Have to use a sketchy setTimeout call here because
+    // process.nextTick does not wait for blocking tasks
+    // to complete. Suboptimal and probably broken in CI.
+    setTimeout(function() {
+      fs.appendFile(tmpFile, 'changed');
+    }, 4000);
   });
 });
 

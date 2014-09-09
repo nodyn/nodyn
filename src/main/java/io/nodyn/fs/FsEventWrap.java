@@ -24,18 +24,37 @@ public class FsEventWrap extends HandleWrap {
     }
 
     public void start(String path, boolean persistent, boolean recursive) {
-        watchedDir =  new File(path);
-
-        if (!watchedDir.isDirectory()) {
-            watchedFile = watchedDir;
-            watchedDir = watchedFile.getParentFile();
+        File dir =  new File(path);
+        if (!dir.isDirectory()) {
+            watched = dir;
+            dir = watched.getParentFile();
         }
         try {
-            Path toWatch = null;
-            toWatch = Paths.get(watchedDir.getCanonicalPath());
+            ref();
+            Path toWatch = Paths.get(dir.getCanonicalPath());
             watcher = toWatch.getFileSystem().newWatchService();
             toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-            this.eventLoop.submitBlockingTask(new Worker());
+            this.eventLoop.submitBlockingTask(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WatchKey key = watcher.take();
+                        while(key != null && key.isValid()) {
+                            for (final WatchEvent event : key.pollEvents()) {
+                                if (watched == null || watched.getName().equals(event.context().toString())) {
+                                    emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
+                                }
+                            }
+                            key.reset();
+                            key = watcher.take();
+                        }
+                    } catch (Exception e) {
+                        // If a thread is currently blocked in the take or poll methods waiting for
+                        // a key to be queued then it immediately receives a ClosedWatchServiceException.
+                        // Any valid keys associated with this watch service are invalidated.
+                    }
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -44,42 +63,14 @@ public class FsEventWrap extends HandleWrap {
     @Override
     public void close() {
         try {
+            unref();
             this.watcher.close();
-            this.eventLoop.await();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    class Worker implements Runnable {
-        @Override
-        public void run() {
-            try {
-                WatchKey key = watcher.take();
-                while(key != null && key.isValid()) {
-                    for (final WatchEvent event : key.pollEvents()) {
-                        if (watchedFile == null || watchedFile.getName().equals(event.context().toString())) {
-                            eventLoop.submitUserTask(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
-                                }
-                            });
-                        }
-                    }
-                    key.reset();
-                    key = watcher.take();
-                }
-            } catch (Exception e) {
-                // If a thread is currently blocked in the take or poll methods waiting for a key to be queued then it immediately receives a ClosedWatchServiceException.
-                // Any valid keys associated with this watch service are invalidated.
-            }
-        }
-    }
-
     private WatchService watcher;
-    private File watchedDir;
-    private File watchedFile;
+    private File watched;
 
 }
