@@ -148,6 +148,15 @@ Number.isFinite = isFinite;
       return {};
     }
 
+    this.features = {
+      debug: false,
+      uv: true,
+      ipv6: true,
+      tls_npn: true,
+      tls_sni: true,
+      tls: true
+    };
+
   }
 
   return new Process(javaProcess);

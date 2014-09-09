@@ -19,6 +19,7 @@ package io.nodyn.stream;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelPipeline;
 import io.nodyn.handle.HandleWrap;
 import io.nodyn.NodeProcess;
 
@@ -38,6 +39,10 @@ public class StreamWrap extends HandleWrap {
     public StreamWrap(NodeProcess process, ChannelFuture channelFuture) {
         super(process, true);
         this.channelFuture = channelFuture;
+    }
+
+    public ChannelPipeline getPipeline() {
+        return this.channelFuture.channel().pipeline();
     }
 
     public void readStart() {

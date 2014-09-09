@@ -426,34 +426,45 @@ module.exports.pseudoRandomBytes = function(size, callback) {
 }
 
 function SecureContext() {
+  this._context = new io.nodyn.crypto.SecureContext();
 }
 
 SecureContext.prototype.init = function(secureProtocol) {
-  console.log( "secureProtocol=" + secureProtocol);
+  this._context.init(secureProtocol);
 }
 
 SecureContext.prototype.setKey = function(key, passphrase) {
-  console.log( "setKey: " + key + " // " + passphrase );
+  this._context.setKey( key._nettyBuffer(), passphrase );
 }
 
 SecureContext.prototype.setCert = function(cert) {
-  console.log( "cert=" + cert );
+  this._context.setCert( cert._nettyBuffer() );
+}
+
+SecureContext.prototype.addCACert = function(caCert) {
+  this._context.addCACert( caCert._nettyBuffer() );
 }
 
 SecureContext.prototype.setCiphers = function(ciphers) {
-  console.log( 'ciphers=' + ciphers );
+  this._context.setCiphers( ciphers );
 }
 
 SecureContext.prototype.setECDHCurve = function(ecdhCurve) {
-  console.log( "ecdh=" + ecdhCurve );
+  this._context.setECDHCurve( ecdhCurve );
 }
 
 SecureContext.prototype.addRootCerts = function(rootCerts) {
-  console.log( "addRootCerts: " + rootCerts );
+  if ( ! rootCerts ) {
+    return;
+  }
+
+  for ( var i = 0 ; i < rootCerts.length ; ++i ) {
+    this._context.addRootCert( rootCerts[i]._nettyBuffer() );
+  }
 }
 
 SecureContext.prototype.setSessionIdContext = function(sessionIdContext) {
-  console.log( "sessionIdContext: " + sessionIdContext );
+  this._context.setSessionIdContext( sessionIdContext );
 }
 
 module.exports.SecureContext = SecureContext;

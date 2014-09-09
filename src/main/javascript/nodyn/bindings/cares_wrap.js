@@ -21,6 +21,9 @@ var util = require('util');
 var cares = {};
 
 cares.isIP = function(host) {
+  if ( ! host ) {
+    return false;
+  }
   if ( host.match( "^[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?\\.[0-9][0-9]?[0-9]?$" ) ) {
     return 4;
   }

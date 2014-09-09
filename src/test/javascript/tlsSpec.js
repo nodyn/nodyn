@@ -39,4 +39,30 @@ describe('tls', function(){
     });
   });
 
+  it ('should allow a secure client connection', function() {
+    waitsFor(helper.testComplete, "server to receive connection", 5000);
+    var server = tls.createServer( {
+      key: serverKey,
+      passphrase: 'server',
+      cert: serverCert
+    }, function(connection) {
+      connection.on( 'data', function(b) {
+        expect( b.toString() ).toBe( "howdy" );
+        connection.destroy();
+        server.close( function() {
+          helper.testComplete(true);
+        });
+      })
+    });
+    server.on('clientError', function(err) {
+      console.log( 'client error: ' + err );
+    })
+
+    server.listen( 8181, function() {
+      var client = tls.connect( 8181, { ca: [ serverCert ] }, function() {
+        client.write( "howdy" );
+      })
+    })
+  })
+
 });

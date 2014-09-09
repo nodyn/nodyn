@@ -22,6 +22,7 @@ import io.nodyn.async.AsyncWrap;
 import io.nodyn.netty.AbstractEventSourceHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.netty.DataEventHandler;
+import io.nodyn.netty.DebugHandler;
 import io.nodyn.netty.EOFEventHandler;
 
 
