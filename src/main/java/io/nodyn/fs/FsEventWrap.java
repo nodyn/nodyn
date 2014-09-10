@@ -17,6 +17,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class FsEventWrap extends HandleWrap {
 
     private final EventLoop eventLoop;
+    private boolean persistent;
 
     public FsEventWrap(NodeProcess process) {
         super(process, true);
@@ -25,12 +26,13 @@ public class FsEventWrap extends HandleWrap {
 
     public void start(String path, boolean persistent, boolean recursive) {
         File dir =  new File(path);
+        this.persistent = persistent;
         if (!dir.isDirectory()) {
             watched = dir;
             dir = watched.getParentFile();
         }
         try {
-            ref();
+            if (persistent) ref();
             Path toWatch = Paths.get(dir.getCanonicalPath());
             watcher = toWatch.getFileSystem().newWatchService();
             toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
@@ -63,7 +65,7 @@ public class FsEventWrap extends HandleWrap {
     @Override
     public void close() {
         try {
-            unref();
+            if (persistent) unref();
             this.watcher.close();
         } catch (Exception e) {
             e.printStackTrace();
