@@ -66,6 +66,7 @@ var source = {};
 
   'querystring',
   'http',
+  'https',
   '_http_agent',
   '_http_client',
   '_http_server',

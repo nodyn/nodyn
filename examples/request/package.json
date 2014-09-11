@@ -1,0 +1,9 @@
+{
+  "name": "getgoogle",
+  "description": "simple example app that fetches google",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "request": "2.42.x"
+  }
+}
