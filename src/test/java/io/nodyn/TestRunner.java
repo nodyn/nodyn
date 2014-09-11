@@ -22,6 +22,8 @@ public class TestRunner {
 
     public static void main(String... args) throws InterruptedException {
         System.setProperty( "nodyn.binary", "./bin/nodyn" );
+        //System.setProperty("javax.net.debug", "all");
+
         NodynConfig config = new NodynConfig(TestRunner.class.getClassLoader());
         config.setCompileMode(Config.CompileMode.OFF);
         config.setArgv(new String[]{"-e", SCRIPT});

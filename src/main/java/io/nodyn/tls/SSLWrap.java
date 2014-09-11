@@ -39,13 +39,18 @@ public class SSLWrap extends AsyncWrap {
     }
 
     public void start() throws Exception {
-        start( false );
+        start(false);
     }
 
     public void start(final boolean isServer) throws Exception {
 
-        this.sslEngine = context.getSSLEngine();
-        this.sslEngine.setUseClientMode( ! isServer );
+        try {
+            this.sslEngine = context.getSSLEngine();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw t;
+        }
+        this.sslEngine.setUseClientMode(!isServer);
 
         SslHandler sslHandler = new SslHandler(this.sslEngine);
         Future<Channel> handleshake = sslHandler.handshakeFuture();
@@ -53,18 +58,18 @@ public class SSLWrap extends AsyncWrap {
             @Override
             public void operationComplete(Future<? super Channel> future) throws Exception {
                 if (future.isSuccess()) {
-                    emit("handshakedone", CallbackResult.EMPTY_SUCCESS );
-                    if ( isServer ) {
+                    emit("handshakedone", CallbackResult.EMPTY_SUCCESS);
+                    if (isServer) {
                         emit("newsession", CallbackResult.createSuccess("foo", "bar"));
                     }
                 } else {
-                    emit("handshakedone", CallbackResult.EMPTY_SUCCESS );
+                    emit("handshakedone", CallbackResult.EMPTY_SUCCESS);
                 }
             }
         });
 
-        if ( stream.getPipeline().get( "debug" ) != null ) {
-            stream.getPipeline().addAfter( "debug", "ssl", sslHandler );
+        if (stream.getPipeline().get("debug") != null) {
+            stream.getPipeline().addAfter("debug", "ssl", sslHandler);
         } else {
             stream.getPipeline().addFirst(sslHandler);
         }
@@ -75,11 +80,19 @@ public class SSLWrap extends AsyncWrap {
 
 
     public void receive(ByteBuf buf) {
-        this.stream.getPipeline().fireChannelRead( buf );
+        this.stream.getPipeline().fireChannelRead(buf);
         this.stream.getPipeline().fireChannelReadComplete();
     }
 
     public Certificate getPeerCertificate() throws SSLPeerUnverifiedException, CertificateEncodingException {
         return this.sslEngine.getSession().getPeerCertificates()[0];
+    }
+
+    public String getServername() {
+        return this.sslEngine.getPeerHost();
+    }
+
+    public String getNegotiatedProtocol() {
+        return this.sslEngine.getSession().getProtocol();
     }
 }

@@ -40,7 +40,6 @@ SSL.prototype._onData = function(result) {
   }
 }
 
-
 SSL.prototype.receive = function(buf) {
   this._ssl.receive( buf._nettyBuffer() );
 }
@@ -49,9 +48,11 @@ SSL.prototype.setVerifyMode = function(requestCert, rejectUnauthorized) {
 }
 
 SSL.prototype.getNegotiatedProtocol = function() {
+  return this._ssl.negotiatedProtocol;
 }
 
 SSL.prototype.getServername = function() {
+  return this._ssl.servername;
 }
 
 SSL.prototype.requestOCSP = function() {

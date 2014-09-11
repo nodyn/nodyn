@@ -3,6 +3,7 @@ package io.nodyn.crypto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import io.nodyn.tls.CipherList;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
@@ -42,8 +43,8 @@ public class SecureContext {
     public SecureContext() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
     }
 
-    public void init(String secureProtocol) throws NoSuchAlgorithmException {
-        if ( secureProtocol == null) {
+    public void init(String secureProtocol) throws NoSuchAlgorithmException, NoSuchProviderException {
+        if (secureProtocol == null) {
             secureProtocol = "TLS";
         }
         this.sslContext = SSLContext.getInstance(secureProtocol);
@@ -56,14 +57,20 @@ public class SecureContext {
         TrustManager[] tm = initTrustManagers(keyStore);
 
         this.sslContext.init(km, tm, null);
-        return this.sslContext.createSSLEngine();
+        SSLEngine engine = this.sslContext.createSSLEngine( "localhost", 0);
+        SSLParameters params = new SSLParameters();
+        params.setWantClientAuth(false);
+        params.setNeedClientAuth(false);
+        engine.setSSLParameters( params );
+        engine.setEnabledCipherSuites( new CipherList( engine.getSupportedCipherSuites(), this.ciphers).toArray() );
+        return engine;
     }
 
     protected KeyStore initKeyStore() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(null);
 
-        if ( this.cert != null ) {
+        if (this.cert != null) {
             keyStore.setCertificateEntry("cert", this.cert);
         }
 
@@ -73,14 +80,14 @@ public class SecureContext {
 
         int counter = 0;
 
-        for ( Certificate each : this.rootCerts ) {
-            keyStore.setCertificateEntry( "root-" + (++counter), each );
+        for (Certificate each : this.rootCerts) {
+            keyStore.setCertificateEntry("root-" + (++counter), each);
         }
 
         counter = 0;
 
-        for ( Certificate each : this.caCerts ) {
-            keyStore.setCertificateEntry( "ca-" + (++counter), each );
+        for (Certificate each : this.caCerts) {
+            keyStore.setCertificateEntry("ca-" + (++counter), each);
         }
 
         return keyStore;
@@ -112,7 +119,7 @@ public class SecureContext {
             this.privateKey = converter.getKeyPair((PEMKeyPair) object).getPrivate();
         } else if (object instanceof PEMEncryptedKeyPair) {
             char[] passphraseChars = null;
-            if ( passphrase == null ) {
+            if (passphrase == null) {
                 passphraseChars = new char[]{};
             } else {
                 passphraseChars = passphrase.toCharArray();
@@ -122,7 +129,7 @@ public class SecureContext {
             try {
                 this.privateKey = converter.getKeyPair(((PEMEncryptedKeyPair) object).decryptKeyPair(decryptor)).getPrivate();
             } catch (Exception e) {
-                throw new Exception( "Invalid passphrase" );
+                throw new Exception("Invalid passphrase");
             }
 
         } else {
@@ -132,20 +139,20 @@ public class SecureContext {
     }
 
     public void setCert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf) );
-        CertificateFactory factory = CertificateFactory.getInstance( "X.509" );
-        this.cert = factory.generateCertificate( certIn );
+        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        this.cert = factory.generateCertificate(certIn);
     }
 
     public void addCACert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf) );
-        CertificateFactory factory = CertificateFactory.getInstance( "X.509" );
+        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
         this.caCerts.add(factory.generateCertificate(certIn));
     }
 
     public void addRootCert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf) );
-        CertificateFactory factory = CertificateFactory.getInstance( "X.509" );
+        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
         this.rootCerts.add(factory.generateCertificate(certIn));
     }
 

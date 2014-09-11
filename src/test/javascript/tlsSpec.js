@@ -9,14 +9,14 @@ describe('tls', function(){
 
   beforeEach( function() {
     helper.testComplete(false);
-    serverKey  = fs.readFileSync( './keys/DSA/serverkey.pem');
-    serverCert = fs.readFileSync( './keys/DSA/servercert.pem');
+    serverKey  = fs.readFileSync( './keys/RSA/server-key.pem');
+    serverCert = fs.readFileSync( './keys/RSA/server-cert.pem');
   })
 
   it( 'should allow creation of a server with key and cert', function() {
     var server = tls.createServer( {
       key: serverKey,
-      passphrase: 'server',
+      passphrase: 'iamserver',
       cert: serverCert,
     },
     function(connection) {
@@ -27,7 +27,7 @@ describe('tls', function(){
     waitsFor(helper.testComplete, "server to be listening", 5000);
     var server = tls.createServer( {
       key: serverKey,
-      passphrase: 'server',
+      passphrase: 'iamserver',
       cert: serverCert,
     },
     function(connection) {
@@ -43,7 +43,7 @@ describe('tls', function(){
     waitsFor(helper.testComplete, "server to receive connection", 5000);
     var server = tls.createServer( {
       key: serverKey,
-      passphrase: 'server',
+      passphrase: 'iamserver',
       cert: serverCert
     }, function(connection) {
       connection.on( 'data', function(b) {
