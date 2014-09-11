@@ -26,4 +26,4 @@ module.exports.sliceOnto = function(src, dest, start, end) {
   return io.nodyn.smalloc.Smalloc.sliceOnto(src, dest, start, end);
 }
 
-module.exports.kMaxLength = 64 * 1024;
+module.exports.kMaxLength = 128 * 1024;

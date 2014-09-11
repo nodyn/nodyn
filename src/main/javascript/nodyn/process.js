@@ -32,10 +32,6 @@ COUNTER_HTTP_SERVER_RESPONSE = function() {};
 COUNTER_HTTP_CLIENT_REQUEST = function() {};
 COUNTER_HTTP_CLIENT_RESPONSE = function() {};
 
-Error.captureStackTrace = function() {
-  // no-op, we already do this?
-};
-
 Number.isFinite = isFinite;
 
 (function(javaProcess){
