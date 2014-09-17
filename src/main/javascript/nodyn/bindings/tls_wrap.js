@@ -45,6 +45,7 @@ SSL.prototype.receive = function(buf) {
 }
 
 SSL.prototype.setVerifyMode = function(requestCert, rejectUnauthorized) {
+  this._ssl.setVerifyMode( requestCert, rejectUnauthorized );
 }
 
 SSL.prototype.getNegotiatedProtocol = function() {
@@ -66,11 +67,14 @@ SSL.prototype.verifyError = function() {
 }
 
 SSL.prototype.getPeerCertificate = function(detailed) {
-  return new Certificate( this._ssl.getPeerCertificate() );
+  var cert = this._ssl.getPeerCertificate();
+  if ( cert ) {
+    return new Certificate( this._ssl.getPeerCertificate() );
+  }
+  return null;
 }
 
 function Certificate(cert) {
-  this._cert = cert;
   this.subject = cert.getSubjectX500Principal().getName( 'CANONICAL' );
   this.issuer  = cert.getIssuerX500Principal().getName( 'CANONICAL' );
 

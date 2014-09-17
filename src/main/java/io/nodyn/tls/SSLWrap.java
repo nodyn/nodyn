@@ -25,6 +25,8 @@ public class SSLWrap extends AsyncWrap {
     private SSLEngine sslEngine;
     private StreamWrap stream;
     private SecureContext context;
+    private boolean requestCert;
+    private boolean rejectUnauthorized;
 
     public SSLWrap(NodeProcess process) {
         super(process);
@@ -85,7 +87,11 @@ public class SSLWrap extends AsyncWrap {
     }
 
     public Certificate getPeerCertificate() throws SSLPeerUnverifiedException, CertificateEncodingException {
-        return this.sslEngine.getSession().getPeerCertificates()[0];
+        try {
+            return this.sslEngine.getSession().getPeerCertificates()[0];
+        } catch (SSLPeerUnverifiedException e) {
+            return null;
+        }
     }
 
     public String getServername() {
@@ -95,4 +101,13 @@ public class SSLWrap extends AsyncWrap {
     public String getNegotiatedProtocol() {
         return this.sslEngine.getSession().getProtocol();
     }
+
+    public void setVerifyMode(boolean requestCert, boolean rejectUnauthorized) {
+        if (this.sslEngine != null) {
+            // if it's null, it's on the client, and it doesn't really matter, does it?
+            this.sslEngine.setWantClientAuth(requestCert);
+            this.sslEngine.setNeedClientAuth(rejectUnauthorized);
+        }
+    }
+
 }

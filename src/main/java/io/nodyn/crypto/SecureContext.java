@@ -59,8 +59,6 @@ public class SecureContext {
         this.sslContext.init(km, tm, null);
         SSLEngine engine = this.sslContext.createSSLEngine( "localhost", 0);
         SSLParameters params = new SSLParameters();
-        params.setWantClientAuth(false);
-        params.setNeedClientAuth(false);
         engine.setSSLParameters( params );
         engine.setEnabledCipherSuites( new CipherList( engine.getSupportedCipherSuites(), this.ciphers).toArray() );
         return engine;
