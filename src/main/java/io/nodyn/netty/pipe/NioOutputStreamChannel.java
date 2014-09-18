@@ -41,45 +41,15 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
     protected NioOutputStreamChannel(NodeProcess process, OutputStream out, Pipe pipe) {
         super(process, pipe);
         this.pipe = pipe;
+        /*
         try {
             pipe.sink().configureBlocking(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
         this.out = out;
-        startPump();
-    }
-
-    @Override
-    protected Pipe.SinkChannel javaChannel() {
-        return pipe.sink();
-    }
-
-    protected void startPump() {
-        this.process.getEventLoop().submitBlockingTask(new Runnable() {
-            @Override
-            public void run() {
-                ByteBuffer buf = ByteBuffer.allocate(1024);
-                int numRead = 0;
-                try {
-                    while ((numRead = NioOutputStreamChannel.this.pipe.source().read(buf)) >= 0) {
-                        if (numRead > 0) {
-                            byte[] writeMe = buf.array();
-                            NioOutputStreamChannel.this.out.write(writeMe, 0, numRead);
-                            NioOutputStreamChannel.this.out.flush();
-                            buf.clear();
-                        }
-                    }
-                } catch (IOException e) {
-                    //e.printStackTrace();
-                    try {
-                        NioOutputStreamChannel.this.pipe.source().close();
-                    } catch (IOException e1) {
-                        //e1.printStackTrace();
-                    }
-                }
-            }
-        });
+        //startPump();
     }
 
     @Override
@@ -95,8 +65,11 @@ public class NioOutputStreamChannel extends AbstractNioStreamChannel {
     @Override
     protected int doWriteBytes(ByteBuf buf) throws Exception {
         final int expectedWrittenBytes = buf.readableBytes();
-        final int writtenBytes = buf.readBytes(javaChannel(), expectedWrittenBytes);
-        return writtenBytes;
+        final byte[] bytes = new byte[ expectedWrittenBytes ];
+        buf.readBytes( bytes );
+        this.out.write( bytes );
+        this.out.flush();
+        return bytes.length;
     }
 
     @Override
