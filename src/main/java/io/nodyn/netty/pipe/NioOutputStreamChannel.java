@@ -17,68 +17,123 @@
 package io.nodyn.netty.pipe;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.FileRegion;
+import io.netty.channel.*;
 import io.nodyn.NodeProcess;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
 
 /**
  * @author Bob McWhirter
  */
-public class NioOutputStreamChannel extends AbstractNioStreamChannel {
+public class NioOutputStreamChannel extends AbstractChannel {
 
     private final OutputStream out;
-    private final Pipe pipe;
+    private final NodeProcess process;
+    private final DefaultChannelConfig config;
+    private final ChannelMetadata metadata;
+    private boolean open;
 
     public static NioOutputStreamChannel create(NodeProcess process, OutputStream out) throws IOException {
-        Pipe pipe = Pipe.open();
-        return new NioOutputStreamChannel(process, out, pipe);
+        NioOutputStreamChannel s = new NioOutputStreamChannel(process, out);
+        return s;
     }
 
-    protected NioOutputStreamChannel(NodeProcess process, OutputStream out, Pipe pipe) {
-        super(process, pipe);
-        this.pipe = pipe;
-        /*
-        try {
-            pipe.sink().configureBlocking(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
+    protected NioOutputStreamChannel(NodeProcess process, OutputStream out) {
+        super(null);
+        this.process = process;
         this.out = out;
-        //startPump();
+        this.config = new DefaultChannelConfig(this);
+        this.metadata = new ChannelMetadata(false);
+        this.open = true;
     }
 
     @Override
-    protected long doWriteFileRegion(FileRegion region) throws Exception {
-        return 0;
+    protected AbstractUnsafe newUnsafe() {
+        return new AbstractUnsafe() {
+            @Override
+            public void connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
+                // no-op
+            }
+        };
     }
 
     @Override
-    protected int doReadBytes(ByteBuf byteBuf) throws Exception {
-        return 0;
+    protected boolean isCompatible(EventLoop loop) {
+        return true;
     }
 
     @Override
-    protected int doWriteBytes(ByteBuf buf) throws Exception {
-        final int expectedWrittenBytes = buf.readableBytes();
-        final byte[] bytes = new byte[ expectedWrittenBytes ];
-        buf.readBytes( bytes );
-        this.out.write( bytes );
-        this.out.flush();
-        return bytes.length;
+    protected SocketAddress localAddress0() {
+        return null;
+    }
+
+    @Override
+    protected SocketAddress remoteAddress0() {
+        return null;
+    }
+
+    @Override
+    protected void doBind(SocketAddress localAddress) throws Exception {
+        // no-op
+    }
+
+    @Override
+    protected void doDisconnect() throws Exception {
+        this.open = false;
     }
 
     @Override
     protected void doClose() throws Exception {
-        this.pipe.source().close();
+        this.open = false;
+    }
+
+    @Override
+    protected void doBeginRead() throws Exception {
+        // no-op;
+
+    }
+
+    @Override
+    protected void doWrite(final ChannelOutboundBuffer in) throws Exception {
+        this.process.getEventLoop().submitBlockingTask(new Runnable() {
+            public void run() {
+                ByteBuffer[] buffers = in.nioBuffers();
+                for (int i = 0; i < buffers.length; ++i) {
+                    ByteBuffer each = buffers[i];
+                    int amount = each.limit() - each.position();
+                    byte[] bytes = new byte[amount];
+                    each.get(bytes);
+                    try {
+                        NioOutputStreamChannel.this.out.write(bytes);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public ChannelConfig config() {
+        return this.config;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return this.open;
     }
 
     public boolean isActive() {
-        return this.pipe.source().isOpen();
+        return this.open;
+    }
+
+    @Override
+    public ChannelMetadata metadata() {
+        return this.metadata;
     }
 
 }
