@@ -18,6 +18,7 @@ package io.nodyn.loop;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.*;
+import io.nodyn.NodeProcess;
 
 import java.util.concurrent.*;
 import java.util.concurrent.Future;
@@ -34,8 +35,10 @@ public class EventLoop implements RefCounted {
     private CountDownLatch latch = new CountDownLatch(1);
     private EventLoopGroup eventLoopGroup;
     private final boolean controlLifecycle;
+    private final AtomicInteger taskCounter = new AtomicInteger();
 
     protected int counter;
+    private NodeProcess process;
 
     public EventLoop(EventLoopGroup eventLoopGroup) {
         this(eventLoopGroup, true);
@@ -78,19 +81,32 @@ public class EventLoop implements RefCounted {
         });
     }
 
+    public void setProcess(NodeProcess process) {
+        this.process = process;
+    }
+
     public EventLoopGroup getEventLoopGroup() {
         return this.eventLoopGroup;
     }
 
     public Future<?> submitUserTask(final Runnable task) {
         final RefHandle handle = newHandle();
+        this.taskCounter.incrementAndGet();
         return this.userTaskExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 task.run();
+                taskComplete();
                 handle.unref();
             }
         });
+    }
+
+    private void taskComplete() {
+        int val = this.taskCounter.decrementAndGet();
+        if ( val == 0 ) {
+            this.process.doNextTick();
+        }
     }
 
     public ScheduledFuture<?> scheduleUserTask(final Runnable task, int time, TimeUnit units) {

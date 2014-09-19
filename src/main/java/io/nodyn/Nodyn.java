@@ -157,6 +157,8 @@ public class Nodyn extends DynJS {
     public NodeProcess initialize() {
         NodeProcess javaProcess = new NodeProcess(Nodyn.this);
 
+        this.eventLoop.setProcess( javaProcess );
+
         // Adds ES6 capabilities not provided by DynJS to global scope
         Nodyn.this.run(ES6_POLYFILL);
 

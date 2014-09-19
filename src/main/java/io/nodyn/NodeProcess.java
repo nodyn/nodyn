@@ -20,9 +20,7 @@ import io.nodyn.fs.UnsafeFs;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.loop.TickInfo;
-import io.nodyn.loop.Ticker;
 import io.nodyn.posix.NodePosixHandler;
-import jnr.posix.FileStat;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
 import org.dynjs.runtime.Runner;
@@ -45,6 +43,9 @@ public class NodeProcess extends EventSource {
     private ImmediateCheckHandle immediateCheckHandle;
     private boolean needImmediateCallback;
     private int exitCode = 0;
+
+    private TickInfo tickInfo;
+    private Runnable tickCallback;
 
     public NodeProcess(Nodyn nodyn) {
         this(nodyn, System.getProperties());
@@ -82,7 +83,13 @@ public class NodeProcess extends EventSource {
     }
 
     public void setupNextTick(Object tickInfo, Runnable tickCallback) {
-        this.nodyn.getEventLoop().submitUserTask(new Ticker(this, tickCallback, new TickInfo((org.dynjs.runtime.JSObject) tickInfo)));
+        this.tickInfo = new TickInfo((org.dynjs.runtime.JSObject) tickInfo);
+        this.tickCallback = tickCallback;
+        doNextTick();
+    }
+
+    public void doNextTick() {
+        this.tickCallback.run();
     }
 
     public boolean getNeedImmediateCallback() {
