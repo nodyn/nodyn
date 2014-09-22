@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* jshint globalstrict: true */
+/* global process, require */
+
 "use strict";
 
 var util = require('util');
