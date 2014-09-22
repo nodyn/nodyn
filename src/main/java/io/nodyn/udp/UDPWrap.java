@@ -31,13 +31,13 @@ public class UDPWrap extends HandleWrap {
     }
 
     public Object bind(final String address, final int port, int flags, final Family family) throws InterruptedException {
-        // TODO: Deal with flags
         try {
             if (family == Family.IPv6) {
                 localAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
             } else {
                 localAddress = new InetSocketAddress(Inet4Address.getByName(address), port);
             }
+            bootstrap.option(ChannelOption.SO_REUSEADDR, flags != 0);
             this.channelFuture = bootstrap.localAddress(localAddress).bind(localAddress);
             this.channelFuture.sync();
         } catch (Exception e) {

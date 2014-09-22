@@ -71,6 +71,8 @@ module.exports.SIGINFO      = 29;
 module.exports.SIGUSR1      = 30;
 module.exports.SIGUSR2      = 31;
 
+module.exports.UV_UDP_REUSEADDR = 4;
+
 jnrConstants('OpenFlags');
 jnrConstants('Errno');
 
