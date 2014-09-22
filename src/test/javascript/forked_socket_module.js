@@ -7,7 +7,7 @@ process.on('message', function(m, connection) {
     result += data.toString();
   });
   connection.on( 'end', function() {
-    if ( result.indexOf( 'Set-Cookie') >= 0 ) {
+    if ( result.indexOf( 'Set-Cookie' ) >= 0 || result.indexOf( '302 Found' ) ) {
       process.exit( 42 );
     }
     process.exit( -1 );
