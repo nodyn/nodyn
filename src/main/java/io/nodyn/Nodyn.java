@@ -30,6 +30,8 @@ import org.vertx.java.core.impl.VertxInternal;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Nodyn extends DynJS {
 
@@ -76,6 +78,20 @@ public class Nodyn extends DynJS {
 
         EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
         this.eventLoop = new EventLoop(elg, controlLifeCycle);
+
+        String[] argv = (String[]) this.config.getArgv();
+        List<String> filteredArgv = new ArrayList<>();
+
+        for ( int i = 0 ; i < argv.length ; ++i ) {
+            if ( argv[i].startsWith("--" ) ) {
+                // skip it
+            } else {
+                filteredArgv.add( argv[i] );
+            }
+        }
+
+        this.config.setArgv( filteredArgv.toArray() );
+
     }
 
     public void setExitHandler(ExitHandler handle) {
