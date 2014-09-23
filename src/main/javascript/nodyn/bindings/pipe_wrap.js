@@ -51,6 +51,8 @@ Pipe.prototype._onDataWithHandle = function(result) {
     if ( json.cmd == 'NODE_HANDLE' ) {
       if ( json.type == 'net.Socket' ) {
         handle = new TCP(fd);
+      } else if ( json.type == 'net.Native' ) {
+        handle = new TCP(fd);
       }
     }
   }

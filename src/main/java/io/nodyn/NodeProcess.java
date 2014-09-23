@@ -66,6 +66,10 @@ public class NodeProcess extends EventSource {
         this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
     }
 
+    public long getPid() {
+        return getPosix().getpid();
+    }
+
     public boolean isatty(int fd) throws NoSuchFieldException, IllegalAccessException {
         return this.posix.isatty(UnsafeFs.createFileDescriptor( fd ) );
     }

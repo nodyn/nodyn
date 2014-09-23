@@ -46,6 +46,12 @@ Number.isFinite = isFinite;
       }
     });
 
+    Object.defineProperty( this, "pid", {
+      get: function() {
+        return this._process.pid;
+      }
+    });
+
     this.context = this._process.vertx;
 
     this.binding = function(name) {
