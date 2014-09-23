@@ -6,11 +6,12 @@ module.exports = {
     // load jasmine and a terminal reporter into global
     load("jasmine-1.3.1/jasmine.js");
     load('./terminalReporter.js');
+    color = !process.env.JASMINE_NOCOLOR;
 
     // load the specs
     var jasmineEnv = jasmine.getEnv(),
         specs      = scanner.findSpecs(pattern),
-        reporter   = new jasmine.TerminalReporter({verbosity:3,color:true}); 
+        reporter   = new jasmine.TerminalReporter({verbosity:3,color:color}); 
 
     jasmineEnv.addReporter(reporter);
 
