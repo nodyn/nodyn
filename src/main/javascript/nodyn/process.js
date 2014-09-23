@@ -59,6 +59,26 @@ Number.isFinite = isFinite;
       return this._process.binding(name);
     };
 
+    // https://github.com/nodyn/nodyn/issues/91
+    // http://nodejs.org/api/process.html#process_process_hrtime
+    // https://github.com/joyent/node/blob/master/src/node.cc#L1995-L2025
+    this.hrtime = function(tuple) {
+      var nano = java.lang.System.nanoTime(),
+          nanosPerSec = 1000000000;
+
+      if (typeof tuple !== 'undefined') { 
+        if (tuple[0] === undefined || 
+            tuple[1] === undefined) {
+          throw new TypeError("process.hrtime() only accepts an Array tuple.");
+        }
+        nano -= (tuple[0] * nanosPerSec) + tuple[1];
+      }
+      return [
+        java.lang.Math.floor( nano / nanosPerSec ),
+        nano % nanosPerSec
+      ]; // seconds/nanoseconds tuple
+    };
+
     this._setupAsyncListener = function(asyncFlags, runAsyncQueue, loadAsyncQueue, unloadAsyncQueue) {
       this._runAsyncQueue = runAsyncQueue;
       this._loadAsyncQueue = loadAsyncQueue;
