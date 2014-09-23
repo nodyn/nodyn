@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOutboundBuffer;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.nodyn.NodeProcess;
 import io.nodyn.netty.DebugHandler;
 import io.nodyn.pipe.PipeWrap;
 import jnr.constants.platform.SocketLevel;
@@ -43,6 +44,8 @@ public class DuplexIPCChannel extends EmbeddedChannel {
     private Thread inPump;
     private Thread outPump;
 
+    private boolean closed;
+
     public DuplexIPCChannel(PipeWrap pipe, POSIX posix, int fd) {
         super(new IPCDataEventHandler(pipe.getProcess(), pipe));
         //pipeline().removeLast();
@@ -56,26 +59,45 @@ public class DuplexIPCChannel extends EmbeddedChannel {
         this.inPump = new Thread(new Runnable() {
             @Override
             public void run() {
-                doReadLoop();
+                try {
+                    doReadLoop();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }
         });
 
-        this.inPump.setDaemon( true );
+        this.inPump.setDaemon(true);
         this.inPump.start();
 
         this.outPump = new Thread(new Runnable() {
             @Override
             public void run() {
-                doWriteLoop();
+                try {
+                    doWriteLoop();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             }
         });
 
-        this.outPump.setDaemon( true );
+        this.outPump.setDaemon(true);
         this.outPump.start();
     }
 
     @Override
     public ChannelFuture close() {
+        MsgHdr message = posix.allocateMsgHdr();
+        ByteBuffer nioBuf = ByteBuffer.allocateDirect(1);
+        nioBuf.put( (byte) 0 );
+        nioBuf.flip();
+        message.setIov(new ByteBuffer[]{ nioBuf });
+        int result = posix.sendmsg( this.fd, message, 0 );
+        result = posix.fsync(this.fd);
+
+
+        this.closed = true;
+        posix.close(this.fd);
         this.inPump.interrupt();
         this.outPump.interrupt();
         return super.close();
@@ -84,8 +106,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
     protected void doReadLoop() {
 
         //while ((numRead = posix.recvmsg(this.fd, message, 0)) >= 0) {
-        while( true ) {
-
+        while (true) {
             ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 
             MsgHdr message = posix.allocateMsgHdr();
@@ -93,14 +114,25 @@ public class DuplexIPCChannel extends EmbeddedChannel {
             message.setIov(new ByteBuffer[]{buffer});
             CmsgHdr control = message.getControls()[0];
 
-            int numRead = posix.recvmsg( this.fd, message, 0 );
-            if ( numRead < 0 ) {
+            int numRead = posix.recvmsg(this.fd, message, 0);
+            if (numRead < 0) {
+                if (!this.closed) {
+                    writeInbound(new IPCRecord(null, -1));
+                }
                 break;
             }
 
             if (numRead > 0) {
+                if ( numRead == 1 ) {
+                    int position = buffer.position();
+                    if( buffer.get() == 0 ) {
+                        writeInbound(new IPCRecord(null, -1));
+                        break;
+                    }
+                    buffer.position( position );
+                }
                 int fd = -1;
-                buffer.limit( numRead );
+                buffer.limit(numRead);
                 ByteBuf nettyBuf = alloc().buffer(numRead);
                 nettyBuf.writeBytes(buffer);
                 if (control.getType() == 0x01 && control.getLevel() == SocketLevel.SOL_SOCKET.intValue()) {
@@ -108,6 +140,9 @@ public class DuplexIPCChannel extends EmbeddedChannel {
                 }
                 IPCRecord record = new IPCRecord(nettyBuf, fd);
                 writeInbound(record);
+            } else {
+                writeInbound(new IPCRecord(null, -1));
+                break;
             }
         }
     }
@@ -150,7 +185,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
         MsgHdr message = posix.allocateMsgHdr();
         message.setIov(new ByteBuffer[]{nioBuf});
 
-        if ( fd >= 0 ) {
+        if (fd >= 0) {
             CmsgHdr control = message.allocateControl(4);
             ByteBuffer fdBuf = ByteBuffer.allocateDirect(4);
             fdBuf.order(ByteOrder.nativeOrder());

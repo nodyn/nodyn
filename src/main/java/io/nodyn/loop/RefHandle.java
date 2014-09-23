@@ -22,21 +22,23 @@ package io.nodyn.loop;
 public class RefHandle {
 
     private final RefCounted refCounted;
+    private final String name;
     private boolean counted;
 
-    public RefHandle(RefCounted refCounted) {
-        this( refCounted, true );
+    public RefHandle(RefCounted refCounted, String name) {
+        this( refCounted, true, name );
     }
 
-    public RefHandle(RefCounted refCounted, boolean count) {
+    public RefHandle(RefCounted refCounted, boolean count, String name) {
         this.refCounted = refCounted;
+        this.name = name;
         if ( count ) {
             ref();
         }
     }
 
-    public RefHandle create() {
-        return new RefHandle( this.refCounted );
+    public RefHandle create(String name) {
+        return this.refCounted.newHandle( name );
     }
 
     public RefHandleHandler handler() {
@@ -50,7 +52,7 @@ public class RefHandle {
 
         this.counted = true;
 
-        this.refCounted.incrCount();
+        this.refCounted.incrCount( this );
     }
 
     public synchronized void unref() {
@@ -60,7 +62,11 @@ public class RefHandle {
 
         this.counted = false;
 
-        this.refCounted.decrCount();
+        this.refCounted.decrCount( this );
+    }
+
+    public String toString() {
+        return this.name;
     }
 
 

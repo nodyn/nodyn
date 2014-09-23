@@ -2,6 +2,8 @@ package io.nodyn.netty.pipe.ipc;
 
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
+
 /**
  * @author Bob McWhirter
  */
@@ -24,6 +26,6 @@ public class IPCRecord {
     }
 
     public String toString() {
-        return "[IPCRecord: buffer=" + this.buffer + "; fd=" + this.fd + "]";
+        return "[IPCRecord: buffer=" + this.buffer + "; buffer.toS=" + this.buffer.toString(Charset.defaultCharset() ) + "; fd=" + this.fd + "]";
     }
 }

@@ -149,7 +149,7 @@ public class Nodyn extends DynJS {
                     }
                 }
             }
-        });
+        }, "init");
     }
 
     public void shutdown() {

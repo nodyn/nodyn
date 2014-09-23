@@ -20,6 +20,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.*;
 import io.nodyn.NodeProcess;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -36,6 +38,8 @@ public class EventLoop implements RefCounted {
     private EventLoopGroup eventLoopGroup;
     private final boolean controlLifecycle;
     private final AtomicInteger taskCounter = new AtomicInteger();
+
+    private Set<RefHandle> handles = new HashSet<>();
 
     protected int counter;
     private NodeProcess process;
@@ -75,7 +79,7 @@ public class EventLoop implements RefCounted {
         this.blockingTaskExecutor = Executors.newCachedThreadPool(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, "blocking-task" );
+                Thread t = new Thread(r, "blocking-task");
                 return t;
             }
         });
@@ -89,14 +93,18 @@ public class EventLoop implements RefCounted {
         return this.eventLoopGroup;
     }
 
-    public Future<?> submitUserTask(final Runnable task) {
-        final RefHandle handle = newHandle();
+    public Future<?> submitUserTask(final Runnable task, String name) {
+        final RefHandle handle = newHandle("user-task#" + name );
         this.taskCounter.incrementAndGet();
         return this.userTaskExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 task.run();
-                taskComplete();
+                try {
+                    taskComplete();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
                 handle.unref();
             }
         });
@@ -104,7 +112,7 @@ public class EventLoop implements RefCounted {
 
     private void taskComplete() {
         int val = this.taskCounter.decrementAndGet();
-        if ( val == 0 ) {
+        if (val == 0) {
             this.process.doNextTick();
         }
     }
@@ -114,31 +122,41 @@ public class EventLoop implements RefCounted {
     }
 
     public Future<?> submitBlockingTask(final Runnable task) {
-        return this.blockingTaskExecutor.submit( task );
+        return this.blockingTaskExecutor.submit(task);
     }
 
     public int refCount() {
         return this.counter;
     }
 
-    public RefHandle newHandle() {
-        return new RefHandle(this);
+    public RefHandle newHandle(String name) {
+        return newHandle(true, name);
     }
 
-    public RefHandle newHandle(boolean count) {
-        return new RefHandle(this, count);
+    public RefHandle newHandle(boolean count, String name) {
+        return new RefHandle(this, count, name);
     }
 
+    public void dump() {
+        System.err.println(" ---- ");
+        System.err.println(this.handles);
+        System.err.println(" ---- ");
 
-    public synchronized void incrCount() {
+    }
+
+    public synchronized void incrCount(RefHandle handle) {
         ++this.counter;
-        //System.err.println(getClass().getSimpleName() + " ++ " + this.counter);
+        this.handles.add(handle);
+        //System.err.println( ( process != null ? process.getPid() : "?" ) + " ++ " + this.counter + " >> " + handle );
+        //System.err.println( this.handles );
         //new Exception().printStackTrace();
     }
 
-    public synchronized void decrCount() {
+    public synchronized void decrCount(RefHandle handle) {
         --this.counter;
-        //System.err.println(getClass().getSimpleName() + " -- " + this.counter);
+        this.handles.remove(handle);
+        //System.err.println( ( process != null ? process.getPid() : "?" ) + " -- " + this.counter + " >> " + handle );
+        //System.err.println( this.handles );
         //new Exception().printStackTrace();
         if (this.counter == 0) {
             doShutdown();
@@ -150,6 +168,7 @@ public class EventLoop implements RefCounted {
     }
 
     protected void doShutdown() {
+        //System.err.println((process != null ? process.getPid() : "?") + " ** SHUTDOWN");
         if (this.eventLoopGroup != null) {
             if (this.controlLifecycle) {
                 io.netty.util.concurrent.Future<?> future = this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);

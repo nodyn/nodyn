@@ -21,6 +21,8 @@ package io.nodyn.loop;
  */
 public interface RefCounted {
 
-    void incrCount();
-    void decrCount();
+    void incrCount(RefHandle handle);
+    void decrCount(RefHandle handle);
+
+    RefHandle newHandle(String name);
 }

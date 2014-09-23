@@ -30,7 +30,7 @@ public class HandleWrap extends AsyncWrap {
 
     public HandleWrap(NodeProcess process, boolean count) {
         super( process );
-        this.handle = process.getEventLoop().newHandle(count);
+        this.handle = process.getEventLoop().newHandle(count, this.toString() );
     }
 
     public void close() {

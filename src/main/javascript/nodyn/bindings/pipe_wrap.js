@@ -41,9 +41,14 @@ Pipe.prototype._onDataWithHandle = function(result) {
     fd = undefined;
   }
 
+  var b;
+  var nread = 0;
   var handle;
 
-  var b = process.binding('buffer').createBuffer( buffer );
+  if ( buffer ) {
+    b = process.binding('buffer').createBuffer( buffer );
+    nread = buffer.readableBytes();
+  }
 
   if (fd) {
     var msg = b.toString().trim();
@@ -57,7 +62,6 @@ Pipe.prototype._onDataWithHandle = function(result) {
     }
   }
 
-  var nread = buffer.readableBytes();
   this.onread( nread, b, handle );
 }
 

@@ -35,12 +35,12 @@ public class IPCDataEventHandler extends AbstractEventSourceHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, final Object msg) throws Exception {
-        process.getEventLoop().getEventLoopGroup().submit(new Runnable() {
+        this.process.getEventLoop().submitUserTask(new Runnable() {
             @Override
             public void run() {
                 emit("dataWithHandle", ReferenceCountUtil.retain(msg));
             }
-        });
+        }, "ipc-data-with-handle" );
         super.channelRead(ctx, msg);
     }
 }

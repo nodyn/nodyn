@@ -43,7 +43,7 @@ public class ImmediateCheckHandle implements Runnable {
         if ( this.future != null ) {
             return;
         }
-        this.future = this.loop.submitUserTask(this);
+        this.future = this.loop.submitUserTask(this, "immediate-check");
     }
 
     public void stop() {

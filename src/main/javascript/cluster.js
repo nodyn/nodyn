@@ -35,12 +35,24 @@ cluster.isWorker = ('NODE_UNIQUE_ID' in process.env);
 cluster.isMaster = (cluster.isWorker === false);
 
 
-function Worker() {
-  if (!(this instanceof Worker)) return new Worker;
+function Worker(options) {
+  if (!(this instanceof Worker))
+    return new Worker(options);
+
   EventEmitter.call(this);
+
+  if (!util.isObject(options))
+    options = {};
+
   this.suicide = undefined;
-  this.state = 'none';
-  this.id = 0;
+  this.state = options.state || 'none';
+  this.id = options.id | 0;
+
+  if (options.process) {
+    this.process = options.process;
+    this.process.on('error', this.emit.bind(this, 'error'));
+    this.process.on('message', this.emit.bind(this, 'message'));
+  }
 }
 util.inherits(Worker, EventEmitter);
 
@@ -50,6 +62,14 @@ Worker.prototype.kill = function() {
 
 Worker.prototype.send = function() {
   this.process.send.apply(this.process, arguments);
+};
+
+Worker.prototype.isDead = function isDead() {
+  return this.process.exitCode != null || this.process.signalCode != null;
+};
+
+Worker.prototype.isConnected = function isConnected() {
+  return this.process.connected;
 };
 
 // Master/worker specific methods are defined in the *Init() functions.
@@ -190,26 +210,6 @@ if (cluster.isMaster)
 else
   workerInit();
 
-
-function createWorkerExecArgv(masterExecArgv, worker) {
-  var args = masterExecArgv.slice();
-  var debugPort = process.debugPort + worker.id;
-  var hasDebugArg = false;
-
-  for (var i = 0; i < args.length; i++) {
-    var match = args[i].match(/^(--debug|--debug-brk)(=\d+)?$/);
-    if (!match) continue;
-    args[i] = match[1] + '=' + debugPort;
-    hasDebugArg = true;
-  }
-
-  if (!hasDebugArg)
-    args = ['--debug-port=' + debugPort].concat(args);
-
-  return args;
-}
-
-
 function masterInit() {
   cluster.workers = {};
 
@@ -278,37 +278,102 @@ function masterInit() {
     });
   };
 
-  var ids = 0;
-  cluster.fork = function(env) {
-    cluster.setupMaster();
-    var worker = new Worker;
-    worker.id = ++ids;
+  function createWorkerProcess(id, env) {
     var workerEnv = util._extend({}, process.env);
+    var execArgv = cluster.settings.execArgv.slice();
+    var debugPort = process.debugPort + id;
+    var hasDebugArg = false;
+
     workerEnv = util._extend(workerEnv, env);
-    workerEnv.NODE_UNIQUE_ID = '' + worker.id;
-    worker.process = fork(cluster.settings.exec, cluster.settings.args, {
+    workerEnv.NODE_UNIQUE_ID = '' + id;
+
+    for (var i = 0; i < execArgv.length; i++) {
+      var match = execArgv[i].match(/^(--debug|--debug-brk)(=\d+)?$/);
+
+      if (match) {
+        execArgv[i] = match[1] + '=' + debugPort;
+        hasDebugArg = true;
+      }
+    }
+
+    if (!hasDebugArg)
+      execArgv = ['--debug-port=' + debugPort].concat(execArgv);
+
+    return fork(cluster.settings.exec, cluster.settings.args, {
       env: workerEnv,
       silent: cluster.settings.silent,
-      execArgv: createWorkerExecArgv(cluster.settings.execArgv, worker),
+      execArgv: execArgv,
       gid: cluster.settings.gid,
       uid: cluster.settings.uid
     });
+  }
+
+  var ids = 0;
+
+  cluster.fork = function(env) {
+    cluster.setupMaster();
+    var id = ++ids;
+    var workerProcess = createWorkerProcess(id, env);
+    var worker = new Worker({
+      id: id,
+      process: workerProcess
+    });
+
+    function removeWorker(worker) {
+      assert(worker);
+
+      delete cluster.workers[worker.id];
+
+      if (Object.keys(cluster.workers).length === 0) {
+        assert(Object.keys(handles).length === 0, 'Resource leak detected.');
+        intercom.emit('disconnect');
+      }
+    }
+
+    function removeHandlesForWorker(worker) {
+      assert(worker);
+
+      for (var key in handles) {
+        var handle = handles[key];
+        if (handle.remove(worker)) delete handles[key];
+      }
+    }
+
     worker.process.once('exit', function(exitCode, signalCode) {
+      /*
+       * Remove the worker from the workers list only
+       * if it has disconnected, otherwise we might
+       * still want to access it.
+       */
+      if (!worker.isConnected()) removeWorker(worker);
+
       worker.suicide = !!worker.suicide;
       worker.state = 'dead';
       worker.emit('exit', exitCode, signalCode);
       cluster.emit('exit', worker, exitCode, signalCode);
-      delete cluster.workers[worker.id];
     });
+
     worker.process.once('disconnect', function() {
+      /*
+       * Now is a good time to remove the handles
+       * associated with this worker because it is
+       * not connected to the master anymore.
+       */
+      removeHandlesForWorker(worker);
+
+      /*
+       * Remove the worker from the workers list only
+       * if its process has exited. Otherwise, we might
+       * still want to access it.
+       */
+      if (worker.isDead()) removeWorker(worker);
+
       worker.suicide = !!worker.suicide;
       worker.state = 'disconnected';
       worker.emit('disconnect');
       cluster.emit('disconnect', worker);
-      delete cluster.workers[worker.id];
     });
-    worker.process.on('error', worker.emit.bind(worker, 'error'));
-    worker.process.on('message', worker.emit.bind(worker, 'message'));
+
     worker.process.on('internalMessage', internal(worker, onmessage));
     process.nextTick(function() {
       cluster.emit('fork', worker);
@@ -330,18 +395,6 @@ function masterInit() {
     if (cb) intercom.once('disconnect', cb);
   };
 
-  cluster.on('disconnect', function(worker) {
-    delete cluster.workers[worker.id];
-    for (var key in handles) {
-      var handle = handles[key];
-      if (handle.remove(worker)) delete handles[key];
-    }
-    if (Object.keys(cluster.workers).length === 0) {
-      assert(Object.keys(handles).length === 0, 'Resource leak detected.');
-      intercom.emit('disconnect');
-    }
-  });
-
   Worker.prototype.disconnect = function() {
     this.suicide = true;
     send(this, { act: 'disconnect' });
@@ -350,7 +403,7 @@ function masterInit() {
   Worker.prototype.destroy = function(signo) {
     signo = signo || 'SIGTERM';
     var proc = this.process;
-    if (proc.connected) {
+    if (this.isConnected()) {
       this.once('disconnect', proc.kill.bind(proc, signo));
       this.disconnect();
       return;
@@ -447,11 +500,12 @@ function workerInit() {
 
   // Called from src/node.js
   cluster._setupWorker = function() {
-    var worker = new Worker;
+    var worker = new Worker({
+      id: +process.env.NODE_UNIQUE_ID | 0,
+      process: process,
+      state: 'online'
+    });
     cluster.worker = worker;
-    worker.id = +process.env.NODE_UNIQUE_ID | 0;
-    worker.state = 'online';
-    worker.process = process;
     process.once('disconnect', function() {
       if (!worker.suicide) {
         // Unexpected disconnect, master exited, or some such nastiness, so
@@ -459,8 +513,6 @@ function workerInit() {
         process.exit(0);
       }
     });
-    worker.process.on('error', worker.emit.bind(worker, 'error'));
-    worker.process.on('message', worker.emit.bind(worker, 'message'));
     process.on('internalMessage', internal(worker, onmessage));
     send({ act: 'online' });
     function onmessage(message, handle) {
@@ -581,7 +633,7 @@ function workerInit() {
 
   Worker.prototype.destroy = function() {
     this.suicide = true;
-    if (!process.connected) process.exit(0);
+    if (!this.isConnected()) process.exit(0);
     var exit = process.exit.bind(null, 0);
     send({ act: 'suicide' }, exit);
     process.once('disconnect', exit);
@@ -610,6 +662,8 @@ function sendHelper(proc, message, handle, cb) {
 // to the callback but intercepts and redirects ACK messages.
 function internal(worker, cb) {
   return function(message, handle) {
+    'use strict';
+
     if (message.cmd !== 'NODE_CLUSTER') return;
     var fn = cb;
     if (!util.isUndefined(message.ack)) {
@@ -619,3 +673,5 @@ function internal(worker, cb) {
     fn.apply(worker, arguments);
   };
 }
+
+

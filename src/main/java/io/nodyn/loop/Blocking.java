@@ -28,7 +28,7 @@ public class Blocking {
     }
 
     public void submit(final Runnable action) {
-        final RefHandle handle = this.eventLoop.newHandle();
+        final RefHandle handle = this.eventLoop.newHandle( "blocking" );
         this.eventLoop.submitBlockingTask(new Runnable() {
             @Override
             public void run() {
@@ -39,7 +39,7 @@ public class Blocking {
     }
 
     public void unblock(final Runnable action) {
-        this.eventLoop.submitUserTask( action );
+        this.eventLoop.submitUserTask( action, "blocking" );
     }
 
 }

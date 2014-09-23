@@ -15,11 +15,16 @@
  */
 
 var Pipe = process.binding( "pipe_wrap" ).Pipe;
+var Handle = process.binding( "handle_wrap" ).Handle;
+var util = require('util');
 
 function Process() {
   this._process = new io.nodyn.process.ProcessWrap( process._process );
   this._process.on( 'exit', Process.prototype._onExit.bind(this) );
+  Handle.call( this, this._process );
 }
+
+util.inherits(Process, Handle);
 
 Object.defineProperty( Process.prototype, 'pid', {
   get: function() {
@@ -40,6 +45,8 @@ Process.prototype.spawn = function(options) {
   for ( i = 0 ; i < options.envPairs.length ; ++i ) {
     this._process.addEnvPair( options.envPairs[i] );
   }
+
+  this._stdio = options.stdio;
 
   for ( i = 0 ; i < options.stdio.length ; ++i ) {
     var fd;
@@ -64,9 +71,16 @@ Process.prototype.spawn = function(options) {
   }
 }
 
+/*
 Process.prototype.close = function() {
+  for ( i = 0 ; i < this._stdio.length ; ++i ) {
+    if ( this._stdio[i].handle ) {
+      this._stdio[i].handle.close();
+    }
+  }
   // what, exactly, should we do here?
 }
+*/
 
 Process.prototype.kill = function(signal) {
   this._process.kill( signal );

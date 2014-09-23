@@ -41,7 +41,7 @@ public class AsyncWrap extends EventSource {
             public void run() {
                 emit("makeCallbackByIndex", CallbackResult.createSuccess( index ) );
             }
-        });
+        }, "make-callback-for-" + getClass().getSimpleName() );
 
     }
 
@@ -51,7 +51,7 @@ public class AsyncWrap extends EventSource {
             public void run() {
                 AsyncWrap.super.emit( event, result );
             }
-        });
+        }, "emit-for-" + getClass().getSimpleName() );
         return null;
     }
 }

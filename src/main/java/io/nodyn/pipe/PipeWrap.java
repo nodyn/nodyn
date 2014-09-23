@@ -5,7 +5,6 @@ import io.netty.channel.ChannelOption;
 import io.nodyn.NodeProcess;
 import io.nodyn.fs.UnsafeFs;
 import io.nodyn.netty.DataEventHandler;
-import io.nodyn.netty.DebugHandler;
 import io.nodyn.netty.EOFEventHandler;
 import io.nodyn.netty.pipe.NioDuplexStreamChannel;
 import io.nodyn.netty.pipe.NioInputStreamChannel;
@@ -15,12 +14,16 @@ import io.nodyn.netty.pipe.ipc.IPCRecord;
 import io.nodyn.stream.StreamWrap;
 import jnr.constants.platform.AddressFamily;
 import jnr.constants.platform.Sock;
+import org.dynjs.runtime.ThreadContextManager;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Bob McWhirter
@@ -46,15 +49,20 @@ public class PipeWrap extends StreamWrap {
         this.ipc = ipc;
     }
 
-    public void create(int downstreamFd) throws IllegalAccessException, NoSuchFieldException, IOException {
-        try {
-            process.getPosix().socketpair(AddressFamily.AF_UNIX.intValue(), Sock.SOCK_STREAM.intValue(), 0, this.fileDescriptors);
-            boolean readable = (downstreamFd != 0);
-            boolean writable = (downstreamFd != 1 && downstreamFd != 2);
-            open(this.fileDescriptors[UPSTREAM], readable, writable);
-        } catch (Throwable t) {
-            t.printStackTrace();
+    public String toString() {
+        if (this.fileDescriptors == null) {
+            return "[PipeWrap: " + System.identityHashCode(this) + " ipc=" + ipc + "; type=" + type + "]";
+        } else {
+            return "[PipeWrap: " + System.identityHashCode(this) + " ipc=" + ipc + "; type=" + type + "; fd[0]=" + fileDescriptors[0] + "; fd[1]=" + this.fileDescriptors[1] + "]";
         }
+    }
+
+
+    public void create(int downstreamFd) throws IllegalAccessException, NoSuchFieldException, IOException {
+        process.getPosix().socketpair(AddressFamily.AF_UNIX.intValue(), Sock.SOCK_STREAM.intValue(), 0, this.fileDescriptors);
+        boolean readable = (downstreamFd != 0);
+        boolean writable = (downstreamFd != 1 && downstreamFd != 2);
+        open(this.fileDescriptors[UPSTREAM], readable, writable);
     }
 
     public void closeDownstream() {
