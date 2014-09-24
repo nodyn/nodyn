@@ -83,8 +83,7 @@ Number.isFinite = isFinite;
     };
 
     this._setupNextTick = function(tickInfo, tickCallback) {
-      this._process.setupNextTick( tickInfo, tickCallback );
-
+      this._process.setupNextTick( tickCallback );
       this._tickInfo = tickInfo;
       this._tickCallback = tickCallback;
     };
