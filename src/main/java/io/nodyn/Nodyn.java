@@ -35,6 +35,7 @@ import java.util.List;
 
 public class Nodyn extends DynJS {
 
+    public static final String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
     private static final String NODE_JS = "node.js";
     private static final String PROCESS = "nodyn/process.js";
     private static final String ES6_POLYFILL = "nodyn/polyfill.js";

@@ -93,7 +93,8 @@ var source = {};
   source[name] = getSource(name);
 });
 
-source.config = "{}";
+// see node.js startup.processConfig
+source.config = "\n{}";
 
 module.exports = source;
 

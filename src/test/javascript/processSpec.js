@@ -1,26 +1,16 @@
 var helper = require('./specHelper');
 
-/*
-var  Stream = require('stream'),
-    EE = require('events').EventEmitter,
-    javaProcess = new io.nodyn.process.Process();
+var Stream = require('stream'),
+    EE = require('events').EventEmitter;
 
 describe('process', function() {
 
   describe('.stdout', function() {
-    it('should be a Stream.Writable', function() {
-      expect(process.stdout instanceof Stream.Writable).toBeTruthy();
-    });
 
     it('should have a write function', function() {
       expect(typeof process.stdout.write).toBe('function');
       process.stdout.write("A message to stdout");
     });
-  });
-
-  it('should pass testProcessObject', function() {
-    expect(process).not.toBe(null);
-    expect(typeof process).toBe('object');
   });
 
   it('should pass testStdErr', function() {
@@ -30,9 +20,8 @@ describe('process', function() {
   });
 
   xit('should pass testStdIn', function() {
-    // If you access process.stdin, you have to deal with
-    // it in its entirety, somehow. A bug in our code,
-    // I'm certain.
+    // TODO: Running this simple test results in exception
+    // java.io.IOException: Broken pipe
     expect(typeof process.stdin).toBe('object');
   });
 
@@ -45,15 +34,35 @@ describe('process', function() {
   });
 
   it('should pass testExecPath', function() {
-    expect(process.execPath).toBe(java.lang.System.getProperty('user.dir'));
+    expect(process.execPath).toBe(java.lang.System.getProperty('user.dir') + '/./bin/nodyn');
   });
 
   it('should pass testArch', function() {
-    expect(process.arch).toBe(javaProcess.arch());
+    if (process._process.isX64()) {
+      expect(process.arch).toBe('x64');
+    } else if (process._process.isIa32()) {
+      expect(process.arch).toBe('ia32');
+    } else if (process._process.isArm()) {
+     expect(process.arch).toBe('arm');
+    } else {
+      this.fail('Unknown arch');
+    }
   });
 
   it('should pass testPlatform', function() {
-    expect(process.platform).toBe(javaProcess.platform());
+    if (process._process.isLinux()) {
+      expect(process.platform).toBe('linux');
+    } else if (process._process.isMac()) {
+      expect(process.platform).toBe('darwin');
+    } else if (process._process.isFreeBSD()) {
+     expect(process.platform).toBe('freebsd');
+    } else if (process._process.isSunos()) {
+     expect(process.platform).toBe('sunos');
+    } else if (process._process.isWindows()) {
+     expect(process.platform).toBe('windows');
+    } else {
+      this.fail('Unknown platform');
+    }
   });
 
   it('should pass testProcessEvents', function() {
@@ -74,7 +83,7 @@ describe('process', function() {
   });
 
   it('should pass testPID', function() {
-    expect(process.pid).toBe(java.lang.management.ManagementFactory.getRuntimeMXBean().getName());
+    expect(process.pid).toBe(process._process.pid);
   });
 
   it('should pass testTitle', function() {
@@ -116,23 +125,17 @@ describe('process', function() {
   });
 
   it('should pass testNextTick', function() {
-    var x = 0;
-    var f = function(y) { x += y; };
-    process.nextTick(f, 10);
-    setTimeout(function() {
-      expect(x).toBe(10);
-    }, 100);
+    waitsFor(helper.testComplete);
+    process.nextTick(function() {
+      helper.testComplete(true);
+    });
   });
 
   it('should pass testMemoryUsage', function() {
     expect(typeof process.memoryUsage).toBe('function');
-    memory = process.memoryUsage();
+    var memory = process.memoryUsage();
     expect(memory.heapTotal > memory.heapUsed).toBe(true);
-  });
-
-  it('should pass testUndocumentedProperties', function() {
-    expect(process.noDeprecation).toBe(false);
-    expect(process.traceDeprecation).toBe(false);
+    expect(memory.rss > memory.heapTotal).toBe(true);
   });
 
   describe('zlib binding', function() {
@@ -182,4 +185,3 @@ describe('process', function() {
 
   });
 });
-*/

@@ -59,9 +59,6 @@ Number.isFinite = isFinite;
       return this._process.binding(name);
     };
 
-    // https://github.com/nodyn/nodyn/issues/91
-    // http://nodejs.org/api/process.html#process_process_hrtime
-    // https://github.com/joyent/node/blob/master/src/node.cc#L1995-L2025
     this.hrtime = function(tuple) {
       var nano = java.lang.System.nanoTime(),
           nanosPerSec = 1000000000;
@@ -134,6 +131,28 @@ Number.isFinite = isFinite;
       var envVal  = envMap.get( envName );
       this.env[envName] = envVal;
     }
+    this.env.TEMP = this.env.TMPDIR;
+    this.env.TMP = this.env.TMPDIR;
+
+    this.arch = this._process.arch();
+    this.platform = this._process.platform();
+    this.version = io.nodyn.Nodyn.VERSION;
+    this.versions = {
+      node: io.nodyn.Nodyn.VERSION,
+      java: System.getProperty('java.version')
+    };
+
+    // TODO: This should affect what is displayed in `ps`
+    this.title = 'Nodyn'; 
+
+    this.memoryUsage = function() {
+      var rt = java.lang.Runtime.getRuntime();
+      return {
+        heapTotal: rt.totalMemory(),
+        heapUsed: rt.totalMemory() - rt.freeMemory(),
+        rss: rt.maxMemory()
+      };
+    };
 
     this.reallyExit = function(code) {
       this._process.exitCode = code;
@@ -168,7 +187,7 @@ Number.isFinite = isFinite;
     this.jaropen = function(module, filename) {
       __nodyn.config.classLoader.append( filename );
       return {};
-    }
+    };
 
     this.features = {
       debug: false,
