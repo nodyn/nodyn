@@ -1,4 +1,5 @@
 language: java
+before_install: umask 022
 install: mvn clean install -Dmaven.test.skip=true -U
 script: mvn test verify
 jdk:
