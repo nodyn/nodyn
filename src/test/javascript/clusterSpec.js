@@ -15,6 +15,7 @@ describe("clustering", function() {
         silent: false
       } );
       var child = cluster.fork();
+      expect( cluster.workers[1] ).toBe( child );
       var body = '';
       child.on('listening', function() {
         //console.log( "child listening" );
@@ -24,6 +25,7 @@ describe("clustering", function() {
           });
           response.on('end', function() {
             expect( body ).toContain( child.process.pid );
+            expect( body ).toContain( "worker#1" );
             //console.log( "disconnecting" );
             child.on( 'disconnect', function() {
               child.kill();

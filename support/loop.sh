@@ -17,6 +17,6 @@ fi
 for i in {1..100}
 do
   #${MVN} ${TASK} ${OPTS} > ${OUTFILE}-${i}.log 2>&1
-  #echo ${MVN} ${TASK} -Dtest.pattern="**/netPauseSpec.js"
-  ${MVN} ${TASK} -Dtest.pattern="**/tlsSpec.js" 2>&1 | tee -a log
+  #echo ${MVN} ${TASK} -Dtest.pattern="**/clusterSpec.js"
+  ${MVN} ${TASK} -Dtest.pattern="**/clusterSpec.js" 2>&1 | tee -a log
 done
