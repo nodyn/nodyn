@@ -18,5 +18,6 @@ function idle() {
   setTimeout( idle, 1000 );
 }
 
+process.send( 'ready' );
 idle();
 

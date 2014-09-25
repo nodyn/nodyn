@@ -69,9 +69,11 @@ describe( 'child_process', function() {
       expect( code ).toBe( 42 );
       helper.testComplete( true );
     })
-    setTimeout( function() {
-      child.send( { exit: 42 } );
-    }, 4000 );
+    child.on( 'message', function(message) {
+      if ( message == 'ready' ) {
+        child.send( { exit: 42 } );
+      }
+    })
   });
 
   it( 'should be able to send sockets to a child', function() {
@@ -83,11 +85,13 @@ describe( 'child_process', function() {
         connection.destroy();
         helper.testComplete( true );
       })
-      setTimeout( function() {
-        connection = require('net').connect( { host: 'www.google.com', port: 80 }, function(c) {
-          child.send( "connection", connection );
-        })
-      }, 4000 );
+      child.on( 'message', function(message) {
+        if ( message == 'ready' ) {
+          connection = require('net').connect( { host: 'www.google.com', port: 80 }, function(c) {
+            child.send( "connection", connection );
+          })
+        }
+      });
   })
 
 });
