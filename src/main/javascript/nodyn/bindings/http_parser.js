@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+var nodyn = require('nodyn');
+
 function HTTPParser() {
   this._parser = new io.nodyn.http.HTTPParser();
   this._parser.on( 'headersComplete', HTTPParser.prototype._onHeadersComplete.bind(this) );
@@ -97,6 +99,6 @@ HTTPParser.kOnMessageComplete = 3;
 HTTPParser.REQUEST  = io.nodyn.http.HTTPParser.REQUEST;
 HTTPParser.RESPONSE = io.nodyn.http.HTTPParser.RESPONSE;
 
-HTTPParser.methods  = io.nodyn.http.HTTPParser.METHODS;
+HTTPParser.methods  = nodyn.arrayConverter(io.nodyn.http.HTTPParser.METHODS);
 
 module.exports.HTTPParser = HTTPParser;
