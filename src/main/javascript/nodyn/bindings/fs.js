@@ -127,8 +127,12 @@ binding.close = function(fd, callback) {
 
 binding.writeBuffer = function(fd, buffer, offset, length, position, callback) {
   function work() {
-    // TODO: Error checking
-    // e.g. https://github.com/joyent/node/blob/master/src/node_file.cc#L788-L795
+    if (offset > buffer.length) throw new RangeError('offset out of bounds');
+    if (length > buffer.length) throw new RangeError('length out of bounds');
+    if (offset + length < offset) throw new RangeError('offset + length overflow');
+    if (offset + length > buffer.length) 
+      throw new RangeError('offset + length > buffer.length');
+
     var toWrite = buffer.slice(offset, offset+length);
     var bytes   = toWrite._byteArray();
     var written = posix.write(fd, bytes, length), err;
@@ -281,10 +285,10 @@ binding.chown = function(path, uid, gid, callback) {
 };
 
 binding.fchown = function(fd, uid, gid, callback) {
-  // TODO: submit a PR to jnr-posix for this
-  // THIS WILL FAIL
   return executeWork(function() {
-    return {err:nodyn.notImplemented('fchown')()};
+    if (posix.fchown(fd, uid, gid) === -1) {
+      return {err:posixError(fd, 'fchown')};
+    }
   }.bind(this), callback);
 };
 
@@ -297,27 +301,27 @@ binding.utimes = function(path, atime, mtime, callback) {
 };
 
 binding.futimes = function(fd, atime, mtime, callback) {
-  // TODO: submit a PR to jnr-posix for this
-  // THIS WILL FAIL
   return executeWork(function() {
-    return {err:nodyn.notImplemented('futimes')()};
+    if (posix.futimes(fd, [atime], [mtime]) === -1) {
+      return {err:posixError(fd, 'futimes')};
+    }
   }.bind(this), callback);
 };
 
 binding.fsync = function(fd) {
-  // TODO: submit a PR to jnr-posix for this
-  // THIS WILL FAIL
   return executeWork(function() {
-    return {err:nodyn.notImplemented('fsync')()};
-  });
+    if (posix.fsync(fd) === -1) {
+      return {err:posixError(fd, 'fsync')};
+    }
+  }.bind(this), callback);
 };
 
 binding.fdatasync = function(fd) {
-  // TODO: submit a PR to jnr-posix for this
-  // THIS WILL FAIL
   return executeWork(function() {
-    return {err:nodyn.notImplemented('fdatasync')()};
-  });
+    if (posix.fdatasync(fd) === -1) {
+      return {err:posixError(fd, 'fdatasync')};
+    }
+  }.bind(this), callback);
 };
 
 
