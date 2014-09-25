@@ -294,10 +294,37 @@ describe("fs module", function() {
         var b = new Buffer(data.length);
         fs.read(f, b, 0, data.length, 0, function(er, bytesRead, buffer) {
           expect(buffer.toString()).toBe(data);
+          sut.delete();
           helper.testComplete(true);
         });
       });
     }, data);
+  });
+
+  it('should provide fs.fchmodSync', function() {
+    waitsFor(helper.testComplete, '', 5000);
+    helper.writeFixture(function(sut) {
+      var fd = fs.openSync(sut.getAbsolutePath(), 'r');
+      var err = fs.fchmodSync(fd, 0400);
+      expect(err).toBeFalsy();
+      var stat = fs.fstatSync(fd);
+      expect(stat.mode).toBe(33024);
+      sut.delete();
+      helper.testComplete(true);
+    });
+  });
+
+  it('should provide fs.fchmod', function() {
+    waitsFor(helper.testComplete, '', 5000);
+    helper.writeFixture(function(sut) {
+      var fd = fs.openSync(sut.getAbsolutePath(), 'r');
+      fs.fchmod(fd, 0400, function(e) {
+        expect(e).toBeFalsy();
+        var stat = fs.statSync(sut.getAbsolutePath());
+        expect(stat.mode).toBe(33024);
+        helper.testComplete(true);
+      });
+    });
   });
 
   describe('realpath', function() {

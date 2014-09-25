@@ -265,10 +265,10 @@ binding.chmod = function(path, mode, callback) {
 };
 
 binding.fchmod = function(fd, mode, callback) {
-  // TODO: submit a PR to jnr-posix for this
-  // THIS WILL FAIL
   return executeWork(function() {
-    return {err:nodyn.notImplemented('fchmod')()};
+    if (posix.fchmod(fd, mode) === -1) {
+      return {err:posixError(fd, 'fchmod')};
+    }
   }.bind(this), callback);
 };
 

@@ -95,6 +95,18 @@ describe("fs.Stat", function() {
       });
     });
   });
+
+  it("should provide the file mode", function() {
+    waitsFor(helper.testComplete, 5000);
+    helper.writeFixture(function(sut) {
+      fs.stat(sut.getAbsolutePath(), function(err, stats) {
+        expect(err).toBeFalsy();
+        expect(stats).toBeTruthy();
+        expect(stats.mode).toBe(33188);
+        helper.testComplete(true);
+      });
+    });
+  });
 });
 
 
