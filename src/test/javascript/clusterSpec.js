@@ -14,11 +14,12 @@ describe("clustering", function() {
         exec: './src/test/javascript/cluster_child.js',
         silent: false
       } );
+      console.log( "master: forking" );
       var child = cluster.fork();
       expect( cluster.workers[1] ).toBe( child );
       var body = '';
       child.on('listening', function() {
-        //console.log( "child listening" );
+        console.log( "master: child is listening" );
         http.get( { port: 8000 }, function(response) {
           response.on('data', function(d) {
             body += d.toString();
@@ -26,19 +27,21 @@ describe("clustering", function() {
           response.on('end', function() {
             expect( body ).toContain( child.process.pid );
             expect( body ).toContain( "worker#1" );
-            //console.log( "disconnecting" );
             child.on( 'disconnect', function() {
+              console.log( "master: disconnected, killing" );
               child.kill();
             });
             child.on('exit', function() {
+              console.log( "master: child exited" );
               helper.testComplete(true);
             })
+            console.log( "master: disconnecting" );
             child.disconnect();
           });
         } );
       })
       child.on( 'online', function() {
-        //console.log( "child is online" );
+        console.log( "master: child is online" );
       })
   });
 
