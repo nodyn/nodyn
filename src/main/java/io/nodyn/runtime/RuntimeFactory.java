@@ -13,34 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.nodyn.runtime;
 
-package io.nodyn;
-
-import io.nodyn.loop.EventLoop;
-import io.nodyn.runtime.Program;
-import org.vertx.java.core.Vertx;
+import io.nodyn.Nodyn;
+import io.nodyn.NodynConfig;
+import io.nodyn.runtime.dynjs.DynJSRuntime;
 
 /**
  * @author Lance Ball
  */
-public interface Nodyn {
-    String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
+public class RuntimeFactory {
 
-    void setExitHandler(ExitHandler handle);
-
-    ExitHandler getExitHandler();
-
-    void reallyExit(int exitCode);
-
-    EventLoop getEventLoop();
-
-    Vertx getVertx();
-
-    int run() throws Throwable;
-
-    Object loadBinding(String name);
-
-    Program compile(String source, String fileName, boolean displayErrors) throws Throwable;
-
-    NodynConfig getConfiguration();
+    public static Nodyn getRuntime( NodynConfig config ) {
+        return new DynJSRuntime(config);
+    }
 }

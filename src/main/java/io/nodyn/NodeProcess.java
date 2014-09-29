@@ -22,7 +22,6 @@ import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.posix.NodePosixHandler;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
-import org.dynjs.runtime.Runner;
 import org.vertx.java.core.Vertx;
 
 import java.io.File;
@@ -131,9 +130,7 @@ public class NodeProcess extends EventSource {
     }
 
     protected Object loadBinding(String name) {
-        Runner runner = this.nodyn.newRunner();
-        runner.withSource("__native_require('nodyn/bindings/" + name + "');");
-        return runner.execute();
+        return this.nodyn.loadBinding(name);
     }
 
     public String getArgv0() {

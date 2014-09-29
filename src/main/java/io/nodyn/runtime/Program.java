@@ -13,34 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.nodyn;
-
-import io.nodyn.loop.EventLoop;
-import io.nodyn.runtime.Program;
-import org.vertx.java.core.Vertx;
+package io.nodyn.runtime;
 
 /**
  * @author Lance Ball
  */
-public interface Nodyn {
-    String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
-
-    void setExitHandler(ExitHandler handle);
-
-    ExitHandler getExitHandler();
-
-    void reallyExit(int exitCode);
-
-    EventLoop getEventLoop();
-
-    Vertx getVertx();
-
-    int run() throws Throwable;
-
-    Object loadBinding(String name);
-
-    Program compile(String source, String fileName, boolean displayErrors) throws Throwable;
-
-    NodynConfig getConfiguration();
+public interface Program {
+    public Object execute(Object context);
 }

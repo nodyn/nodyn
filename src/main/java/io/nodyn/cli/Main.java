@@ -18,7 +18,9 @@ package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
 import io.nodyn.NodynConfig;
+import io.nodyn.runtime.RuntimeFactory;
 import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.JSObject;
 
 import java.io.IOException;
@@ -30,7 +32,7 @@ public class Main {
     public Main(String[] args) {
         NodynConfig config = new NodynConfig();
         config.setArgv(args);
-        this.nodyn = new Nodyn(config);
+        this.nodyn = RuntimeFactory.getRuntime(config);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -44,7 +46,7 @@ public class Main {
         } catch (ThrowException e) {
             Object value = e.getValue();
             if (value != null && value instanceof JSObject) {
-                Object stack = ((JSObject) value).get(this.nodyn.getDefaultExecutionContext(), "stack");
+                Object stack = ((JSObject) value).get(((DynJS) this.nodyn).getDefaultExecutionContext(), "stack");
                 System.err.print(stack);
             } else if ( e.getCause() != null ) {
                 e.getCause().printStackTrace();

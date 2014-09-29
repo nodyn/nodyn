@@ -102,7 +102,7 @@ Number.isFinite = isFinite;
     this.argv = [];
     this.argv.push( this._process.argv0 );
 
-    var rawArgv = this._process.nodyn.config.argv;
+    var rawArgv = this._process.nodyn.configuration.argv;
     if ( rawArgv ) {
       var numArgs = rawArgv.length;
 
