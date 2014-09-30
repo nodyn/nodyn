@@ -130,6 +130,9 @@ Number.isFinite = isFinite;
       var envVal  = envMap.get( envName );
       this.env[envName] = envVal;
     }
+    if (!this.env.TMPDIR) {
+      this.env.TMPDIR = java.lang.System.getProperty('java.io.tmpdir');
+    }
     this.env.TEMP = this.env.TMPDIR;
     this.env.TMP = this.env.TMPDIR;
 
