@@ -140,6 +140,7 @@ describe('The dgram module', function() {
     });
 
     peer1.bind(54321, function() {
+      peer2.send(buffer, 0, buffer.length, 54321, '127.255.255.255');
       peer2.send(buffer, 0, buffer.length, 54321, '255.255.255.255');
     });
   });
