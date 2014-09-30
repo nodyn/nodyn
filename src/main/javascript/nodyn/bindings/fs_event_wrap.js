@@ -15,7 +15,7 @@
  */
 
 var util   = require('util'),
-    fs     = require('fs'),
+    fs     = process.binding('fs'),
     Handle = process.binding('handle_wrap').Handle;
 
 function FSEvent() {
@@ -27,7 +27,7 @@ util.inherits( FSEvent, Handle );
 
 FSEvent.prototype.start = function(path, persistent, recursive) {
   path = require('path').resolve(path);
-  fs.statSync(path);  // throws ENOENT if not found
+  fs.stat(path);  // throws ENOENT if not found
   this._wrap.start(path, persistent, recursive);
 };
 

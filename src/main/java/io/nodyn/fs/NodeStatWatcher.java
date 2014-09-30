@@ -4,6 +4,7 @@ import io.netty.channel.EventLoopGroup;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 import io.nodyn.async.AsyncWrap;
+import io.nodyn.handle.HandleWrap;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 /**
  * @author Lance Ball
  */
-public class NodeStatWatcher extends AsyncWrap {
+public class NodeStatWatcher extends HandleWrap {
     private final EventLoopGroup eventLoop;
     private File watchedDir;
     private File watchedFile;
@@ -23,13 +24,16 @@ public class NodeStatWatcher extends AsyncWrap {
 
 
     public NodeStatWatcher(NodeProcess process) {
-        super(process);
+        super(process, false);
         this.eventLoop = process.getEventLoop().getEventLoopGroup();
     }
 
     public void start(String path, boolean persistent, int interval) {
         // TODO: Deal with persistent and interval flags
-        watchedDir =  new File(path);
+        if (persistent) {
+            ref();
+        }
+        watchedDir = new File(path);
 
         if (!watchedDir.isDirectory()) {
             watchedFile = watchedDir;
@@ -48,6 +52,7 @@ public class NodeStatWatcher extends AsyncWrap {
 
     public void stop() {
         try {
+            unref();
             this.watcher.close();
             this.thread.join();
         } catch (Exception e) {
@@ -60,21 +65,16 @@ public class NodeStatWatcher extends AsyncWrap {
         public void run() {
             try {
                 WatchKey key = watcher.take();
-                while(key != null && key.isValid()) {
+                while (key != null && key.isValid()) {
                     for (final WatchEvent event : key.pollEvents()) {
                         if (watchedFile == null || watchedFile.getName().equals(event.context().toString())) {
-                            eventLoop.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    emit("change", CallbackResult.createSuccess(event.context().toString()));
-                                }
-                            });
+                            emit("change", CallbackResult.createSuccess(event.context().toString()));
                         }
                     }
                     key.reset();
                     key = watcher.take();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 // If a thread is currently blocked in the take or poll methods waiting for a key to be queued then it immediately receives a ClosedWatchServiceException.
                 // Any valid keys associated with this watch service are invalidated.
             }
