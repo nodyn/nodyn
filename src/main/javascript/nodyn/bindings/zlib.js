@@ -50,9 +50,15 @@ Zlib.prototype.close = function() {
 };
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  return new ZlibRequest(this._delegate).run(function() {
-    this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
-  }.bind(this));
+  var request = new ZlibRequest(this._delegate);
+
+  var self = this;
+
+  process.nextTick( function() { request.run(function() {
+    self._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
+  } ) } );
+
+  return request;
 };
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
@@ -86,11 +92,12 @@ ZlibRequest.prototype._onAfter = function _onAfter(result) {
       inAfter = result.result.inAfter;
       outAfter = result.result.outAfter;
     }
-    this.callback(inAfter, outAfter);
+    process.nextTick( function() {
+      this.callback(inAfter, outAfter);
+    }.bind(this) );
   }
 };
 
 ZlibRequest.prototype.run = function run(f) {
   blocking.submit(f);
-  return this;
 };

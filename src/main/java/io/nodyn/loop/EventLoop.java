@@ -122,7 +122,16 @@ public class EventLoop implements RefCounted {
     }
 
     public Future<?> submitBlockingTask(final Runnable task) {
-        return this.blockingTaskExecutor.submit(task);
+        return this.blockingTaskExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    task.run();
+                } catch (Throwable t) {
+                    //t.printStackTrace();
+                }
+            }
+        });
     }
 
     public int refCount() {

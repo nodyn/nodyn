@@ -28,3 +28,7 @@ module.exports.unblock = function(fn) {
     });
   };
 };
+
+module.exports.run_unblocked = function(fn) {
+  blocking.unblock( fn );
+}
