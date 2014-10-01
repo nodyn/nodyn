@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.nodyn;
-
-import io.nodyn.loop.EventLoop;
-import io.nodyn.runtime.Config;
-import io.nodyn.runtime.Program;
-import org.vertx.java.core.Vertx;
+package io.nodyn.runtime;
 
 /**
+ * Configuration interface for Nodyn runtimes
  * @author Lance Ball
  */
-public interface Nodyn {
-    String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
+public interface Config {
 
-    void setExitHandler(ExitHandler handle);
+    /**
+     * Get the command line args
+     * @return the command line args
+     */
+    Object[] getArgv();
 
-    ExitHandler getExitHandler();
+    /**
+     * Sets the command line args
+     *
+     * http://nodejs.org/api/process.html#process_process_argv
+     *
+     * @param argv an array of Objects
+     */
+    void setArgv(Object[] argv);
 
-    void reallyExit(int exitCode);
-
-    EventLoop getEventLoop();
-
-    Vertx getVertx();
-
-    int run() throws Throwable;
-
-    Object loadBinding(String name);
-
-    Program compile(String source, String fileName, boolean displayErrors) throws Throwable;
-
-    Config getConfiguration();
 }

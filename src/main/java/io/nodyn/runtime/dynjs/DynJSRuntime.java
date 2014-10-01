@@ -18,10 +18,10 @@ package io.nodyn.runtime.dynjs;
 
 
 import io.netty.channel.EventLoopGroup;
+import io.nodyn.runtime.Config;
 import io.nodyn.ExitHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.Nodyn;
-import io.nodyn.NodynConfig;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.runtime.Program;
 import org.dynjs.runtime.*;
@@ -48,19 +48,19 @@ public class DynJSRuntime extends DynJS implements Nodyn {
     private CompletionHandler completionHandler;
 
 
-    public DynJSRuntime(NodynConfig config) {
+    public DynJSRuntime(DynJSConfig config) {
         this((config.isClustered() ? VertxFactory.newVertx(config.getHost()) : VertxFactory.newVertx()),
                 config,
                 true);
     }
 
-    public DynJSRuntime(Vertx vertx, NodynConfig config) {
+    public DynJSRuntime(Vertx vertx, DynJSConfig config) {
         this(vertx,
                 config,
                 false);
     }
 
-    public DynJSRuntime(Vertx vertx, NodynConfig config, boolean controlLifeCycle) {
+    public DynJSRuntime(Vertx vertx, DynJSConfig config, boolean controlLifeCycle) {
         super(config);
 
         this.vertx = vertx;
@@ -144,8 +144,8 @@ public class DynJSRuntime extends DynJS implements Nodyn {
     }
 
     @Override
-    public NodynConfig getConfiguration() {
-        return (NodynConfig) this.getConfig();
+    public Config getConfiguration() {
+        return (Config) this.getConfig();
     }
 
     private void start() {

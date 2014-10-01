@@ -15,8 +15,8 @@
  */
 package io.nodyn;
 
-import io.nodyn.runtime.dynjs.DynJSRuntime;
-import org.dynjs.Config;
+import io.nodyn.runtime.Config;
+import io.nodyn.runtime.RuntimeFactory;
 
 /**
  * @author lanceball
@@ -40,10 +40,10 @@ public class TestRunner {
         System.setProperty( "nodyn.binary", "./bin/nodyn" );
         //System.setProperty("javax.net.debug", "all");
 
-        NodynConfig config = new NodynConfig(TestRunner.class.getClassLoader());
-        config.setCompileMode(Config.CompileMode.OFF);
+        RuntimeFactory factory = RuntimeFactory.init(TestRunner.class.getClassLoader());
+        Config config = factory.newConfiguration();
         config.setArgv(new String[]{"-e", SCRIPT});
-        Nodyn nodyn = new DynJSRuntime(config);
+        Nodyn nodyn = factory.newRuntime(config);
         nodyn.setExitHandler( new NoOpExitHandler() );
         try {
             int exitCode = nodyn.run();

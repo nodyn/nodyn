@@ -16,8 +16,16 @@
 package io.nodyn.runtime;
 
 /**
+ * A program that has been compiled by a Nodyn runtime.
+ *
  * @author Lance Ball
  */
 public interface Program {
+
+    /**
+     * Execute the program
+     * @param context the JS context
+     * @return the result of program execution
+     */
     public Object execute(Object context);
 }

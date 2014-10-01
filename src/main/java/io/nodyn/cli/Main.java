@@ -17,7 +17,7 @@
 package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
-import io.nodyn.NodynConfig;
+import io.nodyn.runtime.Config;
 import io.nodyn.runtime.RuntimeFactory;
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.DynJS;
@@ -30,9 +30,10 @@ public class Main {
     private Nodyn nodyn;
 
     public Main(String[] args) {
-        NodynConfig config = new NodynConfig();
+        RuntimeFactory factory = RuntimeFactory.init();
+        Config config = factory.newConfiguration();
         config.setArgv(args);
-        this.nodyn = RuntimeFactory.getRuntime(config);
+        this.nodyn = factory.newRuntime(config);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -41,6 +42,7 @@ public class Main {
     }
 
     public int run() {
+        // TODO: Add custom handling for Nashorn native exceptions
         try {
             return this.nodyn.run();
         } catch (ThrowException e) {

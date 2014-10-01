@@ -9,4 +9,6 @@ http.createServer(function(req, res) {
   res.writeHead(200);
   res.end("this request was processed by: " + process.pid + " aka worker#" + cluster.worker.id );
   console.log( "child: finished request" );
-}).listen(8000);
+}).listen(8000, function() {
+  console.log("child: listening");
+});

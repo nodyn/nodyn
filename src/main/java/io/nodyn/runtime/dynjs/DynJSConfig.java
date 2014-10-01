@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package io.nodyn;
+package io.nodyn.runtime.dynjs;
 
-import org.dynjs.runtime.GlobalObjectFactory;
+import io.nodyn.runtime.Config;
 
 /**
  * @author lanceball
  */
-public class NodynConfig extends org.dynjs.Config {
+public class DynJSConfig extends org.dynjs.Config implements Config {
 
     private boolean isClustered;
     private String host;
 
-    public NodynConfig(ClassLoader parentClassLoader) {
+    public DynJSConfig(ClassLoader parentClassLoader) {
         super(parentClassLoader);
+        setCompileMode(CompileMode.OFF);
     }
 
-    public NodynConfig() {
+    public DynJSConfig() {
         super();
+        setCompileMode(CompileMode.OFF);
     }
 
     public void setClustered(boolean isClustered) {
