@@ -51,8 +51,12 @@ exports.createContext = function(sandbox) {
     return sandbox;
   }
 
-  return binding.makeContext(sandbox);
-  //return sandbox;
+  binding.makeContext(sandbox);
+  return sandbox;
+};
+
+exports.runInDebugContext = function(code) {
+  return binding.runInDebugContext(code);
 };
 
 exports.runInContext = function(code, contextifiedSandbox, options) {
@@ -71,4 +75,5 @@ exports.runInThisContext = function(code, options) {
 };
 
 exports.isContext = binding.isContext;
+
 

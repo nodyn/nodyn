@@ -15,7 +15,8 @@
  */
 
 var util = require('util'),
-    Handle = process.binding('handle_wrap').Handle;
+    Handle = process.binding('handle_wrap').Handle,
+    fs = process.binding('fs');
 
 function StatWatcher() {
   if (!(this instanceof StatWatcher)) return new StatWatcher();
@@ -27,7 +28,7 @@ util.inherits( StatWatcher, Handle );
 
 StatWatcher.prototype.start = function(path, persistent, interval) {
   path = require('path').resolve(path);
-  this._stat = fs.statSync(path);
+  this._stat = fs.stat(path);
   this._delegate.start(path, persistent, interval);
 };
 
@@ -43,8 +44,8 @@ function _onchange(result) {
     if (result.error) {
       return;
     }
-    var stat = fs.statSync(result.result);
-    this.onchange(stat, this._stat, -1);
+    var stat = fs.stat(result.result);
+    this.onchange(stat, this._stat, 1);
     this._stat = stat;
   }
 }

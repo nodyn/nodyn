@@ -6,8 +6,8 @@ describe('vm functions', function() {
   it('should allow creation of new contexts', function() {
     var context = vm.createContext();
     expect(context).not.toBe( undefined );
-    expect(context instanceof org.dynjs.runtime.GlobalObject).toBe(true);
-    //expect(context.__nodyn instanceof org.dynjs.runtime.DynJS).toBe(true);
+    expect(typeof context).toBe("object");
+    expect(context.dynjs.runtime).not.toBe( undefined );
   });
 
   it('should allow initializing the sandbox', function() {
@@ -15,7 +15,8 @@ describe('vm functions', function() {
       tacos: 'crunch',
     });
     expect(context).not.toBe( undefined );
-    expect(context instanceof org.dynjs.runtime.GlobalObject).toBe(true);
+    expect(typeof context).toBe("object");
+    expect(context.dynjs.runtime).not.toBe( undefined );
     expect(context.tacos).toBe('crunch');
     try {
       tacos;

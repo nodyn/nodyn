@@ -8,8 +8,8 @@ describe("clustering", function() {
     helper.testComplete(false);
   });
 
-  xit ('should be able to delegate requests to children', function() {
-      waitsFor(helper.testComplete, "child to come online process a request and die", 5000);
+  it ('should be able to delegate requests to children', function() {
+      waitsFor(helper.testComplete, "child to come online process a request and die", 10000);
       cluster.setupMaster( {
         exec: './src/test/javascript/cluster_child.js',
         silent: false
@@ -34,15 +34,15 @@ describe("clustering", function() {
             child.on('exit', function() {
               console.log( "master: child exited" );
               helper.testComplete(true);
-            })
+            });
             console.log( "master: disconnecting" );
             child.disconnect();
           });
         } );
-      })
+      });
       child.on( 'online', function() {
         console.log( "master: child is online" );
-      })
+      });
   });
 
 

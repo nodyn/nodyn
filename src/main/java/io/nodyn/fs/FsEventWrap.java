@@ -20,19 +20,21 @@ public class FsEventWrap extends HandleWrap {
     private boolean persistent;
 
     public FsEventWrap(NodeProcess process) {
-        super(process, true);
+        super(process, false);
         eventLoop = process.getEventLoop();
     }
 
     public void start(String path, boolean persistent, boolean recursive) {
-        File dir =  new File(path);
+        File dir = new File(path);
         this.persistent = persistent;
         if (!dir.isDirectory()) {
             watched = dir;
             dir = watched.getParentFile();
         }
         try {
-            if (persistent) ref();
+            if (persistent) {
+                ref();
+            }
             Path toWatch = Paths.get(dir.getCanonicalPath());
             watcher = toWatch.getFileSystem().newWatchService();
             toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
@@ -41,7 +43,7 @@ public class FsEventWrap extends HandleWrap {
                 public void run() {
                     try {
                         WatchKey key = watcher.take();
-                        while(key != null && key.isValid()) {
+                        while (key != null && key.isValid()) {
                             for (final WatchEvent event : key.pollEvents()) {
                                 if (watched == null || watched.getName().equals(event.context().toString())) {
                                     emit("change", CallbackResult.createSuccess(event.kind().toString(), event.context().toString()));
@@ -65,7 +67,8 @@ public class FsEventWrap extends HandleWrap {
     @Override
     public void close() {
         try {
-            if (persistent) unref();
+            // double-unref is always safe.
+            unref();
             this.watcher.close();
         } catch (Exception e) {
             e.printStackTrace();
