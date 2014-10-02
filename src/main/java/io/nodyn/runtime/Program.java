@@ -15,6 +15,8 @@
  */
 package io.nodyn.runtime;
 
+import org.dynjs.runtime.JSObject;
+
 /**
  * A program that has been compiled by a Nodyn runtime.
  *
@@ -27,5 +29,5 @@ public interface Program {
      * @param context the JS context
      * @return the result of program execution
      */
-    public Object execute(Object context);
+    public Object execute(JSObject context);
 }
