@@ -69,13 +69,12 @@ public class Nodyn extends DynJS {
 
         this.vertx = vertx;
 
-        GlobalObject globalObject = getGlobalObject();
-        globalObject.defineGlobalProperty("__vertx", vertx, false);
-        globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
-        globalObject.defineGlobalProperty("__filename", NODE_JS); // TODO: This should be a file name sometimes
-        globalObject.defineGlobalProperty("__nodyn", this, false);
-
-        globalObject.defineGlobalProperty("__native_require", new Require( globalObject ));
+        JSObject globalObject = getGlobalContext().getObject();
+        globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(vertx, true, true, false), false);
+        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir") , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(NODE_JS , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this , true, true, false), false);
+        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require( getGlobalContext() ) , true, true, true), false);
 
         EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
         this.eventLoop = new EventLoop(elg, controlLifeCycle);
@@ -180,10 +179,10 @@ public class Nodyn extends DynJS {
         Nodyn.this.run(ES6_POLYFILL);
 
         JSFunction processFunction = (JSFunction) Nodyn.this.run(PROCESS);
-        JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalObject(), javaProcess);
+        JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalContext().getObject(), javaProcess);
 
         JSFunction nodeFunction = (JSFunction) Nodyn.this.run(NODE_JS);
-        getDefaultExecutionContext().call(nodeFunction, getGlobalObject(), jsProcess);
+        getDefaultExecutionContext().call(nodeFunction, getGlobalContext().getObject(), jsProcess);
 
         return javaProcess;
     }

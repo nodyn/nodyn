@@ -19,6 +19,7 @@ package io.nodyn.contextify;
 import io.nodyn.Nodyn;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.Compiler;
+import org.dynjs.runtime.builtins.DynJSBuiltin;
 
 /**
  * @author Bob McWhirter
@@ -41,7 +42,9 @@ public class ContextifyScriptWrap {
         }
     }
 
-    public Object runInContext(GlobalObject context) {
-        return context.getRuntime().newRunner().withSource( this.script ).execute();
+    public Object runInContext(JSObject context) {
+        DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) context.get(null, "dynjs");
+        DynJS runtime = dynjsBuiltin.getRuntime();
+        return runtime.newRunner().withSource( this.script ).execute();
     }
 }

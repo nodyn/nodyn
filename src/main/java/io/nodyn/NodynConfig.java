@@ -16,8 +16,6 @@
 
 package io.nodyn;
 
-import org.dynjs.runtime.GlobalObjectFactory;
-
 /**
  * @author lanceball
  */

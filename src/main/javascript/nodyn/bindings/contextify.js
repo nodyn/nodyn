@@ -26,7 +26,7 @@ function ContextifyScript(script,options) {
 }
 
 ContextifyScript.prototype.runInThisContext = function() {
-  return this.runInContext( __nodyn.globalObject );
+  return this.runInContext( __nodyn.globalContext.object );
 }
 
 ContextifyScript.prototype.runInContext = function(context) {
@@ -34,18 +34,12 @@ ContextifyScript.prototype.runInContext = function(context) {
 }
 
 function isContext(obj) {
-  return (obj instanceof org.dynjs.runtime.GlobalObject );
+  return ( obj.dynjs && obj.dynjs.runtime );
 }
 
 function makeContext(obj) {
-  var runtime = new org.dynjs.runtime.DynJS(__nodyn.config);
-  var g = runtime.globalObject;
-
-  for ( var k in obj ) {
-    g[k] = obj[k];
-  }
-
-  return g;
+  // causes obj to become contextified.
+  new org.dynjs.runtime.DynJS(__nodyn.config, obj);
 }
 
 module.exports.ContextifyScript = ContextifyScript;
