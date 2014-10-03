@@ -38,10 +38,6 @@ import java.util.List;
 
 public class DynJSRuntime extends DynJS implements Nodyn {
 
-    private static final String NODE_JS = "node.js";
-    private static final String PROCESS = "nodyn/process.js";
-    private static final String ES6_POLYFILL = "nodyn/polyfill.js";
-
     private final Vertx vertx;
     private final EventLoop eventLoop;
     private ExitHandler exitHandler;

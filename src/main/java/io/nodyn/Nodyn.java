@@ -25,6 +25,10 @@ import org.vertx.java.core.Vertx;
  * @author Lance Ball
  */
 public interface Nodyn {
+    static final String NODE_JS = "node.js";
+    static final String PROCESS = "nodyn/process.js";
+    static final String ES6_POLYFILL = "nodyn/polyfill.js";
+
     String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
 
     void setExitHandler(ExitHandler handle);
