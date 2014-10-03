@@ -1,9 +1,0 @@
-{
-  "name": "nodyn-connect",
-  "description": "hello world application using connect.js",
-  "version": "0.0.1",
-  "private": true,
-  "dependencies": {
-    "connect": "2.13.0"
-  }
-}
