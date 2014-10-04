@@ -4,10 +4,14 @@ var vm     = require('vm');
 
 describe('vm functions', function() {
   it('should allow creation of new contexts', function() {
-    var context = vm.createContext();
-    expect(context).not.toBe( undefined );
-    expect(typeof context).toBe("object");
-    expect(context.dynjs.runtime).not.toBe( undefined );
+    try {
+      var context = vm.createContext();
+      expect(context).not.toBe( undefined );
+      expect(typeof context).toBe("object");
+      expect(context.dynjs.runtime).not.toBe( undefined );
+    } catch(e) {
+      e.printStackTrace();
+    }
   });
 
   it('should allow initializing the sandbox', function() {

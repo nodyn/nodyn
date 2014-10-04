@@ -17,18 +17,15 @@
 package io.nodyn.runtime.dynjs;
 
 
-import io.netty.channel.EventLoopGroup;
-import io.nodyn.runtime.Config;
-import io.nodyn.ExitHandler;
 import io.nodyn.NodeProcess;
 import io.nodyn.Nodyn;
-import io.nodyn.loop.EventLoop;
 import io.nodyn.runtime.Program;
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.*;
+import org.dynjs.runtime.Compiler;
 import org.dynjs.runtime.builtins.Require;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
-import org.vertx.java.core.impl.VertxInternal;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -36,13 +33,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DynJSRuntime extends DynJS implements Nodyn {
+public class DynJSRuntime extends Nodyn {
 
-    private final Vertx vertx;
-    private final EventLoop eventLoop;
-    private ExitHandler exitHandler;
-    private CompletionHandler completionHandler;
-
+    private final DynJS runtime;
 
     public DynJSRuntime(DynJSConfig config) {
         this((config.isClustered() ? VertxFactory.newVertx(config.getHost()) : VertxFactory.newVertx()),
@@ -50,78 +43,14 @@ public class DynJSRuntime extends DynJS implements Nodyn {
                 true);
     }
 
-    public DynJSRuntime(Vertx vertx, DynJSConfig config) {
-        this(vertx,
-                config,
-                false);
-    }
-
     public DynJSRuntime(Vertx vertx, DynJSConfig config, boolean controlLifeCycle) {
-        super(config);
-
-        this.vertx = vertx;
-
-        JSObject globalObject = getGlobalContext().getObject();
-        globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(vertx, true, true, false), false);
-        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir") , true, true, true), false);
-        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(NODE_JS , true, true, true), false);
-        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this , true, true, false), false);
-        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require( getGlobalContext() ) , true, true, true), false);
-
-        EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
-        this.eventLoop = new EventLoop(elg, controlLifeCycle);
-
-        String[] argv = (String[]) config.getArgv();
-        List<String> filteredArgv = new ArrayList<>();
-
-        for (String anArgv : argv) {
-            if (!anArgv.startsWith("--")) {
-                filteredArgv.add(anArgv);
-            }
-        }
-
-        config.setArgv(filteredArgv.toArray());
-    }
-
-    @Override
-    public void setExitHandler(ExitHandler handle) {
-        this.exitHandler = handle;
-    }
-
-    @Override
-    public ExitHandler getExitHandler() {
-        return this.exitHandler;
-    }
-
-    @Override
-    public void reallyExit(int exitCode) {
-        this.eventLoop.shutdown();
-        if (this.exitHandler != null) {
-            this.exitHandler.reallyExit(exitCode);
-        } else {
-            System.exit(exitCode);
-        }
-    }
-
-    @Override
-    public EventLoop getEventLoop() {
-        return this.eventLoop;
-    }
-
-    @Override
-    public Vertx getVertx() {
-        return this.vertx;
-    }
-
-    @Override
-    public int run() throws Throwable {
-        start();
-        return await();
+        super(config, vertx, controlLifeCycle);
+        this.runtime = new DynJS(config);
     }
 
     @Override
     public Object loadBinding(String name) {
-        Runner runner = this.newRunner();
+        Runner runner = runtime.newRunner();
         runner.withSource("__native_require('nodyn/bindings/" + name + "');");
         return runner.execute();
     }
@@ -139,79 +68,79 @@ public class DynJSRuntime extends DynJS implements Nodyn {
     }
 
     @Override
-    public Config getConfiguration() {
-        return (Config) this.getConfig();
-    }
-
-    private void start() {
-        start(null);
-    }
-
-    private void start(final Runnable callback) {
-        this.completionHandler = new CompletionHandler();
-        this.eventLoop.submitUserTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    DynJSRuntime.this.completionHandler.process = initialize();
-                } catch (Throwable t) {
-                    DynJSRuntime.this.completionHandler.error = t;
-                } finally {
-                    if (callback != null) {
-                        callback.run();
-                    }
-                }
+    public void handleThrowable(Throwable t) {
+        if (t instanceof ThrowException) {
+            ThrowException e = (ThrowException) t;
+            Object value = e.getValue();
+            if (value != null && value instanceof JSObject) {
+                Object stack = ((JSObject) value).get(this.runtime.getDefaultExecutionContext(), "stack");
+                System.err.print(stack);
+            } else if ( t.getCause() != null ) {
+                e.getCause().printStackTrace();
+            } else {
+                e.printStackTrace();
             }
-        }, "init");
+        }
+        else {
+            t.printStackTrace();
+        }
     }
 
-    private void shutdown() {
-        this.eventLoop.shutdown();
+    @Override
+    public Object getGlobalContext() {
+        return this.runtime.getGlobalContext().getObject();
     }
 
-    private int await() throws Throwable {
-        this.eventLoop.await();
+    @Override
+    protected NodeProcess initialize() {
+        JSObject globalObject = runtime.getGlobalContext().getObject();
+        globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(getVertx(), true, true, false), false);
+        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir") , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this , true, true, false), false);
+        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require( runtime.getGlobalContext() ) , true, true, true), false);
 
-        if (this.completionHandler.error != null) {
-            throw completionHandler.error;
+        String[] argv = (String[]) getConfiguration().getArgv();
+        List<String> filteredArgv = new ArrayList<>();
+
+        for (String anArgv : argv) {
+            if (!anArgv.startsWith("--")) {
+                filteredArgv.add(anArgv);
+            }
         }
 
-        if (this.completionHandler.process == null) {
-            return -255;
-        }
+        getConfiguration().setArgv(filteredArgv.toArray());
 
-        return this.completionHandler.process.getExitCode();
-    }
+        NodeProcess javaProcess = new NodeProcess(this);
 
-
-    private NodeProcess initialize() {
-        NodeProcess javaProcess = new NodeProcess(DynJSRuntime.this);
-
-        this.eventLoop.setProcess( javaProcess );
+        getEventLoop().setProcess(javaProcess);
 
         // Adds ES6 capabilities not provided by DynJS to global scope
-        DynJSRuntime.this.run(ES6_POLYFILL);
+        runScript(ES6_POLYFILL);
 
-        JSFunction processFunction = (JSFunction) DynJSRuntime.this.run(PROCESS);
-        JSObject jsProcess = (JSObject) getDefaultExecutionContext().call(processFunction, getGlobalContext().getObject(), javaProcess);
+        JSFunction processFunction = (JSFunction) runScript(PROCESS);
+        JSObject jsProcess = (JSObject) runtime.getDefaultExecutionContext().call(processFunction, runtime.getGlobalContext().getObject(), javaProcess);
 
-        JSFunction nodeFunction = (JSFunction) DynJSRuntime.this.run(NODE_JS);
-        getDefaultExecutionContext().call(nodeFunction, getGlobalContext().getObject(), jsProcess);
-
+        JSFunction nodeFunction = (JSFunction) runScript(NODE_JS);
+        try {
+            runtime.getDefaultExecutionContext().call(nodeFunction, runtime.getGlobalContext().getObject(), jsProcess);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return javaProcess;
     }
 
-    private Object run(String scriptName) {
-        Runner runner = newRunner();
-        InputStream repl = getConfig().getClassLoader().getResourceAsStream(scriptName);
+    @Override
+    protected Object runScript(String scriptName) {
+        Runner runner = runtime.newRunner();
+        InputStream repl = runtime.getConfig().getClassLoader().getResourceAsStream(scriptName);
         BufferedReader in = new BufferedReader(new InputStreamReader(repl));
         runner.withSource(in);
         runner.withFileName(scriptName);
         return runner.execute();
     }
 
-    private static class CompletionHandler {
-        public NodeProcess process;
-        public Throwable error;
+    protected Compiler newCompiler() {
+        return runtime.newCompiler();
     }
 }

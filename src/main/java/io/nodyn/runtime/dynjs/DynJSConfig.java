@@ -17,6 +17,7 @@
 package io.nodyn.runtime.dynjs;
 
 import io.nodyn.runtime.Config;
+import org.dynjs.runtime.DynamicClassLoader;
 
 /**
  * @author lanceball
@@ -27,12 +28,7 @@ public class DynJSConfig extends org.dynjs.Config implements Config {
     private String host;
 
     public DynJSConfig(ClassLoader parentClassLoader) {
-        super(parentClassLoader);
-        setCompileMode(CompileMode.OFF);
-    }
-
-    public DynJSConfig() {
-        super();
+        super(parentClassLoader == null ? new DynamicClassLoader() : parentClassLoader);
         setCompileMode(CompileMode.OFF);
     }
 

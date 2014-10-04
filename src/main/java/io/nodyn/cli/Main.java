@@ -30,7 +30,7 @@ public class Main {
     private Nodyn nodyn;
 
     public Main(String[] args) {
-        RuntimeFactory factory = RuntimeFactory.init();
+        RuntimeFactory factory = RuntimeFactory.init(null, RuntimeFactory.RuntimeType.DYNJS);
         Config config = factory.newConfiguration();
         config.setArgv(args);
         this.nodyn = factory.newRuntime(config);
@@ -45,18 +45,8 @@ public class Main {
         // TODO: Add custom handling for Nashorn native exceptions
         try {
             return this.nodyn.run();
-        } catch (ThrowException e) {
-            Object value = e.getValue();
-            if (value != null && value instanceof JSObject) {
-                Object stack = ((JSObject) value).get(((DynJS) this.nodyn).getDefaultExecutionContext(), "stack");
-                System.err.print(stack);
-            } else if ( e.getCause() != null ) {
-                e.getCause().printStackTrace();
-            } else {
-                e.printStackTrace();
-            }
         } catch (Throwable t) {
-            t.printStackTrace();
+            this.nodyn.handleThrowable(t);
         }
 
         return -255;

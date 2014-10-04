@@ -16,34 +16,19 @@
 package io.nodyn.runtime;
 
 import io.nodyn.Nodyn;
-import io.nodyn.runtime.dynjs.DynJSConfig;
-import io.nodyn.runtime.dynjs.DynJSRuntime;
+import io.nodyn.runtime.dynjs.DynJSFactory;
 
 /**
  * A factory used to obtain a Nodyn instance.
  *
  * @author Lance Ball
  */
-public class RuntimeFactory {
+public abstract class RuntimeFactory {
 
     private final ClassLoader parent;
-    private final Runtime engine = Runtime.DYNJS; // we don't support anything but dynjs for now
 
-    RuntimeFactory(ClassLoader parent) {
+    protected RuntimeFactory(ClassLoader parent) {
         this.parent = parent;
-    }
-
-    RuntimeFactory() {
-        this.parent = null;
-    }
-
-    /**
-     * Initializes a new RuntimeFactory. At some point, this will provide either a DynJS or a Nashorn
-     * runtime depending on env vars, system properties or defaults
-     * @return a factory for creating nodyn configuration and runtime instances
-     */
-    public static RuntimeFactory init() {
-        return new RuntimeFactory();
     }
 
     /**
@@ -53,30 +38,22 @@ public class RuntimeFactory {
      * @param parent a parent classloader
      * @return a factory for creating nodyn configuration and runtime instances
      */
-    public static RuntimeFactory init(ClassLoader parent) {
-        return new RuntimeFactory(parent);
+    public static RuntimeFactory init(ClassLoader parent, RuntimeType runtimeType) {
+        if (runtimeType == RuntimeType.DYNJS) {
+            return new DynJSFactory(parent);
+        }
+        // TODO: Implement NashornFactory
+        throw new RuntimeException("Not implemented: " + runtimeType);
     }
 
-    /**
-     * Creates a new Nodyn instance with the configuration provided
-     * @param config configuration options for the runtime instance
-     * @return the runtime instance
-     */
-    public Nodyn newRuntime(Config config) {
-        return new DynJSRuntime((DynJSConfig) config);
+    public ClassLoader getParent() {
+        return parent;
     }
 
-    /**
-     * Creates a new configuration for a Nodyn runtime. Config instances can be reused for multiple runtimes.
-     * @return a new Config
-     */
-    public Config newConfiguration() {
-        if (parent != null) return new DynJSConfig(parent);
-        return new DynJSConfig();
-    }
+    abstract public Nodyn newRuntime(Config config);
+    abstract public Config newConfiguration();
 
-
-    enum Runtime {
-      DYNJS, NASHORN;
+    public enum RuntimeType {
+      DYNJS, NASHORN
     }
 }
