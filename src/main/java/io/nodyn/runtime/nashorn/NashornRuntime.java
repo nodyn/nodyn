@@ -41,6 +41,16 @@ public class NashornRuntime extends Nodyn {
     }
 
     @Override
+    public void makeContext(Object global) {
+
+    }
+
+    @Override
+    public boolean isContext(Object global) {
+        return false;
+    }
+
+    @Override
     public void handleThrowable(Throwable t) {
 
     }
@@ -56,7 +66,7 @@ public class NashornRuntime extends Nodyn {
     }
 
     @Override
-    protected Object getGlobalContext() {
+    public Object getGlobalContext() {
         return null;
     }
 

@@ -20,9 +20,11 @@ package io.nodyn.runtime.dynjs;
 import io.nodyn.NodeProcess;
 import io.nodyn.Nodyn;
 import io.nodyn.runtime.Program;
+import org.dynjs.Config;
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.Compiler;
+import org.dynjs.runtime.builtins.DynJSBuiltin;
 import org.dynjs.runtime.builtins.Require;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
@@ -68,6 +70,22 @@ public class DynJSRuntime extends Nodyn {
     }
 
     @Override
+    public void makeContext(Object global) {
+        new DynJS((Config)this.getConfiguration(), (JSObject) global);
+    }
+
+    @Override
+    public boolean isContext(Object global) {
+        if (global instanceof DynObject) {
+            final Object dynjs = ((DynObject) global).get("dynjs");
+            if (dynjs != null) {
+                return ((DynJSBuiltin) dynjs).getRuntime() != null;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void handleThrowable(Throwable t) {
         if (t instanceof ThrowException) {
             ThrowException e = (ThrowException) t;
@@ -97,7 +115,7 @@ public class DynJSRuntime extends Nodyn {
         globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(getVertx(), true, true, false), false);
         globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir") , true, true, true), false);
         globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS , true, true, true), false);
-        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this , true, true, false), false);
+        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this, true, true, false), false);
         globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require( runtime.getGlobalContext() ) , true, true, true), false);
 
         String[] argv = (String[]) getConfiguration().getArgv();

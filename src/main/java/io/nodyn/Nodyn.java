@@ -34,15 +34,20 @@ public abstract class Nodyn {
 
     abstract public Object loadBinding(String name);
 
-    abstract public Program compile(String source, String fileName, boolean displayErrors) throws Throwable;
-
     abstract public void handleThrowable(Throwable t);
 
     protected abstract NodeProcess initialize();
 
-    protected abstract Object runScript(String script);
+    abstract protected Object runScript(String script);
 
-    protected abstract Object getGlobalContext();
+    // The following methods are used in contextify.js
+    abstract public Object getGlobalContext();
+
+    abstract public Program compile(String source, String fileName, boolean displayErrors) throws Throwable;
+
+    abstract public void makeContext(Object global);
+
+    abstract public boolean isContext(Object global);
 
 
     protected Nodyn(Config config, Vertx vertx, boolean controlLifeCycle) {
