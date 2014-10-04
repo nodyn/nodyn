@@ -11,6 +11,7 @@ describe('vm functions', function() {
       expect(context.dynjs.runtime).not.toBe( undefined );
     } catch(e) {
       e.printStackTrace();
+      this.fail('Exception caught ' + e);
     }
   });
 
