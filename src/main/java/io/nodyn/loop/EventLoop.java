@@ -99,11 +99,14 @@ public class EventLoop implements RefCounted {
         return this.userTaskExecutor.submit(new Runnable() {
             @Override
             public void run() {
-                task.run();
                 try {
-                    taskComplete();
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                    task.run();
+                } finally {
+                    try {
+                        taskComplete();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 }
                 handle.unref();
             }

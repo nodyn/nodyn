@@ -8,7 +8,7 @@ describe("clustering", function() {
     helper.testComplete(false);
   });
 
-  xit ('should be able to delegate requests to children', function() {
+  it ('should be able to delegate requests to children', function() {
       waitsFor(helper.testComplete, "child to come online process a request and die", 10000);
       cluster.setupMaster( {
         exec: './src/test/javascript/cluster_child.js',

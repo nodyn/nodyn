@@ -49,7 +49,12 @@ public class AsyncWrap extends EventSource {
         this.process.getEventLoop().submitUserTask( new Runnable() {
             @Override
             public void run() {
-                AsyncWrap.super.emit( event, result );
+                try {
+                    AsyncWrap.super.emit(event, result);
+                } catch (Throwable t) {
+                    // TODO: Figure out how to get these errors back to JS code
+                    t.printStackTrace();
+                }
             }
         }, "emit-for-" + getClass().getSimpleName() );
         return null;
