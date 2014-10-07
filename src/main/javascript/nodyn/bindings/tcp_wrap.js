@@ -65,7 +65,7 @@ TCP.prototype._onAfterConnect = function(result) {
   var readable = true;
   var writable = true;;
 
-  if (typeof this._req !== 'undefined') {
+  if ( this._req ) {
     var oncomplete = this._req.oncomplete;
     delete this._req.oncomplete;
     oncomplete( status, handle, this._req, readable, writable );
