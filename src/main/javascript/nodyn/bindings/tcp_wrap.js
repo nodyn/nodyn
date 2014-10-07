@@ -65,9 +65,11 @@ TCP.prototype._onAfterConnect = function(result) {
   var readable = true;
   var writable = true;;
 
-  var oncomplete = this._req.oncomplete;
-  delete this._req.oncomplete;
-  oncomplete( status, handle, this._req, readable, writable );
+  if (typeof this._req !== 'undefined') {
+    var oncomplete = this._req.oncomplete;
+    delete this._req.oncomplete;
+    oncomplete( status, handle, this._req, readable, writable );
+  }
 }
 
 // ----------------------------------------
