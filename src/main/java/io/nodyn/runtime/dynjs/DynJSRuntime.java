@@ -122,7 +122,8 @@ public class DynJSRuntime extends Nodyn {
         List<String> filteredArgv = new ArrayList<>();
 
         for (String anArgv : argv) {
-            if (!anArgv.startsWith("--")) {
+            // --debug-port not currently supported
+            if (!anArgv.startsWith("--debug-port")) {
                 filteredArgv.add(anArgv);
             }
         }
