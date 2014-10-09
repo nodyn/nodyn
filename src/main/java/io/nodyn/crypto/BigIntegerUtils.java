@@ -2,7 +2,6 @@ package io.nodyn.crypto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import sun.security.util.BigInt;
 
 import java.math.BigInteger;
 
