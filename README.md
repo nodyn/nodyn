@@ -25,7 +25,7 @@ To build nodyn from source, check out the repo, and run `mvn install`.
 
     $ git clone https://github.com/nodyn/nodyn.git
     $ cd nodyn
-    $ mvn install
+    $ mvn install -s support/settings.xml
 
 ## Website
 
