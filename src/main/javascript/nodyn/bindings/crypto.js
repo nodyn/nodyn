@@ -468,3 +468,34 @@ SecureContext.prototype.setSessionIdContext = function(sessionIdContext) {
 }
 
 module.exports.SecureContext = SecureContext;
+
+function DiffieHellman(sizeOrKey, generator) {
+}
+
+module.exports.DiffieHellman = DiffieHellman;
+
+function DiffieHellmanGroup(name) {
+  this._group = new io.nodyn.crypto.dh.DiffieHellmanGroup( name );
+}
+
+DiffieHellmanGroup.prototype.generateKeys = function() {
+  var publicBytes = this._group.generateKeys();
+  this._generated = true;
+  return process.binding('buffer').createBuffer( publicBytes );
+}
+
+DiffieHellmanGroup.prototype.getPublicKey = function() {
+  if ( ! this._generated ) {
+    throw new Error( "No public key - did you forget to generate one?")
+  }
+
+  return process.binding('buffer').createBuffer( this._group.publicKey );
+}
+
+DiffieHellmanGroup.prototype.computeSecret = function(other) {
+  var secret = this._group.computeSecret( process.binding('buffer').extractBuffer( other ) );
+  return process.binding('buffer').createBuffer( secret );
+}
+
+module.exports.DiffieHellmanGroup = DiffieHellmanGroup;
+
