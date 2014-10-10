@@ -487,6 +487,14 @@ function DiffieHellman(sizeOrKey, generator) {
 
 module.exports.DiffieHellman = DiffieHellman;
 
+DiffieHellman.prototype.setPublicKey = function(key) {
+  this._dh.publicKey = key._nettyBuffer();
+}
+
+DiffieHellman.prototype.setPrivateKey = function(key) {
+  this._dh.privateKey = key._nettyBuffer();
+}
+
 function DiffieHellmanGroup(name) {
   if ( ! ( this instanceof DiffieHellmanGroup ) ) {
     return new DiffieHellmanGroup(name);
@@ -524,6 +532,24 @@ function dhGetPublicKey() {
 DiffieHellman.prototype.getPublicKey = dhGetPublicKey;
 DiffieHellmanGroup.prototype.getPublicKey = dhGetPublicKey;
 
+function dhGetPrivateKey() {
+  if ( ! this._generated ) {
+    throw new Error( "No private key - did you forget to generate one?")
+  }
+
+  return process.binding('buffer').createBuffer( this._dh.privateKey );
+}
+
+DiffieHellman.prototype.getPrivateKey = dhGetPrivateKey;
+DiffieHellmanGroup.prototype.getPrivateKey = dhGetPrivateKey;
+
+function dhGetGenerator() {
+  return process.binding('buffer').createBuffer( this._dh.generator );
+}
+
+DiffieHellman.prototype.getGenerator = dhGetGenerator;
+DiffieHellmanGroup.prototype.getGenerator = dhGetGenerator;
+
 function dhComputeSecret(other) {
   var secret = this._dh.computeSecret( process.binding('buffer').extractBuffer( other ) );
   return process.binding('buffer').createBuffer( secret );
@@ -531,5 +557,6 @@ function dhComputeSecret(other) {
 
 DiffieHellman.prototype.computeSecret = dhComputeSecret;
 DiffieHellmanGroup.prototype.computeSecret = dhComputeSecret;
+
 
 
