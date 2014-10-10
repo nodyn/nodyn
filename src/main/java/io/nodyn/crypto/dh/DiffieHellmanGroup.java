@@ -20,9 +20,7 @@ import java.security.spec.X509EncodedKeySpec;
  */
 public class DiffieHellmanGroup {
 
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
+
 
     private DiffieHellmanGroupDesc desc;
     private KeyPair keys;

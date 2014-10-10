@@ -17,6 +17,7 @@
 package io.nodyn;
 
 import io.netty.channel.EventLoopGroup;
+import io.nodyn.crypto.CryptoInitializer;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.runtime.Config;
 import io.nodyn.runtime.Program;
@@ -27,6 +28,11 @@ import org.vertx.java.core.impl.VertxInternal;
  * @author Lance Ball
  */
 public abstract class Nodyn {
+
+    static {
+        CryptoInitializer.initialize();
+    }
+    
     protected static final String NODE_JS = "node.js";
     protected static final String PROCESS = "nodyn/process.js";
     protected static final String ES6_POLYFILL = "nodyn/polyfill.js";

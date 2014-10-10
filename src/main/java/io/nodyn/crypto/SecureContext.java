@@ -31,22 +31,7 @@ import java.util.List;
  */
 public class SecureContext {
 
-    static {
-        // because Fedora is hobbled...
 
-        try {
-            Class<Provider> providerClass = (Class<Provider>) Class.forName("sun.security.pkcs11.SunPKCS11");
-            File configFile = new File( System.getProperty( "java.home" ) );
-            configFile = new File( configFile, "lib" );
-            configFile = new File( configFile, "security" );
-            configFile = new File( configFile, "nss.cfg" );
-            Constructor<Provider> constructor = providerClass.getConstructor( String.class );
-            Provider provider = constructor.newInstance( configFile.getAbsolutePath() );
-            Security.addProvider( provider );
-        } catch (Throwable t) {
-            // apparently not do-able, things may behave strangely.
-        }
-    }
 
     private SSLContext sslContext;
 
