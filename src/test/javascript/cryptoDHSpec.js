@@ -30,4 +30,9 @@ describe("crypto diffie-hellman", function() {
     expect( aliceSecret ).toBe( bobSecret );
   });
 
+  it ("should be able to create a DH", function() {
+    var alice = crypto.createDiffieHellman( 1024 );
+    expect( alice.getPrime().length ).toBe( 1024 / 8 );
+  })
+
 });

@@ -469,33 +469,67 @@ SecureContext.prototype.setSessionIdContext = function(sessionIdContext) {
 
 module.exports.SecureContext = SecureContext;
 
+// ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+
 function DiffieHellman(sizeOrKey, generator) {
+  if ( ! ( this instanceof DiffieHellman ) ) {
+    return new DiffieHellman(sizeOrKey, generator);
+  }
+
+  if ( typeof sizeOrKey == 'number' ) {
+    this._dh = new io.nodyn.crypto.dh.DiffieHellman( sizeOrKey, generator );
+  } else {
+    var keyBuf = sizeOrKey._nettyBuffer();
+    this._dh = new io.nodyn.crypto.dh.DiffieHellman( keyBuf, generator );
+  }
 }
 
 module.exports.DiffieHellman = DiffieHellman;
 
 function DiffieHellmanGroup(name) {
-  this._group = new io.nodyn.crypto.dh.DiffieHellmanGroup( name );
+  if ( ! ( this instanceof DiffieHellmanGroup ) ) {
+    return new DiffieHellmanGroup(name);
+  }
+  this._dh = new io.nodyn.crypto.dh.DiffieHellman( name );
 }
 
-DiffieHellmanGroup.prototype.generateKeys = function() {
-  var publicBytes = this._group.generateKeys();
+module.exports.DiffieHellmanGroup = DiffieHellmanGroup;
+
+function dhGetPrime() {
+  return process.binding('buffer').createBuffer( this._dh.prime );
+}
+
+DiffieHellmanGroup.prototype.getPrime = dhGetPrime;
+DiffieHellman.prototype.getPrime = dhGetPrime;
+
+
+function dhGenerateKeys() {
+  var publicBytes = this._dh.generateKeys();
   this._generated = true;
   return process.binding('buffer').createBuffer( publicBytes );
 }
 
-DiffieHellmanGroup.prototype.getPublicKey = function() {
+DiffieHellman.prototype.generateKeys = dhGenerateKeys;
+DiffieHellmanGroup.prototype.generateKeys = dhGenerateKeys;
+
+function dhGetPublicKey() {
   if ( ! this._generated ) {
     throw new Error( "No public key - did you forget to generate one?")
   }
 
-  return process.binding('buffer').createBuffer( this._group.publicKey );
+  return process.binding('buffer').createBuffer( this._dh.publicKey );
 }
 
-DiffieHellmanGroup.prototype.computeSecret = function(other) {
-  var secret = this._group.computeSecret( process.binding('buffer').extractBuffer( other ) );
+DiffieHellman.prototype.getPublicKey = dhGetPublicKey;
+DiffieHellmanGroup.prototype.getPublicKey = dhGetPublicKey;
+
+function dhComputeSecret(other) {
+  var secret = this._dh.computeSecret( process.binding('buffer').extractBuffer( other ) );
   return process.binding('buffer').createBuffer( secret );
 }
 
-module.exports.DiffieHellmanGroup = DiffieHellmanGroup;
+DiffieHellman.prototype.computeSecret = dhComputeSecret;
+DiffieHellmanGroup.prototype.computeSecret = dhComputeSecret;
+
 

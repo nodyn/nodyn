@@ -32,7 +32,7 @@ public abstract class Nodyn {
     static {
         CryptoInitializer.initialize();
     }
-    
+
     protected static final String NODE_JS = "node.js";
     protected static final String PROCESS = "nodyn/process.js";
     protected static final String ES6_POLYFILL = "nodyn/polyfill.js";
