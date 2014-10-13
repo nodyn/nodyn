@@ -162,6 +162,18 @@ Number.isFinite = isFinite;
       //System.exit( code );
     };
 
+    this.umask = function(mask) {
+      if (mask === null || mask === undefined) {
+        // hack - posix doesn't let you pass null to get current
+        // so instead, we pass an arbitrary value to get the
+        // current umask, then reset to current.
+        var orig = this._process.posix.umask(022);
+        this._process.posix.umask(orig);
+        return orig;
+      }
+      return this._process.posix.umask(mask);
+    };
+
     Object.defineProperty( this, "exitCode", {
       get: function() {
         return this._process.exitCode;

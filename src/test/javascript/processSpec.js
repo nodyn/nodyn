@@ -35,6 +35,12 @@ describe('process', function() {
     expect(process.versions.dynjs).not.toBeNull();
   });
 
+  it('should get and set the process umask', function() {
+    var orig = process.umask();
+    expect(process.umask(020)).toBe(orig);
+    expect(process.umask()).toBe(020);
+  });
+
   it('should pass testExecPath', function() {
     expect(process.execPath).toBe(java.lang.System.getProperty('user.dir') + '/./bin/nodyn');
   });
