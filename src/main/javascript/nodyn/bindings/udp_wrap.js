@@ -87,7 +87,8 @@ UDP.prototype.addMembership = function(mcastAddr, ifaceAddr) {
   this._handle.addMembership(mcastAddr, ifaceAddr);
 };
 
-UDP.prototype.dropMembership = function() {
+UDP.prototype.dropMembership = function(mcastAddr, ifaceAddr) {
+  this._handle.dropMembership(mcastAddr, ifaceAddr);
 };
 
 UDP.prototype.setMulticastTTL = function(arg) {

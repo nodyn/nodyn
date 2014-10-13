@@ -146,7 +146,7 @@ describe('The dgram module', function() {
   });
 
   // TODO: Figure out WTF is going on here.
-  xit('should add and drop multicast group membership', function() {
+  it('should add and drop multicast group membership', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
     var buffer = new Buffer('steak frites');
     var groupAddress = '230.0.0.1';
@@ -190,4 +190,4 @@ describe('The dgram module', function() {
   });
 });
 
-function unexpectedError(e) { console.error("ERROR: " + e); this.fail(e); }
+function unexpectedError(e) { console.error("ERROR: " + e); expect(true).toBe(false); /*this.fail(e);*/ }

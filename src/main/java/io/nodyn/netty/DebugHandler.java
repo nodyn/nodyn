@@ -64,7 +64,7 @@ public class DebugHandler extends ChannelDuplexHandler {
 
     @Override
     public void bind(ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise future) throws Exception {
-        System.err.println(ctx.channel() + " | " + this.name + " << BIND");
+        System.err.println(ctx.channel() + " | " + this.name + " << BIND << " + localAddress );
         super.bind(ctx, localAddress, future);
     }
 

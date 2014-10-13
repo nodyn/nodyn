@@ -18,7 +18,6 @@ package io.nodyn.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.nodyn.CallbackResult;
-import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
 import io.nodyn.async.AsyncWrap;
 

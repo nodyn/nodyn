@@ -201,6 +201,7 @@
                   <systemPropertyVariables>
                     <dynjs.compile.mode>OFF</dynjs.compile.mode>
                     <nodyn.binary>./bin/nodyn</nodyn.binary>
+                    <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
                   </systemPropertyVariables>
                 </configuration>
               </execution>
