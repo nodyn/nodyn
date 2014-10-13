@@ -27,7 +27,9 @@ describe('process', function() {
 
   it('should pass testVersion', function() {
     expect(process.version).toBe(io.nodyn.Nodyn.VERSION);
+    expect(process.version).not.toBeUndefined();
     expect(process.versions).not.toBeNull();
+    expect(process.versions).not.toBeUndefined();
     expect(process.versions.node).toBe(io.nodyn.Nodyn.VERSION);
     expect(process.versions.java).toBe(java.lang.System.getProperty("java.version"));
     expect(process.versions.dynjs).not.toBeNull();

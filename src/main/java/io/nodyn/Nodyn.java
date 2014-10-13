@@ -36,7 +36,7 @@ public abstract class Nodyn {
     protected static final String NODE_JS = "node.js";
     protected static final String PROCESS = "nodyn/process.js";
     protected static final String ES6_POLYFILL = "nodyn/polyfill.js";
-    protected static final String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
+    public static final String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
 
     abstract public Object loadBinding(String name);
 
