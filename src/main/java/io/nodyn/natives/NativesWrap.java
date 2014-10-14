@@ -27,29 +27,42 @@ public class NativesWrap {
 
     public static String getSource(String name) throws IOException {
         try {
-            InputStream in = NativesWrap.class.getClassLoader().getResourceAsStream(name + ".js");
-            InputStreamReader reader = new InputStreamReader(in);
-
             StringBuilder source = new StringBuilder();
-            try {
 
-                char[] buf = new char[4096];
-                int numRead = 0;
+            InputStream in = NativesWrap.class.getClassLoader().getResourceAsStream(name + ".js");
 
-                while ((numRead = reader.read(buf)) >= 0) {
-                    source.append(buf, 0, numRead);
-                }
-            } finally {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                }
-            }
+            appendSource( in, source );
+            applyAnnex(name, source);
 
             return source.toString();
         } catch (Throwable t) {
-            System.err.println( "error loading: " + name );
+            System.err.println("error loading: " + name);
             throw t;
         }
+    }
+
+    private static void applyAnnex(String name, StringBuilder source) throws IOException {
+        InputStream in = NativesWrap.class.getClassLoader().getResourceAsStream("nodyn/annex/" + name + ".js");
+        if (in == null) {
+            return;
+        }
+
+        appendSource( in, source );
+    }
+
+    private static void appendSource(InputStream in, StringBuilder source) throws IOException {
+        InputStreamReader reader = new InputStreamReader(in);
+
+        char[] buf = new char[4096];
+        int numRead = 0;
+
+        while ((numRead = reader.read(buf)) >= 0) {
+            source.append(buf, 0, numRead);
+        }
+        try {
+            reader.close();
+        } catch (IOException e) {
+        }
+
     }
 }

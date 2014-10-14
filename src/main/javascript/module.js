@@ -1,4 +1,3 @@
-
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -495,9 +494,6 @@ Module._extensions['.json'] = function(module, filename) {
 //Native extension for .node
 Module._extensions['.node'] = process.dlopen;
 
-//Native extension for .jar
-Module._extensions['.jar'] = process.jaropen;
-
 
 // bootstrap main module.
 Module.runMain = function() {
@@ -523,8 +519,9 @@ Module._initPaths = function() {
     paths.unshift(path.resolve(homeDir, '.node_modules'));
   }
 
-  if (process.env['NODE_PATH']) {
-    paths = process.env['NODE_PATH'].split(path.delimiter).concat(paths);
+  var nodePath = process.env['NODE_PATH'];
+  if (nodePath) {
+    paths = nodePath.split(path.delimiter).concat(paths);
   }
 
   modulePaths = paths;
@@ -542,3 +539,5 @@ Module._initPaths();
 
 // backwards compatibility
 Module.Module = Module;
+
+
