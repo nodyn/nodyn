@@ -49,7 +49,7 @@ public class SSLWrap extends AsyncWrap {
         try {
             this.sslEngine = context.getSSLEngine();
         } catch (Throwable t) {
-            t.printStackTrace();
+            this.process.getNodyn().handleThrowable(t);
             throw t;
         }
         this.sslEngine.setUseClientMode(!isServer);

@@ -58,7 +58,7 @@ public class ImmediateCheckHandle implements Runnable {
         try {
             this.callback.run();
         } catch (Throwable t){
-            t.printStackTrace();
+            this.loop.getProcess().getNodyn().handleThrowable(t);
         } finally {
             this.future = null;
         }

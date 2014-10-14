@@ -55,7 +55,6 @@ public class UDPWrap extends HandleWrap {
             this.channelFuture = bootstrap.localAddress(localAddress).bind();
             this.channelFuture.sync();
         } catch (Exception e) {
-            e.printStackTrace();
             return e; // if failure, return an error - udp_wrap.js should turn this into a JS Error
         }
         ref();
@@ -74,7 +73,7 @@ public class UDPWrap extends HandleWrap {
             DatagramPacket packet = new DatagramPacket(ReferenceCountUtil.retain(buf.slice(offset, length)), remoteAddress, localAddress);
             channelFuture.channel().writeAndFlush(packet);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            UDPWrap.this.process.getNodyn().handleThrowable(e);
             return e;
         }
         return null;

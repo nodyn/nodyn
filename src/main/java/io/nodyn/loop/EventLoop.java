@@ -64,7 +64,7 @@ public class EventLoop implements RefCounted {
         try {
             latch.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            EventLoop.this.process.getNodyn().handleThrowable(e);
             this.eventLoopGroup = null;
         }
 
@@ -105,7 +105,7 @@ public class EventLoop implements RefCounted {
                     try {
                         taskComplete();
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        EventLoop.this.process.getNodyn().handleThrowable(t);
                     }
                 }
                 handle.unref();
@@ -131,7 +131,7 @@ public class EventLoop implements RefCounted {
                 try {
                     task.run();
                 } catch (Throwable t) {
-                    //t.printStackTrace();
+                    EventLoop.this.process.getNodyn().handleThrowable(t);
                 }
             }
         });
@@ -159,17 +159,11 @@ public class EventLoop implements RefCounted {
     public synchronized void incrCount(RefHandle handle) {
         ++this.counter;
         this.handles.add(handle);
-        //System.err.println( ( process != null ? process.getPid() : "?" ) + " ++ " + this.counter + " >> " + handle );
-        //System.err.println( this.handles );
-        //new Exception().printStackTrace();
     }
 
     public synchronized void decrCount(RefHandle handle) {
         --this.counter;
         this.handles.remove(handle);
-        //System.err.println( ( process != null ? process.getPid() : "?" ) + " -- " + this.counter + " >> " + handle );
-        //System.err.println( this.handles );
-        //new Exception().printStackTrace();
         if (this.counter == 0) {
             doShutdown();
         }
@@ -180,7 +174,6 @@ public class EventLoop implements RefCounted {
     }
 
     protected void doShutdown() {
-        //System.err.println((process != null ? process.getPid() : "?") + " ** SHUTDOWN");
         if (this.eventLoopGroup != null) {
             if (this.controlLifecycle) {
                 io.netty.util.concurrent.Future<?> future = this.eventLoopGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS);
@@ -206,4 +199,7 @@ public class EventLoop implements RefCounted {
         this.latch.await();
     }
 
+    public NodeProcess getProcess() {
+        return process;
+    }
 }

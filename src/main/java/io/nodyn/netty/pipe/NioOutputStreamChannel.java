@@ -110,7 +110,7 @@ public class NioOutputStreamChannel extends AbstractChannel {
                     try {
                         NioOutputStreamChannel.this.out.write(bytes);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        NioOutputStreamChannel.this.process.getNodyn().handleThrowable(e);
                     }
                 }
             }

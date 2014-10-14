@@ -43,8 +43,8 @@ public class SyncProcessWrap {
         ProcessBuilder builder = new ProcessBuilder( args );
         this.subProcess = builder.start();
 
-        this.stdOutConsumer = new OutputConsumer( this.subProcess.getInputStream() );
-        this.stdErrConsumer = new OutputConsumer( this.subProcess.getErrorStream() );
+        this.stdOutConsumer = new OutputConsumer( process, this.subProcess.getInputStream() );
+        this.stdErrConsumer = new OutputConsumer( process, this.subProcess.getErrorStream() );
 
         process.getEventLoop().submitBlockingTask( this.stdOutConsumer );
         process.getEventLoop().submitBlockingTask( this.stdErrConsumer );

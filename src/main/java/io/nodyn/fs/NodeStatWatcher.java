@@ -3,7 +3,6 @@ package io.nodyn.fs;
 import io.netty.channel.EventLoopGroup;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
-import io.nodyn.async.AsyncWrap;
 import io.nodyn.handle.HandleWrap;
 
 import java.io.File;
@@ -16,7 +15,6 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * @author Lance Ball
  */
 public class NodeStatWatcher extends HandleWrap {
-    private final EventLoopGroup eventLoop;
     private File watchedDir;
     private File watchedFile;
     private WatchService watcher;
@@ -25,7 +23,6 @@ public class NodeStatWatcher extends HandleWrap {
 
     public NodeStatWatcher(NodeProcess process) {
         super(process, false);
-        this.eventLoop = process.getEventLoop().getEventLoopGroup();
     }
 
     public void start(String path, boolean persistent, int interval) {
@@ -46,7 +43,7 @@ public class NodeStatWatcher extends HandleWrap {
             toWatch.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
             thread.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            this.getProcess().getNodyn().handleThrowable(e);
         }
     }
 
@@ -56,7 +53,7 @@ public class NodeStatWatcher extends HandleWrap {
             this.watcher.close();
             this.thread.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            this.getProcess().getNodyn().handleThrowable(e);
         }
     }
 

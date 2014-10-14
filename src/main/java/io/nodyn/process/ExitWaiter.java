@@ -36,7 +36,7 @@ public class ExitWaiter implements Runnable {
             int signal = this.process.getSignal();
             this.process.emit("exit", CallbackResult.createSuccess(exitCode, signal));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            this.process.getProcess().getNodyn().handleThrowable(e);
             this.process.emit("exit", CallbackResult.createError(e));
         }
     }

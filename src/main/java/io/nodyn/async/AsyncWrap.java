@@ -52,8 +52,7 @@ public class AsyncWrap extends EventSource {
                 try {
                     AsyncWrap.super.emit(event, result);
                 } catch (Throwable t) {
-                    // TODO: Figure out how to get these errors back to JS code
-                    t.printStackTrace();
+                    AsyncWrap.this.getProcess().getNodyn().handleThrowable(t);
                 }
             }
         }, "emit-for-" + getClass().getSimpleName() );

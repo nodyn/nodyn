@@ -68,15 +68,13 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
                             NioDuplexStreamChannel.this.inPipe.sink().write(ByteBuffer.wrap(buf, 0, numRead));
                         }
                     }
-                    //System.err.println( "close IN" );
                     NioDuplexStreamChannel.this.inPipe.sink().close();
                 } catch (IOException e) {
-                    //System.err.println( "close IN: " + fd + " // " + e.getMessage() );
-                    //e.printStackTrace();
+                    NioDuplexStreamChannel.this.process.getNodyn().handleThrowable(e);
                     try {
                         NioDuplexStreamChannel.this.inPipe.sink().close();
                     } catch (IOException e1) {
-                        //e1.printStackTrace();
+                        NioDuplexStreamChannel.this.process.getNodyn().handleThrowable(e);
                     }
                 }
             }
@@ -95,14 +93,12 @@ public class NioDuplexStreamChannel extends AbstractNioStreamChannel {
                             buf.clear();
                         }
                     }
-                    //System.err.println( "close OUT" );
                 } catch (IOException e) {
-                    //System.err.println( "close OUT: " + fd + " // " + e.getMessage() );
-                    //e.printStackTrace();
+                    NioDuplexStreamChannel.this.process.getNodyn().handleThrowable(e);
                     try {
                         NioDuplexStreamChannel.this.outPipe.source().close();
                     } catch (IOException e1) {
-                        //e1.printStackTrace();
+                        NioDuplexStreamChannel.this.process.getNodyn().handleThrowable(e);
                     }
                 }
             }

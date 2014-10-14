@@ -63,7 +63,7 @@ public class DynJSRuntime extends Nodyn {
             return new DynJSProgram(this, source, fileName);
         } catch (Throwable t) {
             if ( displayErrors ) {
-                t.printStackTrace();
+                this.handleThrowable(t);
             }
             throw t;
         }
@@ -94,13 +94,13 @@ public class DynJSRuntime extends Nodyn {
                 Object stack = ((JSObject) value).get(this.runtime.getDefaultExecutionContext(), "stack");
                 System.err.print(stack);
             } else if ( t.getCause() != null ) {
-                e.getCause().printStackTrace();
+                this.handleThrowable(new ThrowException(null, e.getCause()));
             } else {
-                e.printStackTrace();
+                this.handleThrowable(new ThrowException(null, e));
             }
         }
         else {
-            t.printStackTrace();
+            this.handleThrowable(new ThrowException(null, t));
         }
     }
 
@@ -113,10 +113,10 @@ public class DynJSRuntime extends Nodyn {
     protected NodeProcess initialize() {
         JSObject globalObject = runtime.getGlobalContext().getObject();
         globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(getVertx(), true, true, false), false);
-        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir") , true, true, true), false);
-        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir"), true, true, true), false);
+        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS, true, true, true), false);
         globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this, true, true, false), false);
-        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require( runtime.getGlobalContext() ) , true, true, true), false);
+        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require(runtime.getGlobalContext()), true, true, true), false);
 
         String[] argv = (String[]) getConfiguration().getArgv();
         List<String> filteredArgv = new ArrayList<>();
@@ -144,7 +144,9 @@ public class DynJSRuntime extends Nodyn {
         try {
             runtime.getDefaultExecutionContext().call(nodeFunction, runtime.getGlobalContext().getObject(), jsProcess);
         } catch (Exception e) {
+            System.err.println("Unable to initialize Nodyn. Exiting.");
             e.printStackTrace();
+            System.exit(255);
         }
         return javaProcess;
     }

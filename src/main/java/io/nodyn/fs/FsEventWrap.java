@@ -60,7 +60,7 @@ public class FsEventWrap extends HandleWrap {
                 }
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            this.getProcess().getNodyn().handleThrowable(e);
         }
     }
 
@@ -71,7 +71,7 @@ public class FsEventWrap extends HandleWrap {
             unref();
             this.watcher.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            this.getProcess().getNodyn().handleThrowable(e);
         }
     }
 

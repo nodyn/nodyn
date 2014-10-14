@@ -84,7 +84,7 @@ public class TTYWrap extends StreamWrap {
             */
         } catch (IOException ioe) {
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            this.process.getNodyn().handleThrowable(e);
         }
     }
 
@@ -95,7 +95,7 @@ public class TTYWrap extends StreamWrap {
                 ttyConfig = null;
             } catch (InterruptedException e) {
             } catch (IOException e) {
-                e.printStackTrace();
+                this.process.getNodyn().handleThrowable(e);
             }
         }
 

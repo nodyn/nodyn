@@ -21,7 +21,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOutboundBuffer;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.nodyn.NodeProcess;
-import io.nodyn.netty.DebugHandler;
 import io.nodyn.pipe.PipeWrap;
 import jnr.constants.platform.SocketLevel;
 import jnr.posix.CmsgHdr;
@@ -40,6 +39,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
 
     private final POSIX posix;
     private final int fd;
+    private final NodeProcess process;
 
     private Thread inPump;
     private Thread outPump;
@@ -48,6 +48,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
 
     public DuplexIPCChannel(PipeWrap pipe, POSIX posix, int fd) {
         super(new IPCDataEventHandler(pipe.getProcess(), pipe));
+        this.process = pipe.getProcess();
         //pipeline().removeLast();
         this.posix = posix;
         this.fd = fd;
@@ -62,7 +63,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
                 try {
                     doReadLoop();
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    DuplexIPCChannel.this.process.getNodyn().handleThrowable(t);
                 }
             }
         });
@@ -76,7 +77,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
                 try {
                     doWriteLoop();
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    DuplexIPCChannel.this.process.getNodyn().handleThrowable(t);
                 }
             }
         });
