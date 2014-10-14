@@ -16,15 +16,19 @@
 
 package io.nodyn;
 
+import io.nodyn.extension.ExtensionLoader;
 import io.nodyn.fs.UnsafeFs;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.posix.NodePosixHandler;
+import io.nodyn.runtime.dynjs.DynJSConfig;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
 import org.vertx.java.core.Vertx;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -44,6 +48,8 @@ public class NodeProcess extends EventSource {
 
     private Runnable tickCallback;
 
+    private ExtensionLoader extensionLoader;
+
     public NodeProcess(Nodyn nodyn) {
         this(nodyn, System.getProperties());
     }
@@ -61,6 +67,13 @@ public class NodeProcess extends EventSource {
         });
 
         this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
+
+        // TODO remove this DynJS-specific code.
+        this.extensionLoader = new ExtensionLoader( ((DynJSConfig)nodyn.getConfiguration()).getClassLoader() );
+    }
+
+    public Object jaropen(String filename) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, IOException {
+        return this.extensionLoader.load( filename );
     }
 
     public long getPid() {

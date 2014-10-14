@@ -199,8 +199,8 @@ Number.isFinite = isFinite;
     this._posix = this._process.posix;
 
     this.jaropen = function(module, filename) {
-      __nodyn.config.classLoader.append( filename );
-      return {};
+      var result = this._process.jaropen(filename);
+      module.exports = result;
     };
 
     this.features = {

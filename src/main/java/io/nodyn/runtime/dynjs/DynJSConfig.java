@@ -47,4 +47,5 @@ public class DynJSConfig extends org.dynjs.Config implements Config {
     public String getHost() {
         return this.host;
     }
+
 }
