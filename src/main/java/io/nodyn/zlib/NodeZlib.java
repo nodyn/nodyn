@@ -19,6 +19,7 @@ package io.nodyn.zlib;
 import io.netty.buffer.ByteBuf;
 import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
+import io.nodyn.NodeProcess;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +33,14 @@ import java.util.zip.Inflater;
  * @author Lance Ball
  */
 public class NodeZlib extends EventSource {
+    private final NodeProcess process;
     private int level;
     private Mode mode;
     private Strategy strategy;
     private String dictionary;
 
-    public NodeZlib(int mode) {
+    public NodeZlib(NodeProcess process, int mode) {
+        this.process = process;
         this.mode = Mode.values()[mode];
     }
 
@@ -62,12 +65,16 @@ public class NodeZlib extends EventSource {
         // umm?
     }
 
-    public void write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
-        __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+    public void write(final int flush, final byte[] chunk, final int inOffset, final int inLen, final ByteBuf buffer, final int outOffset, final int outLen) {
+        process.getEventLoop().submitBlockingTask(new Runnable() {
+            @Override
+            public void run() {
+                __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+            }
+        });
     }
 
     public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
-        System.err.println("NodeZlib#writeSync()");
         __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 

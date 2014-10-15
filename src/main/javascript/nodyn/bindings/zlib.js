@@ -27,7 +27,7 @@ nodyn.exportEnums(module.exports, io.nodyn.zlib.Flush.values());
 
 function Zlib(mode) {
   if (!(this instanceof Zlib)) return new Zlib(mode);
-  this._delegate = new io.nodyn.zlib.NodeZlib(mode);
+  this._delegate = new io.nodyn.zlib.NodeZlib(process._process, mode);
   this._delegate.on('error', this._onError.bind(this));
 }
 util.inherits(Zlib, EventEmitter);
@@ -51,13 +51,7 @@ Zlib.prototype.close = function() {
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
   var request = new ZlibRequest(this._delegate);
-
-  var self = this;
-
-  process.nextTick( function() { request.run(function() {
-    self._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
-  } ) } );
-
+  this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
   return request;
 };
 
