@@ -57,6 +57,7 @@ Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, ou
 
 Zlib.prototype.writeSync = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
   this._delegate.writeSync(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
+
   // TODO
   return {
     AvailInAfter: 0,

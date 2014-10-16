@@ -21,11 +21,13 @@ import io.nodyn.CallbackResult;
 import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.zip.*;
 
 /**
  * Provides a process binding for zlib functions as expected by zlib.js
@@ -69,54 +71,69 @@ public class NodeZlib extends EventSource {
         process.getEventLoop().submitBlockingTask(new Runnable() {
             @Override
             public void run() {
-                __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                try {
+                    __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                } catch (Throwable t) {
+                    NodeZlib.this.process.getNodyn().handleThrowable(t);
+                }
             }
         });
     }
 
-    public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
+    public void writeSync(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException, DataFormatException {
         __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
     }
 
-    private void __write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
+    private void __write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException, DataFormatException {
+        if (checkChunk(chunk, outLen)) return;
         switch(this.mode) {
             case DEFLATE:
-            case GZIP:
                 deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
                 break;
+            case GZIP:
+                gzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
             case INFLATE:
-            case GUNZIP:
                 inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
                 break;
+            case GUNZIP:
+                gunzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                break;
             default:
-                System.err.println("ERROR: Don't know how to handle " + this.mode);
+                this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
         }
     }
 
-    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
-        if (chunk == null || chunk.length == 0) {
-            after(null, 0, outLen);
-            return;
-        }
-        Inflater inflater = new Inflater(this.mode == Mode.GUNZIP);
+    private void gunzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
+        GZIPInputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(chunk));
+        byte[] result = new byte[outLen];
+        int bytesRead = inputStream.read(result, inOffset, inLen);
+        inputStream.close();
+        buffer.setBytes(outOffset, result); // TODO: Netty 4.0 allows to specify length (bytesRead).
+        after(result, 0, outLen - bytesRead);
+    }
+
+    private void gzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
+        final ByteArrayOutputStream output = new ByteArrayOutputStream(outLen);
+        GZIPOutputStream outputStream = new GZIPOutputStream(output);
+        outputStream.write(chunk, inOffset, inLen);
+        outputStream.finish();
+        final byte[] bytes = output.toByteArray();
+        buffer.setBytes(outOffset, bytes);
+        after(bytes, 0, outLen - bytes.length);
+    }
+
+    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws DataFormatException {
+        Inflater inflater = new Inflater();
         inflater.setInput(chunk, inOffset, inLen);
         byte[] output = new byte[chunk.length*2];
-        try {
-            int inflatedLen = inflater.inflate(output);
-            inflater.end();
-            buffer.setBytes( outOffset, output, 0, inflatedLen );
-            after(output, 0, outLen - inflatedLen);
-        } catch (DataFormatException e) {
-            e.printStackTrace();
-        }
+        int inflatedLen = inflater.inflate(output);
+        inflater.end();
+        buffer.setBytes( outOffset, output, 0, inflatedLen );
+        after(output, 0, outLen - inflatedLen);
     }
 
     private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
-        if (chunk == null || chunk.length == 0) {
-            after(null, 0, outLen);
-            return;
-        }
-        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), this.mode == Mode.GZIP);
+        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level));
         deflater.setStrategy(Strategy.mapDeflaterStrategy(this.strategy));
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
@@ -125,6 +142,14 @@ public class NodeZlib extends EventSource {
         deflater.end();
         buffer.setBytes( outOffset, output, 0, compressedLength );
         after(output, 0, outLen - compressedLength);
+    }
+
+    private boolean checkChunk(byte[] chunk, int outLen) {
+        if (chunk == null || chunk.length == 0) {
+            after(null, 0, outLen);
+            return true;
+        }
+        return false;
     }
 
     private void after(byte[] output, int inAfter, int outAfter) {
