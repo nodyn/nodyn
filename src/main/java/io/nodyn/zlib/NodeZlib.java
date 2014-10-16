@@ -88,12 +88,18 @@ public class NodeZlib extends EventSource {
         if (checkChunk(chunk, outLen)) return;
         switch(this.mode) {
             case DEFLATE:
-                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                break;
+            case DEFLATERAW:
+                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
                 break;
             case GZIP:
                 gzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
             case INFLATE:
-                inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                break;
+            case INFLATERAW:
+                inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
                 break;
             case GUNZIP:
                 gunzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
@@ -122,8 +128,8 @@ public class NodeZlib extends EventSource {
         after(bytes, 0, outLen - bytes.length);
     }
 
-    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws DataFormatException {
-        Inflater inflater = new Inflater();
+    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) throws DataFormatException {
+        Inflater inflater = new Inflater(raw);
         inflater.setInput(chunk, inOffset, inLen);
         byte[] output = new byte[chunk.length*2];
         int inflatedLen = inflater.inflate(output);
@@ -132,8 +138,8 @@ public class NodeZlib extends EventSource {
         after(output, 0, outLen - inflatedLen);
     }
 
-    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) {
-        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level));
+    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
+        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), raw);
         deflater.setStrategy(Strategy.mapDeflaterStrategy(this.strategy));
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
