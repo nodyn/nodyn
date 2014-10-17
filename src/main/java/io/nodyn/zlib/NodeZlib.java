@@ -47,10 +47,10 @@ public class NodeZlib extends EventSource {
     }
 
     public void init(int windowBits, int level, int memLevel, int strategy, String dictionary) {
+        // TODO: We don't (can't?) set windowBits and memLevel in Java the way you can in native zlib
         this.level = level;
         this.strategy = Strategy.values()[strategy];
         this.dictionary = dictionary;
-        System.out.println("Strategy " + strategy);
     }
 
     public void params(int level, int strategy) {
@@ -123,11 +123,8 @@ public class NodeZlib extends EventSource {
         final ByteArrayOutputStream output = new ByteArrayOutputStream(outLen);
         GZIPOutputStream outputStream = new GZIPOutputStream(output){
             {
-                def.setLevel(Level.mapDeflaterLevel(NodeZlib.this.level));
-                def.setStrategy(Strategy.mapDeflaterStrategy(NodeZlib.this.strategy));
-                if (NodeZlib.this.dictionary != null) {
-                    def.setDictionary(NodeZlib.this.dictionary.getBytes());
-                }
+                this.def.setLevel(Level.mapDeflaterLevel(NodeZlib.this.level));
+                this.def.setStrategy(Strategy.mapDeflaterStrategy(NodeZlib.this.strategy));
             }
         };
         outputStream.write(chunk, inOffset, inLen);
@@ -155,7 +152,7 @@ public class NodeZlib extends EventSource {
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length];
-        int compressedLength = deflater.deflate(output);
+        int compressedLength = deflater.deflate(output, 0, output.length, Flush.mapFlush(flush));
         deflater.end();
         buffer.setBytes( outOffset, output, 0, compressedLength );
         after(output, 0, outLen - compressedLength);
