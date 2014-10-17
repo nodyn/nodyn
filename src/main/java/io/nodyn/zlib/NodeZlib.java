@@ -50,6 +50,7 @@ public class NodeZlib extends EventSource {
         this.level = level;
         this.strategy = Strategy.values()[strategy];
         this.dictionary = dictionary;
+        System.out.println("Strategy " + strategy);
     }
 
     public void params(int level, int strategy) {
@@ -120,7 +121,15 @@ public class NodeZlib extends EventSource {
 
     private void gzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
         final ByteArrayOutputStream output = new ByteArrayOutputStream(outLen);
-        GZIPOutputStream outputStream = new GZIPOutputStream(output);
+        GZIPOutputStream outputStream = new GZIPOutputStream(output){
+            {
+                def.setLevel(Level.mapDeflaterLevel(NodeZlib.this.level));
+                def.setStrategy(Strategy.mapDeflaterStrategy(NodeZlib.this.strategy));
+                if (NodeZlib.this.dictionary != null) {
+                    def.setDictionary(NodeZlib.this.dictionary.getBytes());
+                }
+            }
+        };
         outputStream.write(chunk, inOffset, inLen);
         outputStream.finish();
         final byte[] bytes = output.toByteArray();
@@ -131,6 +140,7 @@ public class NodeZlib extends EventSource {
     private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) throws DataFormatException {
         Inflater inflater = new Inflater(raw);
         inflater.setInput(chunk, inOffset, inLen);
+        if (this.dictionary != null) inflater.setDictionary(this.dictionary.getBytes());
         byte[] output = new byte[chunk.length*2];
         int inflatedLen = inflater.inflate(output);
         inflater.end();
@@ -141,6 +151,7 @@ public class NodeZlib extends EventSource {
     private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
         Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), raw);
         deflater.setStrategy(Strategy.mapDeflaterStrategy(this.strategy));
+        if (this.dictionary != null) deflater.setDictionary(this.dictionary.getBytes());
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length];
