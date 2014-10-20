@@ -80,6 +80,21 @@ describe('The zlib module', function() {
     });
   });
 
+  it('should throw on write after close', function() {
+    waitsFor(helper.testComplete, 'the test to complete', 8000);
+    zlib.gzip('hello', function(err, out) {
+      var unzip = zlib.createGunzip();
+      unzip.close(function() {
+          try {
+            unzip.write(out);
+            this.fail("write should fail after close");
+          } catch(e) {
+            helper.testComplete(true);
+          }
+      });
+    });
+  });
+
   it('should fail if the dictionary is not found', function() {
     waitsFor(helper.testComplete, 'the test to complete', 8000);
     var stream = zlib.createInflate();
@@ -102,4 +117,18 @@ describe('The zlib module', function() {
     stream.write(Buffer([0x78,0xBB,0x04,0x09,0x01,0xA5]));
   });
 
+  it('should fail to gunzip with an error given bad input', function() {
+    var nonStringInputs = [1, true, {a: 1}, ['a']];
+    nonStringInputs.forEach(function(input) {
+      // gunzip should not throw an error when called with bad input.
+      try {
+        zlib.gunzip(input, function(err, buffer) {
+          // zlib.gunzip should pass the error to the callback.
+          expect(err).toBeTruthy();
+        });
+      } catch(e) {
+        this.fail('gunzip should not throw');
+      }
+    });
+  });
 });

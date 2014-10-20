@@ -36,10 +36,11 @@ import java.util.zip.*;
  */
 public class NodeZlib extends EventSource {
     private final NodeProcess process;
-    private int level;
     private final Mode mode;
     private Strategy strategy;
     private byte[] dictionary;
+    private int level;
+    private boolean closed = false;
 
     public NodeZlib(NodeProcess process, int mode) {
         this.process = process;
@@ -64,10 +65,13 @@ public class NodeZlib extends EventSource {
     }
 
     public void close() {
-        // umm?
+        this.closed = true;
     }
 
     public void write(final int flush, final byte[] chunk, final int inOffset, final int inLen, final ByteBuf buffer, final int outOffset, final int outLen) {
+        if (closed) {
+            NodeZlib.this.emit("error", CallbackResult.createError(new RuntimeException("Cannot write after close")));
+        }
         process.getEventLoop().submitBlockingTask(new Runnable() {
             @Override
             public void run() {
