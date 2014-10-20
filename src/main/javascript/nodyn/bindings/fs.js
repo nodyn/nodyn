@@ -195,7 +195,7 @@ binding.readdir = function(path, callback) {
     else files = dir.list();
     return {err:err, result:nodyn.arrayConverter(files)};
   }
-  return executeWork(work.bind(this), callback);
+  return executeWork(work.bind(this), callback, true);
 };
 
 binding.read = function(fd, buffer, offset, length, position, callback) {

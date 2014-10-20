@@ -279,6 +279,29 @@ describe("fs module", function() {
     });
   });
 
+  it('should provide appropriate error for readdir if no-such-directoyr', function() {
+    waitsFor( helper.testComplete, 'the readdir test to complete', 5000);
+    fs.readdir( '/i/do/not/exist/damnit', function(e,r) {
+      expect(e).not.toBe( undefined );
+      expect(r).toBe( undefined );
+      helper.testComplete(true);
+    });
+  });
+
+  it('should throw appropriate error for readdir if no-such-directoyr', function() {
+    var caught;
+    var entries;
+    try {
+      entries = fs.readdirSync( '/i/do/not/exist/damnit');
+    } catch (e) {
+      caught = e;
+    }
+
+    expect( entries ).toBe( undefined );
+    expect( caught ).not.toBe( undefined );
+  })
+
+
   it("should provide a readdirSync function", function() {
     var r = fs.readdirSync(tempDir);
     expect(r.length).toBeGreaterThan(0);
