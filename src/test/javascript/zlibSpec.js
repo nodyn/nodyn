@@ -65,4 +65,26 @@ describe('The zlib module', function() {
     });
   });
 
+  it('should close', function() {
+    waitsFor(helper.testComplete, 'the test to complete', 8000);
+    zlib.gzip('hello', function(err, out) {
+      var unzip = zlib.createGunzip();
+      unzip.write(out);
+      unzip.close(function() {
+        helper.testComplete(true);
+      });
+    });
+  });
+
+  it('should fail if the dictionary is not found', function() {
+    waitsFor(helper.testComplete, 'the test to complete', 8000);
+    var stream = zlib.createInflate();
+    stream.on('error', function(e) {
+      expect(e.message).toBe('Missing dictionary');
+      helper.testComplete(true);
+    });
+    // String "test" encoded with dictionary "dict".
+    stream.write(Buffer([0x78,0xBB,0x04,0x09,0x01,0xA5]));
+  });
+
 });

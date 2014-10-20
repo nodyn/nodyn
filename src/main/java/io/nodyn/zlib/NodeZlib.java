@@ -137,9 +137,17 @@ public class NodeZlib extends EventSource {
     private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) throws DataFormatException {
         Inflater inflater = new Inflater(raw);
         inflater.setInput(chunk, inOffset, inLen);
-        if (this.dictionary != null) inflater.setDictionary(this.dictionary.getBytes());
         byte[] output = new byte[chunk.length*2];
         int inflatedLen = inflater.inflate(output);
+        if (inflater.needsDictionary()) {
+            if (this.dictionary == null) {
+                this.emit("error", CallbackResult.createError(new RuntimeException("Missing dictionary")));
+                return;
+            } else {
+                inflater.setDictionary(this.dictionary.getBytes());
+                inflater.inflate(output);
+            }
+        }
         inflater.end();
         buffer.setBytes( outOffset, output, 0, inflatedLen );
         after(output, 0, outLen - inflatedLen);
