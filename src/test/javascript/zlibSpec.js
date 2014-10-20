@@ -45,7 +45,11 @@ describe('The zlib module', function() {
     var encoded = 'H4sIAAAAAAAAAxXLuw2AMBAE0Va2IhIiQsAGTmCvdB9ZdM+RjuZNHBCDXxVDulcFDzAURWxnhu5oa6k4H6owDBat5ba9iVLO7D9ZqPcHFHvOTEwAAAA=';
     zlib.gzip(str, function(e,b) {
       expect(e).toBeFalsy();
- //     expect(b.toString('base64')).toBe(encoded.toString());
+//      console.log(b.toString('base64'));
+//      console.log(typeof b.toString('base64'));
+//      console.log(encoded);
+//      console.log(typeof encoded);
+//      expect(b.toString('base64')).toBe(encoded);
       zlib.gunzip(b, function(ee, bb) {
         expect(ee).toBeFalsy();
         expect(bb.toString()).toBe(str);
@@ -81,6 +85,17 @@ describe('The zlib module', function() {
     var stream = zlib.createInflate();
     stream.on('error', function(e) {
       expect(e.message).toBe('Missing dictionary');
+      helper.testComplete(true);
+    });
+    // String "test" encoded with dictionary "dict".
+    stream.write(Buffer([0x78,0xBB,0x04,0x09,0x01,0xA5]));
+  });
+
+  it('should fail if the dictionary is incorrect', function() {
+    waitsFor(helper.testComplete, 'the test to complete', 8000);
+    var stream = zlib.createInflate({ dictionary: Buffer('fail') });
+    stream.on('error', function(e) {
+      expect(e.message).toBe('Bad dictionary');
       helper.testComplete(true);
     });
     // String "test" encoded with dictionary "dict".

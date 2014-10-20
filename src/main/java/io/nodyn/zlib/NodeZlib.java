@@ -37,16 +37,16 @@ import java.util.zip.*;
 public class NodeZlib extends EventSource {
     private final NodeProcess process;
     private int level;
-    private Mode mode;
+    private final Mode mode;
     private Strategy strategy;
-    private String dictionary;
+    private byte[] dictionary;
 
     public NodeZlib(NodeProcess process, int mode) {
         this.process = process;
         this.mode = Mode.values()[mode];
     }
 
-    public void init(int windowBits, int level, int memLevel, int strategy, String dictionary) {
+    public void init(int windowBits, int level, int memLevel, int strategy, byte[] dictionary) {
         // TODO: We don't (can't?) set windowBits and memLevel in Java the way you can in native zlib
         this.level = level;
         this.strategy = Strategy.values()[strategy];
@@ -61,7 +61,6 @@ public class NodeZlib extends EventSource {
     public void reset() {
         this.level = Level.Z_DEFAULT_COMPRESSION.ordinal();
         this.strategy = Strategy.Z_DEFAULT_STRATEGY;
-        this.mode = Mode.DEFLATE;
     }
 
     public void close() {
@@ -75,7 +74,7 @@ public class NodeZlib extends EventSource {
                 try {
                     __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
                 } catch (Throwable t) {
-                    NodeZlib.this.process.getNodyn().handleThrowable(t);
+                    NodeZlib.this.emit("error", CallbackResult.createError(t));
                 }
             }
         });
@@ -96,6 +95,7 @@ public class NodeZlib extends EventSource {
                 break;
             case GZIP:
                 gzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                break;
             case INFLATE:
                 inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
                 break;
@@ -144,8 +144,12 @@ public class NodeZlib extends EventSource {
                 this.emit("error", CallbackResult.createError(new RuntimeException("Missing dictionary")));
                 return;
             } else {
-                inflater.setDictionary(this.dictionary.getBytes());
-                inflater.inflate(output);
+                try {
+                    inflater.setDictionary(this.dictionary);
+                    inflatedLen = inflater.inflate(output);
+                } catch(Throwable t) {
+                    this.emit("error", CallbackResult.createError(new RuntimeException("Bad dictionary")));
+                }
             }
         }
         inflater.end();
@@ -156,7 +160,7 @@ public class NodeZlib extends EventSource {
     private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
         Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), raw);
         deflater.setStrategy(Strategy.mapDeflaterStrategy(this.strategy));
-        if (this.dictionary != null) deflater.setDictionary(this.dictionary.getBytes());
+        if (this.dictionary != null) deflater.setDictionary(this.dictionary);
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length];

@@ -34,6 +34,7 @@ util.inherits(Zlib, EventEmitter);
 module.exports.Zlib = Zlib;
 
 Zlib.prototype.init = function(windowBits, level, memLevel, strategy, dictionary) {
+  dictionary = (dictionary ? dictionary._byteArray() : null);
   this._delegate.init(windowBits, level, memLevel, strategy, dictionary);
 };
 
@@ -93,6 +94,3 @@ ZlibRequest.prototype._onAfter = function _onAfter(result) {
   }
 };
 
-ZlibRequest.prototype.run = function run(f) {
-  blocking.submit(f);
-};
