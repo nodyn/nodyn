@@ -2,6 +2,9 @@ var util          = require('util');
 var EventEmitter  = require('events').EventEmitter;
 
 function arrayConverter(javaArray) {
+  if ( ! javaArray ) {
+    return undefined;
+  }
   var arry = [];
   for (var i = 0; i < javaArray.length; i++) {
     arry.push(javaArray[i]);
