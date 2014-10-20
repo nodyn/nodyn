@@ -70,7 +70,7 @@
     <version.hazelcast>2.6.6</version.hazelcast>
 -->
 
-    <version.dynjs>0.3.1-SNAPSHOT</version.dynjs>
+    <version.dynjs>0.3.2-SNAPSHOT</version.dynjs>
 
     <version.apacheds>1.5.7</version.apacheds>
     <version.commons.lang>3.1</version.commons.lang>
