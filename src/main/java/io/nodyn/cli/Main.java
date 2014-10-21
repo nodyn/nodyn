@@ -17,11 +17,8 @@
 package io.nodyn.cli;
 
 import io.nodyn.Nodyn;
-import io.nodyn.runtime.Config;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
-import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.JSObject;
 
 import java.io.IOException;
 
@@ -31,8 +28,7 @@ public class Main {
 
     public Main(String[] args) {
         RuntimeFactory factory = RuntimeFactory.init(null, RuntimeFactory.RuntimeType.DYNJS);
-        Config config = factory.newConfiguration();
-        config.setArgv(args);
+        NodynConfig config = new NodynConfig( args );
         this.nodyn = factory.newRuntime(config);
     }
 

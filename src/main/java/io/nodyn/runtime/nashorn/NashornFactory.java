@@ -16,7 +16,7 @@
 package io.nodyn.runtime.nashorn;
 
 import io.nodyn.Nodyn;
-import io.nodyn.runtime.Config;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
 
 /**
@@ -29,12 +29,8 @@ public class NashornFactory extends RuntimeFactory {
     }
 
     @Override
-    public Nodyn newRuntime(Config config) {
+    public Nodyn newRuntime(NodynConfig config) {
         return new NashornRuntime(config, null, true);
     }
 
-    @Override
-    public Config newConfiguration() {
-        return new NashornConfig();
-    }
 }

@@ -19,6 +19,7 @@ package io.nodyn.runtime.dynjs;
 
 import io.nodyn.NodeProcess;
 import io.nodyn.Nodyn;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
 import org.dynjs.Config;
 import org.dynjs.exception.ThrowException;
@@ -39,15 +40,14 @@ public class DynJSRuntime extends Nodyn {
 
     private final DynJS runtime;
 
-    public DynJSRuntime(DynJSConfig config) {
-        this((config.isClustered() ? VertxFactory.newVertx(config.getHost()) : VertxFactory.newVertx()),
-                config,
-                true);
+    public DynJSRuntime(NodynConfig config) {
+        this(VertxFactory.newVertx(), config, true);
     }
 
-    public DynJSRuntime(Vertx vertx, DynJSConfig config, boolean controlLifeCycle) {
+    public DynJSRuntime(Vertx vertx, NodynConfig config, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
-        this.runtime = new DynJS(config);
+        Config dynjsConfig = new Config();
+        this.runtime = new DynJS(dynjsConfig);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class DynJSRuntime extends Nodyn {
         try {
             return new DynJSProgram(this, source, fileName);
         } catch (Throwable t) {
-            if ( displayErrors ) {
+            if (displayErrors) {
                 this.handleThrowable(t);
             }
             throw t;
@@ -71,7 +71,7 @@ public class DynJSRuntime extends Nodyn {
 
     @Override
     public void makeContext(Object global) {
-        new DynJS((Config)this.getConfiguration(), (JSObject) global);
+        new DynJS(runtime.getConfig(), (JSObject) global);
     }
 
     @Override
@@ -93,13 +93,12 @@ public class DynJSRuntime extends Nodyn {
             if (value != null && value instanceof JSObject) {
                 Object stack = ((JSObject) value).get(this.runtime.getDefaultExecutionContext(), "stack");
                 System.err.print(stack);
-            } else if ( t.getCause() != null ) {
+            } else if (t.getCause() != null) {
                 this.handleThrowable(new ThrowException(null, e.getCause()));
             } else {
                 this.handleThrowable(new ThrowException(null, e));
             }
-        }
-        else {
+        } else {
             this.handleThrowable(new ThrowException(null, t));
         }
     }
@@ -111,44 +110,33 @@ public class DynJSRuntime extends Nodyn {
 
     @Override
     protected NodeProcess initialize() {
-        JSObject globalObject = runtime.getGlobalContext().getObject();
-        globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(getVertx(), true, true, false), false);
-        globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir"), true, true, true), false);
-        globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS, true, true, true), false);
-        globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this, true, true, false), false);
-        globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require(runtime.getGlobalContext()), true, true, true), false);
-
-        String[] argv = (String[]) getConfiguration().getArgv();
-        List<String> filteredArgv = new ArrayList<>();
-
-        for (String anArgv : argv) {
-            // --debug-port not currently supported
-            if (!anArgv.startsWith("--debug-port")) {
-                filteredArgv.add(anArgv);
-            }
-        }
-
-        getConfiguration().setArgv(filteredArgv.toArray());
-
-        NodeProcess javaProcess = new NodeProcess(this);
-
-        getEventLoop().setProcess(javaProcess);
-
-        // Adds ES6 capabilities not provided by DynJS to global scope
-        runScript(ES6_POLYFILL);
-
-        JSFunction processFunction = (JSFunction) runScript(PROCESS);
-        JSObject jsProcess = (JSObject) runtime.getDefaultExecutionContext().call(processFunction, runtime.getGlobalContext().getObject(), javaProcess);
-
-        JSFunction nodeFunction = (JSFunction) runScript(NODE_JS);
         try {
+            JSObject globalObject = runtime.getGlobalContext().getObject();
+            globalObject.defineOwnProperty(null, "__vertx", PropertyDescriptor.newDataPropertyDescriptor(getVertx(), true, true, false), false);
+            globalObject.defineOwnProperty(null, "__dirname", PropertyDescriptor.newDataPropertyDescriptor(System.getProperty("user.dir"), true, true, true), false);
+            globalObject.defineOwnProperty(null, "__filename", PropertyDescriptor.newDataPropertyDescriptor(Nodyn.NODE_JS, true, true, true), false);
+            globalObject.defineOwnProperty(null, "__nodyn", PropertyDescriptor.newDataPropertyDescriptor(this, true, true, false), false);
+            globalObject.defineOwnProperty(null, "__native_require", PropertyDescriptor.newDataPropertyDescriptor(new Require(runtime.getGlobalContext()), true, true, true), false);
+
+            NodeProcess javaProcess = new NodeProcess(this);
+
+            getEventLoop().setProcess(javaProcess);
+
+            // Adds ES6 capabilities not provided by DynJS to global scope
+            runScript(ES6_POLYFILL);
+
+            JSFunction processFunction = (JSFunction) runScript(PROCESS);
+            JSObject jsProcess = (JSObject) runtime.getDefaultExecutionContext().call(processFunction, runtime.getGlobalContext().getObject(), javaProcess);
+
+            JSFunction nodeFunction = (JSFunction) runScript(NODE_JS);
             runtime.getDefaultExecutionContext().call(nodeFunction, runtime.getGlobalContext().getObject(), jsProcess);
+            return javaProcess;
         } catch (Exception e) {
             System.err.println("Unable to initialize Nodyn. Exiting.");
             e.printStackTrace();
             System.exit(255);
         }
-        return javaProcess;
+        return null;
     }
 
     @Override

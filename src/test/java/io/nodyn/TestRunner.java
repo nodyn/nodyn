@@ -15,7 +15,7 @@
  */
 package io.nodyn;
 
-import io.nodyn.runtime.Config;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
 
 /**
@@ -41,8 +41,7 @@ public class TestRunner {
         //System.setProperty("javax.net.debug", "all");
 
         RuntimeFactory factory = RuntimeFactory.init(TestRunner.class.getClassLoader(), RuntimeFactory.RuntimeType.DYNJS);
-        Config config = factory.newConfiguration();
-        config.setArgv(new String[]{"-e", SCRIPT});
+        NodynConfig config = new NodynConfig( new String[] { "-e", SCRIPT } );
         Nodyn nodyn = factory.newRuntime(config);
         nodyn.setExitHandler( new NoOpExitHandler() );
         try {

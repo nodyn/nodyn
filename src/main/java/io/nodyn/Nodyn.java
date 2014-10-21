@@ -19,7 +19,7 @@ package io.nodyn;
 import io.netty.channel.EventLoopGroup;
 import io.nodyn.crypto.CryptoInitializer;
 import io.nodyn.loop.EventLoop;
-import io.nodyn.runtime.Config;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.impl.VertxInternal;
@@ -56,7 +56,7 @@ public abstract class Nodyn {
     abstract public boolean isContext(Object global);
 
 
-    protected Nodyn(Config config, Vertx vertx, boolean controlLifeCycle) {
+    protected Nodyn(NodynConfig config, Vertx vertx, boolean controlLifeCycle) {
         EventLoopGroup elg = ((VertxInternal) vertx).getEventLoopGroup();
         this.eventLoop = new EventLoop(elg, controlLifeCycle);
         this.vertx = vertx;
@@ -69,7 +69,7 @@ public abstract class Nodyn {
         return await();
     }
 
-    public Config getConfiguration() {
+    public NodynConfig getConfiguration() {
         return this.config;
     }
 
@@ -124,7 +124,7 @@ public abstract class Nodyn {
     private final EventLoop eventLoop;
     private final CompletionHandler completionHandler;
     private final Vertx vertx;
-    private final Config config;
+    private final NodynConfig config;
     private ExitHandler exitHandler;
 
     private static class CompletionHandler {

@@ -17,7 +17,7 @@ package io.nodyn.runtime.nashorn;
 
 import io.nodyn.NodeProcess;
 import io.nodyn.Nodyn;
-import io.nodyn.runtime.Config;
+import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
 import org.vertx.java.core.Vertx;
 
@@ -26,7 +26,7 @@ import org.vertx.java.core.Vertx;
  */
 public class NashornRuntime extends Nodyn {
 
-    public NashornRuntime(Config config, Vertx vertx, boolean controlLifeCycle) {
+    public NashornRuntime(NodynConfig config, Vertx vertx, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
     }
 

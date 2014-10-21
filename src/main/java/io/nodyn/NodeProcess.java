@@ -21,7 +21,6 @@ import io.nodyn.fs.UnsafeFs;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.loop.ImmediateCheckHandle;
 import io.nodyn.posix.NodePosixHandler;
-import io.nodyn.runtime.dynjs.DynJSConfig;
 import jnr.posix.POSIX;
 import jnr.posix.POSIXFactory;
 import org.vertx.java.core.Vertx;
@@ -69,7 +68,7 @@ public class NodeProcess extends EventSource {
         this.posix = POSIXFactory.getPOSIX(new NodePosixHandler(), true);
 
         // TODO remove this DynJS-specific code.
-        this.extensionLoader = new ExtensionLoader( ((DynJSConfig)nodyn.getConfiguration()).getClassLoader() );
+        this.extensionLoader = new ExtensionLoader( nodyn.getConfiguration().getClassLoader() );
     }
 
     public Object jaropen(String filename) throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, IOException {

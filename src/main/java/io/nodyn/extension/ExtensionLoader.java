@@ -1,5 +1,6 @@
 package io.nodyn.extension;
 
+import io.nodyn.runtime.NodynClassLoader;
 import org.dynjs.runtime.DynamicClassLoader;
 
 import java.io.*;
@@ -14,9 +15,9 @@ import java.util.zip.ZipEntry;
  */
 public class ExtensionLoader {
 
-    private final DynamicClassLoader classLoader;
+    private final NodynClassLoader classLoader;
 
-    public ExtensionLoader(DynamicClassLoader classLoader) {
+    public ExtensionLoader(NodynClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 

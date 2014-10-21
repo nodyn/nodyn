@@ -50,8 +50,7 @@ public abstract class RuntimeFactory {
         return parent;
     }
 
-    abstract public Nodyn newRuntime(Config config);
-    abstract public Config newConfiguration();
+    abstract public Nodyn newRuntime(NodynConfig config);
 
     public enum RuntimeType {
       DYNJS, NASHORN

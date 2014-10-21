@@ -98,29 +98,52 @@ Number.isFinite = isFinite;
     this.execPath = this._process.execPath;
     this.execArgv = [];
 
-    // ARGV
+    readOnlyProperty = function(name, value) {
+      Object.defineProperty( this, name, {
+        get: function() { return value; }
+      } );
+    }.bind(this);
+
+    var config = this._process.nodyn.configuration;
+
+    if ( config.evalString ) {
+      readOnlyProperty( "_eval", config.evalString );
+    }
+
+    if ( config.print ) {
+      readOnlyProperty( "_print_eval", true );
+    }
+
+    if ( config.interactive ) {
+      readOnlyProperty( "_force_repl", true );
+    }
+
+    if ( config.noDeprecation ) {
+      readOnlyProperty( "noDeprecation", config.noDeprecation );
+    }
+
+    if ( config.traceDeprecation ) {
+      readOnlyProperty( "traceDeprecation", config.traceDeprecation );
+    }
+
+    if ( config.throwDeprecation ) {
+      readOnlyProperty( "throwDeprecation", config.throwDeprecation );
+    }
+
+
+    this.execArgv = []
+
     this.argv = [];
     this.argv.push( this._process.argv0 );
 
-    var rawArgv = this._process.nodyn.configuration.argv;
-    if ( rawArgv ) {
-      var numArgs = rawArgv.length;
+    var execArgv = config.execArgv;
 
-      var i = 0;
-      while ( i < numArgs ) {
-        var arg = rawArgv[i];
-        if ( arg == '-e' || arg == '--eval') {
-          ++i;
-          this._eval = rawArgv[i];
-        } else {
-          this.argv.push( rawArgv[i] );
-        }
-        ++i;
-      }
+    for ( i = 0 ; i < execArgv.length; ++i ) {
+      this.argv.push( execArgv[i] );
     }
 
-    this.env = {};
 
+    this.env = {};
     var envMap = System.getenv();
 
     var keyIter = envMap.keySet().iterator();
