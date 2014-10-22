@@ -37,7 +37,7 @@ public class TestRunner {
     }
 
     public static void main(String... args) throws InterruptedException {
-        System.setProperty( "nodyn.binary", "./bin/nodyn" );
+        System.setProperty( "nodyn.binary", "./bin/node" );
         //System.setProperty("javax.net.debug", "all");
 
         RuntimeFactory factory = RuntimeFactory.init(TestRunner.class.getClassLoader(), RuntimeFactory.RuntimeType.DYNJS);

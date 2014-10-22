@@ -42,7 +42,7 @@ describe('process', function() {
   });
 
   it('should pass testExecPath', function() {
-    expect(process.execPath).toBe(java.lang.System.getProperty('user.dir') + '/./bin/nodyn');
+    expect(process.execPath).toBe(java.lang.System.getProperty('user.dir') + '/./bin/node');
   });
 
   it('should pass testArch', function() {
