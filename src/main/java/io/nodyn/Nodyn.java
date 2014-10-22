@@ -24,6 +24,11 @@ import io.nodyn.runtime.Program;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.impl.VertxInternal;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 /**
  * @author Lance Ball
  */
@@ -33,10 +38,38 @@ public abstract class Nodyn {
         CryptoInitializer.initialize();
     }
 
+    public static final String VERSION;
+    public static final String NODE_VERSION;
+
+    static {
+        String v;
+        try {
+            v = loadVersion( "nodyn" );
+        } catch (IOException e) {
+            v = "Unknown";
+        }
+        VERSION = v;
+
+        try {
+            v = loadVersion("node" );
+        } catch (IOException e) {
+            v = "Unknown";
+        }
+
+        NODE_VERSION = v;
+    }
+
+    private static String loadVersion(String component) throws IOException {
+        InputStream in = Nodyn.class.getClassLoader().getResourceAsStream(component + "-version.txt");
+        BufferedReader reader = new BufferedReader( new InputStreamReader(in ) );
+        String line = reader.readLine();
+        reader.close();
+        return line.trim();
+    }
+
     protected static final String NODE_JS = "node.js";
     protected static final String PROCESS = "nodyn/process.js";
     protected static final String ES6_POLYFILL = "nodyn/polyfill.js";
-    public static final String VERSION = "0.1.1-SNAPSHOT"; // TODO: This should come from pom.xml
 
     abstract public Object loadBinding(String name);
 

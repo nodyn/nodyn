@@ -48,6 +48,8 @@
   </licenses>
 
   <properties>
+    <node.version>0.12.0</node.version>
+
     <!-- encodings -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -251,6 +253,7 @@
       </resource>
       <resource>
         <directory>src/main/resources</directory>
+        <filtering>true</filtering>
       </resource>
     </resources>
     <pluginManagement>
