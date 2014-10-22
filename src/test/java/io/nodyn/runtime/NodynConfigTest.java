@@ -40,14 +40,14 @@ public class NodynConfigTest {
     public void testExecWithArg() {
         NodynConfig config = config("--eval 4+4");
         assertEquals( "4+4", config.getEvalString() );
-        assertFalse( config.isPrint() );
+        assertFalse( config.getPrint() );
     }
 
     @Test
     public void testPrint() {
         NodynConfig config = config("--print 4+4");
         assertEquals( "4+4", config.getEvalString() );
-        assertTrue( config.isPrint() );
+        assertTrue( config.getPrint() );
     }
 
     private NodynConfig config(String args) {

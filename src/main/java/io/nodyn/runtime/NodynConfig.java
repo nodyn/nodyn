@@ -49,7 +49,7 @@ public class NodynConfig {
         return this.help || this.version;
     }
 
-    public boolean isPrint() {
+    public boolean getPrint() {
         return this.print;
     }
 
@@ -69,19 +69,19 @@ public class NodynConfig {
         return this.debugPort;
     }
 
-    public boolean isInteractive() {
+    public boolean getInteractive() {
         return this.interactive;
     }
 
-    public boolean isNoDeprecation() {
+    public boolean getNoDeprecation() {
         return this.noDeprecation;
     }
 
-    public boolean isTraceDeprecation() {
+    public boolean getTraceDeprecation() {
         return this.traceDeprecation;
     }
 
-    public boolean isThrowDeprecation() {
+    public boolean getThrowDeprecation() {
         return this.throwDeprecation;
     }
 
