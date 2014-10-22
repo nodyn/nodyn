@@ -46,7 +46,8 @@ public class DynJSRuntime extends Nodyn {
 
     public DynJSRuntime(Vertx vertx, NodynConfig config, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
-        Config dynjsConfig = new Config();
+
+        Config dynjsConfig = new Config( config.getClassLoader() );
         this.runtime = new DynJS(dynjsConfig);
     }
 

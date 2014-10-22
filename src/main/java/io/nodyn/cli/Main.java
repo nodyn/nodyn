@@ -82,7 +82,7 @@ public class Main {
     }
 
     protected int runNormal() {
-        RuntimeFactory factory = RuntimeFactory.init(null, RuntimeFactory.RuntimeType.DYNJS);
+        RuntimeFactory factory = RuntimeFactory.init(this.config.getClassLoader(), RuntimeFactory.RuntimeType.DYNJS);
         this.nodyn = factory.newRuntime(config);
         try {
             return this.nodyn.run();
