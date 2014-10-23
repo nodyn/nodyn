@@ -18,13 +18,12 @@ package io.nodyn.zlib;
 
 import io.netty.buffer.ByteBuf;
 import io.nodyn.CallbackResult;
-import io.nodyn.EventSource;
 import io.nodyn.NodeProcess;
+import io.nodyn.async.AsyncWrap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.*;
@@ -34,34 +33,33 @@ import java.util.zip.*;
  * Used by nodyn/bindings/zlib.js
  * @author Lance Ball
  */
-public class NodeZlib extends EventSource {
-    private final NodeProcess process;
+public class NodeZlib extends AsyncWrap {
     private final Mode mode;
-    private Strategy strategy;
+    private int strategy;
     private byte[] dictionary;
     private int level;
     private boolean closed = false;
 
     public NodeZlib(NodeProcess process, int mode) {
-        this.process = process;
+        super(process);
         this.mode = Mode.values()[mode];
     }
 
     public void init(int windowBits, int level, int memLevel, int strategy, byte[] dictionary) {
         // TODO: We don't (can't?) set windowBits and memLevel in Java the way you can in native zlib
         this.level = level;
-        this.strategy = Strategy.values()[strategy];
+        this.strategy = Strategy.mapDeflaterStrategy(strategy);
         this.dictionary = dictionary;
     }
 
     public void params(int level, int strategy) {
         this.level = level;
-        this.strategy = Strategy.values()[strategy];
+        this.strategy = Strategy.mapDeflaterStrategy(strategy);
     }
 
     public void reset() {
         this.level = Level.Z_DEFAULT_COMPRESSION.ordinal();
-        this.strategy = Strategy.Z_DEFAULT_STRATEGY;
+        this.strategy = Strategy.Z_DEFAULT_STRATEGY.ordinal();
     }
 
     public void close() {
@@ -78,6 +76,8 @@ public class NodeZlib extends EventSource {
                 try {
                     __write(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
                 } catch (Throwable t) {
+                    System.err.println("Got error " + t);
+                    t.printStackTrace();
                     NodeZlib.this.emit("error", CallbackResult.createError(t));
                 }
             }
@@ -117,9 +117,18 @@ public class NodeZlib extends EventSource {
     private void gunzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
         GZIPInputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(chunk));
         byte[] result = new byte[outLen];
-        int bytesRead = inputStream.read(result, inOffset, inLen);
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> GUNZIP");
+//        System.err.println("OUT OFFSET " + outOffset);
+//        System.err.println("IN OFFSET " + inOffset);
+//        System.err.println("IN LEN " + inLen);
+//        System.err.println("OUT LEN " + outLen);
+//        System.err.println("RESULT LEN " + result.length);
+//        System.err.println("CAPACITY " + buffer.capacity());
+        int bytesRead = inputStream.read(result, inOffset, Math.min(inLen, result.length));
+//        System.err.println("READ " + bytesRead);
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         inputStream.close();
-        buffer.setBytes(outOffset, result); // TODO: Netty 4.0 allows to specify length (bytesRead).
+        buffer.setBytes(outOffset, result, 0, bytesRead);
         after(result, 0, outLen - bytesRead);
     }
 
@@ -128,13 +137,13 @@ public class NodeZlib extends EventSource {
         GZIPOutputStream outputStream = new GZIPOutputStream(output){
             {
                 this.def.setLevel(Level.mapDeflaterLevel(NodeZlib.this.level));
-                this.def.setStrategy(Strategy.mapDeflaterStrategy(NodeZlib.this.strategy));
+                this.def.setStrategy(NodeZlib.this.strategy);
             }
         };
         outputStream.write(chunk, inOffset, inLen);
         outputStream.finish();
         final byte[] bytes = output.toByteArray();
-        buffer.setBytes(outOffset, bytes);
+        buffer.setBytes(outOffset, bytes, 0, Math.min(bytes.length, outLen));
         after(bytes, 0, outLen - bytes.length);
     }
 
@@ -142,6 +151,14 @@ public class NodeZlib extends EventSource {
         Inflater inflater = new Inflater(raw);
         inflater.setInput(chunk, inOffset, inLen);
         byte[] output = new byte[chunk.length*2];
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> INFLATE");
+//        System.err.println("IN OFFSET " + inOffset);
+//        System.err.println("OUT OFFSET " + outOffset);
+//        System.err.println("IN LEN " + inLen);
+//        System.err.println("OUT LEN " + outLen);
+//        System.err.println("RESULT LEN " + output.length);
+//        System.err.println("CAPACITY " + buffer.capacity());
+
         int inflatedLen = inflater.inflate(output);
         if (inflater.needsDictionary()) {
             if (this.dictionary == null) {
@@ -156,6 +173,8 @@ public class NodeZlib extends EventSource {
                 }
             }
         }
+//        System.err.println("INFLATED LEN " + inflatedLen);
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         inflater.end();
         buffer.setBytes( outOffset, output, 0, inflatedLen );
         after(output, 0, outLen - inflatedLen);
@@ -163,12 +182,21 @@ public class NodeZlib extends EventSource {
 
     private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
         Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), raw);
-        deflater.setStrategy(Strategy.mapDeflaterStrategy(this.strategy));
+        deflater.setStrategy(this.strategy);
         if (this.dictionary != null) deflater.setDictionary(this.dictionary);
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length];
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> DEFLATE");
+//        System.err.println("IN OFFSET " + inOffset);
+//        System.err.println("OUT OFFSET " + outOffset);
+//        System.err.println("IN LEN " + inLen);
+//        System.err.println("OUT LEN " + outLen);
+//        System.err.println("RESULT LEN " + output.length);
+//        System.err.println("CAPACITY " + buffer.capacity());
         int compressedLength = deflater.deflate(output, 0, output.length, Flush.mapFlush(flush));
+//        System.err.println("COMPRESSED LEN " + compressedLength);
+//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         deflater.end();
         buffer.setBytes( outOffset, output, 0, compressedLength );
         after(output, 0, outLen - compressedLength);
