@@ -288,7 +288,7 @@ describe("fs module", function() {
     });
   });
 
-  it('should throw appropriate error for readdir if no-such-directoyr', function() {
+  it('should throw ENOENT for readdir if no-such-directory', function() {
     var caught;
     var entries;
     try {
@@ -298,7 +298,20 @@ describe("fs module", function() {
     }
 
     expect( entries ).toBe( undefined );
-    expect( caught ).not.toBe( undefined );
+    expect( caught.code ).toBe( "ENOENT" );
+  })
+
+  it('should throw ENOTDIR for readdir on an existing non-dir file', function() {
+    var caught;
+    var entries;
+    try {
+      entries = fs.readdirSync( './pom.xml' );
+    } catch (e) {
+      console.log( e );
+      caught = e;
+    }
+    expect( entries ).toBe( undefined );
+    expect( caught.code ).toBe( "ENOTDIR" );
   })
 
 

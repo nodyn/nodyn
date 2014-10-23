@@ -191,8 +191,23 @@ binding.ftruncate = function(fd, len, callback) {
 binding.readdir = function(path, callback) {
   function work() {
     var dir = new File( path ), err, files;
-    if (!dir.isDirectory()) err = posixError(path, 'readdir');
-    else files = dir.list();
+    if (! dir.isDirectory()) {
+      if ( dir.exists() ) {
+        err = new Error("ENOTDIR");
+        err.errno = 23;
+        err.syscall = 'readdir';
+        err.path = path;
+        err.code = "ENOTDIR";
+      } else {
+        err = new Error("ENOENT");
+        err.errno = 2;
+        err.syscall = 'readdir';
+        err.path = path;
+        err.code = "ENOENT";
+      }
+    } else {
+      files = dir.list();
+    }
     return {err:err, result:nodyn.arrayConverter(files)};
   }
   return executeWork(work.bind(this), callback, true);
