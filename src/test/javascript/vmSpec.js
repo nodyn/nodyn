@@ -62,6 +62,20 @@ describe('vm functions', function() {
     }
   });
 
+  it('should allow running in a contextualized sandbox', function() {
+    var context = {};
+    Object.defineProperty( context, 'taco', {
+      get: function() {
+        return "I'm a taco";
+      }
+    })
+
+    context = vm.createContext( context );
+
+    var result = vm.runInContext( "taco", context );
+    expect( result ).toBe( "I'm a taco" );
+  });
+
 });
 
 describe('Script objects', function() {

@@ -23,7 +23,8 @@ public class NodynConfig {
     private List<String> execArgv = new ArrayList<>();
 
     private boolean debug;
-    private int debugPort;
+    private int debugPort = 5858;
+    private boolean debugWaitConnect;
 
     private boolean noMoreArgs;
 
@@ -61,8 +62,12 @@ public class NodynConfig {
         return this.version;
     }
 
-    public boolean isDebug() {
+    public boolean getDebug() {
         return this.debug;
+    }
+
+    public boolean getDebugWaitConnect() {
+        return this.debugWaitConnect;
     }
 
     public int getDebugPort() {
@@ -161,6 +166,12 @@ public class NodynConfig {
             return pos+1;
         }
 
+        if ( arg.equals( "--debug-brk" ) ) {
+            this.debug = true;
+            this.debugWaitConnect = true;
+            return pos+1;
+        }
+
         if ( arg.startsWith( "--debug=" ) ) {
             try {
                 this.debugPort = Integer.parseInt(arg.substring("--debug=".length()));
@@ -179,6 +190,18 @@ public class NodynConfig {
                 // ignore
             }
             return pos+1;
+        }
+
+        if ( arg.startsWith( "--debug-brk=" ) ) {
+            try {
+                this.debugPort = Integer.parseInt(arg.substring("--debug-brk=".length()));
+                this.debug = true;
+                this.debugWaitConnect = true;
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+            return pos+1;
+
         }
 
         return pos;

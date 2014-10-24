@@ -89,6 +89,8 @@ var source = {};
   'crypto',
   'constants',
 
+  '_debugger',
+
 ].forEach( function(name) {
   source[name] = getSource(name);
 });
