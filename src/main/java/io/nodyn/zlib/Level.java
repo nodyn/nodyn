@@ -26,10 +26,16 @@ public enum Level {
 
     public static int mapDeflaterLevel(int level) {
         switch(level) {
-            case 0: return Deflater.NO_COMPRESSION;
-            case 1: return Deflater.BEST_SPEED;
-            case 9: return Deflater.BEST_COMPRESSION;
-            case -1: return Deflater.DEFAULT_COMPRESSION;
+            case 0:
+                return Deflater.NO_COMPRESSION;
+            case 1:
+                return Deflater.BEST_SPEED;
+            case 3:
+                return Deflater.DEFAULT_COMPRESSION;
+            case 9:
+                return Deflater.BEST_COMPRESSION;
+            case -1:
+                return Deflater.DEFAULT_COMPRESSION;
         }
         return level;
     }

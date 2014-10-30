@@ -823,7 +823,6 @@ jasmine.Env.prototype.describe = function(description, specDefinitions) {
 
   if (declarationError) {
     this.it("encountered a declaration exception", function() {
-      console.log(declarationError.stack);
       throw declarationError;
     });
   }
@@ -2318,9 +2317,10 @@ jasmine.Spec.prototype.waitsFor = function(latchFunction, optional_timeoutMessag
 };
 
 jasmine.Spec.prototype.fail = function (e) {
+  e = e ? e : new Error();
   var expectationResult = new jasmine.ExpectationResult({
     passed: false,
-    message: e ? jasmine.util.formatException(e) : new Error('Exception'),
+    message: jasmine.util.formatException(e),
     trace: { stack: e.stack }
   });
   this.results_.addResult(expectationResult);

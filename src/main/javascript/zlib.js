@@ -1,4 +1,4 @@
-// Copyright Joyent, Inc. and other Node contributors.
+// Copyright Joyent, Inc. and other Node contrsrc/test/javascript/zlibSpec.js
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
