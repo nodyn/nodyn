@@ -19,13 +19,15 @@ package io.nodyn.zlib;
 import io.netty.buffer.ByteBuf;
 import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
-import io.nodyn.async.AsyncWrap;
+import io.nodyn.handle.HandleWrap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.*;
 
 /**
@@ -33,15 +35,10 @@ import java.util.zip.*;
  * Used by nodyn/bindings/zlib.js
  * @author Lance Ball
  */
-public class NodeZlib extends AsyncWrap {
-    private final Mode mode;
-    private int strategy;
-    private byte[] dictionary;
-    private int level;
-    private boolean closed = false;
+public class NodeZlib extends HandleWrap {
 
     public NodeZlib(NodeProcess process, int mode) {
-        super(process);
+        super(process, false);
         this.mode = Mode.values()[mode];
     }
 
@@ -50,6 +47,7 @@ public class NodeZlib extends AsyncWrap {
         this.level = level;
         this.strategy = Strategy.mapDeflaterStrategy(strategy);
         this.dictionary = dictionary;
+        this.initDone.set(true);
     }
 
     public void params(int level, int strategy) {
@@ -63,13 +61,16 @@ public class NodeZlib extends AsyncWrap {
     }
 
     public void close() {
-        this.closed = true;
+        if (writeInProgress.get()) {
+            pendingClose.set(true);
+            return;
+        }
+        this.mode = Mode.NONE;
+        this.closed.set(true);
+        this.unref();
     }
 
     public void write(final int flush, final byte[] chunk, final int inOffset, final int inLen, final ByteBuf buffer, final int outOffset, final int outLen) {
-        if (closed) {
-            NodeZlib.this.emit("error", CallbackResult.createError(new RuntimeException("Cannot write after close")));
-        }
         process.getEventLoop().submitBlockingTask(new Runnable() {
             @Override
             public void run() {
@@ -89,133 +90,128 @@ public class NodeZlib extends AsyncWrap {
     }
 
     private void __write(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException, DataFormatException {
-        if (checkChunk(chunk, outLen)) return;
-        switch(this.mode) {
-            case DEFLATE:
-                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
-                break;
-            case DEFLATERAW:
-                deflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
-                break;
-            case GZIP:
-                gzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
-                break;
-            case INFLATE:
-                inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
-                break;
-            case INFLATERAW:
-                inflate(flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
-                break;
-            case GUNZIP:
-                gunzip(flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
-                break;
-            default:
-                this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
+        if (check(initDone.get(), "write before init") &&
+            check(!pendingClose.get(), "close is pending") &&
+            check(!closed.get(), "already finalized") &&
+            check(!writeInProgress.get(), "write already in progress")) {
+            this.writeInProgress.set(true);
+            this.ref();
+            if (chunk == null || chunk.length == 0) {
+                after(this, null, 0, outLen);
+                return;
+            }
+            switch(this.mode) {
+                case DEFLATE:
+                    deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                    break;
+                case DEFLATERAW:
+                    deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
+                    break;
+                case GZIP:
+                    gzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                    break;
+                case INFLATE:
+                    inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                    break;
+                case INFLATERAW:
+                    inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
+                    break;
+                case GUNZIP:
+                    gunzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                    break;
+                case NONE:
+                    break;
+                default:
+                    this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
+            }
+            this.writeInProgress.set(false);
         }
     }
 
-    private void gunzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
+    private static void gunzip(NodeZlib ctx, int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
         GZIPInputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(chunk));
         byte[] result = new byte[outLen];
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> GUNZIP");
-//        System.err.println("OUT OFFSET " + outOffset);
-//        System.err.println("IN OFFSET " + inOffset);
-//        System.err.println("IN LEN " + inLen);
-//        System.err.println("OUT LEN " + outLen);
-//        System.err.println("RESULT LEN " + result.length);
-//        System.err.println("CAPACITY " + buffer.capacity());
         int bytesRead = inputStream.read(result, inOffset, Math.min(inLen, result.length));
-//        System.err.println("READ " + bytesRead);
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         inputStream.close();
         buffer.setBytes(outOffset, result, 0, bytesRead);
-        after(result, 0, outLen - bytesRead);
+        after(ctx, result, 0, outLen - bytesRead);
     }
 
-    private void gzip(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
+    private static void gzip(final NodeZlib ctx, int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen) throws IOException {
         final ByteArrayOutputStream output = new ByteArrayOutputStream(outLen);
         GZIPOutputStream outputStream = new GZIPOutputStream(output){
             {
-                this.def.setLevel(Level.mapDeflaterLevel(NodeZlib.this.level));
-                this.def.setStrategy(NodeZlib.this.strategy);
+                this.def.setLevel(Level.mapDeflaterLevel(ctx.level));
+                this.def.setStrategy(ctx.strategy);
             }
         };
         outputStream.write(chunk, inOffset, inLen);
         outputStream.finish();
         final byte[] bytes = output.toByteArray();
         buffer.setBytes(outOffset, bytes, 0, Math.min(bytes.length, outLen));
-        after(bytes, 0, outLen - bytes.length);
+        after(ctx, bytes, 0, outLen - bytes.length);
     }
 
-    private void inflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) throws DataFormatException {
+    private static void inflate(NodeZlib ctx, int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) throws DataFormatException {
         Inflater inflater = new Inflater(raw);
         inflater.setInput(chunk, inOffset, inLen);
         byte[] output = new byte[chunk.length*2];
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> INFLATE");
-//        System.err.println("IN OFFSET " + inOffset);
-//        System.err.println("OUT OFFSET " + outOffset);
-//        System.err.println("IN LEN " + inLen);
-//        System.err.println("OUT LEN " + outLen);
-//        System.err.println("RESULT LEN " + output.length);
-//        System.err.println("CAPACITY " + buffer.capacity());
 
         int inflatedLen = inflater.inflate(output);
         if (inflater.needsDictionary()) {
-            if (this.dictionary == null) {
-                this.emit("error", CallbackResult.createError(new RuntimeException("Missing dictionary")));
+            if (ctx.dictionary == null) {
+                ctx.emit("error", CallbackResult.createError(new RuntimeException("Missing dictionary")));
                 return;
             } else {
                 try {
-                    inflater.setDictionary(this.dictionary);
+                    inflater.setDictionary(ctx.dictionary);
                     inflatedLen = inflater.inflate(output);
                 } catch(Throwable t) {
-                    this.emit("error", CallbackResult.createError(new RuntimeException("Bad dictionary")));
+                    ctx.emit("error", CallbackResult.createError(new RuntimeException("Bad dictionary")));
                 }
             }
         }
-//        System.err.println("INFLATED LEN " + inflatedLen);
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         inflater.end();
         buffer.setBytes( outOffset, output, 0, inflatedLen );
-        after(output, 0, outLen - inflatedLen);
+        after(ctx, Arrays.copyOf(output, inflatedLen), 0, outLen - inflatedLen);
     }
 
-    private void deflate(int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
-        Deflater deflater = new Deflater(Level.mapDeflaterLevel(this.level), raw);
-        deflater.setStrategy(this.strategy);
-        if (this.dictionary != null) deflater.setDictionary(this.dictionary);
+    private static void deflate(NodeZlib ctx, int flush, byte[] chunk, int inOffset, int inLen, ByteBuf buffer, int outOffset, int outLen, boolean raw) {
+        Deflater deflater = new Deflater(Level.mapDeflaterLevel(ctx.level), raw);
+        deflater.setStrategy(ctx.strategy);
+        deflater.setLevel(Level.mapDeflaterLevel(ctx.level));
+        if (ctx.dictionary != null) deflater.setDictionary(ctx.dictionary);
         deflater.setInput(chunk, inOffset, inLen);
         deflater.finish();
         byte[] output = new byte[chunk.length];
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>> DEFLATE");
-//        System.err.println("IN OFFSET " + inOffset);
-//        System.err.println("OUT OFFSET " + outOffset);
-//        System.err.println("IN LEN " + inLen);
-//        System.err.println("OUT LEN " + outLen);
-//        System.err.println("RESULT LEN " + output.length);
-//        System.err.println("CAPACITY " + buffer.capacity());
         int compressedLength = deflater.deflate(output, 0, output.length, Flush.mapFlush(flush));
-//        System.err.println("COMPRESSED LEN " + compressedLength);
-//        System.err.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
         deflater.end();
         buffer.setBytes( outOffset, output, 0, compressedLength );
-        after(output, 0, outLen - compressedLength);
+        after(ctx, Arrays.copyOf(output, compressedLength), 0, outLen - compressedLength);
     }
 
-    private boolean checkChunk(byte[] chunk, int outLen) {
-        if (chunk == null || chunk.length == 0) {
-            after(null, 0, outLen);
-            return true;
-        }
-        return false;
-    }
-
-    private void after(byte[] output, int inAfter, int outAfter) {
+    private static void after(NodeZlib ctx, byte[] output, int inAfter, int outAfter) {
         Map result = new HashMap();
         result.put("output", output);
         result.put("inAfter", inAfter);
         result.put("outAfter", outAfter);
-        this.emit("after", CallbackResult.createSuccess(result));
+        ctx.emit("after", CallbackResult.createSuccess(result));
     }
+
+    private boolean check(boolean bool, String msg) {
+        if (!bool) {
+            emit("error", CallbackResult.createError(new RuntimeException(msg)));
+        }
+        return bool;
+    }
+
+    private Mode mode;
+    private int strategy;
+    private byte[] dictionary;
+    private int level;
+    private AtomicBoolean initDone = new AtomicBoolean(false);
+    private AtomicBoolean writeInProgress = new AtomicBoolean(false);
+    private AtomicBoolean closed = new AtomicBoolean(false);
+    private AtomicBoolean pendingClose = new AtomicBoolean(false);
 
 }

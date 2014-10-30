@@ -29,7 +29,7 @@ describe('The zlib module', function() {
     var encoded = 'eJwVy7sNgDAQBNFWtiISIkLABk5gr3QfWXTPkY7mTRwQg18VQ7pXBQ8wFEVsZ4buaGupOB+qMAwWreW2vYlSzuw/Waj3BzTBG/I=';
     zlib.deflate(str, function(e,b) {
       expect(e).toBeFalsy();
-//      expect(b.toString('base64')).toBe(encoded);
+      expect(b.toString('base64')).toBe(encoded);
 
       zlib.inflate(b, function(ee, bb) {
         expect(ee).toBeFalsy();
@@ -42,14 +42,10 @@ describe('The zlib module', function() {
   it('should gzip and gunzip a string', function() {
     waitsFor(helper.testComplete, "the test to complete", 8000);
     var str = 'Now is the winter of our discontent made glorious summer by this Son of York';
-    var encoded = 'H4sIAAAAAAAAAxXLuw2AMBAE0Va2IhIiQsAGTmCvdB9ZdM+RjuZNHBCDXxVDulcFDzAURWxnhu5oa6k4H6owDBat5ba9iVLO7D9ZqPcHFHvOTEwAAAA=';
+    var encoded = 'H4sIAAAAAAAAABXLuw2AMBAE0Va2IhIiQsAGTmCvdB9ZdM+RjuZNHBCDXxVDulcFDzAURWxnhu5oa6k4H6owDBat5ba9iVLO7D9ZqPcHFHvOTEwAAAA=';
     zlib.gzip(str, function(e,b) {
       expect(e).toBeFalsy();
-//      console.log(b.toString('base64'));
-//      console.log(typeof b.toString('base64'));
-//      console.log(encoded);
-//      console.log(typeof encoded);
-//      expect(b.toString('base64')).toBe(encoded);
+      expect(b.toString('base64')).toBe(encoded);
       zlib.gunzip(b, function(ee, bb) {
         expect(ee).toBeFalsy();
         expect(bb.toString()).toBe(str);
@@ -58,7 +54,7 @@ describe('The zlib module', function() {
     });
   });
 
-  it('should unzip a file', function() {
+  it('should gunzip a file', function() {
     waitsFor(helper.testComplete, 'the test to complete', 8000);
     var fs = require('fs');
     var buf = fs.readFileSync(__dirname + "/zlibFixture.txt.gz");
@@ -137,7 +133,8 @@ describe('The zlib module', function() {
 
       function checkComplete() {
         if (failures > 0) {
-          this.fail();
+          this.fail(new Error('Unexpected data'));
+          return true;
         }
         return done + failures === total;
       }
@@ -151,7 +148,8 @@ describe('The zlib module', function() {
            [zlib.Deflate, zlib.Unzip],
            [zlib.Gzip, zlib.Unzip],
            [zlib.DeflateRaw, zlib.InflateRaw]];
-      zlibPairs = [[zlib.Deflate, zlib.Inflate]];
+      zlibPairs = [[zlib.Deflate, zlib.Inflate],
+      [zlib.Gzip, zlib.Gunzip]];
 
       // how fast to trickle through the slowstream
       var trickle = [128, 1024, 1024 * 1024];
@@ -180,6 +178,7 @@ describe('The zlib module', function() {
 
       var fs = require('fs');
       var testFiles = ['person.jpg', 'elipses.txt', 'empty.txt'];
+      testFiles = ['elipses.txt'];
 
       if (process.env.FAST) {
         zlibPairs = [[zlib.Gzip, zlib.Unzip]];
@@ -313,7 +312,6 @@ describe('The zlib module', function() {
                             JSON.stringify(opts) + ' ' +
                             Def.name + ' -> ' + Inf.name;
                         var ok = true;
-                        var testNum = ++done;
                         for (var i = 0; i < Math.max(c.length, test.length); i++) {
                           if (c[i] !== test[i]) {
                             ok = false;
@@ -321,6 +319,8 @@ describe('The zlib module', function() {
                             break;
                           }
                         }
+                        var testNum = ++done;
+                        console.log("test num " + testNum);
                         if (ok) {
                           console.log('ok ' + (testNum) + ' ' + msg);
                         } else {
