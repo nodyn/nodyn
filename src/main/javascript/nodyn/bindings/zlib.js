@@ -29,6 +29,7 @@ function Zlib(mode) {
   if (!(this instanceof Zlib)) return new Zlib(mode);
   this._delegate = new io.nodyn.zlib.NodeZlib(process._process, mode);
   this._delegate.on('error', this._onError.bind(this));
+  this._delegate.on('close', this._onClose.bind(this));
 }
 util.inherits(Zlib, EventEmitter);
 module.exports.Zlib = Zlib;
@@ -51,7 +52,7 @@ Zlib.prototype.close = function() {
 };
 
 Zlib.prototype.write = function(flushFlag, chunk, inOffset, inLen, outBuffer, outOffset, outLen) {
-  var request = new ZlibRequest(this._delegate);
+  var request = new ZlibRequest(this._delegate, outBuffer);
   this._delegate.write(flushFlag, chunk._byteArray(), inOffset, inLen, outBuffer._nettyBuffer(), outOffset, outLen);
   return request;
 };
@@ -73,9 +74,14 @@ Zlib.prototype._onError = function(result) {
     console.error("WTF");
 };
 
-function ZlibRequest(delegate) {
+Zlib.prototype._onClose = function() {
+  this.emit('close');
+};
+
+function ZlibRequest(delegate, buffer) {
   if (!(this instanceof ZlibRequest)) return new ZlibRequest();
   delegate.on('after', this._onAfter.bind(this));
+  this._out = buffer;
 }
 
 ZlibRequest.prototype._onAfter = function _onAfter(result) {
@@ -89,7 +95,7 @@ ZlibRequest.prototype._onAfter = function _onAfter(result) {
       outAfter = result.result.outAfter;
     }
     process.nextTick( function() {
-      this.callback(inAfter, outAfter);
+      this.callback(inAfter, outAfter, this._out);
     }.bind(this) );
   }
 };

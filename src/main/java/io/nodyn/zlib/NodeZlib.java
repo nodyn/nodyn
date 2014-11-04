@@ -56,17 +56,21 @@ public class NodeZlib extends HandleWrap {
     }
 
     public void reset() {
+//        System.err.println("Resetting NodeZlib instance");
         this.level = Level.Z_DEFAULT_COMPRESSION.ordinal();
         this.strategy = Strategy.Z_DEFAULT_STRATEGY.ordinal();
     }
 
     public void close() {
+//        System.err.println("Closing NodeZlib instance");
         if (writeInProgress.get()) {
             pendingClose.set(true);
             return;
         }
         this.mode = Mode.NONE;
         this.closed.set(true);
+        emit("close", CallbackResult.createSuccess());
+//        System.err.println("Unrefing NodeZlib instance");
         this.unref();
     }
 
@@ -98,31 +102,34 @@ public class NodeZlib extends HandleWrap {
             this.ref();
             if (chunk == null || chunk.length == 0) {
                 after(this, null, 0, outLen);
-                return;
+            } else {
+                switch(this.mode) {
+                    case DEFLATE:
+                        deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                        break;
+                    case DEFLATERAW:
+                        deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
+                        break;
+                    case GZIP:
+                        gzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                        break;
+                    case INFLATE:
+                        inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
+                        break;
+                    case INFLATERAW:
+                        inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
+                        break;
+                    case GUNZIP:
+                        gunzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
+                        break;
+                    case NONE:
+                        break;
+                    default:
+                        this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
+                }
             }
-            switch(this.mode) {
-                case DEFLATE:
-                    deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
-                    break;
-                case DEFLATERAW:
-                    deflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
-                    break;
-                case GZIP:
-                    gzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
-                    break;
-                case INFLATE:
-                    inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, false);
-                    break;
-                case INFLATERAW:
-                    inflate(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen, true);
-                    break;
-                case GUNZIP:
-                    gunzip(this, flush, chunk, inOffset, inLen, buffer, outOffset, outLen);
-                    break;
-                case NONE:
-                    break;
-                default:
-                    this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
+            if (this.pendingClose.get()) {
+                this.close();
             }
             this.writeInProgress.set(false);
         }
