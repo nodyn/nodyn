@@ -18,7 +18,6 @@ package io.nodyn;
 
 import io.netty.channel.EventLoopGroup;
 import io.nodyn.crypto.CryptoInitializer;
-import io.nodyn.debugger.DebuggerAgent;
 import io.nodyn.loop.EventLoop;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
@@ -96,10 +95,6 @@ public abstract class Nodyn {
         this.vertx = vertx;
         this.config = config;
         this.completionHandler = new CompletionHandler();
-
-        if ( config.getDebug() ) {
-            this.debuggerAgent = new DebuggerAgent(elg, config.getDebugPort() );
-        }
     }
 
     public int run() throws Throwable {
@@ -164,7 +159,6 @@ public abstract class Nodyn {
     private final Vertx vertx;
     private final NodynConfig config;
     private ExitHandler exitHandler;
-    private DebuggerAgent debuggerAgent;
 
 
     private static class CompletionHandler {

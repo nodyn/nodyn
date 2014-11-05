@@ -22,23 +22,24 @@ import io.nodyn.Nodyn;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
 import org.dynjs.Config;
+import org.dynjs.debugger.agent.DebuggerAgent;
 import org.dynjs.exception.ThrowException;
-import org.dynjs.runtime.*;
 import org.dynjs.runtime.Compiler;
+import org.dynjs.runtime.*;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
 import org.dynjs.runtime.builtins.Require;
+import org.dynjs.runtime.source.ClassLoaderSourceProvider;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DynJSRuntime extends Nodyn {
 
     private final DynJS runtime;
+    private final Runner runner;
 
     public DynJSRuntime(NodynConfig config) {
         this(VertxFactory.newVertx(), config, true);
@@ -47,21 +48,27 @@ public class DynJSRuntime extends Nodyn {
     public DynJSRuntime(Vertx vertx, NodynConfig config, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
 
-        Config dynjsConfig = new Config( config.getClassLoader() );
+        Config dynjsConfig = new Config(config.getClassLoader());
+        dynjsConfig.setExposeDebugAs("v8debug");
+
         this.runtime = new DynJS(dynjsConfig);
+
+        this.runner = this.runtime.newRunner(config.getDebug());
+        if (config.getDebug()) {
+            DebuggerAgent agent = new DebuggerAgent(this.runner.getDebugger(), this.getEventLoop().getEventLoopGroup(), getConfiguration().getDebugPort());
+        }
     }
 
     @Override
     public Object loadBinding(String name) {
-        Runner runner = runtime.newRunner();
-        runner.withSource("__native_require('nodyn/bindings/" + name + "');");
+        this.runner.withSource("__native_require('nodyn/bindings/" + name + "');");
         return runner.execute();
     }
 
     @Override
     public Program compile(String source, String fileName, boolean displayErrors) throws Throwable {
         try {
-            return new DynJSProgram(this, source, fileName);
+            return new DynJSProgram(this, this.runner.getDebugger(), source, fileName);
         } catch (Throwable t) {
             if (displayErrors) {
                 this.handleThrowable(t);
@@ -129,6 +136,9 @@ public class DynJSRuntime extends Nodyn {
             JSFunction processFunction = (JSFunction) runScript(PROCESS);
             JSObject jsProcess = (JSObject) runtime.getDefaultExecutionContext().call(processFunction, runtime.getGlobalContext().getObject(), javaProcess);
 
+            //if ( getConfiguration().getDebug() ) {
+            //this.runner.getDebugger().setWaitConnect( getConfiguration().getDebugWaitConnect() );
+            //}
             JSFunction nodeFunction = (JSFunction) runScript(NODE_JS);
             runtime.getDefaultExecutionContext().call(nodeFunction, runtime.getGlobalContext().getObject(), jsProcess);
             return javaProcess;
@@ -142,11 +152,8 @@ public class DynJSRuntime extends Nodyn {
 
     @Override
     protected Object runScript(String scriptName) {
-        Runner runner = runtime.newRunner();
-        InputStream repl = runtime.getConfig().getClassLoader().getResourceAsStream(scriptName);
-        BufferedReader in = new BufferedReader(new InputStreamReader(repl));
-        runner.withSource(in);
-        runner.withFileName(scriptName);
+        this.runner.withSource( new ClassLoaderSourceProvider( this.runtime.getConfig().getClassLoader(), scriptName));
+        this.runner.withFileName(scriptName);
         return runner.execute();
     }
 

@@ -16,9 +16,11 @@
 package io.nodyn.runtime.dynjs;
 
 import io.nodyn.runtime.Program;
+import org.dynjs.debugger.Debugger;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.Compiler;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
+import org.dynjs.runtime.wrapper.JavascriptFunction;
 
 /**
  * @author Lance Ball
@@ -26,18 +28,21 @@ import org.dynjs.runtime.builtins.DynJSBuiltin;
 public class DynJSProgram implements Program {
 
     private final JSProgram script;
+    private final Debugger debugger;
 
-    public DynJSProgram(DynJSRuntime runtime, String source, String fileName) throws Throwable {
+    public DynJSProgram(DynJSRuntime runtime, Debugger debugger, String source, String fileName) throws Throwable {
         Compiler compiler = runtime.newCompiler();
         compiler.withSource(source);
-        compiler.withFileName( fileName );
+        compiler.withFileName(fileName);
         this.script = compiler.compile();
+        this.debugger = debugger;
     }
 
     @Override
     public Object execute(Object context) {
         DynJSBuiltin dynjsBuiltin = (DynJSBuiltin) ((JSObject)context).get(null, "dynjs");
         DynJS runtime = dynjsBuiltin.getRuntime();
-        return runtime.newRunner().withSource( this.script ).execute();
+        Object result = runtime.newRunner().withSource( this.script ).withDebugger( this.debugger ).execute();
+        return result;
     }
 }
