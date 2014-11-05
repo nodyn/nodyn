@@ -98,10 +98,17 @@ describe("The timers module", function() {
   });
 
   it('should have a setImmediate function', function() {
-    waitsFor(helper.testComplete, 'the test to complete', 3000);
-    setImmediate(function(x) {
-      expect(x.toString()).toBe('foo');
-      helper.testComplete(true);
-    }, 'foo');
+    var x = 0;
+    waitsFor(function() { return x === 2; }, 'the test to complete', 3000);
+    setImmediate(function(y) {
+      expect(x).toBe(0);
+      expect(y).toBe(1);
+      x = y;
+    }, 1);
+    setImmediate(function(z) {
+      expect(x).toBe(1);
+      expect(z).toBe(2);
+      x = z;
+    }, 2);
   });
 });
