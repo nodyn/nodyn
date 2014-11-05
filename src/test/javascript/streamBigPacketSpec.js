@@ -4,15 +4,23 @@ var util = require('util'),
 
 describe("Streaming big packets", function() {
 
-  it("should work", function() {
-    waitsFor(function() { return passed; }, "the test to complete", 8000);
+  xit("should work", function() {
+    waitsFor(function() { 
+      if (passed && later) {
+        s1.emit('drain');
+        return true;
+      }
+      return false;
+    }, "the test to complete", 8000);
     var passed = false;
+    var later = false;
 
     function PassThrough () {
       stream.Transform.call(this);
     }
     util.inherits(PassThrough, stream.Transform);
     PassThrough.prototype._transform = function (chunk, encoding, done) {
+      later = chunk.toString() === 'later';
       this.push(chunk);
       done();
     };
