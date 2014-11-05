@@ -197,6 +197,7 @@ describe('The zlib module', function() {
 
       // stream that saves everything
       function BufferStream() {
+        stream.Stream.call(this);
         this.chunks = [];
         this.length = 0;
         this.writable = true;
@@ -230,6 +231,7 @@ describe('The zlib module', function() {
 
 
       function SlowStream(trickle) {
+        stream.Stream.call(this);
         this.trickle = trickle;
         this.offset = 0;
         this.readable = this.writable = true;

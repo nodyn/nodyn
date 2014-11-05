@@ -48,6 +48,7 @@ public class NodeZlib extends HandleWrap {
         this.strategy = Strategy.mapDeflaterStrategy(strategy);
         this.dictionary = dictionary;
         this.initDone.set(true);
+        this.ref();
     }
 
     public void params(int level, int strategy) {
@@ -99,7 +100,6 @@ public class NodeZlib extends HandleWrap {
             check(!closed.get(), "already finalized") &&
             check(!writeInProgress.get(), "write already in progress")) {
             this.writeInProgress.set(true);
-            this.ref();
             if (chunk == null || chunk.length == 0) {
                 after(this, null, 0, outLen);
             } else {
@@ -128,10 +128,10 @@ public class NodeZlib extends HandleWrap {
                         this.process.getNodyn().handleThrowable(new RuntimeException("ERROR: Don't know how to handle " + this.mode));
                 }
             }
+            this.writeInProgress.set(false);
             if (this.pendingClose.get()) {
                 this.close();
             }
-            this.writeInProgress.set(false);
         }
     }
 
