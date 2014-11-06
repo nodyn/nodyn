@@ -211,7 +211,7 @@ Number.isFinite = isFinite;
         return this._process.needImmediateCallback;
       },
       set: function(v) {
-        this._process.needImmediateCallback = true;
+        this._process.needImmediateCallback = (v?true:false);
       }
     });
 

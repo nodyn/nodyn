@@ -4,7 +4,7 @@ var util = require('util'),
 
 describe("Streaming big packets", function() {
 
-  xit("should work", function() {
+  it("should work", function() {
     waitsFor(function() { 
       if (passed && later) {
         s1.emit('drain');
