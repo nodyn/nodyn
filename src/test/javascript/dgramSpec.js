@@ -145,7 +145,6 @@ describe('The dgram module', function() {
     });
   });
 
-  // TODO: Figure out WTF is going on here.
   it('should add and drop multicast group membership', function() {
     waitsFor(helper.testComplete, "the dgram broadcast test", 5000);
     var buffer = new Buffer('steak frites');
