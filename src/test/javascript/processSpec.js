@@ -90,6 +90,13 @@ describe('process', function() {
     expect(process.cwd()).toBe(java.lang.System.getProperty('user.dir'));
   });
 
+  it('should pass chdir', function() {
+    var path = require('path');
+    var newdir = [process.cwd(), 'amodule'].join(path.sep);
+    expect(process.chdir('amodule')).toBe(true);
+    expect(process.cwd()).toBe(newdir);
+  });
+
   it('should pass testPID', function() {
     expect(process.pid).toBe(process._process.pid);
   });

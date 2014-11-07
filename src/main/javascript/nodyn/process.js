@@ -95,6 +95,15 @@ Number.isFinite = isFinite;
       return System.getProperty("user.dir");
     };
 
+    this.chdir = function(path) {
+      directory = new java.io.File(path).getAbsoluteFile();
+      if (directory.exists() || directory.mkdirs()) {
+        return (System.setProperty('user.dir', directory.getAbsolutePath()) !== null);
+      }
+      return false;
+    };
+
+
     this.execPath = this._process.execPath;
     this.execArgv = [];
 
