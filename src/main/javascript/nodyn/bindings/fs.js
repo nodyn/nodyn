@@ -16,6 +16,7 @@
 
 var nodyn       = require('nodyn'),
     util        = require('util'),
+    path        = require('path'),
     blocking    = require('nodyn/blocking'),
     StatWatcher = process.binding('stat_watcher').StatWatcher,
     posix       = process._posix,
@@ -48,6 +49,11 @@ function executeWork(work, async, throws) {
   }
 }
 
+function possiblyRelative(p) {
+  if (path.isAbsolute(p)) return p;
+  return path.resolve(process.cwd(), p);
+}
+
 binding.FSInitialize = function(stats) {
   // fs.js uses this in "native" node.js to inform the C++ in
   // node_file.cc what JS function is used to construct an fs.Stat
@@ -77,13 +83,14 @@ function buildStat(path, statf) {
       delegate.ctime(),
       delegate.ctime() // TODO: I don't know what birthtim_msec should be
     );
-  } else err = posixError(path, 'stat');
+  } else err = posixError(possiblyRelative(path), 'stat');
   return {err:err, result:stats};
 }
 
 binding.StatWatcher = StatWatcher;
 
 binding.stat = function(path, callback) {
+  path = possiblyRelative(path);
   function work() {
     return buildStat(path, function(stat) { return posix.stat(path, stat); });
   }
@@ -91,6 +98,7 @@ binding.stat = function(path, callback) {
 };
 
 binding.lstat = function(path, callback) {
+  path = possiblyRelative(path);
   function work() {
     return buildStat(path, function(stat) { return posix.lstat(path, stat); });
   }
@@ -105,6 +113,7 @@ binding.fstat = function(fd, callback) {
 };
 
 binding.open = function(path, flags, mode, callback) {
+  path = possiblyRelative(path);
   function work() {
     var fd = posix.open(path, flags, mode), err;
     if (fd === -1) err = posixError(path, 'open');
@@ -137,7 +146,7 @@ binding.writeBuffer = function(fd, buffer, offset, length, position, callback) {
     var bytes   = toWrite._byteArray();
     var written = posix.write(fd, bytes, length), err;
 
-    if (written === -1) err = posixError(path, 'write');
+    if (written === -1) err = posixError(fd, 'write');
     return {err: err, result: written};
   }
   return executeWork(work.bind(this), callback);
@@ -150,6 +159,7 @@ binding.writeString = function(fd, str, position, enc, callback) {
 };
 
 binding.mkdir = function(path, mode, callback) {
+  path = possiblyRelative(path);
   function work() {
     var success = posix.mkdir(path, mode), err;
     if (success === -1) err = posixError(path, 'mkdir');
@@ -159,6 +169,7 @@ binding.mkdir = function(path, mode, callback) {
 };
 
 binding.rmdir = function(path, callback) {
+  path = possiblyRelative(path);
   function work() {
     var success = posix.rmdir(path), err;
     if (success === -1) err = posixError(path, 'rmdir');
@@ -189,6 +200,7 @@ binding.ftruncate = function(fd, len, callback) {
 };
 
 binding.readdir = function(path, callback) {
+  path = possiblyRelative(path);
   function work() {
     var dir = new File( path ), err, files;
     if (! dir.isDirectory()) {
@@ -241,6 +253,8 @@ binding.read = function(fd, buffer, offset, length, position, callback) {
 };
 
 binding.link = function(srcpath, dstpath, callback) {
+  srcpath = possiblyRelative(srcpath);
+  dstpath = possiblyRelative(dstpath);
   return executeWork(function() {
     if (posix.link(srcpath, dstpath) === -1) {
       return {err:posixError(srcpath, 'link')};
@@ -249,6 +263,8 @@ binding.link = function(srcpath, dstpath, callback) {
 };
 
 binding.symlink = function(srcpath, dstpath, type, callback) {
+  srcpath = possiblyRelative(srcpath);
+  dstpath = possiblyRelative(dstpath);
   return executeWork(function() {
     // TODO: The node.js API allows for an optional 'type'
     // parameter that is only available on Windows. The
@@ -260,6 +276,7 @@ binding.symlink = function(srcpath, dstpath, type, callback) {
 };
 
 binding.readlink = function(path, callback) {
+  path = possiblyRelative(path);
   return executeWork(function() {
     var result = posix.readlink(path);
     if (result === null) return {err:posixError(path, 'readlink')};
@@ -268,6 +285,7 @@ binding.readlink = function(path, callback) {
 };
 
 binding.unlink = function(path, callback) {
+  path = possiblyRelative(path);
   return executeWork(function() {
     if (posix.unlink(path) === -1) {
       return {err:posixError(path, 'unlink')};
@@ -276,6 +294,7 @@ binding.unlink = function(path, callback) {
 };
 
 binding.chmod = function(path, mode, callback) {
+  path = possiblyRelative(path);
   return executeWork(function() {
     if (posix.chmod(path, mode) === -1) {
       return {err:posixError(path, 'chmod')};
@@ -292,6 +311,7 @@ binding.fchmod = function(fd, mode, callback) {
 };
 
 binding.chown = function(path, uid, gid, callback) {
+  path = possiblyRelative(path);
   return executeWork(function() {
     if (posix.chown(path, uid, gid) === -1) {
       return {err:posixError(path, 'chown')};
@@ -308,6 +328,7 @@ binding.fchown = function(fd, uid, gid, callback) {
 };
 
 binding.utimes = function(path, atime, mtime, callback) {
+  path = possiblyRelative(path);
   return executeWork(function() {
     if (posix.utimes(path, [atime], [mtime]) === -1) {
       return {err:posixError(path, 'utimes')};

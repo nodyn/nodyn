@@ -39,6 +39,7 @@ Number.isFinite = isFinite;
   function Process(process) {
     this._process = process;
     this.moduleLoadList = [];
+    this._cwd = System.getProperty('user.dir');
 
     Object.defineProperty( this, "EVENT_LOOP", {
       get: function() {
@@ -55,7 +56,6 @@ Number.isFinite = isFinite;
     this.context = this._process.vertx;
 
     this.binding = function(name) {
-      // return require(['nodyn', 'bindings', name].join('/'));
       return this._process.binding(name);
     };
 
@@ -92,15 +92,17 @@ Number.isFinite = isFinite;
     };
 
     this.cwd = function() {
-      return System.getProperty("user.dir");
+      return this._cwd;
     };
 
     this.chdir = function(path) {
-      directory = new java.io.File(path).getAbsoluteFile();
-      if (directory.exists() || directory.mkdirs()) {
-        return (System.setProperty('user.dir', directory.getAbsolutePath()) !== null);
+      var cwd = require('path').resolve(path);
+      var f = new java.io.File(cwd);
+      if (f.exists()) {
+        this._cwd = cwd;
+        return true;
       }
-      return false;
+      throw new Error("Cannot cwd to " + cwd);
     };
 
 

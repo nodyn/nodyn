@@ -92,9 +92,11 @@ describe('process', function() {
 
   it('should pass chdir', function() {
     var path = require('path');
-    var newdir = [process.cwd(), 'amodule'].join(path.sep);
-    expect(process.chdir('amodule')).toBe(true);
+    var newdir = [process.cwd(), 'src', 'main'].join(path.sep);
+    var curdir = process.cwd();
+    expect(process.chdir(['src', 'main'].join(path.sep))).toBe(true);
     expect(process.cwd()).toBe(newdir);
+    process.chdir(curdir);
   });
 
   it('should pass testPID', function() {

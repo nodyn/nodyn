@@ -1,5 +1,6 @@
 var helper = require('./specHelper'),
     util   = require('util'),
+    path   = require('path'),
     fs     = require('fs');
 
 describe("fs.Stat", function() {
@@ -11,7 +12,7 @@ describe("fs.Stat", function() {
     waitsFor(helper.testComplete, "Stat file", 5000);
     fs.stat('invalidpath', function(err, stat) {
       expect(err instanceof Error).toBeTruthy();
-      expect(err.path).toBe('invalidpath');
+      expect(err.path).toBe(path.resolve('invalidpath'));
       expect(err.syscall).toBe('stat');
       expect(stat).toBeFalsy();
       helper.testComplete(true);
@@ -120,7 +121,7 @@ describe("fs.StatSync", function() {
       fs.statSync('invalidpath');
     } catch(err) {
       expect(err instanceof Error).toBeTruthy();
-      expect(err.path).toBe('invalidpath');
+      expect(err.path).toBe(path.resolve('invalidpath'));
       expect(err.syscall).toBe('stat');
     }
   });
