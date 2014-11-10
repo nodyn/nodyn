@@ -33,6 +33,7 @@ import io.nodyn.stream.StreamWrap;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author Bob McWhirter
@@ -74,7 +75,7 @@ public class TCPWrap extends StreamWrap {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ch.config().setAutoRead(false);
-                //ch.pipeline().addLast("debug", new DebugHandler("server"));
+//                ch.pipeline().addLast("debug", new DebugHandler("server"));
                 ch.pipeline().addLast("emit.connection", new ConnectionEventHandler(TCPWrap.this.process, TCPWrap.this));
                 ch.pipeline().addLast("handle", new UnrefHandler(TCPWrap.this));
             }
@@ -86,6 +87,7 @@ public class TCPWrap extends StreamWrap {
                 // TODO callback error
             }
         });
+
         ref();
     }
 
@@ -123,21 +125,20 @@ public class TCPWrap extends StreamWrap {
     }
 
     @Override
-    public void shutdown() {
-        ((NioSocketChannel) this.channelFuture.channel()).shutdownOutput();
+    public void shutdown() throws InterruptedException {
+        ((NioSocketChannel) this.channelFuture.await().channel()).shutdownOutput();
     }
 
-    public SocketAddress getRemoteAddress() {
-        return this.channelFuture.channel().remoteAddress();
+    public SocketAddress getRemoteAddress() throws InterruptedException {
+        return this.channelFuture.await().channel().remoteAddress();
     }
 
-    public SocketAddress getLocalAddress() {
-        return this.channelFuture.channel().localAddress();
+    public SocketAddress getLocalAddress() throws InterruptedException {
+        return this.channelFuture.await().channel().localAddress();
     }
 
-    public int getFd() throws NoSuchFieldException, IllegalAccessException, IOException {
-        return UnsafeTcp.getFd((NioSocketChannel) this.channelFuture.channel());
+    public int getFd() throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+        return UnsafeTcp.getFd((NioSocketChannel) this.channelFuture.await().channel());
 
     }
-
 }

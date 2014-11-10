@@ -61,7 +61,7 @@ public class StreamWrap extends HandleWrap {
         super.close();
     }
 
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
     }
 
     public void write(ByteBuf buf) throws IOException {
