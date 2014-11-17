@@ -33,6 +33,7 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -151,7 +152,7 @@ public class DynJSRuntime extends Nodyn {
     }
 
     @Override
-    protected Object runScript(String scriptName) {
+    protected Object runScript(String scriptName) throws IOException {
         this.runner.withSource( new ClassLoaderSourceProvider( this.runtime.getConfig().getClassLoader(), scriptName));
         this.runner.withFileName(scriptName);
         return runner.execute();

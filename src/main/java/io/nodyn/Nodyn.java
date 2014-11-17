@@ -77,7 +77,7 @@ public abstract class Nodyn {
 
     protected abstract NodeProcess initialize();
 
-    abstract protected Object runScript(String script);
+    abstract protected Object runScript(String script) throws IOException;
 
     // The following methods are used in contextify.js
     abstract public Object getGlobalContext();
