@@ -18,6 +18,7 @@ package io.nodyn.runtime.nashorn;
 import io.nodyn.Nodyn;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
+import org.vertx.java.core.Vertx;
 
 /**
  * @author Lance Ball
@@ -31,6 +32,11 @@ public class NashornFactory extends RuntimeFactory {
     @Override
     public Nodyn newRuntime(NodynConfig config) {
         return new NashornRuntime(config, null, true);
+    }
+
+    @Override
+    public Nodyn newRuntime(Vertx vertx, NodynConfig config) {
+        return new NashornRuntime(config, vertx, true);
     }
 
 }

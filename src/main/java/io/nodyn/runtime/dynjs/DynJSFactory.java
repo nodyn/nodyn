@@ -19,6 +19,7 @@ import io.nodyn.Nodyn;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
 import org.dynjs.Config;
+import org.vertx.java.core.Vertx;
 
 /**
  * @author Lance Ball
@@ -36,5 +37,10 @@ public class DynJSFactory extends RuntimeFactory {
      */
     public Nodyn newRuntime(NodynConfig config) {
         return new DynJSRuntime(config);
+    }
+
+    @Override
+    public Nodyn newRuntime(Vertx vertx, NodynConfig config) {
+        return new DynJSRuntime(vertx, config, true);
     }
 }

@@ -17,6 +17,7 @@ package io.nodyn.runtime;
 
 import io.nodyn.Nodyn;
 import io.nodyn.runtime.dynjs.DynJSFactory;
+import org.vertx.java.core.Vertx;
 
 /**
  * A factory used to obtain a Nodyn instance.
@@ -50,7 +51,20 @@ public abstract class RuntimeFactory {
         return parent;
     }
 
+    /**
+     * Creates a new runtime using the configuration options provided
+     * @param config configuration options
+     * @return the new Nodyn runtime
+     */
     abstract public Nodyn newRuntime(NodynConfig config);
+
+    /**
+     * Creates a new runtime using the vertx instance and configuration options provided
+     * @param vertx The vertx instance to use for vertx interop
+     * @param config The configuration options
+     * @return the new Nodyn runtime
+     */
+    abstract public Nodyn newRuntime(Vertx vertx, NodynConfig config);
 
     public enum RuntimeType {
       DYNJS, NASHORN
