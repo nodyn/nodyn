@@ -102,6 +102,10 @@ public abstract class Nodyn {
         return await();
     }
 
+    public void runAsync() {
+        start();
+    }
+
     public NodynConfig getConfiguration() {
         return this.config;
     }
