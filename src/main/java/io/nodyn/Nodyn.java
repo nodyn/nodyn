@@ -98,12 +98,17 @@ public abstract class Nodyn {
     }
 
     public int run() throws Throwable {
-        start();
+        start(null);
         return await();
     }
 
-    public void runAsync() {
-        start();
+    /**
+     * Starts nodyn asynchronously. The optional callback, if provided,
+     * will be called when initialization has completed
+     * @param callback optional - if provided will be called when initialization of nodyn completes
+     */
+    public void runAsync(Callback callback) {
+        start(callback);
     }
 
     public NodynConfig getConfiguration() {
@@ -145,14 +150,20 @@ public abstract class Nodyn {
         return this.completionHandler.process.getExitCode();
     }
 
-    private void start() {
+    private void start(final Callback callback) {
         this.eventLoop.submitUserTask(new Runnable() {
             @Override
             public void run() {
                 try {
                     Nodyn.this.completionHandler.process = initialize();
+                    if (callback != null) {
+                        callback.call(CallbackResult.createSuccess());
+                    }
                 } catch (Throwable t) {
                     Nodyn.this.completionHandler.error = t;
+                    if (callback != null) {
+                        callback.call(CallbackResult.createError(t));
+                    }
                 }
             }
         }, "init");
