@@ -20,17 +20,16 @@ import io.nodyn.CallbackResult;
 import io.nodyn.NodeProcess;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
  * @author Bob McWhirter
  */
-public class GetAddrInfo6Wrap extends AbstractQueryWrap {
+public class GetAddrInfoWrap extends AbstractQueryWrap {
 
 
-    public GetAddrInfo6Wrap(NodeProcess process, String name) {
+    public GetAddrInfoWrap(NodeProcess process, String name) {
         super(process, name);
     }
 
@@ -44,9 +43,8 @@ public class GetAddrInfo6Wrap extends AbstractQueryWrap {
                         boolean found = false;
                         InetAddress[] addrs = InetAddress.getAllByName(name);
                         for ( int i = 0 ; i < addrs.length ; ++i ) {
-                            if ( addrs[i] instanceof Inet6Address) {
-                                final CallbackResult success = CallbackResult.createSuccess(addrs[i]);
-                                emit("complete", success);
+                            if ( addrs[i] instanceof Inet4Address ) {
+                                emit("complete", CallbackResult.createSuccess(addrs[i]));
                                 found = true;
                                 break;
                             }
@@ -60,7 +58,8 @@ public class GetAddrInfo6Wrap extends AbstractQueryWrap {
                 }
             });
         } else {
-            dnsClient().lookup6(this.name, this.<Inet6Address>handler());
+            dnsClient().lookup(this.name, this.<InetAddress>handler());
         }
     }
+
 }

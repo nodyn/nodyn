@@ -54,10 +54,12 @@ cares.getaddrinfo = function(req,name,family) {
     new cares.getaddrinfo(req,name,family);
     return;
   }
-  if ( family == 4 ) {
+  if ( family === 4 ) {
     this._query = new io.nodyn.dns.GetAddrInfo4Wrap(process._process, name);
-  } else {
+  } else if (family === 6 ) {
     this._query = new io.nodyn.dns.GetAddrInfo6Wrap(process._process, name);
+  } else {
+    this._query = new io.nodyn.dns.GetAddrInfoWrap(process._process, name);
   }
   this._query.on( "complete", function(result) {
     if ( result.error ) {

@@ -15,12 +15,16 @@
  */
 
 function update(chunk, encoding) {
-  if ( Buffer.isBuffer( chunk ) ) {
-    this._delegate.update( chunk._nettyBuffer() );
-  } else {
-    this._delegate.update( new Buffer( chunk, encoding )._nettyBuffer() );
-  }
+  this._delegate.update( bufferChunk( chunk, encoding )._nettyBuffer() );
 }
+
+function bufferChunk(chunk, encoding) {
+  if ( Buffer.isBuffer( chunk ) ) {
+    return chunk;
+  }
+  return new Buffer( chunk, encoding );
+}
+
 
 function digest(outputEncoding) {
   var buf = process.binding('buffer').createBuffer( this._delegate.digest() );

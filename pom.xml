@@ -249,6 +249,13 @@
   <build>
     <resources>
       <resource>
+        <directory>node/lib</directory>
+      </resource>
+      <resource>
+        <directory>node/src</directory>
+        <includes><include>node.js</include></includes>
+      </resource>
+      <resource>
         <directory>src/main/javascript</directory>
       </resource>
       <resource>

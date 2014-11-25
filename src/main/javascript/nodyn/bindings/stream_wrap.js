@@ -55,6 +55,10 @@ Stream.prototype.readStop = function() {
   this._stream.readStop();
 };
 
+Stream.prototype.writeBinaryString = function(req,data) {
+  this._stream.writeBinaryString(data);
+};
+
 Stream.prototype.writeUtf8String = function(req,data) {
   this._stream.writeUtf8String(data);
 };

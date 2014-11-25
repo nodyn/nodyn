@@ -24,6 +24,7 @@ import io.nodyn.handle.HandleWrap;
 import io.nodyn.NodeProcess;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Bob McWhirter
@@ -66,6 +67,12 @@ public class StreamWrap extends HandleWrap {
 
     public void write(ByteBuf buf) throws IOException {
         this.channelFuture.channel().writeAndFlush(buf.retain());
+    }
+
+    public void writeBinaryString(String str) throws IOException {
+        ByteBuf buf = this.channelFuture.channel().alloc().buffer();
+        buf.writeBytes(str.getBytes(StandardCharsets.ISO_8859_1));
+        write(buf);
     }
 
     public void writeUtf8String(String str) throws IOException {

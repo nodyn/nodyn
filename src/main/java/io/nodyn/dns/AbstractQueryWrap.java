@@ -88,7 +88,9 @@ public abstract class AbstractQueryWrap extends EventSource {
                 if (event.failed()) {
                     emit("complete", CallbackResult.createError(event.cause()));
                 } else {
-                    emit("complete", CallbackResult.createSuccess(event.result()));
+                    final T result = event.result();
+                    final CallbackResult success = CallbackResult.createSuccess(result);
+                    emit("complete", success);
                 }
             }
         };

@@ -105,4 +105,6 @@ TCP.prototype.connect = function(req, addr, port) {
   this._tcp.connect(addr,port);
 }
 
+TCP.prototype.connect6 = TCP.prototype.connect;
+
 module.exports.TCP = TCP;

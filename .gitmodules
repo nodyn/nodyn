@@ -1,0 +1,4 @@
+[submodule "node"]
+	path = node
+	url = https://github.com/joyent/node.git
+	branch = master

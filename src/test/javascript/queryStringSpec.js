@@ -4,15 +4,15 @@ var qs = require('querystring');
 
 describe('The querystring module', function() {
   it('should pass testEscape', function() {
-    expect(qs.escape('This is a simple & short test.')).toBe("This+is+a+simple+%26+short+test.");
+    expect(qs.escape('This is a simple & short test.')).toBe("This%20is%20a%20simple%20%26%20short%20test.");
   });
 
   it('should pass testUnescape', function() {
-    expect(qs.unescape("This+is+a+simple+%26+short+test.")).toBe('This is a simple & short test.');
+    expect(qs.unescape("This%20is%20a%20simple%20%26%20short%20test.")).toBe('This is a simple & short test.');
   });
 
   it('should pass testStringify', function() {
-    expect(qs.stringify({ foo: 'ba r', baz: ['qux', 'quux'], corge: '' })).toBe("foo=ba+r&baz=qux&baz=quux&corge=");
+    expect(qs.stringify({ foo: 'ba r', baz: ['qux', 'quux'], corge: '' })).toBe("foo=ba%20r&baz=qux&baz=quux&corge=");
   });
 
   it('should pass testStringifyCustomOptions', function() {

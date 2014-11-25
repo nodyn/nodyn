@@ -63,6 +63,7 @@ var source = {};
   'tls',
   '_tls_common',
   '_tls_wrap',
+  '_tls_legacy',
 
   'querystring',
   'http',

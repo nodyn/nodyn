@@ -82,10 +82,13 @@ Number.isFinite = isFinite;
       this._unloadAsyncQueue = unloadAsyncQueue;
     };
 
-    this._setupNextTick = function(tickInfo, tickCallback) {
+    this._setupNextTick = function(tickInfo, tickCallback, runMicrotasks) {
       this._process.setupNextTick( tickCallback );
       this._tickInfo = tickInfo;
       this._tickCallback = tickCallback;
+      // prepare for node 0.12 where this is introduced
+      runMicrotasks = runMicrotasks || {};
+      runMicrotasks.runMicrotasks = function() {}; // noop
     };
 
     this._setupDomainUse = function(domain, domainFlag) {

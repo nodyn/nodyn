@@ -50,7 +50,6 @@ describe( "http.request", function() {
       request.on( "socket", function(s) {
         socket = s;
       })
-      System.err.println( "AND GO!" );
       request.end();
   });
 

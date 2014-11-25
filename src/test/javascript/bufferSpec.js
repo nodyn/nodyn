@@ -72,6 +72,8 @@ describe("Buffer", function() {
 
   it('should pass testBufferFill', function() {
     var b = new Buffer(4);
+    console.log("BUFFER " + b);
+    console.log(b.fill);
     b.fill(72, 0, 4);
     expect(b.length).toBe(4);
     expect(b.toString()).toBe("HHHH");
