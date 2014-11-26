@@ -1,6 +1,6 @@
 [![Build Status](https://secure.travis-ci.org/nodyn/nodyn.png)](http://travis-ci.org/nodyn/nodyn)
 
-## Hey, What's Nodyn?
+## What is Nodyn
 
 Nodyn is a [node.js](http://nodejs.org) compatible framework on the JVM.
 
@@ -25,6 +25,8 @@ To build nodyn from source, check out the repo, and run `mvn install`.
 
     $ git clone https://github.com/nodyn/nodyn.git
     $ cd nodyn
+    $ git submodule init
+    $ git submodule update
     $ mvn install -s support/settings.xml
 
 ## Website
