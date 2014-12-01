@@ -67,7 +67,11 @@ cares.getaddrinfo = function(req,name,family) {
     } else {
       var addr = result.result;
       var family = ( addr instanceof java.net.Inet4Address ? 4 : 6 );
-      req.oncomplete( undefined, [ result.result.hostAddress ], family );
+      if (typeof addr === 'string') {
+        req.oncomplete( undefined, [ addr ]  );
+      } else {
+        req.oncomplete( undefined, [ addr.hostAddress ], family );
+      }
     }
   });
   this._query.start();

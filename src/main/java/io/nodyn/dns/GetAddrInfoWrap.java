@@ -43,11 +43,9 @@ public class GetAddrInfoWrap extends AbstractQueryWrap {
                         boolean found = false;
                         InetAddress[] addrs = InetAddress.getAllByName(name);
                         for ( int i = 0 ; i < addrs.length ; ++i ) {
-                            if ( addrs[i] instanceof Inet4Address ) {
-                                emit("complete", CallbackResult.createSuccess(addrs[i]));
-                                found = true;
-                                break;
-                            }
+                            emit("complete", CallbackResult.createSuccess(addrs[i]));
+                            found = true;
+                            break;
                         }
                         if ( ! found ) {
                             emit("complete", CallbackResult.createError(new UnknownHostException()));
