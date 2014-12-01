@@ -62,8 +62,13 @@ public class DynJSRuntime extends Nodyn {
 
     @Override
     public Object loadBinding(String name) {
-        this.runner.withSource("__native_require('nodyn/bindings/" + name + "');");
-        return runner.execute();
+        try {
+            this.runner.withSource("__native_require('nodyn/bindings/" + name + "');");
+            return runner.execute();
+        } catch(Throwable t) {
+            this.handleThrowable(t);
+        }
+        return null;
     }
 
     @Override

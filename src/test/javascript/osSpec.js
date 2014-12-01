@@ -1,7 +1,6 @@
 var helper = require('./specHelper');
-/*
-//var javaProcess = new io.nodyn.process.Process();
-//var isWindows = process.platform === 'win32';
+
+var isWindows = process.platform === 'win32';
 var os = require('os');
 
 describe('OS module', function() {
@@ -37,7 +36,7 @@ describe('OS module', function() {
   });
 
   it('should pass testOsPlatform', function() {
-    expect(os.platform()).toBe(javaProcess.platform());
+    expect(os.platform()).toBe(process._process.platform());
   });
 
   it('should pass testUptime', function() {
@@ -76,4 +75,4 @@ describe('OS module', function() {
     }
   });
 });
-*/
+
