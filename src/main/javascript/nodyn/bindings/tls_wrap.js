@@ -56,6 +56,10 @@ SSL.prototype.getServername = function() {
   return this._ssl.servername;
 }
 
+SSL.prototype.setServername = function(name) {
+  this._ssl.serverName(name);
+}
+
 SSL.prototype.requestOCSP = function() {
 }
 

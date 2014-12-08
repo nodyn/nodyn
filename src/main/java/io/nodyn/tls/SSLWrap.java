@@ -1,7 +1,6 @@
 package io.nodyn.tls;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
@@ -16,6 +15,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Bob McWhirter
@@ -27,6 +27,8 @@ public class SSLWrap extends AsyncWrap {
     private SecureContext context;
     private boolean requestCert;
     private boolean rejectUnauthorized;
+    private AtomicBoolean started = new AtomicBoolean(false);
+    private boolean isServer;
 
     public SSLWrap(NodeProcess process) {
         super(process);
@@ -35,6 +37,13 @@ public class SSLWrap extends AsyncWrap {
     public void init(StreamWrap stream, SecureContext context, final boolean isServer) throws Throwable {
         this.stream = stream;
         this.context = context;
+        this.isServer = isServer;
+        try {
+            this.sslEngine = context.getSSLEngine();
+        } catch (Throwable t) {
+            this.process.getNodyn().handleThrowable(t);
+            return;
+        }
         if (isServer) {
             start(isServer);
         }
@@ -46,12 +55,6 @@ public class SSLWrap extends AsyncWrap {
 
     public void start(final boolean isServer) throws Exception {
 
-        try {
-            this.sslEngine = context.getSSLEngine();
-        } catch (Throwable t) {
-            this.process.getNodyn().handleThrowable(t);
-            throw t;
-        }
         this.sslEngine.setUseClientMode(!isServer);
 
         SslHandler sslHandler = new SslHandler(this.sslEngine);
@@ -75,7 +78,7 @@ public class SSLWrap extends AsyncWrap {
         } else {
             stream.getPipeline().addFirst(sslHandler);
         }
-
+        started.set(true);
         emit("handshakestart", CallbackResult.EMPTY_SUCCESS);
 
     }
@@ -94,8 +97,23 @@ public class SSLWrap extends AsyncWrap {
         }
     }
 
+    public boolean started() {
+        return started.get();
+    }
+
     public String getServername() {
         return this.sslEngine.getPeerHost();
+    }
+
+    public void setServername() {
+        if (started()) {
+            this.process.getNodyn().handleThrowable(new Exception("Already started"));
+            return;
+        } else if (isServer) {
+            return;
+        }
+        // TODO: hrm
+        // this.sslEngine;
     }
 
     public String getNegotiatedProtocol() {
