@@ -19,6 +19,44 @@ binary.  You can use the binary to start an application from a Javascript file,
 or use the REPL to experiment with small snippets of code on the command line.
 The `./bin/nodyn` binary behaves nearly identical to the `node` binary.
 
+## Embedding
+
+Nodyn can be embedded into existing Java programs and exeucte scripts like so.
+
+    public class EmbedExample {
+
+        private static final String SCRIPT = "" +
+                "var main = require('./project/main.js');" +
+                "main.run();";
+
+
+        public void runMain(String... args) throws InterruptedException {
+            // set the node.binary property 
+            System.setProperty( "nodyn.binary", "./bin/node" );
+
+            // Use DynJS runtime
+            RuntimeFactory factory = RuntimeFactory.init(
+                EmbedExample.class.getClassLoader(), 
+                RuntimeFactory.RuntimeType.DYNJS);
+
+            // Set config to run main.js
+            NodynConfig config = new NodynConfig( new String[] { "-e", SCRIPT } );
+
+            // Create a new Nodyn and run it
+            Nodyn nodyn = factory.newRuntime(config);
+            nodyn.setExitHandler( new NoOpExitHandler() );
+            try {
+                int exitCode = nodyn.run();
+                if (exitCode != 0) {
+                    throw new TestFailureException();
+                }
+            } catch (Throwable t) {
+                throw new TestFailureException( t );
+            }
+        }
+    }
+
+
 ## Building Nodyn
 
 To build nodyn from source, check out the repo, and run `mvn install`.
