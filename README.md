@@ -59,7 +59,9 @@ Nodyn can be embedded into existing Java programs and exeucte scripts like so.
 
 ## Building Nodyn
 
-To build nodyn from source, check out the repo, and run `mvn install`.
+To build nodyn from source, first check out the repo. Since nodyn uses
+node.js sources for the javascript layer, you will also need to run 
+`git submodule init` and `git submodule update` the first time you build.
 
     $ git clone https://github.com/nodyn/nodyn.git
     $ cd nodyn
