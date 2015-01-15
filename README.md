@@ -31,9 +31,6 @@ Nodyn can be embedded into existing Java programs and exeucte scripts like so.
 
 
         public void runMain(String... args) throws InterruptedException {
-            // set the node.binary property 
-            System.setProperty( "nodyn.binary", "./bin/node" );
-
             // Use DynJS runtime
             RuntimeFactory factory = RuntimeFactory.init(
                 EmbedExample.class.getClassLoader(), 
