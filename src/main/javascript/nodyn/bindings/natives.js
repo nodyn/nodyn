@@ -16,7 +16,7 @@
 
 "use strict";
 
-var getSource = io.nodyn.natives.NativesWrap.getSource;
+var NativesWrap = Java.type('io.nodyn.natives.NativesWrap');
 
 var source = {};
 
@@ -93,7 +93,7 @@ var source = {};
   '_debugger',
 
 ].forEach( function(name) {
-  source[name] = getSource(name);
+  source[name] = NativesWrap.getSource(name);
 });
 
 // see node.js startup.processConfig

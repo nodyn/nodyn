@@ -66,7 +66,7 @@
     <maven.source.plugin.version>2.2.1</maven.source.plugin.version>
 
     <!-- dependency versions -->
-    <version.junit>4.7</version.junit>
+    <version.junit>4.11</version.junit>
     <version.vertx>2.1.1</version.vertx>
 <!--
     <version.hazelcast>2.6.6</version.hazelcast>
@@ -317,8 +317,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
       </plugin>

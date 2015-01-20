@@ -35,7 +35,7 @@ public class NashornFactory extends RuntimeFactory {
     }
 
     @Override
-    public Nodyn newRuntime(Vertx vertx, NodynConfig config) {
+    public Nodyn newRuntime(NodynConfig config, Vertx vertx) {
         return new NashornRuntime(config, vertx, true);
     }
 

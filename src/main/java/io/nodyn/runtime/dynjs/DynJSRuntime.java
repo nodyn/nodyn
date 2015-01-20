@@ -32,10 +32,7 @@ import org.dynjs.runtime.source.ClassLoaderSourceProvider;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class DynJSRuntime extends Nodyn {
 

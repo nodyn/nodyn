@@ -60,11 +60,11 @@ public abstract class RuntimeFactory {
 
     /**
      * Creates a new runtime using the vertx instance and configuration options provided
-     * @param vertx The vertx instance to use for vertx interop
      * @param config The configuration options
+     * @param vertx The vertx instance to use for vertx interop
      * @return the new Nodyn runtime
      */
-    abstract public Nodyn newRuntime(Vertx vertx, NodynConfig config);
+    abstract public Nodyn newRuntime(NodynConfig config, Vertx vertx);
 
     public enum RuntimeType {
       DYNJS, NASHORN

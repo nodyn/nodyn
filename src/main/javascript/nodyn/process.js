@@ -35,6 +35,7 @@ COUNTER_HTTP_CLIENT_RESPONSE = function() {};
 Number.isFinite = isFinite;
 
 (function(javaProcess){
+  var System = java.lang.System;
 
   function Process(process) {
     this._process = process;
@@ -175,9 +176,9 @@ Number.isFinite = isFinite;
 
     this.arch = this._process.arch();
     this.platform = this._process.platform();
-    this.version = io.nodyn.Nodyn.VERSION;
+    this.version = Packages.io.nodyn.Nodyn.VERSION;
     this.versions = {
-      node: io.nodyn.Nodyn.VERSION,
+      node: Packages.io.nodyn.Nodyn.VERSION,
       java: System.getProperty('java.version')
     };
 

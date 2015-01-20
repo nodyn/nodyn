@@ -40,7 +40,7 @@ public class DynJSFactory extends RuntimeFactory {
     }
 
     @Override
-    public Nodyn newRuntime(Vertx vertx, NodynConfig config) {
+    public Nodyn newRuntime(NodynConfig config, Vertx vertx) {
         return new DynJSRuntime(vertx, config, true);
     }
 }

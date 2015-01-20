@@ -18,35 +18,31 @@ package io.nodyn.smalloc;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.nodyn.buffer.NettyExternalIndexedData;
-import org.dynjs.runtime.JSObject;
+import io.nodyn.buffer.Buffer;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * @author Bob McWhirter
  */
 public class Smalloc {
 
-    public static Object alloc(JSObject obj, int size) throws Exception {
-        if ( obj.hasExternalIndexedData() ) {
-            throw new Exception( "already has external data" );
-        }
-
+    public static Object alloc(ScriptObjectMirror obj, int size) throws Exception {
         ByteBuf b = Unpooled.buffer(size);
-        obj.setExternalIndexedData(new NettyExternalIndexedData(b));
+        Buffer.inject(obj, b);
         return obj;
     }
 
-    public static Object truncate(JSObject obj, int len) {
+    public static Object truncate(ScriptObjectMirror obj, int len) {
         // we really have nothing to do?
         return obj;
     }
 
-    public static Object sliceOnto(JSObject src, JSObject dest, int start, int end) {
-        ByteBuf srcBuf = ((NettyExternalIndexedData)src.getExternalIndexedData()).buffer();
+    public static Object sliceOnto(ScriptObjectMirror src, ScriptObjectMirror dest, int start, int end) {
+        ByteBuf srcBuf = Buffer.extract(src);
         int len = end - start;
         ByteBuf destBuf = srcBuf.slice( start, len );
         destBuf.writerIndex(0);
-        dest.setExternalIndexedData(new NettyExternalIndexedData(destBuf));
+        Buffer.inject(dest, destBuf);
         return src;
     }
 }
