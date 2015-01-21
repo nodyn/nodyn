@@ -26,6 +26,11 @@ public class NodynClassLoader extends URLClassLoader {
         final URL url = getURL(path);
         addURL(url);
     }
+    
+    @Override
+    public URL findResource(String resource) {
+        return getParent().getResource(resource);
+    }
 
     private URL getURL(String target) throws MalformedURLException {
         try {

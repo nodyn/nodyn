@@ -21,7 +21,6 @@ import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -32,7 +31,6 @@ import org.vertx.java.core.Vertx;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.script.SimpleScriptContext;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -42,36 +40,32 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
  */
 public class NashornRuntime extends Nodyn {
 
-    private final ScriptEngineManager factory;
     private final NashornScriptEngine engine;
     private final ScriptContext global;
-    private final NodynConfig config;
+    private Program nativeRequire;
+    
+    private static final String NATIVE_REQUIRE = "nodyn/_native_require.js";
 
     public NashornRuntime(NodynConfig config, Vertx vertx, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
-        Thread.currentThread().setContextClassLoader(config.getClassLoader());
-        factory = new ScriptEngineManager();
-        engine = (NashornScriptEngine) factory.getEngineByName("nashorn");
+        Thread.currentThread().setContextClassLoader(getConfiguration().getClassLoader());
+        engine = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
         global = engine.getContext();
-        this.config = config;
+
+        try {
+            nativeRequire = compileNative(NATIVE_REQUIRE);
+            nativeRequire.execute(global);
+        } catch (ScriptException ex) {
+            Logger.getLogger(NashornRuntime.class.getName()).log(Level.SEVERE, "Failed to load " + NATIVE_REQUIRE, ex);
+            System.exit(255);
+        }
     }
 
     @Override
     public Object loadBinding(String name) {
         try {
             String pathName = "nodyn/bindings/" + name + ".js";
-            // Load in its own script context
-            ScriptContext context = new SimpleScriptContext();
-            context.setBindings(global.getBindings(ScriptContext.GLOBAL_SCOPE), ScriptContext.GLOBAL_SCOPE);
-
-            // Set up module and exports
-            NodynJSObject module = new NodynJSObject();
-            module.setMember("exports", new NodynJSObject());
-            context.setAttribute("module", module, ScriptContext.GLOBAL_SCOPE);
-
-            loadFromClasspath(pathName, context);
-            return engine.eval("module.exports");
-
+            return engine.eval("_native_require('" + pathName + "');", global);
         } catch (ScriptException e) {
             this.handleThrowable(e);
         }
@@ -80,7 +74,7 @@ public class NashornRuntime extends Nodyn {
 
     @Override
     public Program compile(String source, String fileName, boolean displayErrors) throws Throwable {
-        // TODO: remove the fileName and displayErrors parameters, as these are specific to DynJS
+        // TODO: remove the displayErrors parameter, as this is specific to DynJS
         try {
             return new NashornProgram(engine.compile(source), fileName);
         } catch (ScriptException ex) {
@@ -91,7 +85,7 @@ public class NashornRuntime extends Nodyn {
 
     @Override
     public void makeContext(Object global) {
-
+        System.err.println("NashornRuntime#makeContext not implemented");
     }
 
     @Override
@@ -112,7 +106,7 @@ public class NashornRuntime extends Nodyn {
         bindings.put("__dirname", System.getProperty("user.dir"));
         bindings.put("__filename", Nodyn.NODE_JS);
         bindings.put("__nodyn", this);
-
+        
         NodeProcess javaProcess = new NodeProcess(this);
         getEventLoop().setProcess(javaProcess);
 
@@ -121,14 +115,14 @@ public class NashornRuntime extends Nodyn {
             engine.eval("load(\"nashorn:mozilla_compat.js\");");
 
             // Adds ES6 capabilities not provided by DynJS to global scope
-            loadFromClasspath(ES6_POLYFILL, global);
+            compileNative(ES6_POLYFILL).execute(global);
 
             // Invoke the process function
-            JSObject processFunction = (JSObject) loadFromClasspath(PROCESS, global);
+            JSObject processFunction = (JSObject) compileNative(PROCESS).execute(global);
             JSObject jsProcess = (JSObject) processFunction.call(processFunction, javaProcess);
 
-            Object o = loadFromClasspath(NODE_JS, global);
-            JSObject nodeFunction = (JSObject) o;
+            // Invoke the node function
+            JSObject nodeFunction = (JSObject) compileNative(NODE_JS).execute(global);
             nodeFunction.call(nodeFunction, jsProcess);
         } catch (ScriptException ex) {
             Logger.getLogger(NashornRuntime.class.getName()).log(Level.SEVERE, "Cannot initialize", ex);
@@ -138,7 +132,6 @@ public class NashornRuntime extends Nodyn {
 
     @Override
     protected Object runScript(String script) {
-        System.out.println("Running script " + script);
         try {
             return engine.eval(new FileReader(script));
         } catch (ScriptException | FileNotFoundException ex) {
@@ -151,17 +144,11 @@ public class NashornRuntime extends Nodyn {
     public Object getGlobalContext() {
         return global;
     }
-
-    private Object loadFromClasspath(String pathName, ScriptContext context) throws ScriptException {
-        System.out.println("Loading from classpath " + pathName + " in context " + context);
-        // Get the source JS
-        InputStream is = config.getClassLoader().getResourceAsStream(pathName);
-        if (is == null) { throw new ScriptException("Path not found: " + pathName); }
-        
-        // eval the binding and return the result
-        return engine.eval(new InputStreamReader(is), context);
+    
+    private Program compileNative(String fileName) throws ScriptException  {
+        final InputStreamReader is = new InputStreamReader(getConfiguration().getClassLoader().getResourceAsStream(fileName));
+        return new NashornProgram(engine.compile(is), fileName);
     }
-
 
     class NodynJSObject extends AbstractJSObject {
 

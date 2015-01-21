@@ -19,15 +19,15 @@ var util = require('util'),
     blocking = require('nodyn/blocking'),
     EventEmitter = require('events').EventEmitter;
 
-nodyn.exportEnums(module.exports, io.nodyn.zlib.Mode.values());
-nodyn.exportEnums(module.exports, io.nodyn.zlib.Code.values());
-nodyn.exportEnums(module.exports, io.nodyn.zlib.Level.values());
-nodyn.exportEnums(module.exports, io.nodyn.zlib.Strategy.values());
-nodyn.exportEnums(module.exports, io.nodyn.zlib.Flush.values());
+nodyn.exportEnums(module.exports, Packages.io.nodyn.zlib.Mode.values());
+nodyn.exportEnums(module.exports, Packages.io.nodyn.zlib.Code.values());
+nodyn.exportEnums(module.exports, Packages.io.nodyn.zlib.Level.values());
+nodyn.exportEnums(module.exports, Packages.io.nodyn.zlib.Strategy.values());
+nodyn.exportEnums(module.exports, Packages.io.nodyn.zlib.Flush.values());
 
 function Zlib(mode) {
   if (!(this instanceof Zlib)) return new Zlib(mode);
-  this._delegate = new io.nodyn.zlib.NodeZlib(process._process, mode);
+  this._delegate = new Packages.io.nodyn.zlib.NodeZlib(process._process, mode);
   this._delegate.on('error', this._onError.bind(this));
   this._delegate.on('close', this._onClose.bind(this));
 }

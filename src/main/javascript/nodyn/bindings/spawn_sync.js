@@ -15,7 +15,7 @@
  */
 
 function spawn(options) {
-  var proc = new io.nodyn.process.SyncProcessWrap( process._process );
+  var proc = new Packages.io.nodyn.process.SyncProcessWrap( process._process );
   var status = proc.spawn( options.files, options.args );
   var result = {
     pid: proc.pid,

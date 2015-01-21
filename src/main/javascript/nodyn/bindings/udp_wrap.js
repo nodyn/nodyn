@@ -16,7 +16,7 @@
 
 var Handle = process.binding('handle_wrap').Handle,
     Helper = process.binding('buffer'),
-    Family = io.nodyn.udp.Family,
+    Family = Packages.io.nodyn.udp.Family,
     util   = require('util');
 
 function onRecv(result) { 
@@ -38,7 +38,7 @@ function onRecv(result) {
 
 var UDP = function() {
   if (!(this instanceof UDP)) return new UDP();
-  Handle.call(this, new io.nodyn.udp.UDPWrap(process._process));
+  Handle.call(this, new Packages.io.nodyn.udp.UDPWrap(process._process));
   this._handle.on('recv', onRecv.bind(this));
 };
 util.inherits(UDP, Handle);

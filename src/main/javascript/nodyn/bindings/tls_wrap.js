@@ -1,6 +1,6 @@
 
 function SSL(handle, context, isServer) {
-  this._ssl = new io.nodyn.tls.SSLWrap( process._process );
+  this._ssl = new Packages.io.nodyn.tls.SSLWrap( process._process );
 
   this._ssl.on( "handshakestart", _onhandshakestart.bind(this) );
   this._ssl.on( "handshakedone",  _onhandshakedone.bind(this) );

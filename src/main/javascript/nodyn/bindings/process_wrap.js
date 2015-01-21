@@ -19,7 +19,7 @@ var Handle = process.binding( "handle_wrap" ).Handle;
 var util = require('util');
 
 function Process() {
-  this._process = new io.nodyn.process.ProcessWrap( process._process );
+  this._process = new Packages.io.nodyn.process.ProcessWrap( process._process );
   this._process.on( 'exit', Process.prototype._onExit.bind(this) );
   Handle.call( this, this._process );
 }

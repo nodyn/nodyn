@@ -20,12 +20,12 @@ var util = require('util');
 var Stream = process.binding('stream_wrap').Stream;
 
 function TCP(tcp) {
-  if ( tcp instanceof io.nodyn.tcp.TCPWrap ) {
+  if ( tcp instanceof Packages.io.nodyn.tcp.TCPWrap ) {
     this._tcp = tcp;
   } else if ( typeof tcp == 'number' ) {
-    this._tcp = new io.nodyn.tcp.TCPWrap( process._process, tcp );
+    this._tcp = new Packages.io.nodyn.tcp.TCPWrap( process._process, tcp );
   } else {
-    this._tcp = new io.nodyn.tcp.TCPWrap( process._process );
+    this._tcp = new Packages.io.nodyn.tcp.TCPWrap( process._process );
   }
 
   // Server

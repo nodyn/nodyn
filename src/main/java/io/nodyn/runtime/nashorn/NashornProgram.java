@@ -41,7 +41,6 @@ public class NashornProgram implements Program {
 
     @Override
     public Object execute(Object context) {
-        System.out.println("Executing compiled script " + script + " (" + fileName + ") in context " + context);
         if (context instanceof ScriptContext) {
             try {
                 return script.eval((ScriptContext) context);

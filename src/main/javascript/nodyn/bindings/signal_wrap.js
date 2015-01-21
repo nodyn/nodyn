@@ -18,7 +18,7 @@ var util = require('util');
 var Handle = process.binding('handle_wrap').Handle;
 
 function Signal() {
-  this._signal = new io.nodyn.process.SignalWrap( process._process );
+  this._signal = new Packages.io.nodyn.process.SignalWrap( process._process );
   Handle.call( this, this._signal );
 }
 

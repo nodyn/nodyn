@@ -22,7 +22,7 @@ var TCP = process.binding( 'tcp_wrap').TCP;
 
 function Pipe(ipc) {
   this._ipc = ipc;
-  this._pipe = new io.nodyn.pipe.PipeWrap( process._process, ipc );
+  this._pipe = new Packages.io.nodyn.pipe.PipeWrap( process._process, ipc );
   if ( ipc ) {
     this._pipe.on( 'dataWithHandle', Pipe.prototype._onDataWithHandle.bind(this) );
   }

@@ -20,7 +20,7 @@ var util = require('util'),
 
 function StatWatcher() {
   if (!(this instanceof StatWatcher)) return new StatWatcher();
-  this._delegate = new io.nodyn.fs.NodeStatWatcher(process._process);
+  this._delegate = new Packages.io.nodyn.fs.NodeStatWatcher(process._process);
   this._delegate.on('change', _onchange.bind(this));
   Handle.call( this, this._delegate );
 }

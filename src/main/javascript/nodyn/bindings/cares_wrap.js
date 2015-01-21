@@ -55,11 +55,11 @@ cares.getaddrinfo = function(req,name,family) {
     return;
   }
   if ( family === 4 ) {
-    this._query = new io.nodyn.dns.GetAddrInfo4Wrap(process._process, name);
+    this._query = new Packages.io.nodyn.dns.GetAddrInfo4Wrap(process._process, name);
   } else if (family === 6 ) {
-    this._query = new io.nodyn.dns.GetAddrInfo6Wrap(process._process, name);
+    this._query = new Packages.io.nodyn.dns.GetAddrInfo6Wrap(process._process, name);
   } else {
-    this._query = new io.nodyn.dns.GetAddrInfoWrap(process._process, name);
+    this._query = new Packages.io.nodyn.dns.GetAddrInfoWrap(process._process, name);
   }
   this._query.on( "complete", function(result) {
     if ( result.error ) {
@@ -87,7 +87,7 @@ cares.queryA = function(req,name) {
     new cares.queryA(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryAWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryAWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -112,7 +112,7 @@ cares.queryAaaa = function(req,name) {
     new cares.queryAaaa(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryAaaaWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryAaaaWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -137,7 +137,7 @@ cares.queryMx = function(req,name) {
     new cares.queryMx(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryMxWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryMxWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -166,7 +166,7 @@ cares.queryTxt = function(req,name) {
     new cares.queryTxt(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryTxtWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryTxtWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -192,7 +192,7 @@ cares.querySrv = function(req,name) {
     new cares.querySrv(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QuerySrvWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QuerySrvWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -223,7 +223,7 @@ cares.queryNs = function(req,name) {
     new cares.queryNs(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryNsWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryNsWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -249,7 +249,7 @@ cares.queryCname = function(req,name) {
     new cares.queryCname(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.QueryCnameWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.QueryCnameWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
@@ -275,7 +275,7 @@ cares.getHostByAddr = function(req,name) {
     new cares.getHostByAddr(req,name);
     return;
   }
-  this._query = new io.nodyn.dns.GetHostByAddrWrap(process._process, name);
+  this._query = new Packages.io.nodyn.dns.GetHostByAddrWrap(process._process, name);
   this._query.on( "complete", function(result) {
     if ( result.error ) {
       req.oncomplete( result.error.toString() );
