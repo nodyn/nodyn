@@ -18,7 +18,6 @@ package io.nodyn.runtime.dynjs;
 import io.nodyn.Nodyn;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.RuntimeFactory;
-import org.dynjs.Config;
 import org.vertx.java.core.Vertx;
 
 /**
@@ -35,6 +34,7 @@ public class DynJSFactory extends RuntimeFactory {
      * @param config configuration options for the runtime instance
      * @return the runtime instance
      */
+    @Override
     public Nodyn newRuntime(NodynConfig config) {
         return new DynJSRuntime(config);
     }

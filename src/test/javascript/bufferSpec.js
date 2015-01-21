@@ -1,5 +1,5 @@
 
-var Harness     = io.nodyn.buffer.BufferHarness;
+var Harness     = Packages.io.nodyn.buffer.BufferHarness;
 var TEST_STRING = Harness.TEST_STRING;
 var UTF8_BYTES  = Harness.UTF8_BYTE_STRING;
 var ASCII_BYTES = Harness.ASCII_BYTE_STRING;

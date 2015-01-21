@@ -40,7 +40,7 @@ public class TestRunner {
         System.setProperty( "nodyn.binary", "./bin/node" );
         //System.setProperty("javax.net.debug", "all");
 
-        RuntimeFactory factory = RuntimeFactory.init(TestRunner.class.getClassLoader(), RuntimeFactory.RuntimeType.DYNJS);
+        RuntimeFactory factory = RuntimeFactory.init(TestRunner.class.getClassLoader(), RuntimeFactory.RuntimeType.NASHORN);
         NodynConfig config = new NodynConfig( new String[] { "-e", SCRIPT } );
         Nodyn nodyn = factory.newRuntime(config);
         nodyn.setExitHandler( new NoOpExitHandler() );

@@ -4,12 +4,12 @@ var helper     = require('./specHelper'),
 describe('The dns module', function() {
 
   var server, // server instance set in prepareDns
-      DnsServer  = io.nodyn.dns.TestDnsServer;
+      DnsServer  = Packages.io.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
     System.setProperty( "dns.server", "127.0.0.1" );
     System.setProperty( "dns.port",   "53530" );
-    io.nodyn.dns.ResolverConfig.refresh();
+    Packages.io.nodyn.dns.ResolverConfig.refresh();
     helper.testComplete(false);
   });
 
@@ -19,7 +19,7 @@ describe('The dns module', function() {
     }
     System.clearProperty("dns.server")
     System.clearProperty("dns.port");
-    io.nodyn.dns.ResolverConfig.refresh();
+    Packages.io.nodyn.dns.ResolverConfig.refresh();
   });
 
   //dns.server({host: '127.0.0.1', port: 53530});

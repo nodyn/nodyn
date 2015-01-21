@@ -21,7 +21,10 @@ module.exports = {
     }
 
     try{
-      var visitor = new java.nio.file.SimpleFileVisitor({ visitFile: visit });
+      var Visitor = Java.extend(java.nio.file.SimpleFileVisitor);
+      var visitor = new Visitor() {
+        visitFile: visit 
+      };
       FILES.walkFileTree(FILE_SYSTEM.getPath(".", [""]), visitor);
     } catch (e) {
       console.error(e);

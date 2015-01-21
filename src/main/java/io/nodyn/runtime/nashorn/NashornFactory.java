@@ -25,13 +25,13 @@ import org.vertx.java.core.Vertx;
  */
 public class NashornFactory extends RuntimeFactory {
 
-    protected NashornFactory(ClassLoader parent) {
+    public NashornFactory(ClassLoader parent) {
         super(parent);
     }
 
     @Override
     public Nodyn newRuntime(NodynConfig config) {
-        return new NashornRuntime(config, null, true);
+        return new NashornRuntime(config);
     }
 
     @Override

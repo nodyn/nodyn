@@ -34,6 +34,7 @@ import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.vertx.java.core.VertxFactory;
 
 /**
  * @author Lance Ball
@@ -45,6 +46,11 @@ public class NashornRuntime extends Nodyn {
     private Program nativeRequire;
     
     private static final String NATIVE_REQUIRE = "nodyn/_native_require.js";
+
+    public NashornRuntime(NodynConfig config) {
+        this(config, VertxFactory.newVertx(), true);
+    }
+
 
     public NashornRuntime(NodynConfig config, Vertx vertx, boolean controlLifeCycle) {
         super(config, vertx, controlLifeCycle);
@@ -96,7 +102,6 @@ public class NashornRuntime extends Nodyn {
     @Override
     public void handleThrowable(Throwable t) {
         System.err.println(t);
-        t.printStackTrace(System.err);
     }
 
     @Override

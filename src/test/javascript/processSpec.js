@@ -26,11 +26,11 @@ describe('process', function() {
   });
 
   it('should pass testVersion', function() {
-    expect(process.version).toBe(io.nodyn.Nodyn.VERSION);
+    expect(process.version).toBe(Packages.io.nodyn.Nodyn.VERSION);
     expect(process.version).not.toBeUndefined();
     expect(process.versions).not.toBeNull();
     expect(process.versions).not.toBeUndefined();
-    expect(process.versions.node).toBe(io.nodyn.Nodyn.VERSION);
+    expect(process.versions.node).toBe(Packages.io.nodyn.Nodyn.VERSION);
     expect(process.versions.java).toBe(java.lang.System.getProperty("java.version"));
     expect(process.versions.dynjs).not.toBeNull();
   });
@@ -158,7 +158,7 @@ describe('process', function() {
   describe('zlib binding', function() {
     it('should have an enumeration of zlib modes', function() {
       var binding = process.binding('zlib');
-      var values = io.nodyn.zlib.Mode.values();
+      var values = Packages.io.nodyn.zlib.Mode.values();
       for(var i=0; i<values.length; i++) {
         expect(binding[values[i]]).toBe(values[i].ordinal());
       }
@@ -166,7 +166,7 @@ describe('process', function() {
 
     it('should have an enumeration of zlib codes', function() {
       var binding = process.binding('zlib');
-      var values = io.nodyn.zlib.Code.values();
+      var values = Packages.io.nodyn.zlib.Code.values();
       for(var i=0; i<values.length; i++) {
         expect(binding[values[i]]).toBe(values[i].ordinal());
       }
@@ -174,7 +174,7 @@ describe('process', function() {
 
     it('should have an enumeration of zlib strategies', function() {
       var binding = process.binding('zlib');
-      var values = io.nodyn.zlib.Strategy.values();
+      var values = Packages.io.nodyn.zlib.Strategy.values();
       for(var i=0; i<values.length; i++) {
         expect(binding[values[i]]).toBe(values[i].ordinal());
       }
@@ -182,7 +182,7 @@ describe('process', function() {
 
     it('should have an enumeration of zlib flush options', function() {
       var binding = process.binding('zlib');
-      var values = io.nodyn.zlib.Flush.values();
+      var values = Packages.io.nodyn.zlib.Flush.values();
       for(var i=0; i<values.length; i++) {
         expect(binding[values[i]]).toBe(values[i].ordinal());
       }

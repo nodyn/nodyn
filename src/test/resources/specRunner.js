@@ -4,8 +4,8 @@ module.exports = {
   run: function(pattern) {
 
     // load jasmine and a terminal reporter into global
-    load("jasmine-1.3.1/jasmine.js");
-    load('./terminalReporter.js');
+    load("./target/test-classes/jasmine-1.3.1/jasmine.js");
+    load('./target/test-classes/terminalReporter.js');
     color = !process.env.JASMINE_NOCOLOR;
 
     // load the specs

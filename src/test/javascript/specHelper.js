@@ -1,7 +1,7 @@
 // Should only happen when running with a test-patter
 // for a single spec. Otherwise, specRunner.js handles this.
-if ((typeof nodyn) !== 'object') {
-  load('./node.js');
+if ((typeof __nodyn) !== 'object') {
+  load('./target/classes/node.js');
   (function() {
     jasmine.WaitsForBlock.TIMEOUT_INCREMENT = 1;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 1;
