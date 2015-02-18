@@ -31,6 +31,7 @@ import org.vertx.java.core.Vertx;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import jdk.nashorn.api.scripting.AbstractJSObject;
 import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -80,28 +81,50 @@ public class NashornRuntime extends Nodyn {
 
     @Override
     public Program compile(String source, String fileName, boolean displayErrors) throws Throwable {
-        // TODO: remove the displayErrors parameter, as this is specific to DynJS
+        // TODO: do something with the displayErrors parameter
         try {
-            return new NashornProgram(engine.compile(source), fileName);
+            Program program = new NashornProgram(engine.compile(source), fileName);
+            return program;
         } catch (ScriptException ex) {
-            Logger.getLogger(NashornRuntime.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(NashornRuntime.class.getName()).log(Level.SEVERE, "Cannot compile script " + fileName, ex);
+            handleThrowable(ex);
         }
         return null;
     }
 
     @Override
-    public void makeContext(Object global) {
-        System.err.println("NashornRuntime#makeContext not implemented");
+    public void makeContext(Object init) {
+        if (init != null) {
+            ScriptContext context = new SimpleScriptContext();
+            context.setBindings(engine.getBindings(ScriptContext.GLOBAL_SCOPE), ScriptContext.GLOBAL_SCOPE);
+        } else {
+            throw new RuntimeException("WTF");
+        }
     }
 
     @Override
-    public boolean isContext(Object global) {
-        return global instanceof ScriptContext;
+    public boolean isContext(Object ctx) {
+        return NashornRuntime.extractContext(ctx) != null;
+    }
+
+    /**
+     *
+     * @param ctx
+     * @return
+     */
+    protected static ScriptContext extractContext(Object ctx) {
+        if (ctx instanceof ScriptContext) {
+            return (ScriptContext) ctx;
+        } else if (ctx instanceof JSObject) {
+            return (ScriptContext) ((JSObject)ctx).getMember("__contextifyContext");
+        }
+        return null;
     }
 
     @Override
     public void handleThrowable(Throwable t) {
         System.err.println(t);
+        t.printStackTrace();
     }
 
     @Override

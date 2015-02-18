@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Red Hat, Inc.
+ * Copyright 2014-15 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package io.nodyn.buffer;
 
-import io.netty.buffer.ByteBuf;
+import java.nio.ByteBuffer;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -26,6 +26,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * @author Bob McWhirter
+ * @author Lance Ball
  */
 public class Buffer {
 
@@ -34,25 +35,53 @@ public class Buffer {
     private static final Charset UCS2 = StandardCharsets.UTF_16LE;
     private static final Charset BINARY = StandardCharsets.ISO_8859_1;
 
-    public static void inject(ScriptObjectMirror object, ByteBuf buf) {
-        if ( object.containsKey("__nettyBuffer__")) {
+    public static void inject(ScriptObjectMirror object, ByteBuffer buf) {
+        if ( object.containsKey("__rawBuffer__")) {
             throw new RuntimeException( "already has external data" );
         }
 
-        object.setMember("__nettyBuffer__", buf);
-        object.setIndexedPropertiesToExternalArrayData(buf.nioBuffer());
+        object.setMember("__rawBuffer__", buf);
+        object.setIndexedPropertiesToExternalArrayData(buf);
     }
 
-    public static ByteBuf extract(ScriptObjectMirror object) {
-        return (ByteBuf) object.getMember("__nettyBuffer__");
+    public static ByteBuffer extract(ScriptObjectMirror object) {
+        return (ByteBuffer) object.getMember("__rawBuffer__");
     }
 
     public static byte[] extractByteArray(ScriptObjectMirror object) {
-        ByteBuf buf = extract( object );
-        byte[] bytes = new byte[ bufLen( object ) ];
-        buf.getBytes( buf.readerIndex(), bytes );
+        ByteBuffer buf = extract( object );
+        int origPosition = buf.position();
+        buf.position(0);
+        byte[] bytes = new byte[ buf.remaining() ];
+        buf.get(bytes);
+        buf.position(origPosition);
         return bytes;
     }
+    
+    public static String extractString(ScriptObjectMirror object, int start, int end, Charset charset) {
+        ByteBuffer b = extract( object );
+        int len = end-start;
+        if (len <= 0) { return ""; }
+        
+        byte[] strBytes = new byte[len];
+        int origPosition = b.position();
+        b.position(start);
+        b.get(strBytes, 0, len);
+        b.position(origPosition);
+        return new String(strBytes, charset);
+    }
+
+    public static long writeStringAsBytes(ScriptObjectMirror object, String str, int offset, int len, Charset encoding) {
+        ByteBuffer b = extract( object );
+        int origWriter = b.position();
+        b.position(offset);
+        byte[] bytes = str.getBytes( encoding );
+        len = Math.min( bytes.length, Math.min( len, b.limit() - b.position() ) );
+        b.put( bytes, 0, len );
+        b.position( Math.max( b.position(), origWriter ) );
+        return len;
+    }
+
 
     public static int bufLen(ScriptObjectMirror obj) {
         return extract(obj).capacity();
@@ -68,29 +97,26 @@ public class Buffer {
         } else if ( val instanceof String && ! ((String) val).isEmpty() ) {
             byteVal = ((String) val).charAt(0);
         }
-        ByteBuf b = extract(obj);
+        ByteBuffer b = extract(obj);
         for ( int i = offset; i < end; ++i ) {
-            b.setByte( i, byteVal );
+            b.put(i, (byte) byteVal);
         }
-        b.writerIndex( Math.max( b.writerIndex(), offset + end ) );
+        b.position( Math.max( b.position(), offset + end ) );
         return obj;
     }
 
     public static long copy(ScriptObjectMirror src, ScriptObjectMirror target, int targetStart, int sourceStart, int sourceEnd) {
 
-        ByteBuf srcBuf = extract(src);
-        ByteBuf targetBuf = extract(target);
+        ByteBuffer srcBuf = extract(src);
+        ByteBuffer targetBuf = extract(target);
 
-        int origWriter = targetBuf.writerIndex();
+        int origPosition = targetBuf.position();
+        targetBuf.position( targetStart );
 
-        targetBuf.writerIndex( targetStart );
+        int len = Math.min( (sourceEnd - sourceStart), targetBuf.limit() - targetStart );
 
-        int len = sourceEnd - sourceStart;
-
-        len = Math.min( len, bufLen( target ) - targetStart );
-
-        targetBuf.writeBytes(srcBuf, sourceStart, len);
-        targetBuf.writerIndex(Math.max(targetBuf.writerIndex(), origWriter));
+        targetBuf.put(extractByteArray(src), sourceStart, len);
+        targetBuf.position(Math.max(targetBuf.position(), origPosition));
 
         return len;
     }
@@ -101,19 +127,19 @@ public class Buffer {
     // ----------------------------------------
 
     public static long[] utf8Write(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
+        ByteBuffer b = extract( object );
+        int origPosition = b.position();
         byte[] bytes = str.getBytes( UTF8 );
-        b.writerIndex( offset );
+        b.position( offset );
         len = Math.min( bytes.length, Math.min( len, bufLen(object) - offset  ) );
-        b.writeBytes( bytes, 0, len );
-        b.writerIndex( Math.max( b.writerIndex(), origWriter ) );
+        b.put( bytes, 0, len );
+        b.position( Math.max( b.position(), origPosition ) );
         return new long[] { str.length(), len };
+        
     }
 
     public static String utf8Slice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
-        return b.toString( start, (end-start), UTF8 );
+        return extractString(object, start, end, UTF8);
     }
 
     // ----------------------------------------
@@ -121,18 +147,11 @@ public class Buffer {
     // ----------------------------------------
 
     public static long asciiWrite(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
-        byte[] bytes = str.getBytes( ASCII );
-        len = Math.min( bytes.length, Math.min( len, b.writableBytes() ) );
-        b.writeBytes( bytes, 0, len );
-        b.writerIndex( Math.max( b.writerIndex(), origWriter ) );
-        return len;
+        return writeStringAsBytes(object, str, offset, len, ASCII);
     }
 
     public static String asciiSlice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
-        return b.toString( start, (end-start), ASCII );
+        return extractString(object, start, end, ASCII);
     }
 
     // ----------------------------------------
@@ -140,18 +159,11 @@ public class Buffer {
     // ----------------------------------------
 
     public static long ucs2Write(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
-        byte[] bytes = str.getBytes( UCS2 );
-        len = Math.min( bytes.length, Math.min( len, b.writableBytes() ) );
-        b.writeBytes( bytes, 0, len );
-        b.writerIndex( Math.max( b.writerIndex(), origWriter ) );
-        return len;
+        return writeStringAsBytes(object, str, offset, len, UCS2);
     }
 
     public static String ucs2Slice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
-        return b.toString( start, (end-start), UCS2 );
+        return extractString(object, start, end, UCS2);
     }
 
     // ----------------------------------------
@@ -159,20 +171,23 @@ public class Buffer {
     // ----------------------------------------
 
     public static long hexWrite(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
+        ByteBuffer b = extract( object );
+        int origWriter = b.position();
         byte[] bytes = Hex.decode(str);
-        b.writerIndex( offset );
-        len = Math.min( bytes.length, Math.min( len, b.writableBytes() ) );
-        b.writeBytes( bytes, 0, len );
-        b.writerIndex( Math.max( b.writerIndex(), origWriter ) );
+        b.position( offset );
+        len = Math.min( bytes.length, Math.min( len, b.capacity() - b.position()) );
+        b.put( bytes, 0, len );
+        b.position( Math.max( b.position(), origWriter ) );
         return len;
     }
 
     public static String hexSlice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
+        ByteBuffer b = extract( object );
         byte[] bytes = new byte[ end-start ];
-        b.getBytes( start, bytes );
+        int originalPosition = b.position();
+        b.position(start);
+        b.get( bytes, start, end-start );
+        b.position(originalPosition);
         return Hex.toHexString( bytes );
     }
 
@@ -181,20 +196,23 @@ public class Buffer {
     // ----------------------------------------
 
     public static long base64Write(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
+        ByteBuffer b = extract( object );
+        int origPosition = b.position();
         byte[] bytes = Base64.decode(str);
-        b.writerIndex( offset );
-        len = Math.min( bytes.length, Math.min( len, b.writableBytes() ) );
-        b.writeBytes(bytes, 0, len);
-        b.writerIndex(Math.max(b.writerIndex(), origWriter));
+        b.position( offset );
+        len = Math.min( bytes.length, Math.min( len, b.capacity() - b.position() ) );
+        b.put(bytes, 0, len);
+        b.position(Math.max(b.position(), origPosition));
         return len;
     }
 
     public static String base64Slice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
+        ByteBuffer b = extract( object );
         byte[] bytes = new byte[ end-start ];
-        b.getBytes( start, bytes );
+        int originalPosition = b.position();
+        b.position(start);
+        b.get( bytes, start, end-start );
+        b.position(originalPosition);
 
         return Base64.toBase64String(bytes);
     }
@@ -204,18 +222,17 @@ public class Buffer {
     // ----------------------------------------
 
     public static long binaryWrite(ScriptObjectMirror object, String str, int offset, int len) {
-        ByteBuf b = extract( object );
-        int origWriter = b.writerIndex();
+        ByteBuffer b = extract( object );
+        int origPosition = b.position();
         byte[] bytes = str.getBytes( BINARY );
-        len = Math.min( bytes.length, Math.min( len, b.writableBytes() ) );
-        b.writeBytes( bytes, 0, len );
-        b.writerIndex( Math.max( b.writerIndex(), origWriter ) );
+        len = Math.min( bytes.length, Math.min( len, b.capacity() - b.position() ) );
+        b.put( bytes, 0, len );
+        b.position( Math.max( b.position(), origPosition ) );
         return len;
     }
 
     public static String binarySlice(ScriptObjectMirror object, int start, int end) {
-        ByteBuf b = extract( object );
-        return b.toString( start, (end-start), BINARY );
+        return extractString(object, start, end, BINARY);
     }
 
     // ----------------------------------------
@@ -223,7 +240,7 @@ public class Buffer {
     // ----------------------------------------
 
     public static void writeFloatBE(ScriptObjectMirror obj, float value, int offset) {
-        extract( obj ).setFloat( offset, value );
+        extract( obj ).putFloat( offset, value );
     }
 
     public static float readFloatBE(ScriptObjectMirror obj, int offset) {
@@ -232,7 +249,7 @@ public class Buffer {
 
     public static void writeFloatLE(ScriptObjectMirror obj, float value, int offset) {
         int bits = Float.floatToIntBits((float) value);
-        extract(obj).setInt(offset, Integer.reverseBytes(bits));
+        extract(obj).putInt(offset, Integer.reverseBytes(bits));
     }
 
     public static float readFloatLE(ScriptObjectMirror obj, int offset) {
@@ -241,7 +258,7 @@ public class Buffer {
     }
 
     public static void writeDoubleBE(ScriptObjectMirror obj, double value, int offset) {
-        extract( obj ).setDouble( offset, value );
+        extract( obj ).putDouble( offset, value );
     }
 
     public static double readDoubleBE(ScriptObjectMirror obj, int offset) {
@@ -250,13 +267,11 @@ public class Buffer {
 
     public static void writeDoubleLE(ScriptObjectMirror obj, double value, int offset) {
         long bits = Double.doubleToLongBits(value);
-        extract(obj).setLong(offset, Long.reverse(bits));
+        extract(obj).putLong(offset, Long.reverse(bits));
     }
 
     public static double readDoubleLE(ScriptObjectMirror obj, int offset) {
         long bits = extract(obj).getLong(offset);
         return Double.longBitsToDouble(Long.reverseBytes(bits));
     }
-
-
 }

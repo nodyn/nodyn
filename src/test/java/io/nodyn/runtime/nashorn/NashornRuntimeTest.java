@@ -18,7 +18,6 @@ package io.nodyn.runtime.nashorn;
 import io.nodyn.NodeProcess;
 import io.nodyn.runtime.NodynConfig;
 import io.nodyn.runtime.Program;
-import jdk.nashorn.api.scripting.JSObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -75,6 +74,17 @@ public class NashornRuntimeTest {
 //        assertEquals("Function", f.getClassName());
     }
 
+    @Test
+    public void testBuffer() throws Throwable {
+        runtime.initialize();
+        Program p = runtime.compile("var b1 = new Buffer('hello world'),"
+              + "    b2 = new Buffer(64);"
+              + "b1.copy(b2);"
+              + "print(b2);"
+              + "b2;", "testBuffer.js", true);
+        p.execute(runtime.getGlobalContext());
+    }
+    
     /**
      * Test of compile method, of class NashornRuntime.
      */
@@ -96,7 +106,7 @@ public class NashornRuntimeTest {
         System.out.println("makeContext");
         Object global = null;
         NashornRuntime instance = new NashornRuntime(config, vertx, false);
-        instance.makeContext(global);
+//        instance.makeContext(global);
         // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
@@ -110,7 +120,7 @@ public class NashornRuntimeTest {
         Object global = null;
         NashornRuntime instance = new NashornRuntime(config, vertx, false);
         boolean expResult = false;
-        boolean result = instance.isContext(global);
+//        boolean result = instance.isContext(global);
 //        assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");

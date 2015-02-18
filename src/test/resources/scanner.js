@@ -31,7 +31,6 @@ module.exports = {
     }
     return paths;
   }
-
 };
 
 

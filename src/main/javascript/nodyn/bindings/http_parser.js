@@ -84,7 +84,7 @@ HTTPParser.prototype.reinitialize = function(state) {
 }
 
 HTTPParser.prototype.execute = function(d) {
-  return this._parser.execute( d._nettyBuffer() );
+  return this._parser.execute( d._rawBuffer() );
 }
 
 HTTPParser.prototype.finish = function() {

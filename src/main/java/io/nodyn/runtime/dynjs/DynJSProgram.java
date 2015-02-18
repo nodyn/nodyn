@@ -20,7 +20,6 @@ import org.dynjs.debugger.Debugger;
 import org.dynjs.runtime.*;
 import org.dynjs.runtime.Compiler;
 import org.dynjs.runtime.builtins.DynJSBuiltin;
-import org.dynjs.runtime.wrapper.JavascriptFunction;
 
 /**
  * @author Lance Ball

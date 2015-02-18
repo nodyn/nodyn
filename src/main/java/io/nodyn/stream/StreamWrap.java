@@ -24,6 +24,7 @@ import io.nodyn.handle.HandleWrap;
 import io.nodyn.NodeProcess;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**

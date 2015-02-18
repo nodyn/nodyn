@@ -34,21 +34,22 @@ public class NashornProgram implements Program {
         this(script, null);
     }
 
-    NashornProgram(CompiledScript compile, String fileName) {
+    public NashornProgram(CompiledScript compile, String fileName) {
         this.script = compile;
         this.fileName = fileName;
     }
 
     @Override
     public Object execute(Object context) {
-        if (context instanceof ScriptContext) {
+        ScriptContext ctx = NashornRuntime.extractContext(context);
+        if (ctx != null) {
             try {
-                return script.eval((ScriptContext) context);
+                return script.eval(ctx);
             } catch (ScriptException ex) {
-                Logger.getLogger(NashornRuntime.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NashornProgram.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        return null;
+        throw new RuntimeException("Cannot execute with null context");
     }
 
 }

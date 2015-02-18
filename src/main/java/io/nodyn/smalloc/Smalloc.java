@@ -16,9 +16,8 @@
 
 package io.nodyn.smalloc;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.nodyn.buffer.Buffer;
+import java.nio.ByteBuffer;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
@@ -27,8 +26,8 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 public class Smalloc {
 
     public static Object alloc(ScriptObjectMirror obj, int size) throws Exception {
-        ByteBuf b = Unpooled.buffer(size);
-        Buffer.inject(obj, b);
+        ByteBuffer buffer = ByteBuffer.allocate(size);
+        Buffer.inject(obj, buffer);
         return obj;
     }
 
@@ -38,10 +37,22 @@ public class Smalloc {
     }
 
     public static Object sliceOnto(ScriptObjectMirror src, ScriptObjectMirror dest, int start, int end) {
-        ByteBuf srcBuf = Buffer.extract(src);
+        ByteBuffer srcBuf = Buffer.extract(src);
         int len = end - start;
-        ByteBuf destBuf = srcBuf.slice( start, len );
-        destBuf.writerIndex(0);
+        
+        // Set the source buffer's position to the start of the new slice
+        int origPosition = srcBuf.position();
+        srcBuf.position(start);
+        
+        // Create a slice starting at the new position and set the limit to `len`
+        // The new buffer's position is set by slice() to 0.
+        ByteBuffer destBuf = srcBuf.slice();
+        destBuf.limit(len);
+        destBuf.position(0);
+        
+        // Reset the source buffer's position to it's original location
+        srcBuf.position(origPosition);
+        
         Buffer.inject(dest, destBuf);
         return src;
     }

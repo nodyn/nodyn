@@ -17,7 +17,7 @@
 module.exports.setupBufferJS = function(target, internal) {
   module.exports.createBuffer = function(nettyBuffer) {
     var b = new target(nettyBuffer.readableBytes());
-    Packages.io.nodyn.buffer.Buffer.inject( b, nettyBuffer );
+    Packages.io.nodyn.buffer.Buffer.inject( b, nettyBuffer.nioBuffer() );
     return b;
   };
 
@@ -64,7 +64,7 @@ module.exports.setupBufferJS = function(target, internal) {
   target.prototype.asciiWrite = function(str, offset, len) {
     offset = offset || 0;
     len    = len    || this.length;
-    var l = Packages.io.nodyn.buffer.Buffer.asciiWrite( this, start, end );
+    var l = Packages.io.nodyn.buffer.Buffer.asciiWrite( this, str, offset, len );
     Buffer._charsWritten = l;
     return l;
   };
@@ -143,7 +143,7 @@ module.exports.setupBufferJS = function(target, internal) {
 
   // ----------------------------------------
 
-  target.prototype._nettyBuffer = function() {
+  target.prototype._rawBuffer = function() {
     return module.exports.extractBuffer(this);
   };
 
@@ -153,7 +153,7 @@ module.exports.setupBufferJS = function(target, internal) {
 
   // TODO: remove this
   target.prototype._vertxBuffer = function() {
-    return new org.vertx.java.core.buffer.Buffer( this._nettyBuffer() );
+    return new org.vertx.java.core.buffer.Buffer( this._rawBuffer() );
   };
 
 
@@ -186,8 +186,12 @@ module.exports.setupBufferJS = function(target, internal) {
   // ----------------------------------------
 
   internal.compare = function(a,b) {
-
+    // TODO: Implement this function
   };
 
-  internal.byteLength = Packages.io.nodyn.buffer.Internal.byteLength;
-}
+  internal.byteLength = function(str, enc) {
+    if ((typeof str !== 'string') || 
+        str === '' ) throw new TypeError('Argument must be a string');
+    return Packages.io.nodyn.buffer.Internal.byteLength(str, enc);
+  };
+};

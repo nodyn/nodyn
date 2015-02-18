@@ -36,7 +36,8 @@ ContextifyScript.prototype.runInContext = function(context) {
 };
 
 function isContext(obj) {
-  return __nodyn.isContext(obj);
+  return Object.prototype.hasOwnProperty.call(obj, "__contextifyContext");
+  //return __nodyn.isContext(obj);
 }
 
 function makeContext(obj) {

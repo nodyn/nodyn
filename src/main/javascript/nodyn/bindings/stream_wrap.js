@@ -68,7 +68,7 @@ Stream.prototype.writeAsciiString = function(req,data) {
 };
 
 Stream.prototype.writeBuffer = function(req,data) {
-  this._stream.write( data._nettyBuffer() );
+  this._stream.write( data._rawBuffer() );
   req.oncomplete(0, this, req );
 };
 

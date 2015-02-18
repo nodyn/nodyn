@@ -16,30 +16,31 @@
 
 package io.nodyn.fs;
 
-import io.netty.buffer.ByteBuf;
+import java.nio.ByteBuffer;
 import jnr.posix.POSIX;
-import jnr.posix.POSIXFactory;
 
 /**
  * @author Lance Ball
  */
 public class Fs {
-    public static int read(POSIX posix, int fd, ByteBuf buf, int offset, int length) {
+    public static int read(POSIX posix, int fd, ByteBuffer buf, int offset, int length) {
         byte[] input = new byte[length];
         int read = posix.read(fd, input, length);
         if (read != -1) {
-            buf.setBytes(offset, input, 0, read);
-            buf.writerIndex(Math.max(buf.writerIndex(), offset + read));
+            buf.position(offset);
+            buf.put(input, offset, read);
+            buf.position(Math.max(buf.position(), offset + read));
         }
         return read;
     }
 
-    public static int pread(POSIX posix, int fd, ByteBuf buf, int offset, int length, int position) {
+    public static int pread(POSIX posix, int fd, ByteBuffer buf, int offset, int length, int position) {
         byte[] input = new byte[length];
         int read = posix.pread(fd, input, length, position);
         if (read != -1) {
-            buf.setBytes(offset, input, 0, read);
-            buf.writerIndex(Math.max(buf.writerIndex(), offset + read));
+            buf.position(offset);
+            buf.put(input, 0, read);
+            buf.position(Math.max(buf.position(), offset + read));
         }
         return read;
     }

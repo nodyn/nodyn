@@ -16,7 +16,6 @@
 
 package io.nodyn.netty.pipe;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.nodyn.NodeProcess;
 
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.Pipe;
 
 /**
  * @author Bob McWhirter
@@ -104,14 +102,19 @@ public class NioOutputStreamChannel extends AbstractChannel {
                 ByteBuffer[] buffers = in.nioBuffers();
                 for (int i = 0; i < buffers.length; ++i) {
                     ByteBuffer each = buffers[i];
-                    int amount = each.limit() - each.position();
-                    byte[] bytes = new byte[amount];
-                    each.get(bytes);
-                    try {
-                        NioOutputStreamChannel.this.out.write(bytes);
-                    } catch (IOException e) {
-                        NioOutputStreamChannel.this.process.getNodyn().handleThrowable(e);
-                    }
+                    
+                    // TODO: we should not have to make this check, the array should
+                    // be trimmed appropriately elsewhere
+                    if (each != null) {
+                        int amount = each.limit() - each.position();
+                        byte[] bytes = new byte[amount];
+                        each.get(bytes);
+                        try {
+                            NioOutputStreamChannel.this.out.write(bytes);
+                        } catch (IOException e) {
+                            NioOutputStreamChannel.this.process.getNodyn().handleThrowable(e);
+                        }
+                    } else { break; }
                 }
             }
         });

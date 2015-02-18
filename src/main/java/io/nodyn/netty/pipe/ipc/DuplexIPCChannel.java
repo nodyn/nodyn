@@ -202,6 +202,7 @@ public class DuplexIPCChannel extends EmbeddedChannel {
 
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
+        System.err.println("DOING WRITE IN DUPLEX IPC CHANNEL");
         super.doWrite(in);
         synchronized (outboundNotifier) {
             outboundNotifier.notifyAll();

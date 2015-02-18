@@ -37,7 +37,7 @@ public class PipeWrap extends StreamWrap {
 
     private final boolean ipc;
     private Type type;
-    private int[] fileDescriptors = new int[2];
+    private final int[] fileDescriptors = new int[2];
 
 
     public PipeWrap(NodeProcess process, boolean ipc) throws NoSuchFieldException, IllegalAccessException, IOException {
