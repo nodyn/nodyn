@@ -38,7 +38,7 @@ describe("crypto Cipher & Decipher module", function() {
     expect( f[5] ).toBe( 0xEC );
     expect( f[6] ).toBe( 0xD3 );
     expect( f[7] ).toBe( 0x41 );
-  })
+  });
 
 
   it( "should produce the same bytes as node.js for AES-128-CBC", function() {
@@ -228,7 +228,7 @@ describe("crypto Cipher & Decipher module", function() {
     var types = crypto.getCiphers();
     expect( types ).toContain( "des" );
     expect( types ).toContain( "aes-128-cbc" );
-  })
+  });
 
   function testCipher(name, plaintext, expected) {
     var cipher = crypto.createCipher( name, 'tacos' );

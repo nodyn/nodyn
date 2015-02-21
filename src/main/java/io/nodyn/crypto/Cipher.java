@@ -1,19 +1,14 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import org.bouncycastle.crypto.BlockCipher;
+import java.nio.ByteBuffer;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.engines.DESEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 
 /**
  * @author Bob McWhirter
@@ -21,44 +16,62 @@ import java.security.InvalidKeyException;
 public class Cipher {
 
     private BufferedBlockCipher cipher;
-    private ByteBuf outBuf;
+    private ArrayList<ByteBuffer> outBuf = new ArrayList<>();
+    private int outLen;
 
-    public Cipher(boolean encipher, BufferedBlockCipher cipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+    public Cipher(boolean encipher, BufferedBlockCipher cipher, ByteBuffer key, ByteBuffer iv) throws InvalidKeyException {
         this.cipher = cipher;
-        this.outBuf = Unpooled.buffer();
         initialize(encipher, key, iv);
     }
 
-    private void initialize(boolean encipher, ByteBuf key, ByteBuf iv) throws InvalidKeyException {
+    private void initialize(boolean encipher, ByteBuffer key, ByteBuffer iv) throws InvalidKeyException {
         CipherParameters params = null;
-
-        byte[] keyBytes = new byte[key.readableBytes()];
-        key.readBytes(keyBytes);
-
+        final int originalPosition = key.position();
+        byte[] keyBytes = new byte[originalPosition];
+        key.position(0);
+        key.get(keyBytes);
+        key.position(originalPosition);
         params = new KeyParameter(keyBytes);
 
-        if (iv.readableBytes() > 0) {
-            byte[] ivBytes = new byte[iv.readableBytes()];
-            iv.readBytes(ivBytes);
+        if (iv.position() > 0) {
+            final int ivPosition = iv.position();
+            byte[] ivBytes = new byte[ivPosition];
+            iv.position(0);
+            iv.get(ivBytes);
+            iv.position(ivPosition);
             params = new ParametersWithIV(params, ivBytes);
         }
 
         this.cipher.init(encipher, params);
     }
 
-    public void update(ByteBuf buf) {
-        byte[] outBytes = new byte[this.cipher.getUpdateOutputSize(buf.readableBytes())];
-        byte[] inBytes = new byte[buf.readableBytes()];
-        buf.readBytes(inBytes);
+    public void update(ByteBuffer buf) {
+        final int pos = buf.position();
+        buf.position(0);
+        byte[] outBytes = new byte[this.cipher.getUpdateOutputSize(pos)];
+        byte[] inBytes = new byte[pos];
+        buf.get(inBytes);
+        buf.position(pos);
         int len = this.cipher.processBytes(inBytes, 0, inBytes.length, outBytes, 0);
-        this.outBuf.writeBytes(outBytes, 0, len);
+        ByteBuffer out = ByteBuffer.allocate(len);
+        out.put(outBytes, 0, len);
+        this.outBuf.add(out);
+        outLen += len;
     }
 
-    public ByteBuf doFinal() throws InvalidCipherTextException {
+    public ByteBuffer doFinal() throws InvalidCipherTextException {
         byte[] outBytes = new byte[this.cipher.getOutputSize(0)];
         int len = this.cipher.doFinal(outBytes, 0);
-        this.outBuf.writeBytes(outBytes, 0, len);
-        return this.outBuf;
+        ByteBuffer fnl = ByteBuffer.allocate(len);
+        fnl.put(outBytes, 0, len);
+        this.outBuf.add(fnl);
+        outLen += len;
+        ByteBuffer out = ByteBuffer.allocate(outLen);
+        for(ByteBuffer b : outBuf) {
+            b.position(0);
+            out.put(b);
+        }
+        return out;
     }
 
 }

@@ -15,7 +15,7 @@
  */
 
 function update(chunk, encoding) {
-  this._delegate.update( bufferChunk( chunk, encoding )._nettyBuffer() );
+  this._delegate.update( bufferChunk( chunk, encoding )._rawBuffer() );
 }
 
 function bufferChunk(chunk, encoding) {
@@ -63,7 +63,7 @@ function Hash(algorithm) {
   }
 
   this._delegate = new Packages.io.nodyn.crypto.Hash( new algo() );
-};
+}
 
 Hash.prototype.update = update;
 Hash.prototype.digest = digest;
@@ -71,11 +71,11 @@ Hash.prototype.digest = digest;
 module.exports.Hash = Hash;
 module.exports.getHashes = function() {
   var hashes = [];
-  for ( n in hashAlgorithms ) {
+  for ( var n in hashAlgorithms ) {
     hashes.push( n );
   }
   return hashes;
-}
+};
 
 function Hmac() {
   if ( ! this instanceof Hmac ) { return new Hmac(); }
@@ -90,7 +90,7 @@ Hmac.prototype.init = function(algorithm, key) {
   }
 
   this._delegate = new Packages.io.nodyn.crypto.Hmac( new algo(), key._nettyBuffer() );
-}
+};
 
 Hmac.prototype.update = update;
 Hmac.prototype.digest = digest;
@@ -264,7 +264,7 @@ registerCipher( 'seed-cbc', 128, 16, seed_cbc );
 registerCipher( 'seed-ecb', 128, 0,  seed_ecb );
 
 function generateKeyIv(password, algo) {
-  return new Packages.io.nodyn.crypto.OpenSSLKDF( password._nettyBuffer(), algo.keyLen, algo.ivLen );
+  return new Packages.io.nodyn.crypto.OpenSSLKDF( password._rawBuffer(), algo.keyLen, algo.ivLen );
 }
 
 function CipherBase(encipher){
@@ -282,7 +282,7 @@ CipherBase.prototype.init = function(cipher, password) {
   this.initiv( cipher,
                process.binding('buffer').createBuffer( keyIv.key ),
                process.binding('buffer').createBuffer( keyIv.iv ) );
-}
+};
 
 CipherBase.prototype.initiv = function(cipher, key, iv) {
 
@@ -291,29 +291,29 @@ CipherBase.prototype.initiv = function(cipher, key, iv) {
     throw new Error( "Cipher method not supported" );
   }
 
-  this._delegate = new Packages.io.nodyn.crypto.Cipher( this._encipher, algo.factory(), key._nettyBuffer(), iv._nettyBuffer() );
-}
+  this._delegate = new Packages.io.nodyn.crypto.Cipher( this._encipher, algo.factory(), key._rawBuffer(), iv._rawBuffer() );
+};
 
 
 CipherBase.prototype.update = update;
 
 CipherBase.prototype.final = function() {
   return process.binding('buffer').createBuffer( this._delegate.doFinal() );
-}
+};
 
 module.exports.CipherBase = CipherBase;
 
 module.exports.getCiphers = function() {
   var ciphers = [];
-  for ( n in cipherAlgorithms ) {
+  for ( var n in cipherAlgorithms ) {
     ciphers.push( n );
   }
   return ciphers;
-}
+};
 
 var signatureAlgorithms = {
   'RSA-SHA256': 'SHA256withRSA',
-}
+};
 
 function Sign() {
   this._delegate = new Packages.io.nodyn.crypto.Sign();
@@ -325,14 +325,14 @@ Sign.prototype.init = function(algorithm) {
     throw new Error( "Invalid signature algorithm: " + algorithm );
   }
   this._delegate.init( algo );
-}
+};
 
 Sign.prototype.update = update;
 
 Sign.prototype.sign = function(key, junk, passphrase) {
   var ret = this._delegate.sign(key._nettyBuffer(), passphrase);
   return process.binding('buffer').createBuffer( ret );
-}
+};
 
 module.exports.Sign = Sign;
 
@@ -346,13 +346,13 @@ Verify.prototype.init = function(algorithm) {
     throw new Error( "Invalid signature algorithm: " + algorithm );
   }
   this._delegate.init( algo );
-}
+};
 
 Verify.prototype.update = update;
 
 Verify.prototype.verify = function(object, signature) {
   return this._delegate.verify( object._nettyBuffer(), signature._nettyBuffer() );
-}
+};
 
 module.exports.Verify = Verify;
 
@@ -379,7 +379,7 @@ module.exports.PBKDF2 = function(password, salt, iterations, keylen, digest, cal
   } else {
     return pbkdf2Sync(password, salt, iterations, keylen, digest);
   }
-}
+};
 
 function randomBytes(size, callback) {
   blocking.submit( function() {
@@ -417,7 +417,7 @@ module.exports.randomBytes = function(size, callback) {
     ret = process.binding('buffer').createBuffer(ret);
     return ret;
   }
-}
+};
 
 module.exports.pseudoRandomBytes = function(size, callback) {
   if ( callback ) {
@@ -427,7 +427,7 @@ module.exports.pseudoRandomBytes = function(size, callback) {
     ret = process.binding('buffer').createBuffer(ret);
     return ret;
   }
-}
+};
 
 function SecureContext() {
   this._context = new Packages.io.nodyn.crypto.SecureContext();
@@ -435,27 +435,27 @@ function SecureContext() {
 
 SecureContext.prototype.init = function(secureProtocol) {
   this._context.init(secureProtocol);
-}
+};
 
 SecureContext.prototype.setKey = function(key, passphrase) {
   this._context.setKey( key._nettyBuffer(), passphrase );
-}
+};
 
 SecureContext.prototype.setCert = function(cert) {
   this._context.setCert( cert._nettyBuffer() );
-}
+};
 
 SecureContext.prototype.addCACert = function(caCert) {
   this._context.addCACert( caCert._nettyBuffer() );
-}
+};
 
 SecureContext.prototype.setCiphers = function(ciphers) {
   this._context.setCiphers( ciphers );
-}
+};
 
 SecureContext.prototype.setECDHCurve = function(ecdhCurve) {
   this._context.setECDHCurve( ecdhCurve );
-}
+};
 
 SecureContext.prototype.addRootCerts = function(rootCerts) {
   if ( ! rootCerts ) {
@@ -465,11 +465,11 @@ SecureContext.prototype.addRootCerts = function(rootCerts) {
   for ( var i = 0 ; i < rootCerts.length ; ++i ) {
     this._context.addRootCert( rootCerts[i]._nettyBuffer() );
   }
-}
+};
 
 SecureContext.prototype.setSessionIdContext = function(sessionIdContext) {
   this._context.setSessionIdContext( sessionIdContext );
-}
+};
 
 module.exports.SecureContext = SecureContext;
 
@@ -493,11 +493,11 @@ module.exports.DiffieHellman = DiffieHellman;
 
 DiffieHellman.prototype.setPublicKey = function(key) {
   this._dh.publicKey = key._nettyBuffer();
-}
+};
 
 DiffieHellman.prototype.setPrivateKey = function(key) {
   this._dh.privateKey = key._nettyBuffer();
-}
+};
 
 function DiffieHellmanGroup(name) {
   if ( ! ( this instanceof DiffieHellmanGroup ) ) {
@@ -527,7 +527,7 @@ DiffieHellmanGroup.prototype.generateKeys = dhGenerateKeys;
 
 function dhGetPublicKey() {
   if ( ! this._generated ) {
-    throw new Error( "No public key - did you forget to generate one?")
+    throw new Error( "No public key - did you forget to generate one?");
   }
 
   return process.binding('buffer').createBuffer( this._dh.publicKey );
@@ -538,7 +538,7 @@ DiffieHellmanGroup.prototype.getPublicKey = dhGetPublicKey;
 
 function dhGetPrivateKey() {
   if ( ! this._generated ) {
-    throw new Error( "No private key - did you forget to generate one?")
+    throw new Error( "No private key - did you forget to generate one?");
   }
 
   return process.binding('buffer').createBuffer( this._dh.privateKey );

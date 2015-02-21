@@ -15,9 +15,9 @@
  */
 
 module.exports.setupBufferJS = function(target, internal) {
-  module.exports.createBuffer = function(nettyBuffer) {
-    var b = new target(nettyBuffer.readableBytes());
-    Packages.io.nodyn.buffer.Buffer.inject( b, nettyBuffer.nioBuffer() );
+  module.exports.createBuffer = function(byteBuffer) {
+    var b = new target(byteBuffer.position());
+    Packages.io.nodyn.buffer.Buffer.inject( b, byteBuffer );
     return b;
   };
 

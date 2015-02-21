@@ -1,28 +1,30 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import java.nio.ByteBuffer;
 import org.bouncycastle.crypto.digests.MD5Digest;
 
 /**
  * @author Bob McWhirter
  */
-public class OpenSSLKDF {
+public final class OpenSSLKDF {
 
-    private ByteBuf key;
-    private ByteBuf iv;
+    private ByteBuffer key;
+    private ByteBuffer iv;
 
-    public OpenSSLKDF(ByteBuf data, int keyLen, int ivLen) {
-        byte[] bytes = new byte[data.readableBytes()];
-        data.readBytes(bytes);
+    public OpenSSLKDF(ByteBuffer data, int keyLen, int ivLen) {
+        int originalPosition = data.position();
+        byte[] bytes = new byte[originalPosition];
+        data.position(0);
+        data.get(bytes);
+        data.position(originalPosition);
         kdf(bytes, keyLen / 8 , ivLen  );
     }
 
-    public ByteBuf getKey() {
+    public ByteBuffer getKey() {
         return this.key;
     }
 
-    public ByteBuf getIv() {
+    public ByteBuffer getIv() {
         return this.iv;
     }
 
@@ -47,11 +49,11 @@ public class OpenSSLKDF {
             }
         }
 
-        this.key = Unpooled.buffer(keyLen);
-        this.iv = Unpooled.buffer(ivLen);
+        this.key = ByteBuffer.allocate(keyLen);
+        this.iv = ByteBuffer.allocate(ivLen);
 
-        this.key.writeBytes(kiv, 0, keyLen);
-        this.iv.writeBytes(kiv, keyLen, ivLen);
+        this.key.put(kiv, 0, keyLen);
+        this.iv.put(kiv, keyLen, ivLen);
     }
 
     protected byte[] kdf_d(byte[] data, byte[] prev, int iter) {
