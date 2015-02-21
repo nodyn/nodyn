@@ -89,7 +89,7 @@ Hmac.prototype.init = function(algorithm, key) {
     throw new Error( "Digest method not supported" );
   }
 
-  this._delegate = new Packages.io.nodyn.crypto.Hmac( new algo(), key._nettyBuffer() );
+  this._delegate = new Packages.io.nodyn.crypto.Hmac( new algo(), key._rawBuffer() );
 };
 
 Hmac.prototype.update = update;
