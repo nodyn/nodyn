@@ -16,6 +16,7 @@
 
 package io.nodyn.crypto;
 
+import io.nodyn.buffer.Buffer;
 import java.nio.ByteBuffer;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.macs.HMac;
@@ -35,23 +36,14 @@ public class Hmac {
     }
 
     private void computeKey(ByteBuffer key) throws InvalidKeyException {
-        byte[] keyBytes = extractBytes(key);
+        byte[] keyBytes = Buffer.extractByteArray(key);
         SecretKeySpec secretKey = new SecretKeySpec( keyBytes, this.hmac.getUnderlyingDigest().getAlgorithmName() );
         KeyParameter param = new KeyParameter(secretKey.getEncoded());
         this.hmac.init(param);
     }
 
-    protected byte[] extractBytes(ByteBuffer buf) {
-        final int pos = buf.position();
-        byte[] bytes = new byte[ pos ];
-        buf.position( 0 );
-        buf.get( bytes );
-        buf.position( pos );
-        return bytes;
-    }
-
     public void update(ByteBuffer buf) {
-        byte[] bytes = extractBytes(buf);
+        byte[] bytes = Buffer.extractByteArray(buf);
         this.hmac.update( bytes, 0, bytes.length );
     }
 

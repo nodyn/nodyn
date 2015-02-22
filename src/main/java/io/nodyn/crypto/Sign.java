@@ -16,11 +16,9 @@ import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
-import javax.crypto.EncryptedPrivateKeyInfo;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 
 /**

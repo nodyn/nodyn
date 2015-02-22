@@ -49,14 +49,18 @@ public class Buffer {
     }
 
     public static byte[] extractByteArray(ScriptObjectMirror object) {
-        ByteBuffer buf = extract( object );
-        int origPosition = buf.position();
-        buf.position(0);
-        byte[] bytes = new byte[ buf.remaining() ];
-        buf.get(bytes);
-        buf.position(origPosition);
+        return extractByteArray( extract( object ) );
+    }
+    
+    public static byte[] extractByteArray(ByteBuffer buf) {
+        final int pos = buf.position();
+        byte[] bytes = new byte[ pos ];
+        buf.position( 0 );
+        buf.get( bytes );
+        buf.position( pos );
         return bytes;
     }
+
     
     public static String extractString(ScriptObjectMirror object, int start, int end, Charset charset) {
         ByteBuffer b = extract( object );
