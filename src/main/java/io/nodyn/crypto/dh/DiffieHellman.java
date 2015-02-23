@@ -1,7 +1,5 @@
 package io.nodyn.crypto.dh;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.nodyn.crypto.BigIntegerUtils;
 
 import javax.crypto.KeyAgreement;
@@ -10,6 +8,7 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHPrivateKeySpec;
 import javax.crypto.spec.DHPublicKeySpec;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
@@ -26,7 +25,7 @@ public class DiffieHellman {
         this(new BigInteger(keySize, 500, new Random()), g);
     }
 
-    public DiffieHellman(ByteBuf p, int g) {
+    public DiffieHellman(ByteBuffer p, int g) {
         this(BigIntegerUtils.fromBuf(p), g);
     }
 
@@ -38,20 +37,20 @@ public class DiffieHellman {
         this.desc = new ModpGroupDesc(null, p, new BigInteger("" + g));
     }
 
-    public ByteBuf getPrime() {
+    public ByteBuffer getPrime() {
         return BigIntegerUtils.toBuf(this.desc.getP());
     }
 
-    public ByteBuf getGenerator() {
+    public ByteBuffer getGenerator() {
         return BigIntegerUtils.toBuf(this.desc.getG());
     }
 
-    public ByteBuf generateKeys() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
+    public ByteBuffer generateKeys() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
         this.keys = this.desc.generateKeys();
         return getPublicKey();
     }
 
-    public void setPublicKey(ByteBuf keyBuf) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void setPublicKey(ByteBuffer keyBuf) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger y = BigIntegerUtils.fromBuf( keyBuf );
 
         DHPublicKeySpec keySpec = new DHPublicKeySpec(y, this.desc.getP(), this.desc.getG());
@@ -66,12 +65,12 @@ public class DiffieHellman {
         }
     }
 
-    public ByteBuf getPublicKey() {
+    public ByteBuffer getPublicKey() {
         BigInteger y = ((DHPublicKey) this.keys.getPublic()).getY();
         return BigIntegerUtils.toBuf(y);
     }
 
-    public void setPrivateKey(ByteBuf keyBuf) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public void setPrivateKey(ByteBuffer keyBuf) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger x = BigIntegerUtils.fromBuf( keyBuf );
 
         DHPrivateKeySpec keySpec = new DHPrivateKeySpec(x, this.desc.getP(), this.desc.getG());
@@ -86,12 +85,12 @@ public class DiffieHellman {
         }
     }
 
-    public ByteBuf getPrivateKey() {
+    public ByteBuffer getPrivateKey() {
         BigInteger y = ((DHPrivateKey) this.keys.getPrivate()).getX();
         return BigIntegerUtils.toBuf(y);
     }
 
-    public ByteBuf computeSecret(ByteBuf publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException {
+    public ByteBuffer computeSecret(ByteBuffer publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException {
         BigInteger y = BigIntegerUtils.fromBuf(publicKeyBytes);
 
         DHPublicKeySpec keySpec = new DHPublicKeySpec(y, this.desc.getP(), this.desc.getG());
@@ -106,6 +105,8 @@ public class DiffieHellman {
 
         byte[] secret = agreement.generateSecret();
 
-        return Unpooled.wrappedBuffer(secret);
+        ByteBuffer b = ByteBuffer.wrap(secret);
+        b.position(secret.length-1);
+        return b;
     }
 }

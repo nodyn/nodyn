@@ -1,28 +1,27 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * @author Bob McWhirter
  */
 public class BigIntegerUtils {
 
-    public static ByteBuf toBuf(BigInteger i) {
+    public static ByteBuffer toBuf(BigInteger i) {
         byte[] array = i.toByteArray();
         int byteLen = (int) Math.ceil( i.bitLength() / 8.0  );
-        ByteBuf buf = Unpooled.buffer( byteLen );
-        buf.writeBytes( array, array.length - byteLen, byteLen );
+        ByteBuffer buf = ByteBuffer.allocate( byteLen );
+        buf.put( array, array.length - byteLen, byteLen );
         return buf;
     }
 
-    public static BigInteger fromBuf(ByteBuf buf) {
-        byte[] array = new byte[ buf.readableBytes() + 1 ];
+    public static BigInteger fromBuf(ByteBuffer buf) {
+        byte[] array = new byte[ buf.position() + 1 ];
         array[0] = 0;
-        buf.getBytes(0, array, 1, buf.readableBytes() );
-
+        buf.position(0);
+        buf.get( array, 1, array.length-1 );
+        buf.position( array.length-1 );
         return new BigInteger( array );
     }
 }
