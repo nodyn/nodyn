@@ -3,6 +3,7 @@ package io.nodyn.crypto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
+import io.nodyn.buffer.Buffer;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
@@ -16,6 +17,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.PublicKey;
 import java.util.Iterator;
@@ -37,13 +39,13 @@ public class Verify {
         this.data = Unpooled.compositeBuffer();
     }
 
-    public void update(ByteBuf buf) {
-        this.data.addComponent(buf);
-        this.data.writerIndex(this.data.writerIndex() + buf.writerIndex());
+    public void update(ByteBuffer buf) {
+        this.data.addComponent(Unpooled.wrappedBuffer(Buffer.extractByteArray(buf)));
+        this.data.writerIndex(this.data.writerIndex() + buf.position());
     }
 
-    public boolean verify(ByteBuf objectBuf, ByteBuf signature) throws Exception {
-        String objectStr = objectBuf.toString(Charset.forName("utf8"));
+    public boolean verify(ByteBuffer objectBuf, ByteBuffer signature) throws Exception {
+        String objectStr = new String(objectBuf.array(), Charset.forName("UTF-8"));
         Reader objectReader = new StringReader(objectStr);
         PEMParser parser = new PEMParser(objectReader);
         PublicKey publicKey = null;
@@ -69,8 +71,7 @@ public class Verify {
             this.data.getBytes(this.data.readerIndex(), dataBytes);
             CMSProcessableByteArray message = new CMSProcessableByteArray(dataBytes);
 
-            byte[] signatureBytes = new byte[signature.readableBytes()];
-            signature.getBytes(signature.readerIndex(), signatureBytes);
+            byte[] signatureBytes = Buffer.extractByteArray(signature);
 
             CMSSignedData signedData = new CMSSignedData(message, signatureBytes);
 

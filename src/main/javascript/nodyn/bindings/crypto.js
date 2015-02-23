@@ -330,7 +330,7 @@ Sign.prototype.init = function(algorithm) {
 Sign.prototype.update = update;
 
 Sign.prototype.sign = function(key, junk, passphrase) {
-  var ret = this._delegate.sign(key._nettyBuffer(), passphrase);
+  var ret = this._delegate.sign(key._rawBuffer(), passphrase);
   return process.binding('buffer').createBuffer( ret );
 };
 
@@ -351,7 +351,7 @@ Verify.prototype.init = function(algorithm) {
 Verify.prototype.update = update;
 
 Verify.prototype.verify = function(object, signature) {
-  return this._delegate.verify( object._nettyBuffer(), signature._nettyBuffer() );
+  return this._delegate.verify( object._rawBuffer(), signature._rawBuffer() );
 };
 
 module.exports.Verify = Verify;
@@ -484,7 +484,7 @@ function DiffieHellman(sizeOrKey, generator) {
   if ( typeof sizeOrKey == 'number' ) {
     this._dh = new Packages.io.nodyn.crypto.dh.DiffieHellman( sizeOrKey, generator );
   } else {
-    var keyBuf = sizeOrKey._nettyBuffer();
+    var keyBuf = sizeOrKey._rawBuffer();
     this._dh = new Packages.io.nodyn.crypto.dh.DiffieHellman( keyBuf, generator );
   }
 }
@@ -492,11 +492,11 @@ function DiffieHellman(sizeOrKey, generator) {
 module.exports.DiffieHellman = DiffieHellman;
 
 DiffieHellman.prototype.setPublicKey = function(key) {
-  this._dh.publicKey = key._nettyBuffer();
+  this._dh.publicKey = key._rawBuffer();
 };
 
 DiffieHellman.prototype.setPrivateKey = function(key) {
-  this._dh.privateKey = key._nettyBuffer();
+  this._dh.privateKey = key._rawBuffer();
 };
 
 function DiffieHellmanGroup(name) {

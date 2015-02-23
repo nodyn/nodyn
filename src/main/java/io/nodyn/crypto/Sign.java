@@ -3,6 +3,7 @@ package io.nodyn.crypto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
+import io.nodyn.buffer.Buffer;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
@@ -18,6 +19,7 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 
@@ -38,14 +40,14 @@ public class Sign {
         this.data = Unpooled.compositeBuffer();
     }
 
-    public void update(ByteBuf buf) {
-        this.data.addComponent(buf);
-        this.data.writerIndex(this.data.writerIndex() + buf.writerIndex());
+    public void update(ByteBuffer buf) {
+        this.data.addComponent(Unpooled.wrappedBuffer(Buffer.extractByteArray(buf)));
+        this.data.writerIndex(this.data.writerIndex() + buf.position());
     }
 
-    public ByteBuf sign(ByteBuf privateKeyBuf, String passphrase) throws Exception {
+    public ByteBuffer sign(ByteBuffer privateKeyBuf, String passphrase) throws Exception {
 
-        String privateKeyStr = privateKeyBuf.toString(Charset.forName("utf8"));
+        String privateKeyStr = new String(privateKeyBuf.array(), Charset.forName("UTF-8"));
         Reader privateKeyReader = new StringReader(privateKeyStr);
         PEMParser parser = new PEMParser(privateKeyReader);
         Object object = parser.readObject();
@@ -92,6 +94,9 @@ public class Sign {
         CMSSignedData sigData = generator.generate(message);
         byte[] sigBytes = sigData.getEncoded();
 
-        return Unpooled.wrappedBuffer(sigBytes);
+        ByteBuffer out = ByteBuffer.wrap(sigBytes);
+        out.position(sigBytes.length);
+//        System.out.println(out);
+        return out;
     }
 }

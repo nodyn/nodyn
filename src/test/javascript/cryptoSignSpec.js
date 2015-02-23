@@ -11,7 +11,7 @@ describe("crypto Sign/Verify module", function() {
     var sign = crypto.createSign('RSA-SHA256');
     sign.write( message );
 
-    var signature = sign.sign(privateKey );
+    var signature = sign.sign(privateKey);
 
     var publicKey  = fs.readFileSync( 'keys/RSA/key-rsa512-public.pem' );
 
