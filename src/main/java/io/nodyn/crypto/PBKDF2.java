@@ -1,7 +1,7 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.nodyn.buffer.Buffer;
+import java.nio.ByteBuffer;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -16,19 +16,20 @@ import java.security.spec.KeySpec;
  */
 public class PBKDF2 {
 
-    public static ByteBuf pbkdf2(ByteBuf password, ByteBuf salt, int iterations, int keyLen) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static ByteBuffer pbkdf2(ByteBuffer password, ByteBuffer salt, int iterations, int keyLen) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
-        char[] passwordChars = password.toString(Charset.forName( "utf8" ) ).toCharArray();
+        char[] passwordChars = new String(Buffer.extractByteArray(password), Charset.forName("UTF-8")).toCharArray();
 
-        byte[] saltBytes = new byte[ salt.readableBytes() ];
-        salt.readBytes( saltBytes );
+        byte[] saltBytes = Buffer.extractByteArray(salt);
 
         KeySpec keySpec = new PBEKeySpec( passwordChars, saltBytes, iterations, keyLen * 8 );
 
         SecretKey secretKey = factory.generateSecret(keySpec);
 
         byte[] keyBytes = secretKey.getEncoded();
-        return Unpooled.copiedBuffer( keyBytes );
+        ByteBuffer out = ByteBuffer.allocate(keyBytes.length);
+        out.put(keyBytes);
+        return out;
     }
 }

@@ -369,7 +369,7 @@ function pbkdf2(password, salt, iterations, keylen, digest, callback) {
 }
 
 function pbkdf2Sync(password, salt, iterations, keylen, digest) {
-  var key = Packages.io.nodyn.crypto.PBKDF2.pbkdf2( password._nettyBuffer(), salt._nettyBuffer(), iterations, keylen );
+  var key = Packages.io.nodyn.crypto.PBKDF2.pbkdf2( password._rawBuffer(), salt._rawBuffer(), iterations, keylen );
   return process.binding('buffer').createBuffer( key );
 }
 
