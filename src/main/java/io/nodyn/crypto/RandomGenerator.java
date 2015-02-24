@@ -1,7 +1,6 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import java.nio.ByteBuffer;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -11,17 +10,19 @@ import java.util.Random;
  */
 public class RandomGenerator {
 
-    public static ByteBuf random(int size) {
+    public static ByteBuffer random(int size) {
         return random( new SecureRandom(), size );
     }
 
-    public static ByteBuf pseudoRandom(int size) {
+    public static ByteBuffer pseudoRandom(int size) {
         return random( new Random(), size );
     }
 
-    public static ByteBuf random(Random random, int size) {
+    public static ByteBuffer random(Random random, int size) {
         byte[] bytes = new byte[ size ];
         random.nextBytes( bytes );
-        return Unpooled.wrappedBuffer(bytes);
+        ByteBuffer out = ByteBuffer.allocate( bytes.length );
+        out.put( bytes );
+        return out;
     }
 }

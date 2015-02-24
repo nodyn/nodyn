@@ -50,8 +50,8 @@ public class Hmac {
     public ByteBuffer digest() throws NoSuchAlgorithmException {
         byte[] digestBytes = new byte[this.hmac.getMacSize()];
         this.hmac.doFinal(digestBytes, 0);
-        ByteBuffer b = ByteBuffer.wrap(digestBytes);
-        b.position(digestBytes.length);
+        ByteBuffer b = ByteBuffer.allocate(digestBytes.length);
+        b.put(digestBytes);
         return b;
     }
 

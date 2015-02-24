@@ -16,6 +16,7 @@
 
 package io.nodyn.crypto;
 
+import io.nodyn.buffer.Buffer;
 import java.nio.ByteBuffer;
 import org.bouncycastle.crypto.Digest;
 
@@ -30,16 +31,15 @@ public class Hash {
     }
 
     public void update(ByteBuffer buf) {
-        final int originalPosition = buf.position();
-        byte[] bytes = new byte[ originalPosition ];
-        buf.position(0);
-        buf.get( bytes );
+        byte[] bytes = Buffer.extractByteArray(buf);
         this.digest.update( bytes, 0, bytes.length );
     }
 
     public ByteBuffer digest() throws NoSuchAlgorithmException {
         byte[] digestBytes = new byte[ this.digest.getDigestSize() ];
         this.digest.doFinal( digestBytes, 0 );
-        return ByteBuffer.wrap( digestBytes );
+        ByteBuffer out = ByteBuffer.allocate( digestBytes.length );
+        out.put(digestBytes);
+        return out;
     }
 }

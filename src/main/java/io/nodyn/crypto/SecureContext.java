@@ -1,9 +1,8 @@
 package io.nodyn.crypto;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.Unpooled;
+import io.nodyn.buffer.Buffer;
 import io.nodyn.tls.CipherList;
+import java.io.ByteArrayInputStream;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
@@ -13,11 +12,10 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 
 import javax.net.ssl.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Constructor;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -107,8 +105,8 @@ public class SecureContext {
         return tmf.getTrustManagers();
     }
 
-    public void setKey(ByteBuf privateKeyBuf, String passphrase) throws Exception {
-        String privateKeyStr = privateKeyBuf.toString(Charset.forName("utf8"));
+    public void setKey(ByteBuffer privateKeyBuf, String passphrase) throws Exception {
+        String privateKeyStr = new String(Buffer.extractByteArray(privateKeyBuf), Charset.forName("UTF-8"));
         Reader privateKeyReader = new StringReader(privateKeyStr);
         PEMParser parser = new PEMParser(privateKeyReader);
         Object object = parser.readObject();
@@ -140,20 +138,20 @@ public class SecureContext {
 
     }
 
-    public void setCert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+    public void setCert(ByteBuffer certBuf) throws IOException, CertificateException {
+        ByteArrayInputStream certIn = new ByteArrayInputStream(certBuf.array());
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         this.cert = factory.generateCertificate(certIn);
     }
 
-    public void addCACert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+    public void addCACert(ByteBuffer certBuf) throws IOException, CertificateException {
+        ByteArrayInputStream certIn = new ByteArrayInputStream(certBuf.array());
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         this.caCerts.add(factory.generateCertificate(certIn));
     }
 
-    public void addRootCert(ByteBuf certBuf) throws IOException, CertificateException {
-        ByteBufInputStream certIn = new ByteBufInputStream(Unpooled.wrappedBuffer(certBuf));
+    public void addRootCert(ByteBuffer certBuf) throws IOException, CertificateException {
+        ByteArrayInputStream certIn = new ByteArrayInputStream(certBuf.array());
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         this.rootCerts.add(factory.generateCertificate(certIn));
     }

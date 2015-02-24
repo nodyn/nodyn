@@ -438,15 +438,15 @@ SecureContext.prototype.init = function(secureProtocol) {
 };
 
 SecureContext.prototype.setKey = function(key, passphrase) {
-  this._context.setKey( key._nettyBuffer(), passphrase );
+  this._context.setKey( key._rawBuffer(), passphrase );
 };
 
 SecureContext.prototype.setCert = function(cert) {
-  this._context.setCert( cert._nettyBuffer() );
+  this._context.setCert( cert._rawBuffer() );
 };
 
 SecureContext.prototype.addCACert = function(caCert) {
-  this._context.addCACert( caCert._nettyBuffer() );
+  this._context.addCACert( caCert._rawBuffer() );
 };
 
 SecureContext.prototype.setCiphers = function(ciphers) {
@@ -463,7 +463,7 @@ SecureContext.prototype.addRootCerts = function(rootCerts) {
   }
 
   for ( var i = 0 ; i < rootCerts.length ; ++i ) {
-    this._context.addRootCert( rootCerts[i]._nettyBuffer() );
+    this._context.addRootCert( rootCerts[i]._rawBuffer() );
   }
 };
 
