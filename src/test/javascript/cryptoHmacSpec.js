@@ -11,11 +11,11 @@ describe("crypto Hmac module", function() {
   });
 
   it('should pass testMD5HmacDigest', function() {
-      var hash = crypto.createHash('md5');
-      hash.update('Now is the winter of our discontent ');
       var key = 'Sweet home Alabama';
       var hmac = crypto.createHmac('md5', key);
       hmac.update('Where the skies are so blue ');
+      var hash = crypto.createHash('md5');
+      hash.update('Now is the winter of our discontent ');
 //      hmac.update('Now we all did what we could do');
 //      expect(hmac.digest('hex')).toBe('f41e6884025c2ba61268df653ce16cb3');
   });
