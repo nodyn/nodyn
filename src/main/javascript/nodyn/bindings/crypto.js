@@ -83,7 +83,6 @@ function Hmac() {
 
 Hmac.prototype.init = function(algorithm, key) {
 
-  print(["binding.Hmac.prototype.init", algorithm, key].join(' - '));
   var algo = hashAlgorithms[ algorithm ];
 
   if ( ! algo ) {
@@ -91,7 +90,6 @@ Hmac.prototype.init = function(algorithm, key) {
   }
 
   this._delegate = new Packages.io.nodyn.crypto.Hmac( new algo(), key._rawBuffer() );
-  print("binding.Hmac.prototype.init this.update " + this.update);
 };
 
 Hmac.prototype.update = update;
