@@ -45,7 +45,7 @@ public class Verify {
     }
 
     public boolean verify(ByteBuffer objectBuf, ByteBuffer signature) throws Exception {
-        String objectStr = new String(objectBuf.array(), Charset.forName("UTF-8"));
+        String objectStr = new String(Buffer.extractByteArray(objectBuf), Charset.forName("UTF-8"));
         Reader objectReader = new StringReader(objectStr);
         PEMParser parser = new PEMParser(objectReader);
         PublicKey publicKey = null;

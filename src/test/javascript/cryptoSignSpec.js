@@ -7,7 +7,6 @@ describe("crypto Sign/Verify module", function() {
   it ('should allow signing and verification', function() {
     var message = "howdy, this is my message to sign";
     var privateKey = fs.readFileSync( './keys/RSA/key-rsa512-private.pem' );
-
     var sign = crypto.createSign('RSA-SHA256');
     sign.write( message );
 

@@ -46,8 +46,7 @@ public class Sign {
     }
 
     public ByteBuffer sign(ByteBuffer privateKeyBuf, String passphrase) throws Exception {
-
-        String privateKeyStr = new String(privateKeyBuf.array(), Charset.forName("UTF-8"));
+        String privateKeyStr = new String(Buffer.extractByteArray(privateKeyBuf), Charset.forName("UTF-8"));
         Reader privateKeyReader = new StringReader(privateKeyStr);
         PEMParser parser = new PEMParser(privateKeyReader);
         Object object = parser.readObject();
