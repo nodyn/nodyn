@@ -2,7 +2,7 @@ package io.nodyn.udp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ChannelFactory;
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -11,11 +11,12 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.ReferenceCountUtil;
 import io.nodyn.NodeProcess;
+import io.nodyn.buffer.Buffer;
 import io.nodyn.handle.HandleWrap;
 
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.util.Enumeration;
 
 /**
@@ -61,7 +62,7 @@ public class UDPWrap extends HandleWrap {
         return null;
     }
 
-    public Object send(ByteBuf buf, int offset, int length, int port, String address, Family family) {
+    public Object send(ByteBuffer buf, int offset, int length, int port, String address, Family family) {
         try {
             InetSocketAddress remoteAddress;
             if (family == Family.IPv4) {
@@ -69,8 +70,7 @@ public class UDPWrap extends HandleWrap {
             } else {
                 remoteAddress = new InetSocketAddress(Inet6Address.getByName(address), port);
             }
-
-            DatagramPacket packet = new DatagramPacket(ReferenceCountUtil.retain(buf.slice(offset, length)), remoteAddress, localAddress);
+            DatagramPacket packet = new DatagramPacket(Unpooled.copiedBuffer(Buffer.extractByteArray(buf), offset, length), remoteAddress, localAddress);
             channelFuture.channel().writeAndFlush(packet);
         } catch (UnknownHostException e) {
             UDPWrap.this.process.getNodyn().handleThrowable(e);
@@ -106,7 +106,7 @@ public class UDPWrap extends HandleWrap {
 
     public void addMembership(String mcastAddr, String ifaceAddr) throws UnknownHostException, SocketException {
         InetAddress addr = InetAddress.getByName(mcastAddr);
-        if (ifaceAddr == null) {
+        if (ifaceAddr == null || ifaceAddr.equals("undefined")) { // nashornism
             Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
             while (ifaces.hasMoreElements()) {
                 NetworkInterface candidate = ifaces.nextElement();
@@ -123,7 +123,7 @@ public class UDPWrap extends HandleWrap {
 
     public void dropMembership(String mcastAddr, String ifaceAddr) throws UnknownHostException, SocketException {
         InetAddress addr = InetAddress.getByName(mcastAddr);
-        if (ifaceAddr == null) {
+        if (ifaceAddr == null || ifaceAddr.equals("undefined")) { // nashornism
             Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
             while (ifaces.hasMoreElements()) {
                 NetworkInterface candidate = ifaces.nextElement();

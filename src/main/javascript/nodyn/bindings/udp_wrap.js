@@ -19,15 +19,17 @@ var Handle = process.binding('handle_wrap').Handle,
     Family = Packages.io.nodyn.udp.Family,
     util   = require('util');
 
-function onRecv(result) { 
+function onRecv(result) {
   if (typeof this.onmessage === 'function') {
     if (result.error) {
       throw Error(result.error); // TODO: throw here?
     }
-    var buf = process.binding('buffer').createBuffer(result.result),
+    // result.result is a Netty buffer
+    var buffer = result.result,
+        buf = process.binding('buffer').createBuffer(buffer),
         remote = this._handle.remoteAddress,
         rinfo = {};
-       
+
     if (remote) {
       rinfo.address = remote.address.hostAddress;
       rinfo.port = remote.port;
@@ -59,14 +61,14 @@ UDP.prototype.recvStart = function() {
 };
 
 UDP.prototype.send = function(req, buffer, offset, length, port, address) {
-  this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv4);
+  this._handle.send(buffer._rawBuffer(), offset, length, port, address, Family.IPv4);
   if (req.oncomplete) {
     req.oncomplete();
   }
 };
 
 UDP.prototype.send6 = function(req, buffer, offset, length, port, address) {
-  this._handle.send(buffer._nettyBuffer(), offset, length, port, address, Family.IPv6);
+  this._handle.send(buffer._rawBuffer(), offset, length, port, address, Family.IPv6);
   if (req.oncomplete) {
     req.oncomplete();
   }
@@ -106,4 +108,3 @@ UDP.prototype.setBroadcast = function(arg) {
 UDP.prototype.setTTL = function(arg) {
   this._handle.setTTL(arg);
 };
-

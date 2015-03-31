@@ -15,7 +15,7 @@
  */
 
 module.exports.setupBufferJS = function(target, internal) {
-  module.exports.createBuffer = function(byteBuffer) {
+    module.exports.createBuffer = function(byteBuffer) {
     var b = new target(byteBuffer.position());
     Packages.io.nodyn.buffer.Buffer.inject( b, byteBuffer );
     return b;
@@ -190,7 +190,7 @@ module.exports.setupBufferJS = function(target, internal) {
   };
 
   internal.byteLength = function(str, enc) {
-    if ((typeof str !== 'string') || 
+    if ((typeof str !== 'string') ||
         str === '' ) throw new TypeError('Argument must be a string');
     return Packages.io.nodyn.buffer.Internal.byteLength(str, enc);
   };

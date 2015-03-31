@@ -80,7 +80,7 @@ describe('The dgram module', function() {
     peer2.on('error', unexpectedError.bind(this));
 
     peer2.on('message', function(msg, rinfo) {
-      expect(buffer.toString()).toBe(msg.toString());
+      expect(msg.toString()).toBe(buffer.toString());
       peer2.on('close', function() { helper.testComplete(true); });
       peer1.on('close', function() { peer2.close(); });
       peer1.close();
@@ -101,12 +101,12 @@ describe('The dgram module', function() {
     peer2.on('error', unexpectedError.bind(this));
 
     peer1.on('message', function(msg, rinfo) {
-      expect(buffer.toString()).toBe(msg.toString());
+      expect(msg.toString()).toBe(buffer.toString());
       peer1.send(msg, 0, msg.length, rinfo.port, rinfo.address);
     });
 
     peer2.on('message', function(msg, rinfo) {
-      expect(buffer.toString()).toBe(msg.toString());
+      expect(msg.toString()).toBe(buffer.toString());
       peer1.on('close', function() { peer2.close(); });
       peer2.on('close', function() { helper.testComplete(true); });
       peer1.close();
