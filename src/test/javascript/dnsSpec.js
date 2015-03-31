@@ -7,8 +7,8 @@ describe('The dns module', function() {
       DnsServer  = Packages.io.nodyn.dns.TestDnsServer;
 
   beforeEach(function() {
-    System.setProperty( "dns.server", "127.0.0.1" );
-    System.setProperty( "dns.port",   "53530" );
+    java.lang.System.setProperty( "dns.server", "127.0.0.1" );
+    java.lang.System.setProperty( "dns.port",   "53530" );
     Packages.io.nodyn.dns.ResolverConfig.refresh();
     helper.testComplete(false);
   });
@@ -17,8 +17,8 @@ describe('The dns module', function() {
     if (server) {
       server.stop();
     }
-    System.clearProperty("dns.server")
-    System.clearProperty("dns.port");
+    java.lang.System.clearProperty("dns.server")
+    java.lang.System.clearProperty("dns.port");
     Packages.io.nodyn.dns.ResolverConfig.refresh();
   });
 

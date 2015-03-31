@@ -34,7 +34,7 @@ cares.isIP = function(host) {
 // ----------------------------------------------------------------------
 
 function translateError(err) {
-  if ( err instanceof org.vertx.java.core.dns.DnsException ) {
+  if ( err instanceof Java.type("org.vertx.java.core.dns.DnsException") ) {
     var c = err.code().code();
     if ( c == 3 ) {
       return process.binding('uv').UV_EAI_NODATA;
@@ -62,8 +62,8 @@ cares.getaddrinfo = function(req,name,family) {
     this._query = new Packages.io.nodyn.dns.GetAddrInfoWrap(process._process, name);
   }
   this._query.on( "complete", function(result) {
-    if ( result.error ) {
-      req.oncomplete( translateError( result.error ) );
+    if ( result.isError() ) {
+      req.oncomplete( translateError( result.getError() ) );
     } else {
       var addr = result.result;
       var family = ( addr instanceof java.net.Inet4Address ? 4 : 6 );
