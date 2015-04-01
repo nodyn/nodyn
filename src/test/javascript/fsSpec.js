@@ -299,7 +299,7 @@ describe("fs module", function() {
 
     expect( entries ).toBe( undefined );
     expect( caught.code ).toBe( "ENOENT" );
-  })
+  });
 
   it('should throw ENOTDIR for readdir on an existing non-dir file', function() {
     var caught;
@@ -312,7 +312,7 @@ describe("fs module", function() {
     }
     expect( entries ).toBe( undefined );
     expect( caught.code ).toBe( "ENOTDIR" );
-  })
+  });
 
 
   it("should provide a readdirSync function", function() {

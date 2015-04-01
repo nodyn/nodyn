@@ -53,7 +53,7 @@ public class Buffer {
     }
     
     public static byte[] extractByteArray(ByteBuffer buf) {
-        final int pos = buf.position();
+        final int pos = buf.limit();
         byte[] bytes = new byte[ pos ];
         buf.position( 0 );
         buf.get( bytes );

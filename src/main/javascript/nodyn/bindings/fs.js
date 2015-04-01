@@ -139,7 +139,7 @@ binding.writeBuffer = function(fd, buffer, offset, length, position, callback) {
     if (offset > buffer.length) throw new RangeError('offset out of bounds');
     if (length > buffer.length) throw new RangeError('length out of bounds');
     if (offset + length < offset) throw new RangeError('offset + length overflow');
-    if (offset + length > buffer.length) 
+    if (offset + length > buffer.length)
       throw new RangeError('offset + length > buffer.length');
 
     var toWrite = buffer.slice(offset, offset+length);
