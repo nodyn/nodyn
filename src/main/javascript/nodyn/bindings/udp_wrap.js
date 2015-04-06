@@ -24,7 +24,7 @@ function onRecv(result) {
     if (result.error) {
       throw Error(result.error); // TODO: throw here?
     }
-    // result.result is a Netty buffer
+
     var buffer = result.result,
         buf = process.binding('buffer').createBuffer(buffer),
         remote = this._handle.remoteAddress,

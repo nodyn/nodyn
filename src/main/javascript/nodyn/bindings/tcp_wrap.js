@@ -43,7 +43,7 @@ Object.defineProperty( TCP.prototype, '_fd', {
   get: function() {
     return this._tcp.fd;
   }
-})
+});
 
 // ----------------------------------------
 // Server
@@ -52,7 +52,7 @@ TCP.prototype._onConnection = function(result) {
   var err;
   var clientHandle = new TCP( result.result );
   this.onconnection(err, clientHandle);
-}
+};
 
 // ----------------------------------------
 // Client
@@ -63,7 +63,7 @@ TCP.prototype._onAfterConnect = function(result) {
   var status = 0;
   var handle = this;
   var readable = true;
-  var writable = true;;
+  var writable = true;
 
   if ( this._req ) {
     var oncomplete = this._req.oncomplete;
