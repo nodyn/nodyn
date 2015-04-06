@@ -16,10 +16,12 @@
 
 package io.nodyn.netty;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 import io.nodyn.NodeProcess;
 import io.nodyn.async.AsyncWrap;
+import java.nio.ByteBuffer;
 
 
 /**
@@ -34,7 +36,16 @@ public class DataEventHandler extends AbstractEventSourceHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        emit("data", ReferenceCountUtil.retain(msg));
+        if (msg instanceof ByteBuf) {
+            final ByteBuf content = (ByteBuf)msg;
+            final byte[] arr = new byte[content.readableBytes()];
+            content.readBytes(arr);
+            final ByteBuffer buf = ByteBuffer.wrap(arr);
+            buf.position(arr.length);
+            emit("data", buf);
+        } else {
+            emit("data", ReferenceCountUtil.retain(msg));
+        }
         super.channelRead(ctx, msg);
     }
 }

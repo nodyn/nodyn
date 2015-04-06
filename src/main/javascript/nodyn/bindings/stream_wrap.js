@@ -34,7 +34,7 @@ util.inherits(Stream, Handle);
 // ----------------------------------------
 
 Stream.prototype._onData = function(result) {
-  var nread = result.result.readableBytes();
+  var nread = result.result.limit();
   var b = process.binding('buffer').createBuffer( result.result );
   this.onread( nread, b );
 };
