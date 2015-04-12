@@ -14,14 +14,14 @@ current node.js API.
 Nodyn doesn't yet have an initial release. Until then, to use it, you will need
 to build from source or download a CI SNAPSHOT from
 [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/io/nodyn/nodyn/0.1.1-SNAPSHOT/).
-Download the latest zip file from Sonatype. It will contain a `./bin/nodyn`
+Download the latest zip file from Sonatype. It will contain a `./bin/node`
 binary.  You can use the binary to start an application from a Javascript file,
 or use the REPL to experiment with small snippets of code on the command line.
-The `./bin/nodyn` binary behaves nearly identical to the `node` binary.
+The `./bin/node` binary behaves nearly identically to the native `node` binary.
 
 ## Embedding
 
-Nodyn can be embedded into existing Java programs and exeucte scripts like so.
+Nodyn can be embedded into existing Java programs and execute scripts like so:
 
     public class EmbedExample {
 
