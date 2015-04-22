@@ -1,4 +1,4 @@
 [submodule "node"]
 	path = node
-	url = https://github.com/joyent/node.git
-	branch = master
+	url = https://github.com/nodyn/node.git
+	branch = nodyn
