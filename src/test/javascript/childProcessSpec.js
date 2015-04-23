@@ -76,7 +76,7 @@ describe( 'child_process', function() {
   });
 
   it( 'should be able to send sockets to a child', function() {
-      waitsFor(helper.testComplete, "child process to be killed", 10000 );
+      waitsFor(helper.testComplete, "child process to be killed", 15000 );
       var connection;
       var child = child_process.fork( './src/test/javascript/forked_socket_module.js' );
       child.on( "exit", function(code, signal) {

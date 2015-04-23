@@ -22,7 +22,7 @@ describe( "http.request", function() {
   });
 
   it( "should send the request when headers are implicitly sent", function() {
-    waitsFor(helper.testComplete, "page to load", 5000 );
+    waitsFor(helper.testComplete, "page to load", 15000 );
     var page = '';
     var request = http.request( { host: 'nodyn.io' }, function(response) {
       response.on('data', function(d) {
@@ -38,7 +38,7 @@ describe( "http.request", function() {
   });
 
   it('should receive a "socket" event', function() {
-      waitsFor(helper.testComplete, "page to load", 5000 );
+      waitsFor(helper.testComplete, "page to load", 15000 );
       var socket;
       var request = http.request( { host: 'nodyn.io' }, function(response) {
         response.on('data',function(){});
@@ -54,7 +54,7 @@ describe( "http.request", function() {
   });
 
   it('should allow later binding of a response-handler', function(){
-      waitsFor(helper.testComplete, "page to load", 5000 );
+      waitsFor(helper.testComplete, "page to load", 15000 );
       var page = '';
       var request = http.request( { host: 'nodyn.io' } );
       request.on('response', function(response) {
@@ -70,5 +70,3 @@ describe( "http.request", function() {
       request.end();
   });
 });
-
-
