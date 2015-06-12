@@ -1,4 +1,7 @@
 [![Build Status](https://secure.travis-ci.org/nodyn/nodyn.png)](http://travis-ci.org/nodyn/nodyn)
+# NOTICE
+
+This project is no longer being actively maintained. If you have interest in taking over the project, please file an issue.
 
 ## What is Nodyn
 
