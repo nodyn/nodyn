@@ -27,6 +27,10 @@ import static org.junit.Assert.*;
 import org.vertx.java.core.Vertx;
 import org.vertx.java.core.VertxFactory;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /**
  *
  * @author lanceball
@@ -38,22 +42,22 @@ public class NashornRuntimeTest {
 
     public NashornRuntimeTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         vertx = VertxFactory.newVertx();
         config = new NodynConfig();
         runtime = new NashornRuntime(config, vertx, false);
     }
-    
+
     @After
     public void tearDown() {
         vertx.stop();
@@ -66,7 +70,7 @@ public class NashornRuntimeTest {
     public void testLoadBinding() {
 //        Object result = runtime.loadBinding("v8");
 //        assertEquals(true, result instanceof JSObject);
-//        
+//
 //        // the v8 module has a function let's see if we can access it
 //        JSObject exports = (JSObject) result;
 //        JSObject f = (JSObject) exports.getMember("getHeapStatistics");
@@ -84,7 +88,25 @@ public class NashornRuntimeTest {
               + "b2;", "testBuffer.js", true);
         p.execute(runtime.getGlobalContext());
     }
-    
+
+    @Test
+    public void testReadFileSync() throws Throwable {
+        NodynConfig config = new NodynConfig(new String[] {"-e", "process"});
+        NashornRuntime instance = new NashornRuntime(config);
+        instance.initialize();
+
+        File tempFile = File.createTempFile("testReadSync", "txt");
+        tempFile.deleteOnExit();
+        FileWriter fileWriter = new FileWriter(tempFile);
+        String testString = "test";
+        fileWriter.write(testString);
+        fileWriter.close();
+
+        Program p = instance.compile("require('fs').readFileSync('" + tempFile.getAbsolutePath() + "' , {encoding: 'UTF-8'})", "testReadSync", true);
+        Object fileContent = p.execute(instance.getGlobalContext());
+        assertEquals(testString, fileContent);
+    }
+
     /**
      * Test of compile method, of class NashornRuntime.
      */
@@ -181,5 +203,5 @@ public class NashornRuntimeTest {
         // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
-    
+
 }

@@ -68,20 +68,21 @@ function buildStat(path, statf) {
 
   if (result !== -1) {
     stats = new statsCtor(
-      delegate.dev(),
+      // must convert Java Long to JS Number since JDK 1.8.0_101, see http://mail.openjdk.java.net/pipermail/nashorn-dev/2016-October/006552.html
+      Number(delegate.dev()),
       delegate.mode(),
       delegate.nlink(),
       delegate.uid(),
       delegate.gid(),
-      delegate.rdev(),
-      delegate.blockSize(),
-      delegate.ino(),
-      delegate.st_size(),
-      delegate.blocks(),
-      delegate.atime(),
-      delegate.mtime(),
-      delegate.ctime(),
-      delegate.ctime() // TODO: I don't know what birthtim_msec should be
+      Number(delegate.rdev()),
+      Number(delegate.blockSize()),
+      Number(delegate.ino()),
+      Number(delegate.st_size()),
+      Number(delegate.blocks()),
+      Number(delegate.atime()),
+      Number(delegate.mtime()),
+      Number(delegate.ctime()),
+      Number(delegate.ctime()) // TODO: I don't know what birthtim_msec should be
     );
   } else err = posixError(possiblyRelative(path), 'stat');
   return {err:err, result:stats};
